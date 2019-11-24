@@ -1,0 +1,144 @@
+import groovy.json.JsonSlurper
+
+class SceneGeneratorV1 {
+    private def sb = new StringBuilder()
+
+    void generate(SceneGenerator task, SceneGenerator.Scene scene, json) {
+        def className = json.root.name
+        def file = new File(task.project.buildFile.parentFile, "build/gen/${className}.kt")
+        println("Generate $file")
+
+
+        sb.append("package ${task.packageName}\n")
+        sb.append("import mogot.*\n")
+        sb.append("\n")
+        sb.append("class ").append(className).append(":").append(json.root.type).append("()")
+        sb.append("{\n")
+
+        if (json.root.childs != null) {
+            json.root.childs.each {
+                generateChildVariables(it)
+            }
+        }
+
+        sb.append("    init{\n")
+        if (json.root.behaviour != null)
+            sb.append("        behaviour = ").append(json.root.behaviour).append("()\n")
+        if (json.root.childs != null) {
+            json.root.childs.each {
+                sb.append("        addChild(").append(it.name).append(")\n")
+                generateChildBody(it)
+            }
+        }
+        sb.append("    }\n")
+
+        sb.append("}")
+
+        file.parentFile.mkdirs()
+        file.delete()
+        file.append(sb.toString())
+    }
+
+
+    private void generateChildVariables(child) {
+        sb.append("    val ").append(child.name).append(" = ").append(child.type).append("()\n")
+        if (child.childs != null) {
+            child.childs.each {
+                generateChildVariables(it)
+            }
+        }
+    }
+
+    private void generateChildBody(child) {
+        if (child.properties != null)
+            generateProperties(child.name, child.properties)
+        if (child.behaviour != null)
+            sb.append("        ").append(child.name).append(".behaviour = ").append(child.behaviour).append("()\n")
+        if (child.childs != null) {
+            child.childs.each {
+                generateChildBody()
+            }
+        }
+    }
+
+    private generateProperty(String self, property) {
+        if (property instanceof String) {
+            sb.append("        ").append(self).append(" = ").append(property).append("\n")
+            return
+        }
+        if (property instanceof BigDecimal) {
+            sb.append("        ").append(self).append(" = ").append(property).append("\n")
+            return
+        }
+
+        if (property instanceof Integer) {
+            sb.append("        ").append(self).append(" = ").append(property).append("\n")
+            return
+        }
+
+        def type=property["@type"]
+        if (type=="image"){
+            sb.append("        ").append(self).append(" = Resources.loadImage(\"").append(property["path"]).append("\")\n")
+            return
+        }
+
+        property.each {
+            generateProperty("$self.${it.key}", it.value)
+        }
+    }
+
+    private void generateProperties(String self, properties) {
+        properties.each {
+            generateProperty("$self.${it.key}", it.value)
+        }
+        println("properties=$properties")
+    }
+}
+
+class SceneGenerator extends DefaultTask {
+
+    @InputFiles
+    private def sceneFiles = new ArrayList<File>()
+    private def scenes = new ArrayList<Scene>()
+
+    @Input
+    String packageName = "jodot"
+
+    void addScene(File file, String name) {
+        sceneFiles += file
+        scenes += new Scene(file, name)
+    }
+
+    class Scene {
+        File file;
+        String name;
+
+        public Scene(File file, String name) {
+            this.file = file
+            this.name = name
+        }
+    }
+
+    void generateScene(Scene scene) {
+        def json = new JsonSlurper().parse(scene.file)
+        if (json.version.toString() == "1") {
+            new SceneGeneratorV1().generate(this, scene, json)
+        }
+        println("Version: ${json.version}")
+    }
+
+    @TaskAction
+    void action() {
+        println("Count: ${scenes.size()}")
+        this.scenes.each {
+            this.generateScene(it)
+        }
+    }
+}
+
+//tasks.register<SceneGenerator>("generateScene") {
+//    group = "build"
+//}
+
+task generateScene(type: SceneGenerator) {
+}

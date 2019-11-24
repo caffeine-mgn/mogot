@@ -1,0 +1,111 @@
+import groovy.json.JsonSlurper
+
+import javax.imageio.ImageIO
+import java.awt.*
+import java.awt.image.BufferedImage
+import java.util.List
+
+class FontGenerator {
+    private Font font
+    private List<Character> chars;
+    private File rootRes
+    private File buildRootRes
+
+    public FontGenerator(File rootRes, File buildRootRes, String font, int style, int size, List<Character> chars) {
+        this.rootRes = rootRes
+        this.buildRootRes = buildRootRes
+        this.font = new Font(font, style, size)
+        this.chars = chars
+    }
+
+    void generate(String pkg, File kts, File img) {
+
+        def sb = new StringBuilder()
+        if (!pkg.isEmpty())
+            sb.append("package ").append(pkg).append("\n\n")
+        sb.append("import mogot.*\n\n")
+        sb.append("private val symbols:List<BitmapFont.Symbol> = listOf(")
+        def imgResPath = img.path.substring(buildRootRes.path.length() + 1).replace('\\', '/')
+        println("imgResPath=$imgResPath")
+        println("rootRes.path=${rootRes.path}")
+        println("img=${img.path}")
+        kts.parentFile.mkdirs()
+        img.parentFile.mkdirs()
+
+        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        def g = image.createGraphics()
+
+        chars.parallelStream().map {
+            g.fontMetrics.getStringBounds(it.toString(), g)
+        }
+        def width = 256
+        def height = 256
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        g = image.createGraphics()
+        g.font = font
+        g.setColor(Color.WHITE)
+        def x = 0
+        def y = 0
+        chars.each {
+            def r = g.fontMetrics.getStringBounds(it.toString(), g)
+            if ((int) r.width + x > width) {
+                y += g.fontMetrics.height
+                x = 0
+            }
+            if (x != 0 || y != 0)
+                sb.append(",\n        ")
+            sb.append("BitmapFont.Symbol(x = $x, y = ${y+2}, width = ${(int) r.width}")
+            sb.append(", char = '")
+            if (it == '\\')
+                sb.append("\\")
+            sb.append(it)
+            sb.append("')")
+            g.drawString(it.toString(), x, y + (int) r.getHeight())
+            x += (int) r.width
+        }
+        img.delete()
+        ImageIO.write(image, "png", img)
+        sb.append(")\n")
+
+        sb.append("val ").append(kts.name.substring(0, kts.name.length() - 3))
+                .append(" = BitmapFont(\n")
+                .append("        image = \"res://").append(imgResPath).append("\",\n")
+                .append("        height = ").append(g.fontMetrics.height).append("f,\n")
+                .append("        symbols = symbols)")
+        sb.append("\n")
+        kts.delete()
+        kts.append(sb.toString(), "UTF-8")
+    }
+}
+
+task generateFont {
+    def resRoot = file("res")
+    fileTree(resRoot).filter {
+        (it as File).name.endsWith(".font")
+    }.each {
+        def json = new JsonSlurper().parse(it)
+        def fontName = json.font
+        def fontSize = json.size
+        Collection<String> charsJson = json.chars
+        ArrayList<Character> chars = new ArrayList<Character>()
+        charsJson.each {
+            if (it == "RUS") {
+                ['А'..'я'].first().each {
+                    chars.add(it)
+                }
+                chars.add('Ё')
+                chars.add('ё')
+                return
+            }
+            if (it == "ENG") {
+                ['A'..'z'].first().each { chars.add(it) }
+                return
+            }
+            chars.add(it.charAt(0))
+        }
+        def path = it.absolutePath.substring(resRoot.absolutePath.length() + 1).substring(0, path.length() - 5)
+        def dir = it.parentFile.absolutePath.substring(resRoot.absolutePath.length() + 1)
+        new FontGenerator(resRoot, file("${buildDir}/res"), fontName, Font.PLAIN, fontSize, chars)
+                .generate(dir.replace('\\', '.').replace('/', '.'), file("$buildDir/gen/${path}.kt"), file("${buildDir}/res/${path}.png"))
+    }
+}

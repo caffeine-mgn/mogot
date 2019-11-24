@@ -1,0 +1,125 @@
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+
+def nativeEntryPoint = 'game.main'
+apply plugin: 'kotlin-dce-js'
+kotlin {
+
+    linuxX64 { // Use your target instead.
+        binaries {
+            executable {
+                entryPoint = nativeEntryPoint
+            }
+        }
+    }
+
+    linuxArm32Hfp { // Use your target instead.
+        binaries {
+            executable {
+                entryPoint = nativeEntryPoint
+            }
+        }
+    }
+
+    mingwX64 { // Use your target instead.
+        binaries {
+            executable {
+                entryPoint = nativeEntryPoint
+            }
+        }
+    }
+
+    mingwX86 { // Use your target instead.
+        binaries {
+            executable {
+                entryPoint = nativeEntryPoint
+            }
+        }
+    }
+
+    jvm()
+    js()
+
+    sourceSets {
+
+        commonMain {
+            dependencies {
+                api "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+                api project(":engine")
+            }
+        }
+
+        nativeMain {
+            dependencies {
+                dependsOn commonMain
+
+
+            }
+        }
+
+        mingwX64Main {
+            dependencies {
+                dependsOn linuxX64Main
+            }
+        }
+
+        mingwX86Main {
+            dependencies {
+                dependsOn mingwX64Main
+            }
+        }
+
+
+        linuxX64Main {
+            dependencies {
+                dependsOn nativeMain
+            }
+        }
+
+        linuxArm32HfpMain {
+            dependencies {
+                dependsOn linuxX64Main
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                dependsOn commonMain
+                api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+            }
+        }
+    }
+}
+
+jvmJar {
+    from {
+        (configurations.jvmRuntimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    manifest {
+        attributes 'Main-Class': 'game.Main'
+    }
+
+    archiveName = "game.jar"
+}
+
+//apply from: '../scene.gradle'
+//apply from: '../fontGenerator.gradle'
+//
+//generateScene {
+//    addScene(file("res/scene.jsc"), "scene")
+//}
+//
+
+
+//compileKotlin {
+//    dependsOn generateScene
+//}
+
+//task generateScene(type:SceneGenerator){
+//    addScene(file("res/scene.jsc"))
+//}

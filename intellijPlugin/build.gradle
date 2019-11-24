@@ -1,0 +1,91 @@
+import org.jetbrains.grammarkit.tasks.*
+
+plugins {
+    id "org.jetbrains.grammarkit" version "2019.2"
+}
+
+apply plugin: 'org.jetbrains.grammarkit'
+apply plugin: 'org.jetbrains.intellij'
+intellij {
+    version '2019.2'
+}
+apply plugin: 'kotlin-platform-jvm'
+//apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'kotlin'
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir "${this.buildDir}/gen"
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+
+dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib:1.3.50"
+    api 'org.jogamp.jogl:jogl-all:2.3.2'
+    api 'org.jogamp.jogl:jogl-all-main:2.3.2'
+    api 'org.jogamp.gluegen:gluegen-rt-main:2.3.2'
+    api 'org.jogamp.gluegen:gluegen-rt:2.3.2'
+    api 'org.joml:joml:1.9.12'
+    api project(':engine')
+    api group: 'org.jogamp.jogl', name: 'nativewindow', version: '2.3.2'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+
+jar {
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+
+    archiveName = "plugin.jar"
+}
+
+
+task generateGLSLParser(type: GenerateParser) {
+    targetRoot = "${this.buildDir}/gen"
+    pathToParser = "pw/binom/glsl/GLSLParser.java"
+    pathToPsiRoot = "pw/binom/glsl/psi"
+    source = "src/main/resources/glsl.bnf"
+    purgeOldFiles = true
+}
+
+task generateGLSLLexer(type: GenerateLexer) {
+    source = "src/main/resources/glsl.flex"
+    targetDir = "${this.buildDir}/gen/pw/binom/glsl"
+    targetClass = "GLSLLexer"
+    purgeOldFiles = true
+}
+
+classes {
+    dependsOn generateGLSLParser
+    dependsOn generateGLSLLexer
+}
+
+compileJava {
+    dependsOn generateGLSLParser
+    dependsOn generateGLSLLexer
+}
+//task generateScene(type:SceneGenerator){
+//    addScene(file("res/scene.jsc"))
+//}

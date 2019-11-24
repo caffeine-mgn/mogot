@@ -1,0 +1,20 @@
+{
+  parserClass="mogot.SimpleParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Shader"
+  psiImplClassSuffix="Impl"
+  psiPackage="pw.binom.shader.psi"
+  psiImplPackage="pw.binom.shader.psi.impl"
+
+  elementTypeHolderClass="pw.binom.ShaderTypes"
+  elementTypeClass="pw.binom.ShaderElementType"
+  tokenTypeClass="pw.binom.ShaderTokenType"
+}
+
+simpleFile ::= item_*
+
+private item_ ::= (property|COMMENT|CRLF)
+
+property ::= (KEY? SEPARATOR VALUE?) | KEY

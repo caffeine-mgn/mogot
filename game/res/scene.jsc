@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "root": {
+    "type": "Spatial",
+    "name": "root",
+    "behaviour": "game.TestBehaviour",
+    "childs": [
+      {
+        "type": "Camera",
+        "name": "camera",
+        "properties": {
+          "position": {
+            "x": "0f",
+            "y": "70f",
+            "z": "0f"
+          },
+          "quaternion": {
+            "x": "0f",
+            "y": "0.7141414f",
+            "z": "0.7000014f",
+            "w": "0f"
+          }
+        }
+      },
+      {
+        "type": "CSGBox",
+        "name": "panel",
+        "properties": {
+          "width": "50f",
+          "height": "0.1f",
+          "depth": "50f",
+          "position": {
+            "x": "0f",
+            "y": "0f",
+            "z": "0f"
+          }
+        }
+      }
+    ]
+  }
+}
