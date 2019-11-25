@@ -1,7 +1,7 @@
 package mogot.fbx
 
 import mogot.Spatial
-import org.joml.Vector3f
+import mogot.math.Vector3f
 import java.util.*
 
 class AnimationCurveNode(val el: FbxFile.Element) : FbxObject {

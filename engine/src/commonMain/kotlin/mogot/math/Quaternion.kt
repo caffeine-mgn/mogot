@@ -70,6 +70,73 @@ interface Quaternionfc {
         dest.w = scale0 * w + scale1 * target.w
         return dest
     }
+
+    fun positiveX(dir: Vector3f): Vector3f {
+        val invNorm = 1.0f / (x * x + y * y + z * z + w * w)
+        val nx = -x * invNorm
+        val ny = -y * invNorm
+        val nz = -z * invNorm
+        val nw = w * invNorm
+        val dy = ny + ny
+        val dz = nz + nz
+        dir.x = -ny * dy - nz * dz + 1.0f
+        dir.y = nx * dy + nw * dz
+        dir.z = nx * dz - nw * dy
+        return dir
+    }
+
+    fun positiveY(dir: Vector3f): Vector3f {
+        val invNorm = 1.0f / (x * x + y * y + z * z + w * w)
+        val nx = -x * invNorm
+        val ny = -y * invNorm
+        val nz = -z * invNorm
+        val nw = w * invNorm
+        val dx = nx + nx
+        val dy = ny + ny
+        val dz = nz + nz
+        dir.x = nx * dy - nw * dz
+        dir.y = -nx * dx - nz * dz + 1.0f
+        dir.z = ny * dz + nw * dx
+        return dir
+    }
+
+    fun positiveZ(dir: Vector3f): Vector3f {
+        val invNorm = 1.0f / (x * x + y * y + z * z + w * w)
+        val nx = -x * invNorm
+        val ny = -y * invNorm
+        val nz = -z * invNorm
+        val nw = w * invNorm
+        val dx = nx + nx
+        val dy = ny + ny
+        val dz = nz + nz
+        dir.x = nx * dz + nw * dy
+        dir.y = ny * dz - nw * dx
+        dir.z = -nx * dx - ny * dy + 1.0f
+        return dir
+    }
+
+    fun rotateXYZ(angleX: Float, angleY: Float, angleZ: Float, dest: Quaternionf): Quaternionf {
+        val sx = sin(angleX * 0.5).toFloat()
+        val cx = cosFromSin(sx.toDouble(), angleX * 0.5).toFloat()
+        val sy = sin(angleY * 0.5).toFloat()
+        val cy = cosFromSin(sy.toDouble(), angleY * 0.5).toFloat()
+        val sz = sin(angleZ * 0.5).toFloat()
+        val cz = cosFromSin(sz.toDouble(), angleZ * 0.5).toFloat()
+        val cycz = cy * cz
+        val sysz = sy * sz
+        val sycz = sy * cz
+        val cysz = cy * sz
+        val w = cx * cycz - sx * sysz
+        val x = sx * cycz + cx * sysz
+        val y = cx * sycz - sx * cysz
+        val z = cx * cysz + sx * sycz
+        // right-multiply
+        dest.set(this.w * x + this.x * w + this.y * z - this.z * y,
+                this.w * y - this.x * z + this.y * w + this.z * x,
+                this.w * z + this.x * y - this.y * x + this.z * w,
+                this.w * w - this.x * x - this.y * y - this.z * z)
+        return dest
+    }
 }
 
 class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 1f) : Quaternionfc {
@@ -98,14 +165,14 @@ class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, overri
 
     fun lookAlong(dir: Vector3fc, up: Vector3fc, dest: Quaternionf): Quaternionf {
         // Normalize direction
-        val invDirLength = (1.0 / kotlin.math.sqrt(dir.x() * dir.x() + dir.y() * dir.y() + dir.z() * dir.z())).toFloat()
-        val dirnX = -dir.x() * invDirLength;
-        val dirnY = -dir.y() * invDirLength;
-        val dirnZ = -dir.z() * invDirLength;
+        val invDirLength = (1.0 / kotlin.math.sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)).toFloat()
+        val dirnX = -dir.x* invDirLength;
+        val dirnY = -dir.y * invDirLength;
+        val dirnZ = -dir.z * invDirLength;
         // left = up x dir
-        var leftX = up.y() * dirnZ - up.z() * dirnY;
-        var leftY = up.z() * dirnX - up.x() * dirnZ;
-        var leftZ = up.x() * dirnY - up.y() * dirnX;
+        var leftX = up.y * dirnZ - up.z * dirnY;
+        var leftY = up.z * dirnX - up.x * dirnZ;
+        var leftZ = up.x * dirnY - up.y * dirnX;
         // normalize left
         val invLeftLength = (1.0 / kotlin.math.sqrt(leftX * leftX + leftY * leftY + leftZ * leftZ)).toFloat()
         leftX *= invLeftLength;
@@ -163,4 +230,20 @@ class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, overri
     }
 
     fun lookAlong(dir: Vector3fc, up: Vector3fc): Quaternionf = lookAlong(dir, up, this)
+
+    fun rotateXYZ(angleX: Float, angleY: Float, angleZ: Float): Quaternionf =
+            rotateXYZ(angleX, angleY, angleZ, this)
 }
+
+
+val Quaternionfc.right: Vector3f
+    get() = positiveX(Vector3f())
+
+val Quaternionfc.left: Vector3f
+    get() = right.negate()
+
+val Quaternionfc.up: Vector3f
+    get() = positiveY(Vector3f())
+
+val Quaternionfc.forward: Vector3f
+    get() = positiveZ(Vector3f()).negate()

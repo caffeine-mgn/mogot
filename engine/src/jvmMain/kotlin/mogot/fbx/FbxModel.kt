@@ -1,7 +1,7 @@
 package mogot.fbx
 
-import org.joml.Math
-import org.joml.Vector3f
+import mogot.math.Vector3f
+
 
 class FbxModel2(val el: FbxFile.Element) : FbxObject {
     override val id: Long

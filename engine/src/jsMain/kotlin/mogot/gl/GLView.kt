@@ -1,10 +1,12 @@
 package mogot.gl
 
 import mogot.*
-import mogot.math.Matrix4f
-import mogot.math.Matrix4fc
-import mogot.math.Vector4f
+import mogot.math.*
 import org.khronos.webgl.WebGLRenderingContext
+import org.w3c.dom.events.KeyboardEvent
+import org.w3c.dom.events.MouseEvent
+import kotlin.browser.document
+import kotlin.browser.window
 
 open class GLView : AbstractGLView() {
     open var camera: Camera? = null
@@ -22,9 +24,19 @@ open class GLView : AbstractGLView() {
     private val viewMatrix = Matrix4f()
 
     val engine = Engine(this)
+    private var oldLockMouse = false
+    private var oldLockMouse1 = false
 
     override fun draw() {
         super.draw()
+
+        if (oldLockMouse != lockMouse) {
+            oldLockMouse = lockMouse
+            if (lockMouse) {
+                mousePosition.set(size.x / 2, size.y / 2)
+            }
+        }
+
         gl.ctx.viewport(0, 0, width, height)
         gl.ctx.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
         gl.ctx.enable(WebGLRenderingContext.DEPTH_TEST)
@@ -40,7 +52,93 @@ open class GLView : AbstractGLView() {
             update(root!!, viewMatrix)
             renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
         }
+
+
+        if (lockMouse)
+            mousePosition.set(size.x / 2, size.y / 2)
     }
+
+    override val mouseDown = EventValueDispatcher<Int>()
+    override val mouseUp = EventValueDispatcher<Int>()
+
+    init {
+        canvas.addEventListener("mousemove", {
+            it as MouseEvent
+            if (lockMouse) {
+                mousePosition.x = size.x / 2 + it.asDynamic().movementX.unsafeCast<Int>()
+                mousePosition.y = size.y / 2 + it.asDynamic().movementY.unsafeCast<Int>()
+            } else {
+                mousePosition.x = it.x.toInt()
+                mousePosition.y = it.y.toInt()
+            }
+        })
+
+        canvas.addEventListener("mousedown", {
+            it as MouseEvent
+            canvas.focus()
+            println("mousedown  ${it.button}")
+            mouseButtonsDown.add(it.button.unsafeCast<Int>())
+            mouseDown.dispatch(it.button.toInt())
+            it.preventDefault()
+        })
+        canvas.addEventListener("mouseup", {
+            it as MouseEvent
+            canvas.focus()
+            println("mouseup  ${it.button}")
+            mouseButtonsDown.remove(it.button.unsafeCast<Int>())
+            mouseUp.dispatch(it.button.toInt())
+            it.preventDefault()
+        })
+
+        canvas.addEventListener("keydown", {
+            it as KeyboardEvent
+            keyDown.add(it.keyCode.unsafeCast<Int>())
+            it.preventDefault()
+        })
+        canvas.addEventListener("keyup", {
+            it as KeyboardEvent
+            keyDown.remove(it.keyCode.unsafeCast<Int>())
+            it.preventDefault()
+        })
+
+        canvas.addEventListener("contextmenu", {
+            it.preventDefault()
+        })
+    }
+
+    private val mouseButtonsDown = HashSet<Int>()
+    private val keyDown = HashSet<Int>()
+
+    override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
+
+    override fun isKeyDown(code: Int): Boolean = code in keyDown
+
+    override val mousePosition = Vector2i()
+    override var lockMouse: Boolean
+        get() = document.asDynamic().pointerLockElement === canvas
+        set(value) {
+            if (value)
+                canvas.asDynamic().requestPointerLock()
+            else
+                document.asDynamic().exitPointerLock()
+
+        }
+
+    override var cursorVisible: Boolean
+        get() = canvas.style.cursor != "pointer"
+        set(value) {
+            canvas.style.cursor = if (value)
+                ""
+            else
+                "pointer"
+        }
+
+
+    override val size: Vector2ic
+        get() {
+            val r = canvas.getBoundingClientRect()
+            return Vector2i(r.width.toInt(), r.height.toInt())
+        }
 
     private var width: Int = 0
     private var height: Int = 0
@@ -48,12 +146,16 @@ open class GLView : AbstractGLView() {
         this.width = width
         this.height = height
         super.setup(width, height)
-        gl.ctx.clearColor(renderContext.sceneColor.x,renderContext.sceneColor.y,renderContext.sceneColor.z,renderContext.sceneColor.w)
+        gl.ctx.clearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
         camera?.resize(width, height)
     }
 
+    private var lastFrameTime = window.performance.now().unsafeCast<Float>()
     private fun update(node: Node, model: Matrix4fc) {
         var pos = model
+        val time = window.performance.now().unsafeCast<Float>()
+        node.update((time - lastFrameTime) / 1e+6f)
+        lastFrameTime = time
         if (node is Spatial) {
             pos = node.apply(model)
         }

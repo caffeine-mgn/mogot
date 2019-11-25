@@ -10,6 +10,10 @@ abstract class AbstractGLView : Stage {
     private val context = canvas.getContext("webgl2").unsafeCast<WebGL2RenderingContext>()
     override val gl: GL = GL(context)
 
+    init {
+        canvas.tabIndex = 1
+    }
+
     private val drawFunc: (Double) -> Unit = {
         drawOp()
     }
@@ -43,6 +47,7 @@ abstract class AbstractGLView : Stage {
     }
 
     fun startDraw() {
+        canvas.focus()
         init()
         drawOp()
     }

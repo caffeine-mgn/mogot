@@ -23,6 +23,6 @@ open class Spatial : Node() {
 
     fun lookTo(position: Vector3f) {
         quaternion.identity()
-        quaternion.lookAlong(position - this.position, Vec3f.UP)
+        quaternion.lookAlong(position - this.position, Vector3fc.UP)
     }
 }

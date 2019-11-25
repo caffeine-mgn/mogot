@@ -59,7 +59,6 @@ abstract class View3D : GLView() {
                 _x = e.x
                 _y = e.y
             }
-
         })
         addMouseMotionListener(object : MouseMotionListener {
             override fun mouseMoved(e: MouseEvent?) {

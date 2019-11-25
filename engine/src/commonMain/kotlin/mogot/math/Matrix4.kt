@@ -43,7 +43,7 @@ interface Matrix4fc {
         return dest.rotate(other)
     }
 
-    fun translate(vector: Vector3fc, dest: Matrix4f) = translate(vector.x(), vector.y(), vector.z(), dest)
+    fun translate(vector: Vector3fc, dest: Matrix4f) = translate(vector.x, vector.y, vector.z, dest)
     fun scale(x: Float, y: Float, z: Float, dest: Matrix4f): Matrix4f {
         return if (properties and PROPERTY_IDENTITY != 0)
             dest.scaling(x, y, z)
@@ -163,7 +163,7 @@ class Matrix4f : Matrix4fc {
 
     fun translation(x: Float, y: Float, z: Float): Matrix4f = translate(x, y, z, this)
 
-    fun translate(vector: Vector3fc): Matrix4f = translation(vector.x(), vector.y(), vector.z())
+    fun translate(vector: Vector3fc): Matrix4f = translation(vector.x, vector.y, vector.z)
 
     override fun rotate(other: Quaternionfc, dest: Matrix4f): Matrix4f {
         val quat = other
@@ -415,7 +415,7 @@ class Matrix4f : Matrix4fc {
     fun rotateAffine(other: Quaternionfc): Matrix4f =
             rotateAffine(other, this)
 
-    fun scale(vector: Vector3fc): Matrix4f = scale(vector.x(), vector.y(), vector.z(), this)
+    fun scale(vector: Vector3fc): Matrix4f = scale(vector.x, vector.y, vector.z, this)
 
     fun perspective(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4f =
             perspective(fovy, aspect, zNear, zFar, this)
@@ -445,7 +445,7 @@ class Matrix4f : Matrix4fc {
     }
 
     private fun perspectiveGeneric(fovy: Float, aspect: Float, zNear: Float, zFar: Float, zZeroToOne: Boolean, dest: Matrix4f): Matrix4f {
-        val h = kotlin.math.tan(fovy * 0.5f.toDouble()) as Float
+        val h = kotlin.math.tan(fovy * 0.5f.toDouble()).toFloat()
         // calculate right matrix elements
         val rm00 = 1.0f / (h * aspect)
         val rm11 = 1.0f / h
@@ -539,13 +539,13 @@ const val PI2 = PI * 2
 const val PIHalf = PI * 0.5
 fun cosFromSin(sin: Double, angle: Double): Double {
 //    if (Options.FASTMATH)
-//        return sin(angle + PIHalf)
+        return kotlin.math.sin(angle + PIHalf)
 
 
     // sin(x)^2 + cos(x)^2 = 1
-    val cos: Double = kotlin.math.sqrt(1.0 - sin * sin)
-    val a: Double = angle + PIHalf
-    var b: Double = a - (a / PI2) * PI2
-    if (b < 0.0) b += PI2
-    return if (b >= PI) -cos else cos
+//    val cos: Double = kotlin.math.sqrt(1.0 - sin * sin)
+//    val a: Double = angle + PIHalf
+//    var b: Double = a - (a / PI2) * PI2
+//    if (b < 0.0) b += PI2
+//    return if (b >= PI) -cos else cos
 }

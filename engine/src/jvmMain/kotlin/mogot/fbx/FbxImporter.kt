@@ -81,7 +81,7 @@ object FbxImporter {
                     Spatial()
 
         node.position.set(obj.translation)
-        node.quaternion.rotateZYX(obj.rotation.z(), obj.rotation.y(), obj.rotation.x())
+        node.quaternion.rotateZYX(obj.rotation.z, obj.rotation.y, obj.rotation.x)
         node.scale.set(obj.scale)
 
 //        obj.geometry?.also {
@@ -98,7 +98,7 @@ object FbxImporter {
                     AnimationCurveNode.Type.ROTATION -> {
                         animation.calc().forEach { time, vec ->
                             val f = Quaternionf()
-                            f.rotateZYX(Math.toRadians(vec.z().toDouble()).toFloat(), Math.toRadians(vec.y().toDouble()).toFloat(), Math.toRadians(vec.x().toDouble()).toFloat())
+                            f.rotateZYX(Math.toRadians(vec.z.toDouble()).toFloat(), Math.toRadians(vec.y.toDouble()).toFloat(), Math.toRadians(vec.x.toDouble()).toFloat())
                             anim.addRotation(time = (time * FbxFile.SECONDS_PER_UNIT).toFloat(), rotation = f)
                         }
                     }
