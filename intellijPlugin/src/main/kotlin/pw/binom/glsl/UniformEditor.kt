@@ -3,6 +3,8 @@ package pw.binom.glsl
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiWhiteSpace
@@ -11,14 +13,36 @@ import pw.binom.glsl.psi.GLSLGlobalArrayDef
 import pw.binom.glsl.psi.GLSLGlobalVarDefinition
 import pw.binom.glsl.psi.GLSLTypes
 import pw.binom.glsl.psi.GLSLVarDefinitionExp
+import javax.swing.JButton
 import javax.swing.JPanel
 
 
 class UniformEditor(private val document: Document, private val file: PsiFile) : JPanel() {
+
+    abstract interface Editor
+
+    inner abstract class ImageSelector : JButton(), Editor {
+        init {
+            addActionListener {
+                FileChooser.chooseFiles(
+                        FileChooserDescriptor(
+                                true,
+                                false,
+                                false,
+                                false,
+                                false,
+                                false
+                        ),
+                        file.project,
+                        null
+                )
+            }
+        }
+    }
+
     init {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-
                 val uniforms = file.asSequence().map { it as? GLSLGlobalVarDefinition }.filterNotNull().forEach {
                     val variable = it.varDefinitionExp
                     val array = it.array

@@ -96,13 +96,13 @@ kotlin {
         jvmMain {
             dependencies {
                 api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-                api "org.jetbrains.kotlin:kotlin-stdlib:1.3.60"
                 api 'org.jogamp.jogl:jogl-all:2.3.2'
                 api 'org.jogamp.jogl:jogl-all-main:2.3.2'
                 api 'org.jogamp.gluegen:gluegen-rt-main:2.3.2'
                 api 'org.jogamp.gluegen:gluegen-rt:2.3.2'
                 api 'org.joml:joml:1.9.12'
                 api group: 'org.jogamp.jogl', name: 'nativewindow', version: '2.3.2'
+                api "pw.binom.io:file:$binom_io_version"
             }
         }
 

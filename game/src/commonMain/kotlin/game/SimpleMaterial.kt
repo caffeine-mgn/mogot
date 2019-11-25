@@ -1,6 +1,7 @@
 package game
 
 import mogot.RenderContext
+import mogot.Texture2D
 import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
@@ -74,7 +75,10 @@ void main() {
 //    color = vec4(texture(tex, UV).rgb,0.5f);
 //    color = texture(tex, UV).rgba * diffuseColor;
 //    vec4 cc = texture(tex, UV).rgba * diffuseColor;
-    lowp vec4 cc = vec4(0.5,0.5,0.5,1);
+//    lowp vec4 cc = vec4(0.5,0.5,0.5,1);
+    mediump vec4 cc = texture(tex, UV).rgba;// * diffuseColor;
+    color = cc;
+    return;
       
     for (int i = 0; i<lights_len; i++){
         lowp vec3 lightDir = vec3(lights[i].position.xyz - vVertex);
@@ -105,14 +109,40 @@ void main() {
 //        }
     }
     color = cc;
-    color=vec4(normalize(normal),1);
+    //color=vec4(normalize(normal),1);
 }
 """
     )
 
+    var tex: Texture2D? = null
+        set(value) {
+            field = value
+            shader.use()
+            if (tex != null) {
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+                shader.uniform("tex", 0)
+            } else {
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, null)
+            }
+//            shader.uniform("tex", field)
+        }
+
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
 //        image?.bind()
+        if (tex != null) {
+//            gl.activeTexture(gl.TEXTURE0)
+            gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+//            shader.uniform("tex", 0)
+        }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
+    }
+
+    override fun unuse() {
+//        if (tex != null)
+        gl.bindTexture(gl.TEXTURE_2D, null)
+        super.unuse()
     }
 }

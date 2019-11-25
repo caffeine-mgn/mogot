@@ -235,6 +235,34 @@ actual class GL(val gl: GL2) {
         gl.glUniformMatrix4fv(location.id, 1, false, data, 0)
     }
 
+    actual fun activeTexture(texture: Int) {
+        gl.glActiveTexture(texture)
+    }
+
+    actual fun bindTexture(target: Int, texture: GLTexture?) {
+        texture as JGLTexture?
+        gl.glBindTexture(target, texture?.id ?: 0)
+    }
+
+    actual val TEXTURE0: Int
+        get() = GL2.GL_TEXTURE0
+
+    actual fun createTexture(): GLTexture {
+        val b = IntBuffer.allocate(1)
+        gl.glGenTextures(1, b)
+        return JGLTexture(b[0])
+    }
+
+    actual fun deleteTexture(texture: GLTexture) {
+        texture as JGLTexture
+        val b = IntBuffer.allocate(1)
+        b.put(0, texture.id)
+        gl.glDeleteTextures(1, b)
+    }
+
+    actual val TEXTURE_2D: Int
+        get() = GL2.GL_TEXTURE_2D
+
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {
@@ -260,3 +288,4 @@ private inline class JVertexArray(val id: Int) : GLVertexArray
 private inline class JGLProgram(val id: Int) : GLProgram
 private inline class JGLShader(val id: Int) : GLShader
 private inline class JGLUniformLocation(val id: Int) : GLUniformLocation
+internal inline class JGLTexture(val id: Int) : GLTexture
