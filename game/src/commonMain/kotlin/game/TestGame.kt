@@ -77,11 +77,11 @@ class FpsCam(val engine: Engine) : Behaviour() {
     override fun onUpdate(delta: Float) {
 
         engine.stage.mouseDown.on {
-            if (it == 2)
+            if (it == 2 || it == 3)
                 engine.stage.lockMouse = true
         }
         engine.stage.mouseUp.on {
-            if (it == 2)
+            if (it == 2 || it == 3)
                 engine.stage.lockMouse = false
         }
         val delta = 0.01f
@@ -115,7 +115,7 @@ class FpsCam(val engine: Engine) : Behaviour() {
         if (engine.stage.isKeyDown(81)) {
             node.position.add(-node.quaternion.up * moveSpeed * delta)
         }
-        if (engine.stage.isMouseDown(2)) {
+        if (engine.stage.isMouseDown(2) || engine.stage.isMouseDown(3)) {
             engine.stage.cursorVisible = false
 //            engine.stage.lockMouse = true
 //            node.rotation.rotateLocalX(((Input.mousePosition.y - oldMousePosition.y).toDouble() * dt / 10f).toFloat())

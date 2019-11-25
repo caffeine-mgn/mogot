@@ -14,9 +14,11 @@ import java.awt.image.BufferedImage
 
 open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
-    private val mouseDown = HashSet<Int>()
+    override val mouseDown = EventValueDispatcher<Int>()
+    override val mouseUp = EventValueDispatcher<Int>()
+    private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
-    override fun isMouseDown(button: Int): Boolean = button in mouseDown
+    override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
     override val mousePosition = Vector2i()
@@ -81,7 +83,8 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
         addMouseListener(object : MouseListener {
             override fun mouseReleased(e: MouseEvent) {
-                mouseDown.remove(e.button)
+                mouseButtonsDown.remove(e.button)
+                mouseUp.dispatch(e.button)
             }
 
             override fun mouseEntered(e: MouseEvent?) {
@@ -95,7 +98,8 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             }
 
             override fun mousePressed(e: MouseEvent) {
-                mouseDown.add(e.button)
+                mouseButtonsDown.add(e.button)
+                mouseDown.dispatch(e.button)
             }
         })
 
@@ -134,8 +138,12 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     }
 
     private val viewMatrix = Matrix4f()
-
+    private var oldLockMouse = false
     protected open fun render() {
+        if (oldLockMouse != lockMouse) {
+            oldLockMouse = lockMouse
+            mousePosition.set(size.x / 2, size.y / 2)
+        }
         gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
         gl.gl.glEnable(GL2.GL_DEPTH_TEST)
         gl.gl.glEnable(GL2.GL_CULL_FACE)
