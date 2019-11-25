@@ -1,4 +1,5 @@
 @file:JvmName("MathCommonKt")
+
 package mogot.math
 
 
@@ -539,13 +540,10 @@ const val PI2 = PI * 2
 const val PIHalf = PI * 0.5
 fun cosFromSin(sin: Double, angle: Double): Double {
 //    if (Options.FASTMATH)
-        return kotlin.math.sin(angle + PIHalf)
+    return kotlin.math.sin(angle + PIHalf)
+}
 
-
-    // sin(x)^2 + cos(x)^2 = 1
-//    val cos: Double = kotlin.math.sqrt(1.0 - sin * sin)
-//    val a: Double = angle + PIHalf
-//    var b: Double = a - (a / PI2) * PI2
-//    if (b < 0.0) b += PI2
-//    return if (b >= PI) -cos else cos
+fun cosFromSin(sin: Float, angle: Float): Double {
+//    if (Options.FASTMATH)
+    return kotlin.math.sin(angle + PIHalf)
 }

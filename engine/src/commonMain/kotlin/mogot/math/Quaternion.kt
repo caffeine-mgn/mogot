@@ -137,6 +137,21 @@ interface Quaternionfc {
                 this.w * w - this.x * x - this.y * y - this.z * z)
         return dest
     }
+
+    fun rotateAxis(angle: Float, axisX: Float, axisY: Float, axisZ: Float, dest: Quaternionf): Quaternionf? {
+        val hangle = angle / 2.0f
+        val sinAngle = sin(hangle)
+        val invVLength = 1.0f / sqrt(axisX * axisX + axisY * axisY + (axisZ * axisZ))
+        val rx = axisX * invVLength * sinAngle
+        val ry = axisY * invVLength * sinAngle
+        val rz = axisZ * invVLength * sinAngle
+        val rw: Double = cosFromSin(sinAngle, hangle)
+        dest.set((w * rx + x * rw + y * rz - z * ry).toFloat(),
+                (w * ry - x * rz + y * rw + z * rx).toFloat(),
+                (w * rz + x * ry - y * rx + z * rw).toFloat(),
+                (w * rw - x * rx - y * ry - z * rz).toFloat())
+        return dest
+    }
 }
 
 class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 1f) : Quaternionfc {
@@ -147,6 +162,9 @@ class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, overri
         w = 1f
         return this
     }
+
+    fun rotateAxis(angle: Float, axisX: Float, axisY: Float, axisZ: Float): Quaternionf? =
+            rotateAxis(angle, axisX, axisY, axisZ, this)
 
     override fun toString(): String =
             "Quaternionf($x, $y, $z, $w)"
@@ -166,7 +184,7 @@ class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, overri
     fun lookAlong(dir: Vector3fc, up: Vector3fc, dest: Quaternionf): Quaternionf {
         // Normalize direction
         val invDirLength = (1.0 / kotlin.math.sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)).toFloat()
-        val dirnX = -dir.x* invDirLength;
+        val dirnX = -dir.x * invDirLength;
         val dirnY = -dir.y * invDirLength;
         val dirnZ = -dir.z * invDirLength;
         // left = up x dir

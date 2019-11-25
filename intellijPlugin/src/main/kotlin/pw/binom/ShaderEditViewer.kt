@@ -26,15 +26,20 @@ class ShaderEditViewer : View3D() {
     private var fp = ""
     private var vpOld = ""
     private var fpOld = ""
-
+private val fpPrefix="""#version 300 es
+    
+#ifdef GL_ES
+precision mediump float;
+#endif
+"""
     override fun render() {
         if (vp != vpOld || fp != fpOld) {
             vpOld = vp
             fpOld = fp
             try {
                 material.dynamicShader?.close()
-                material.dynamicShader = mogot.gl.Shader(gl, vp, fp)
-                repaint()
+                material.dynamicShader = Shader(gl, vp, fpPrefix+fp)
+                //repaint()
                 println("OK")
             } catch (e: Throwable) {
                 println("ERROR")
@@ -42,6 +47,7 @@ class ShaderEditViewer : View3D() {
                 e.printStackTrace()
             }
         }
+        println("Render Shader View! $root $camera")
         super.render()
     }
 
@@ -55,9 +61,9 @@ class ShaderEditViewer : View3D() {
     override fun init() {
         super.init()
         material = DynamicMaterialGLSL(gl)
-        val node = GeomNode().apply {
-            geom = Geoms.buildCube2(gl, 1f)
-            material = material
+        val node = GeomNode().also {
+            it.geom = Geoms.buildCube2(gl, 1f)
+            it.material = material
         }
         root!!.addChild(node)
 

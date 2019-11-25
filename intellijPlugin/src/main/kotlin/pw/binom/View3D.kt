@@ -3,7 +3,10 @@ package pw.binom
 
 import mogot.*
 import mogot.gl.GLView
-import org.joml.*
+import mogot.math.Quaternionf
+import mogot.math.Vector3f
+import mogot.math.forward
+import mogot.math.times
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
