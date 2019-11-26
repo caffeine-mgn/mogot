@@ -6,7 +6,7 @@
  * Detailed information about configuring a multi-project build in Gradle can be found
  * in the user guide at https://docs.gradle.org/4.8.1/userguide/multi_project_builds.html
  */
-
+enableFeaturePreview("GRADLE_METADATA")
 rootProject.name = 'Mogot'
 include ":game"
 include ":intellijPlugin"
