@@ -11,7 +11,7 @@ class TestGame(val engine: Engine) {
     init {
         camera.parent = root
 
-        val tex = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\3.png")
+        val tex = engine.resources.createTexture2D("res/2.png")
         val tex2=tex// = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\4.png")
 
         val box = CSGBox(engine).apply {
