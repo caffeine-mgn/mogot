@@ -529,9 +529,9 @@ class PNGDecoder(private val input: InputStream) {
 
     @Throws(IOException::class)
     private fun unfilter(curLine: ByteArray, prevLine: ByteArray) {
-        println("->${curLine[0].toInt()}")
         when (curLine[0].toInt()) {
             0 -> {
+                //NOP
             }
             1 -> unfilterSub(curLine)
             2 -> unfilterUp(curLine, prevLine)
