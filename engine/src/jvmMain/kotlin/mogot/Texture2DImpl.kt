@@ -32,23 +32,6 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
         val buf = ByteBuffer.allocateDirect(width * height * color.numComponents)
         image.png.decode(buf, width * color.numComponents, color)
         buf.flip2()
-
-
-        val vv = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        for (x in 0 until width)
-            for (y in 0 until height) {
-                val r = buf.get().toInt() and 0xFF
-                val g = buf.get().toInt() and 0xFF
-                val b = buf.get().toInt() and 0xFF
-                if (image.png.hasAlpha())
-                    buf.get()
-
-                val color = (r shl 16) or (g shl 8) or (b shl 0)
-
-                vv.setRGB(x,y, color)
-            }
-        ImageIO.write(vv, "png", File("D:\\WORK\\mogot\\game\\res\\ttt.png"));
-        buf.flip2()
         val mipMapCount = 3
 
         engine.gl.bindTexture(engine.gl.TEXTURE_2D, gl)
