@@ -48,6 +48,12 @@ open class GLView : AbstractGLView() {
                 renderContext.pointLights += it
             true
         }
+
+        while (!engine.frameListeners.isEmpty) {
+            console.info("ON FRAME!")
+            engine.frameListeners.popLast().invoke()
+        }
+
         if (root != null) {
             update(root!!, viewMatrix)
             renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)

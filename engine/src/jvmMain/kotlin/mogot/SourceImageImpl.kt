@@ -1,6 +1,10 @@
 package mogot
 
-actual class SourceImage(engine: Engine, val png: PNGDecoder) : Resource(engine) {
-    override fun dispose() {
+import java.nio.ByteBuffer
+
+class SourceImage(val type: Type, val width: Int, val height: Int, val data: ByteBuffer) {
+    enum class Type(val elementSize: Int) {
+        RGB(3),
+        RGBA(4)
     }
 }

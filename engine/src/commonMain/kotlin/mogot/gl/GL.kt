@@ -62,6 +62,7 @@ expect class GL {
     val LINK_STATUS: Int
     val TEXTURE0: Int
     val TEXTURE_2D: Int
+    val TEXTURE_MAX_LEVEL:Int
 }
 
 interface GLBuffer

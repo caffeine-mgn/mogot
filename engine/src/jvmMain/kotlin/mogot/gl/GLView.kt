@@ -150,13 +150,17 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
         camera?.applyMatrix(viewMatrix.identity())
-
         renderContext.pointLights.clear()
         root?.walk {
             if (it is PointLight)
                 renderContext.pointLights += it
             true
         }
+
+        while (!engine.frameListeners.isEmpty) {
+            engine.frameListeners.popFirst().invoke()
+        }
+
         if (root != null) {
             update(root!!, viewMatrix)
             renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)

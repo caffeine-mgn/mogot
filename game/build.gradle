@@ -123,3 +123,13 @@ jvmJar {
 //task generateScene(type:SceneGenerator){
 //    addScene(file("res/scene.jsc"))
 //}
+
+task runJsWebServer {
+    dependsOn runDceJsKotlin
+    doLast {
+        SimpleHttpFileServerFactory factory = new SimpleHttpFileServerFactory()
+        HttpFileServer server = factory.start(buildFile.parentFile, 8085)
+        java.lang.Thread.sleep(Long.MAX_VALUE);
+        server.stop()
+    }
+}
