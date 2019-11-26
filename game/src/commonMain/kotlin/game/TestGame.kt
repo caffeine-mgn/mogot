@@ -2,6 +2,7 @@ package game
 
 import mogot.*
 import mogot.math.*
+import pw.binom.io.use
 
 class TestGame(val engine: Engine) {
     val root = Spatial()
@@ -10,12 +11,17 @@ class TestGame(val engine: Engine) {
     init {
         camera.parent = root
 
+        val tex = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\3.png")
+        val tex2=tex// = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\4.png")
+
         val box = CSGBox(engine).apply {
             parent = root
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl)
+            material = SimpleMaterial(engine.gl).also {
+                it.tex = tex2
+            }
         }
 
         CSGBox(engine).apply {
@@ -23,7 +29,9 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl)
+            material = SimpleMaterial(engine.gl).also {
+                it.tex = tex
+            }
             position.set(7f, 5f, 5f)
         }
 
@@ -32,7 +40,9 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl)
+            material = SimpleMaterial(engine.gl).also {
+                it.tex = tex2
+            }
             position.set(3f, 5f, 5f)
         }
 
@@ -41,7 +51,9 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl)
+            material = SimpleMaterial(engine.gl).also {
+                it.tex = tex2
+            }
             position.set(5f, 7f, 5f)
         }
 
@@ -50,7 +62,9 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl)
+            material = SimpleMaterial(engine.gl).also {
+                it.tex = tex
+            }
             position.set(5f, 3f, 5f)
         }
         camera.position.x = 5f
@@ -91,7 +105,6 @@ class FpsCam(val engine: Engine) : Behaviour() {
 
         if (engine.stage.isKeyDown(87)) {
             node.position.add(node.quaternion.forward * delta * moveSpeed)
-            println("go forward")
 //            node.position.add(node.rotation.forward * dt * moveSpeed)
         }
 

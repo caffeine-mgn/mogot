@@ -1,5 +1,6 @@
 package mogot.gl
 
+import mogot.Texture2D
 import mogot.math.Matrix4fc
 
 expect class GL {
@@ -31,10 +32,14 @@ expect class GL {
     fun uniform4f(uniformLocation: GLUniformLocation, x: Float, y: Float, z: Float, w: Float)
     fun uniform4i(uniformLocation: GLUniformLocation, x: Int, y: Int, z: Int, w: Int)
     fun uniform1fv(location: GLUniformLocation, v: FloatArray)
-    fun uniformMatrix4v(location: GLUniformLocation, vararg matrix:Matrix4fc)
+    fun uniformMatrix4v(location: GLUniformLocation, vararg matrix: Matrix4fc)
+    fun activeTexture(texture: Int)
+    fun createTexture(): GLTexture
+    fun deleteTexture(texture: GLTexture)
+    fun bindTexture(target: Int, texture: GLTexture?)
     fun getShaderInfoLog(shader: GLShader): String?
     fun getShaderi(shader: GLShader, type: Int): Int
-    fun getProgrami(program: GLProgram,type:Int):Int
+    fun getProgrami(program: GLProgram, type: Int): Int
     fun getProgramInfoLog(program: GLProgram): String?
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int)
@@ -55,6 +60,8 @@ expect class GL {
     val FRAGMENT_SHADER: Int
     val COMPILE_STATUS: Int
     val LINK_STATUS: Int
+    val TEXTURE0: Int
+    val TEXTURE_2D: Int
 }
 
 interface GLBuffer
@@ -62,3 +69,4 @@ interface GLVertexArray
 interface GLProgram
 interface GLShader
 interface GLUniformLocation
+interface GLTexture

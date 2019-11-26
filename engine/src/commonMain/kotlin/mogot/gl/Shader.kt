@@ -1,5 +1,6 @@
 package mogot.gl
 
+import mogot.Texture2D
 import mogot.math.Matrix4fc
 import mogot.math.Vector3fc
 import mogot.math.Vector4fc
@@ -51,6 +52,14 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
             gl.useProgram(null)
         }
     }
+
+//    fun uniform(name: String, texture: Texture2D?): Boolean {
+//        val num = gl.getUniformLocation(id, name) ?: return false
+//        gl.uniformSampler2D(num, texture)
+//        checkError(name)
+//        return true
+//    }
+
 
     fun uniform(name: String, x: Float, y: Float, z: Float, w: Float): Boolean {
         val num = gl.getUniformLocation(id, name) ?: return false
