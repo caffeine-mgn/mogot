@@ -137,9 +137,12 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         repaint()
     }
 
-    private val viewMatrix = Matrix4f()
+    private val tempMatrix = Matrix4f()
     private var oldLockMouse = false
     protected open fun render() {
+        val time = System.nanoTime()
+        val dt = (time - lastFrameTime) / 1e+9f
+
         if (oldLockMouse != lockMouse) {
             oldLockMouse = lockMouse
             mousePosition.set(size.x / 2, size.y / 2)
@@ -149,7 +152,8 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         gl.gl.glEnable(GL2.GL_CULL_FACE)
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
-        camera?.applyMatrix(viewMatrix.identity())
+        camera?.applyMatrix(tempMatrix.identity())
+
         renderContext.pointLights.clear()
         root?.walk {
             if (it is PointLight)
@@ -162,8 +166,14 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         }
 
         if (root != null) {
-            update(root!!, viewMatrix)
-            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
+            update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+            renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+
+            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+            gl.gl.glDisable(GL2.GL_CULL_FACE)
+
+            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+            renderNode2D(root!!, tempMatrix, renderContext)
         }
 
         if (lockMouse) {
@@ -174,34 +184,50 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             robot.mouseMove(point.x, point.y)
         }
         swapBuffers()
+        lastFrameTime = time
     }
 
     private var lastFrameTime = System.nanoTime()
 
-    private fun update(node: Node, model: Matrix4fc) {
-        var pos = model
+    private fun update(dt:Float,node: Node, camModel: Matrix4fc,ortoModel:Matrix4fc) {
+
         val time = System.nanoTime()
         node.update((time - lastFrameTime) / 1e+9f)
         lastFrameTime = time
-        if (node is Spatial) {
-            pos = node.apply(model)
+        val pos = when (node){
+            is Spatial->node.apply(camModel)
+            is Spatial2D->node.apply(ortoModel)
+            else->camModel
         }
 
+
         node.childs.forEach {
-            update(it, pos)
+            update(dt,it, camModel=pos,ortoModel = ortoModel)
         }
     }
 
     private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         var pos = model
         if (node is VisualInstance) {
-//            pos = node.apply(model)
             pos = node.matrix
             node.render(node.matrix, projection, renderContext)
         }
 
         node.childs.forEach {
             renderNode3D(it, pos, projection, renderContext)
+        }
+    }
+
+    private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+        //var pos = model
+        if (node is VisualInstance2D) {
+            //pos = node.matrix
+            node.render(node.matrix, projection, renderContext)
+        }
+
+
+        node.childs.forEach {
+            renderNode2D(it, projection, renderContext)
         }
     }
 

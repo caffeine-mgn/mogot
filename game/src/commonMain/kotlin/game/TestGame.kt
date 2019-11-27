@@ -4,7 +4,7 @@ import mogot.*
 import mogot.math.*
 
 class TestGame(val engine: Engine) {
-    val root = Spatial()
+    val root = Node()
     val camera = Camera()
 
     init {
@@ -65,6 +65,12 @@ class TestGame(val engine: Engine) {
 
         camera.lookTo(Vector3f(0f, 0f, 0f))
         camera.behaviour = FpsCam(engine)
+
+        val s = Sprite(engine)
+
+        root.addChild(s)
+        s.size.set(100f, 100f)
+        s.material=mat
 
         engine.waitFrame {
             println("load texure...")

@@ -5,6 +5,7 @@ package mogot.math
 
 import kotlin.jvm.JvmName
 import kotlin.math.PI
+import kotlin.math.sin
 
 interface Matrix4fc {
     fun getTranslation(dest: Vector3f): Vector3f
@@ -80,8 +81,93 @@ interface Matrix4fc {
 
     fun perspective(fovy: Float, aspect: Float, zNear: Float, zFar: Float, dest: Matrix4f): Matrix4f =
             perspective(fovy, aspect, zNear, zFar, false, dest);
+
+    fun rotateZ(ang: Float, dest: Matrix4f): Matrix4f {
+        if (properties and PROPERTY_IDENTITY != 0) {
+            val sin: Float = kotlin.math.sin(ang)
+            val cos: Float = cosFromSin(sin, ang)
+            if (properties and PROPERTY_IDENTITY == 0) dest.identity()
+            dest.m00 = (cos)
+            dest.m01 = (sin)
+            dest.m10 = (-sin)
+            dest.m11 = (cos)
+            dest.properties = (PROPERTY_AFFINE or PROPERTY_ORTHONORMAL)
+            return dest
+        }
+        val sin = sin(ang)
+        val cos = cosFromSin(sin, ang)
+        return rotateTowardsXY(sin, cos, dest)
+    }
+
+    fun rotateTowardsXY(dirX: Float, dirY: Float, dest: Matrix4f): Matrix4f {
+        if (properties and PROPERTY_IDENTITY != 0) {
+            if (properties and PROPERTY_IDENTITY == 0) dest.identity()
+            dest.m00 = (dirY)
+            dest.m01 = (dirX)
+            dest.m10 = (-dirX)
+            dest.m11 = (dirY)
+            dest.properties = (PROPERTY_AFFINE or PROPERTY_ORTHONORMAL)
+            return dest
+        }
+        val rm10 = -dirX
+        val nm00 = m00 * dirY + m10 * dirX
+        val nm01 = m01 * dirY + m11 * dirX
+        val nm02 = m02 * dirY + m12 * dirX
+        val nm03 = m03 * dirY + m13 * dirX
+        dest.m10 = (m00 * rm10 + m10 * dirY)
+        dest.m11 = (m01 * rm10 + m11 * dirY)
+        dest.m12 = (m02 * rm10 + m12 * dirY)
+        dest.m13 = (m03 * rm10 + m13 * dirY)
+        dest.m00 = (nm00)
+        dest.m01 = (nm01)
+        dest.m02 = (nm02)
+        dest.m03 = (nm03)
+        dest.m20 = (m20)
+        dest.m21 = (m21)
+        dest.m22 = (m22)
+        dest.m23 = (m23)
+        dest.m30 = (m30)
+        dest.m31 = (m31)
+        dest.m32 = (m32)
+        dest.m33 = (m33)
+        dest.properties = (properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY or PROPERTY_TRANSLATION).inv())
+        return dest
+    }
+
+    fun ortho2D(left: Float, right: Float, bottom: Float, top: Float, dest: Matrix4f): Matrix4f {
+        return if (properties and PROPERTY_IDENTITY != 0)
+            dest.setOrtho2D(left, right, bottom, top)
+        else
+            ortho2DGeneric(left, right, bottom, top, dest)
+    }
 }
 
+private fun Matrix4fc.ortho2DGeneric(left: Float, right: Float, bottom: Float, top: Float, dest: Matrix4f): Matrix4f { // calculate right matrix elements
+    val rm00 = 2.0f / (right - left)
+    val rm11 = 2.0f / (top - bottom)
+    val rm30 = (right + left) / (left - right)
+    val rm31 = (top + bottom) / (bottom - top)
+    // perform optimized multiplication
+// compute the last column first, because other columns do not depend on it
+    dest.m30 = (m00 * rm30 + m10 * rm31 + m30)
+    dest.m31 = (m01 * rm30 + m11 * rm31 + m31)
+    dest.m32 = (m02 * rm30 + m12 * rm31 + m32)
+    dest.m33 = (m03 * rm30 + m13 * rm31 + m33)
+    dest.m00 = (m00 * rm00)
+    dest.m01 = (m01 * rm00)
+    dest.m02 = (m02 * rm00)
+    dest.m03 = (m03 * rm00)
+    dest.m10 = (m10 * rm11)
+    dest.m11 = (m11 * rm11)
+    dest.m12 = (m12 * rm11)
+    dest.m13 = (m13 * rm11)
+    dest.m20 = (-m20)
+    dest.m21 = (-m21)
+    dest.m22 = (-m22)
+    dest.m23 = (-m23)
+    dest.properties = (properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY or PROPERTY_TRANSLATION or PROPERTY_ORTHONORMAL).inv())
+    return dest
+}
 
 var PROPERTY_IDENTITY = 1 shl 2
 var PROPERTY_AFFINE = 1 shl 1
@@ -109,6 +195,22 @@ class Matrix4f : Matrix4fc {
     override var m32 = 0f
     override var m33 = 1f
 
+    fun rotateZ(ang: Float): Matrix4f = rotateZ(ang, this)
+
+    fun ortho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f =
+            ortho2D(left, right, bottom, top, this)
+
+    internal fun setOrtho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f {
+        if (properties and PROPERTY_IDENTITY == 0) identity()
+        this.m00 = (2.0f / (right - left))
+        this.m11 = (2.0f / (top - bottom))
+        this.m22 = (-1.0f)
+        this.m30 = ((right + left) / (left - right))
+        this.m31 = ((top + bottom) / (bottom - top))
+        properties = PROPERTY_AFFINE
+        return this
+    }
+
     fun identity(): Matrix4f {
         if (properties and PROPERTY_IDENTITY != 0)
             return this
@@ -129,6 +231,16 @@ class Matrix4f : Matrix4fc {
         m32 = 0.0f
         m33 = 1.0f
         properties = PROPERTY_IDENTITY or PROPERTY_AFFINE or PROPERTY_TRANSLATION or PROPERTY_ORTHONORMAL
+        return this
+    }
+
+    fun translate(x: Float, y: Float, z: Float): Matrix4f {
+        if (properties and PROPERTY_IDENTITY != 0) return translation(x, y, z)
+        this.m30 = (m00 * x + m10 * y + m20 * z + m30)
+        this.m31 = (m01 * x + m11 * y + m21 * z + m31)
+        this.m32 = (m02 * x + m12 * y + m22 * z + m32)
+        this.m33 = (m03 * x + m13 * y + m23 * z + m33)
+        properties = properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY).inv()
         return this
     }
 
@@ -417,6 +529,7 @@ class Matrix4f : Matrix4fc {
             rotateAffine(other, this)
 
     fun scale(vector: Vector3fc): Matrix4f = scale(vector.x, vector.y, vector.z, this)
+    fun scale(x: Float, y: Float, z: Float): Matrix4f = scale(x, y, z, this)
 
     fun perspective(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4f =
             perspective(fovy, aspect, zNear, zFar, this)
@@ -543,7 +656,7 @@ fun cosFromSin(sin: Double, angle: Double): Double {
     return kotlin.math.sin(angle + PIHalf)
 }
 
-fun cosFromSin(sin: Float, angle: Float): Double {
+fun cosFromSin(sin: Float, angle: Float): Float {
 //    if (Options.FASTMATH)
-    return kotlin.math.sin(angle + PIHalf)
+    return kotlin.math.sin(angle + PIHalf).toFloat()
 }
