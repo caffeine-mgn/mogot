@@ -1,6 +1,5 @@
 package mogot.gl
 
-import mogot.Texture2D
 import mogot.math.Matrix4fc
 
 expect class GL {
@@ -41,6 +40,16 @@ expect class GL {
     fun getShaderi(shader: GLShader, type: Int): Int
     fun getProgrami(program: GLProgram, type: Int): Int
     fun getProgramInfoLog(program: GLProgram): String?
+    fun bindFramebuffer(target: Int, frameBuffer: Int)
+    fun genFramebuffers(): Int
+    fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long)
+    fun texParameteri(target: Int, pname: Int, param: Int)
+    fun framebufferTexture2D(target: Int, attachmen: Int, textarget: Int, texture: Int, level: Int)
+    fun genRenderbuffers(): Int
+    fun bindRenderbuffer(target: Int, renderbuffer: Int)
+    fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
+    fun framebufferRenderbuffer(target:Int, attachment:Int, renderbuffertarget:Int, renderbuffer:Int)
+    fun checkFramebufferStatus(target: Int):Int
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int)
     fun drawElements(mode: Int, count: Int, type: Int, offset: Int)
