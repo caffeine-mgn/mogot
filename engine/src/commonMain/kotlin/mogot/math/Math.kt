@@ -7,3 +7,5 @@ expect object Math  {
     fun cos(value: Double):Double
     fun toRadians(value: Double):Double
 }
+
+val MATRIX4_ONE: Matrix4fc = Matrix4f().identity()

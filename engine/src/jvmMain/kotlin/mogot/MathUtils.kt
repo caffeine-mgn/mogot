@@ -39,7 +39,6 @@ val Quaternionfc.forward: Vector3f
 
 fun Vector3fc.mul(value: Float) = Vector3f(x() * value, y() * value, z() * value)
 
-val MATRIX4_ONE: Matrix4fc = Matrix4f().identity()
 val TEMP_MATRIX = Matrix4f()
 fun Matrix4dc.toArray(): DoubleArray {
     val out = DoubleArray(16)

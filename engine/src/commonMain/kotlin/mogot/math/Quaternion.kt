@@ -145,11 +145,11 @@ interface Quaternionfc {
         val rx = axisX * invVLength * sinAngle
         val ry = axisY * invVLength * sinAngle
         val rz = axisZ * invVLength * sinAngle
-        val rw: Double = cosFromSin(sinAngle, hangle)
-        dest.set((w * rx + x * rw + y * rz - z * ry).toFloat(),
-                (w * ry - x * rz + y * rw + z * rx).toFloat(),
-                (w * rz + x * ry - y * rx + z * rw).toFloat(),
-                (w * rw - x * rx - y * ry - z * rz).toFloat())
+        val rw = cosFromSin(sinAngle, hangle)
+        dest.set((w * rx + x * rw + y * rz - z * ry),
+                (w * ry - x * rz + y * rw + z * rx),
+                (w * rz + x * ry - y * rx + z * rw),
+                (w * rw - x * rx - y * ry - z * rz))
         return dest
     }
 }

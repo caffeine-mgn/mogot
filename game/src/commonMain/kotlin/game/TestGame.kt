@@ -5,14 +5,14 @@ import mogot.math.*
 import pw.binom.io.use
 
 class TestGame(val engine: Engine) {
-    val root = Spatial()
+    val root = Node()
     val camera = Camera()
 
     init {
         camera.parent = root
 
         val tex = engine.resources.createTexture2D("res/2.png")
-        val tex2=tex// = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\4.png")
+        val tex2 = tex// = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\4.png")
 
         val box = CSGBox(engine).apply {
             parent = root
@@ -75,6 +75,14 @@ class TestGame(val engine: Engine) {
 
         camera.lookTo(Vector3f(0f, 0f, 0f))
         camera.behaviour = FpsCam(engine)
+
+        val s = Sprite(engine)
+
+        root.addChild(s)
+        s.size.set(100f, 100f)
+        s.material=SimpleMaterial(engine.gl).also {
+            it.tex = tex2
+        }
     }
 }
 
