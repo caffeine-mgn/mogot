@@ -58,9 +58,7 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
             vertexBuffer.uploadArray(vertex)
             vertexBuffer.bind()
 
-//            gl.glVertexAttribPointer(0, 3, GL2.GL_FLOAT, false, 0, 0)
             gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-//            gl.glEnableVertexAttribArray(0)
             gl.enableVertexAttribArray(0)
 
             uvs?.let { uvs ->
