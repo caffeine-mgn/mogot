@@ -66,6 +66,13 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual val LINK_STATUS: Int
         get() = WebGLRenderingContext.LINK_STATUS
 
+    actual val TEXTURE0: Int
+        get() = WebGLRenderingContext.TEXTURE0
+    actual val TEXTURE_2D: Int
+        get() = WebGLRenderingContext.TEXTURE_2D
+    actual val TEXTURE_MAX_LEVEL: Int
+        get() = js("WebGL2RenderingContext.TEXTURE_MAX_LEVEL")
+
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
     actual fun deleteBuffer(buffer: GLBuffer) {
@@ -119,7 +126,7 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     }
 
     actual fun getError(): Int = ctx.getError()
-    actual fun createProgram(): GLProgram{
+    actual fun createProgram(): GLProgram {
         val p = ctx.createProgram()!!
         println("Created Program $p")
         return JSGLProgram(p)
@@ -232,8 +239,24 @@ actual class GL(val ctx: WebGL2RenderingContext) {
             matrix4fc.get(data, index * 16)
             matrix4fc.get(vv, index * 16)
         }
-//        ctx.uniformMatrix4fv(location.js, false, data)
         ctx.uniformMatrix4fv(location.js, false, vv.unsafeCast<Array<Float>>())
+    }
+
+    actual fun activeTexture(texture: Int) {
+        ctx.activeTexture(texture)
+    }
+
+    actual fun createTexture(): GLTexture =
+            JGLTexture(ctx.createTexture()!!)
+
+    actual fun deleteTexture(texture: GLTexture) {
+        texture as JGLTexture
+        ctx.deleteTexture(texture.js)
+    }
+
+    actual fun bindTexture(target: Int, texture: GLTexture?) {
+        texture as JGLTexture?
+        ctx.bindTexture(target, texture?.js)
     }
 }
 
@@ -242,3 +265,4 @@ private inline class JSVertexArray(val js: WebGLVertexArray) : GLVertexArray
 private inline class JSGLProgram(val js: WebGLProgram) : GLProgram
 private inline class JSGLShader(val js: WebGLShader) : GLShader
 private inline class JSGLUniformLocation(val js: WebGLUniformLocation) : GLUniformLocation
+private inline class JGLTexture(val js: WebGLTexture) : GLTexture

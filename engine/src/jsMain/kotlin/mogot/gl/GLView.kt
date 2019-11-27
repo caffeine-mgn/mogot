@@ -28,6 +28,8 @@ open class GLView : AbstractGLView() {
     private var oldLockMouse1 = false
 
     override fun draw() {
+        val time = window.performance.now().unsafeCast<Float>()
+        val dt = (time - lastFrameTime) / 1e+6f
         super.draw()
 
         if (oldLockMouse != lockMouse) {
@@ -48,14 +50,29 @@ open class GLView : AbstractGLView() {
                 renderContext.pointLights += it
             true
         }
+
+        while (!engine.frameListeners.isEmpty) {
+            engine.frameListeners.popLast().invoke()
+        }
+
         if (root != null) {
-            update(root!!, viewMatrix)
+//            update(root!!, viewMatrix)
+//            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
+            update(dt,root!!, camModel = viewMatrix, ortoModel = MATRIX4_ONE)
             renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
+
+            gl.ctx.disable(WebGLRenderingContext.DEPTH_TEST)
+            gl.ctx.disable(WebGLRenderingContext.CULL_FACE)
+
+            viewMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+            renderNode2D(root!!, viewMatrix, renderContext)
         }
 
 
         if (lockMouse)
             mousePosition.set(size.x / 2, size.y / 2)
+
+        lastFrameTime = time
     }
 
     override val mouseDown = EventValueDispatcher<Int>()
@@ -76,7 +93,6 @@ open class GLView : AbstractGLView() {
         canvas.addEventListener("mousedown", {
             it as MouseEvent
             canvas.focus()
-            println("mousedown  ${it.button}")
             mouseButtonsDown.add(it.button.unsafeCast<Int>())
             mouseDown.dispatch(it.button.toInt())
             it.preventDefault()
@@ -84,7 +100,6 @@ open class GLView : AbstractGLView() {
         canvas.addEventListener("mouseup", {
             it as MouseEvent
             canvas.focus()
-            println("mouseup  ${it.button}")
             mouseButtonsDown.remove(it.button.unsafeCast<Int>())
             mouseUp.dispatch(it.button.toInt())
             it.preventDefault()
@@ -151,17 +166,17 @@ open class GLView : AbstractGLView() {
     }
 
     private var lastFrameTime = window.performance.now().unsafeCast<Float>()
-    private fun update(node: Node, model: Matrix4fc) {
-        var pos = model
-        val time = window.performance.now().unsafeCast<Float>()
-        node.update((time - lastFrameTime) / 1e+6f)
-        lastFrameTime = time
-        if (node is Spatial) {
-            pos = node.apply(model)
+    private fun update(dt:Float,node: Node, camModel: Matrix4fc,ortoModel:Matrix4fc) {
+        node.update(dt)
+        val pos = when (node){
+            is Spatial->node.apply(camModel)
+            is Spatial2D->node.apply(ortoModel)
+            else->camModel
         }
 
+
         node.childs.forEach {
-            update(it, pos)
+            update(dt,it, camModel=pos,ortoModel = ortoModel)
         }
     }
 
@@ -175,6 +190,17 @@ open class GLView : AbstractGLView() {
 
         node.childs.forEach {
             renderNode3D(it, pos, projection, renderContext)
+        }
+    }
+
+    private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+        if (node is VisualInstance2D) {
+            node.render(node.matrix, projection, renderContext)
+        }
+
+
+        node.childs.forEach {
+            renderNode2D(it, projection, renderContext)
         }
     }
 }
