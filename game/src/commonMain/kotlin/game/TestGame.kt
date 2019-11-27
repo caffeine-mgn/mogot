@@ -73,9 +73,7 @@ class TestGame(val engine: Engine) {
         s.material=mat
 
         engine.waitFrame {
-            println("load texure...")
             val tex = engine.resources.createTexture2D("res/2.png")
-            println("Set texture...")
             mat.tex = tex
         }
     }

@@ -11,7 +11,6 @@ import kotlin.coroutines.suspendCoroutine
 actual class Resources actual constructor(private val engine: Engine) {
     actual suspend fun createTexture2D(path: String): Texture2D {
         val img = loadImage(path)
-        println("Try to create texture")
         return Texture2D(engine, img)
     }
 
@@ -29,14 +28,11 @@ suspend fun loadImage(path: String): Image {
     img.crossOrigin = ""
     img.width = 600
     img.height = 600
-    console.info("Loading image from $path")
     return suspendCoroutine {
         img.onload = { _ ->
-            console.info("image loaded")
             it.resumeWith(Result.success(img))
         }
         img.onerror = { message, url, line, col, errorObj ->
-            console.info("error load image")
             it.resumeWith(Result.failure(RuntimeException("Can't load image from path. $message")))
         }
         img.src = path

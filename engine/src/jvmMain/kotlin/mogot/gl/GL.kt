@@ -108,6 +108,9 @@ actual class GL(val gl: GL2) {
     actual val COMPILE_STATUS: Int
         get() = GL2.GL_COMPILE_STATUS
 
+    actual val TEXTURE_MAX_LEVEL: Int
+        get() = GL2.GL_TEXTURE_MAX_LEVEL
+
     actual fun deleteProgram(program: GLProgram) {
         program as JGLProgram
         gl.glDeleteProgram(program.id)
@@ -262,7 +265,6 @@ actual class GL(val gl: GL2) {
 
     actual val TEXTURE_2D: Int
         get() = GL2.GL_TEXTURE_2D
-
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {
