@@ -161,6 +161,10 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             true
         }
 
+        while (!engine.frameListeners.isEmpty) {
+            engine.frameListeners.popFirst().invoke()
+        }
+
         if (root != null) {
             update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
             renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
@@ -186,10 +190,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     private var lastFrameTime = System.nanoTime()
 
     private fun update(dt:Float,node: Node, camModel: Matrix4fc,ortoModel:Matrix4fc) {
-
-        val time = System.nanoTime()
-        node.update((time - lastFrameTime) / 1e+9f)
-        lastFrameTime = time
+        node.update(dt)
         val pos = when (node){
             is Spatial->node.apply(camModel)
             is Spatial2D->node.apply(ortoModel)
@@ -215,9 +216,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     }
 
     private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
-        //var pos = model
         if (node is VisualInstance2D) {
-            //pos = node.matrix
             node.render(node.matrix, projection, renderContext)
         }
 

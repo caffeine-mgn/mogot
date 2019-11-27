@@ -16,7 +16,6 @@ open class CSGBox(val engine: Engine) : CSGPrimitive() {
     }
 
     override fun onStart() {
-        println("on start!")
         super.onStart()
         rebuild()
     }

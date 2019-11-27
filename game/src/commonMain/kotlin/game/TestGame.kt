@@ -2,7 +2,6 @@ package game
 
 import mogot.*
 import mogot.math.*
-import pw.binom.io.use
 
 class TestGame(val engine: Engine) {
     val root = Node()
@@ -11,17 +10,16 @@ class TestGame(val engine: Engine) {
     init {
         camera.parent = root
 
-        val tex = engine.resources.createTexture2D("res/2.png")
-        val tex2 = tex// = engine.resources.createTexture2D("D:\\WORK\\mogot\\game\\res\\4.png")
+        val mat = SimpleMaterial(engine.gl).also {
+            it.tex = engine.resources.createEmptyTexture2D()
+        }
 
         val box = CSGBox(engine).apply {
             parent = root
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl).also {
-                it.tex = tex2
-            }
+            material = mat
         }
 
         CSGBox(engine).apply {
@@ -29,9 +27,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl).also {
-                it.tex = tex
-            }
+            material = mat
             position.set(7f, 5f, 5f)
         }
 
@@ -40,9 +36,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl).also {
-                it.tex = tex2
-            }
+            material = mat
             position.set(3f, 5f, 5f)
         }
 
@@ -51,9 +45,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl).also {
-                it.tex = tex2
-            }
+            material = mat
             position.set(5f, 7f, 5f)
         }
 
@@ -62,9 +54,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = SimpleMaterial(engine.gl).also {
-                it.tex = tex
-            }
+            material = mat
             position.set(5f, 3f, 5f)
         }
         camera.position.x = 5f
@@ -80,8 +70,11 @@ class TestGame(val engine: Engine) {
 
         root.addChild(s)
         s.size.set(100f, 100f)
-        s.material=SimpleMaterial(engine.gl).also {
-            it.tex = tex2
+        s.material=mat
+
+        engine.waitFrame {
+            val tex = engine.resources.createTexture2D("res/2.png")
+            mat.tex = tex
         }
     }
 }
