@@ -25,9 +25,6 @@ actual class Resources actual constructor(private val engine: Engine) {
 
 suspend fun loadImage(path: String): Image {
     val img = Image()
-    img.crossOrigin = ""
-    img.width = 600
-    img.height = 600
     return suspendCoroutine {
         img.onload = { _ ->
             it.resumeWith(Result.success(img))
