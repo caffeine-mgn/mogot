@@ -17,6 +17,28 @@ actual class Resources actual constructor(private val engine: Engine) {
 
     private val tasks = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
+    fun syncCreateTexture2D(path: String): Texture2D {
+        val file = File(path)
+        if (!file.isFile)
+            throw FileNotFoundException(path)
+        val image = FileInputStream(file).use {
+            val png = PNGDecoder(it)
+            val color = if (png.hasAlpha())
+                PNGDecoder.Format.RGBA
+            else
+                PNGDecoder.Format.RGB
+            val buf = ByteBuffer.allocateDirect(png.width * png.height * color.numComponents)
+            png.decode(buf, png.width * color.numComponents, color)
+            val colorType = if (png.hasAlpha())
+                SourceImage.Type.RGBA
+            else
+                SourceImage.Type.RGB
+            buf.flip2()
+            SourceImage(colorType, png.width, png.height, buf)
+        }
+        return Texture2D(engine, image)
+    }
+
     actual suspend fun createTexture2D(path: String): Texture2D {
         val file = File(path)
         if (!file.isFile)

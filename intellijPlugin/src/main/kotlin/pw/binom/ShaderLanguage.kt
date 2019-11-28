@@ -16,7 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.tree.IElementType
 import com.intellij.ui.JBSplitter
-import pw.binom.glsl.UniformEditor
+import pw.binom.glsl.uniformEditor.UniformEditor
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.FlowLayout
@@ -124,13 +124,13 @@ void main() {
 
 //        val panel = JPanel()
         val viewer = view
-        viewer.background = Color.RED
         val splitPane = JBSplitter()
 //        val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, viewer)
 //        splitPane.dividerLocation = document.getUserData(splitSize) ?: 150
         val splitPane2 = JBSplitter(true)
         splitPane2.firstComponent = viewer
-        splitPane2.secondComponent = UniformEditor(document, file)
+        val uniformEditor = UniformEditor(document, viewer, file)
+        splitPane2.secondComponent = uniformEditor
         splitPane2.splitterProportionKey = "SPLIT2"
         splitPane.firstComponent = myTextViewer.component//scrollPane
         splitPane.secondComponent = splitPane2
@@ -141,16 +141,19 @@ void main() {
             }
         })
 
+        viewer.addRenderListener {
+            uniformEditor.apply(viewer.engine)
+        }
+
+        viewer.addInitListener {
+            uniformEditor.reinit()
+        }
+
+
         viewer.setShader(VP, document.text)
         viewer.repaint()
-        val toolBar = JPanel()
-        toolBar.border = null
-        toolBar.layout = FlowLayout()
-        toolBar.add(FlatBtn("1").also { it.border = null })
-        toolBar.add(FlatBtn("2").also { it.border = null })
         val panel = JPanel()
         panel.layout = BorderLayout()
-        panel.add(toolBar, BorderLayout.PAGE_START)
         panel.add(splitPane, BorderLayout.CENTER)
         panel
     }

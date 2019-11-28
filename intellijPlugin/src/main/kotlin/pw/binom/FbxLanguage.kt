@@ -86,10 +86,6 @@ class FbxFileEditor(private val project: Project,
         FbxViewer(b.toByteArray())
     }
 
-    init {
-        component.background = Color.CYAN
-    }
-
     override fun getComponent(): JComponent = component
 
     override fun getPreferredFocusedComponent(): JComponent? = component
