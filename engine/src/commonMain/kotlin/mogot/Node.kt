@@ -1,9 +1,10 @@
 package mogot
 
 import mogot.math.Matrix4fc
+import pw.binom.io.Closeable
 
 
-open class Node {
+open class Node:Closeable {
     private var _parent: Node? = null
     private val _childs = ArrayList<Node>()
     val childs: List<Node>
@@ -22,6 +23,10 @@ open class Node {
         childs.forEach {
             it.free()
         }
+    }
+
+    override fun close() {
+        //NOP
     }
 
     var parent: Node?

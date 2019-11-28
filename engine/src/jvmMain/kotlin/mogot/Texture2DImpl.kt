@@ -3,13 +3,14 @@ package mogot
 import com.jogamp.opengl.GL2
 import mogot.gl.JGLTexture
 import mogot.gl.flip2
+import pw.binom.io.Closeable
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 
 
-actual class Texture2D(private val engine: Engine, image: SourceImage) : Resource(engine) {
+actual class Texture2D(private val engine: Engine, image: SourceImage) : Resource(engine), Closeable {
     actual val gl = engine.gl.createTexture()
     val width = image.width
     val height = image.height
@@ -34,5 +35,9 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
 
     override fun dispose() {
         engine.gl.deleteTexture(gl)
+    }
+
+    override fun close() {
+        dispose()
     }
 }
