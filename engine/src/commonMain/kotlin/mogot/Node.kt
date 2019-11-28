@@ -4,7 +4,7 @@ import mogot.math.Matrix4fc
 import pw.binom.io.Closeable
 
 
-open class Node:Closeable {
+open class Node : Closeable {
     private var _parent: Node? = null
     private val _childs = ArrayList<Node>()
     val childs: List<Node>
@@ -26,7 +26,9 @@ open class Node:Closeable {
     }
 
     override fun close() {
-        //NOP
+        childs.forEach {
+            it.close()
+        }
     }
 
     var parent: Node?
@@ -42,7 +44,7 @@ open class Node:Closeable {
         _childs.add(node)
     }
 
-    internal open fun update(delta:Float){
+    internal open fun update(delta: Float) {
         behaviour?.onUpdate(delta)
         childs.forEach {
             it.update(delta)
@@ -61,7 +63,7 @@ open class Node:Closeable {
 
     open fun apply(matrix: Matrix4fc): Matrix4fc = matrix
     open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-
+        //NOP
     }
 
     protected open fun onStart() {
