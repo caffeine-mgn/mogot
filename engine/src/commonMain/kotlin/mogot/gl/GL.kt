@@ -3,6 +3,7 @@ package mogot.gl
 import mogot.math.Matrix4fc
 
 expect class GL {
+    fun clear(mask:Int)
     fun createBuffer(): GLBuffer
     fun deleteBuffer(buffer: GLBuffer)
     fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int)
@@ -44,7 +45,7 @@ expect class GL {
     fun genFramebuffers(): Int
     fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long)
     fun texParameteri(target: Int, pname: Int, param: Int)
-    fun framebufferTexture2D(target: Int, attachmen: Int, textarget: Int, texture: Int, level: Int)
+    fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
     fun genRenderbuffers(): Int
     fun bindRenderbuffer(target: Int, renderbuffer: Int)
     fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
@@ -55,7 +56,26 @@ expect class GL {
     fun drawElements(mode: Int, count: Int, type: Int, offset: Int)
 
     fun getError(): Int
+    fun deleteBuffers(texture: GLTexture)
+    fun deleteBuffers(buffer: Int)
+    fun enable(depthTest: Int)
 
+    val CULL_FACE: Int
+    val DEPTH_TEST: Int
+    val GL_DEPTH_BUFFER_BIT: Int
+    val GL_COLOR_BUFFER_BIT: Int
+    val COLOR_BUFFER_BIT: Int
+    val FRAMEBUFFER_COMPLETE: Int
+    val DEPTH_STENCIL_ATTACHMENT: Int
+    val DEPTH24_STENCIL8: Int
+    val RENDERBUFFER: Int
+    val COLOR_ATTACHMENT0: Int
+    val FRAMEBUFFER: Int
+    val TEXTURE_MAG_FILTER: Int
+    val LINEAR: Int
+    val TEXTURE_MIN_FILTER: Int
+    val UNSIGNED_BYTE: Int
+    val RGB: Int
     val STATIC_DRAW: Int
     val DYNAMIC_DRAW: Int
     val STATIC_READ: Int

@@ -1,6 +1,7 @@
 package mogot.gl
 
 import com.jogamp.opengl.GL2
+import com.jogamp.opengl.GL3
 import mogot.math.Matrix4fc
 import mogot.math.get
 import java.nio.Buffer
@@ -263,8 +264,96 @@ actual class GL(val gl: GL2) {
         gl.glDeleteTextures(1, b)
     }
 
+    actual fun bindFramebuffer(target: Int, frameBuffer: Int){
+        gl.glBindBuffer(target, frameBuffer)
+    }
+    actual fun genFramebuffers(): Int{
+        val fbo = IntBuffer.allocate(1)
+        gl.glGenFramebuffers(1,fbo)
+        return fbo[0]
+    }
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long){
+        gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels)
+    }
+    actual fun texParameteri(target: Int, pname: Int, param: Int){
+        gl.glTexParameteri(target, pname, param)
+    }
+    actual fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int){
+        gl.glFramebufferTexture2D(target, attachment, textarget, (texture as JGLTexture).id, level)
+    }
+    actual fun genRenderbuffers(): Int{
+        val rbo = IntBuffer.allocate(1)
+        gl.glGenRenderbuffers(1,rbo)
+        return rbo[0]
+    }
+    actual fun bindRenderbuffer(target: Int, renderbuffer: Int){
+        gl.glBindRenderbuffer(target, renderbuffer)
+    }
+    actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int){
+        gl.glRenderbufferStorage(target, internalformat, width, height)
+    }
+    actual fun framebufferRenderbuffer(target:Int, attachment:Int, renderbuffertarget:Int, renderbuffer:Int){
+        gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer)
+    }
+    actual fun checkFramebufferStatus(target: Int):Int{
+        return gl.glCheckFramebufferStatus(target)
+    }
+
+    actual fun clear(mask:Int){
+        gl.glClear(mask)
+    }
+
     actual val TEXTURE_2D: Int
         get() = GL2.GL_TEXTURE_2D
+    actual val COLOR_ATTACHMENT0: Int
+        get() = GL2.GL_COLOR_ATTACHMENT0
+    actual val FRAMEBUFFER: Int
+        get() = GL2.GL_FRAMEBUFFER
+    actual val TEXTURE_MAG_FILTER: Int
+        get() = GL2.GL_TEXTURE_MAG_FILTER
+    actual val LINEAR: Int
+        get() = GL2.GL_LINEAR
+    actual val TEXTURE_MIN_FILTER: Int
+        get() = GL2.GL_TEXTURE_MIN_FILTER
+    actual val UNSIGNED_BYTE: Int
+        get() = GL2.GL_UNSIGNED_BYTE
+    actual val RGB: Int
+        get() = GL2.GL_RGB
+
+    actual fun deleteBuffers(texture: GLTexture) {
+        val buffer = IntBuffer.allocate(1)
+        buffer.put((texture as JGLTexture).id)
+        gl.glDeleteBuffers(1,buffer)
+    }
+
+    actual fun deleteBuffers(buffer: Int) {
+        val buffer_ = IntBuffer.allocate(1)
+        buffer_.put(buffer)
+        gl.glDeleteBuffers(1,buffer_)
+    }
+
+    actual val FRAMEBUFFER_COMPLETE: Int
+        get() = GL3.GL_FRAMEBUFFER_COMPLETE
+    actual val DEPTH_STENCIL_ATTACHMENT: Int
+        get() = GL2.GL_DEPTH_STENCIL_ATTACHMENT
+    actual val DEPTH24_STENCIL8: Int
+        get() = GL2.GL_DEPTH24_STENCIL8
+    actual val RENDERBUFFER: Int
+        get() = GL2.GL_RENDERBUFFER
+
+    actual fun enable(depthTest: Int) {
+    }
+
+    actual val CULL_FACE: Int
+        get() = GL2.GL_CULL_FACE
+    actual val DEPTH_TEST: Int
+        get() = GL2.GL_DEPTH_TEST
+    actual val GL_DEPTH_BUFFER_BIT: Int
+        get() = GL2.GL_DEPTH_BUFFER_BIT
+    actual val GL_COLOR_BUFFER_BIT: Int
+        get() = GL2.GL_COLOR_BUFFER_BIT
+    actual val COLOR_BUFFER_BIT: Int
+        get() = GL2.GL_COLOR_BUFFER_BIT
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {

@@ -18,6 +18,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override val mouseUp = EventValueDispatcher<Int>()
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
+    private val postEffectPipeline: PostEffectPipeline = PostEffectPipeline(gl,width,height)
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -147,9 +148,9 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             oldLockMouse = lockMouse
             mousePosition.set(size.x / 2, size.y / 2)
         }
-        gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
+        /*gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
         gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-        gl.gl.glEnable(GL2.GL_CULL_FACE)
+        gl.gl.glEnable(GL2.GL_CULL_FACE)*/
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
         camera?.applyMatrix(tempMatrix.identity())
@@ -166,6 +167,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         }
 
         if (root != null) {
+            p
             update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
             renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
@@ -182,6 +184,9 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             point.y += size.y / 2
 
             robot.mouseMove(point.x, point.y)
+        }
+        postEffectPipeline.use {
+
         }
         swapBuffers()
         lastFrameTime = time
