@@ -18,7 +18,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override val mouseUp = EventValueDispatcher<Int>()
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
-    private val postEffectPipeline: PostEffectPipeline = PostEffectPipeline(gl,width,height)
+    var postEffectPipeline: PostEffectPipeline? = null
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -166,18 +166,19 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             engine.frameListeners.popFirst().invoke()
         }
 
-        if (root != null) {
-            p
-            update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-            renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-            gl.gl.glDisable(GL2.GL_CULL_FACE)
+        postEffectPipeline?.use(renderContext) {
+            if (root != null) {
+                update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, tempMatrix, renderContext)
+                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+                gl.gl.glDisable(GL2.GL_CULL_FACE)
+
+                tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+                renderNode2D(root!!, tempMatrix, renderContext)
+            }
         }
-
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
@@ -185,9 +186,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
             robot.mouseMove(point.x, point.y)
         }
-        postEffectPipeline.use {
 
-        }
         swapBuffers()
         lastFrameTime = time
     }
@@ -233,9 +232,18 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
     protected open fun init() {
         _engine = Engine(this)
+        if(postEffectPipeline!=null){
+            postEffectPipeline?.close()
+            postEffectPipeline = null
+        }
+        postEffectPipeline =  PostEffectPipeline(gl,width,height)
+        postEffectPipeline?.init()
     }
 
     protected open fun dispose() {
-
+        if(postEffectPipeline!=null){
+            postEffectPipeline?.close()
+            postEffectPipeline = null
+        }
     }
 }

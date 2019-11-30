@@ -261,19 +261,21 @@ actual class GL(val gl: GL2) {
         texture as JGLTexture
         val b = IntBuffer.allocate(1)
         b.put(0, texture.id)
+        b.flip()
         gl.glDeleteTextures(1, b)
     }
 
     actual fun bindFramebuffer(target: Int, frameBuffer: Int){
-        gl.glBindBuffer(target, frameBuffer)
+        gl.glBindFramebuffer(target, frameBuffer)
     }
     actual fun genFramebuffers(): Int{
         val fbo = IntBuffer.allocate(1)
         gl.glGenFramebuffers(1,fbo)
         return fbo[0]
     }
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long){
-        gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels)
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?){
+        if(pixels!=null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!)
+        else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
     actual fun texParameteri(target: Int, pname: Int, param: Int){
         gl.glTexParameteri(target, pname, param)
@@ -323,12 +325,14 @@ actual class GL(val gl: GL2) {
     actual fun deleteBuffers(texture: GLTexture) {
         val buffer = IntBuffer.allocate(1)
         buffer.put((texture as JGLTexture).id)
+        buffer.flip()
         gl.glDeleteBuffers(1,buffer)
     }
 
     actual fun deleteBuffers(buffer: Int) {
         val buffer_ = IntBuffer.allocate(1)
         buffer_.put(buffer)
+        buffer_.flip()
         gl.glDeleteBuffers(1,buffer_)
     }
 
@@ -341,17 +345,20 @@ actual class GL(val gl: GL2) {
     actual val RENDERBUFFER: Int
         get() = GL2.GL_RENDERBUFFER
 
-    actual fun enable(depthTest: Int) {
+    actual fun enable(feature: Int) {
+        gl.glEnable(feature)
+    }
+
+    actual fun disable(feature: Int){
+        gl.glDisable(feature)
     }
 
     actual val CULL_FACE: Int
         get() = GL2.GL_CULL_FACE
     actual val DEPTH_TEST: Int
         get() = GL2.GL_DEPTH_TEST
-    actual val GL_DEPTH_BUFFER_BIT: Int
+    actual val DEPTH_BUFFER_BIT: Int
         get() = GL2.GL_DEPTH_BUFFER_BIT
-    actual val GL_COLOR_BUFFER_BIT: Int
-        get() = GL2.GL_COLOR_BUFFER_BIT
     actual val COLOR_BUFFER_BIT: Int
         get() = GL2.GL_COLOR_BUFFER_BIT
 }

@@ -43,7 +43,7 @@ expect class GL {
     fun getProgramInfoLog(program: GLProgram): String?
     fun bindFramebuffer(target: Int, frameBuffer: Int)
     fun genFramebuffers(): Int
-    fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long)
+    fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?)
     fun texParameteri(target: Int, pname: Int, param: Int)
     fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
     fun genRenderbuffers(): Int
@@ -58,12 +58,12 @@ expect class GL {
     fun getError(): Int
     fun deleteBuffers(texture: GLTexture)
     fun deleteBuffers(buffer: Int)
-    fun enable(depthTest: Int)
+    fun enable(feature: Int)
+    fun disable(feature: Int)
 
     val CULL_FACE: Int
     val DEPTH_TEST: Int
-    val GL_DEPTH_BUFFER_BIT: Int
-    val GL_COLOR_BUFFER_BIT: Int
+    val DEPTH_BUFFER_BIT: Int
     val COLOR_BUFFER_BIT: Int
     val FRAMEBUFFER_COMPLETE: Int
     val DEPTH_STENCIL_ATTACHMENT: Int
