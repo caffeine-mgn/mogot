@@ -361,6 +361,8 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_DEPTH_BUFFER_BIT
     actual val COLOR_BUFFER_BIT: Int
         get() = GL2.GL_COLOR_BUFFER_BIT
+    actual val NEAREST: Int
+        get() = GL2.GL_NEAREST
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {

@@ -61,6 +61,7 @@ expect class GL {
     fun enable(feature: Int)
     fun disable(feature: Int)
 
+    val NEAREST: Int
     val CULL_FACE: Int
     val DEPTH_TEST: Int
     val DEPTH_BUFFER_BIT: Int
