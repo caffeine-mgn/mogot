@@ -61,6 +61,18 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_ARRAY_BUFFER
     actual val ELEMENT_ARRAY_BUFFER: Int
         get() = GL2.GL_ELEMENT_ARRAY_BUFFER
+    actual val TEXTURE_2D: Int
+        get() = GL2.GL_TEXTURE_2D
+    actual val LINES: Int
+        get() = GL2.GL_LINES
+    actual val LINE_STRIP: Int
+        get() = GL2.GL_LINE_STRIP
+    actual val LINE_LOOP: Int
+        get() = GL2.GL_LINE_LOOP
+    actual val TRIANGLE_STRIP: Int
+        get() = GL2.GL_TRIANGLE_STRIP
+    actual val TRIANGLE_FAN: Int
+        get() = GL2.GL_TRIANGLE_FAN
 
     actual fun createVertexArray(): GLVertexArray {
         val v = IntArray(1)
@@ -262,9 +274,6 @@ actual class GL(val gl: GL2) {
         b.put(0, texture.id)
         gl.glDeleteTextures(1, b)
     }
-
-    actual val TEXTURE_2D: Int
-        get() = GL2.GL_TEXTURE_2D
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {

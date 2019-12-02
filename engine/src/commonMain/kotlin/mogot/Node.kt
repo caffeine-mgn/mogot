@@ -5,6 +5,7 @@ import pw.binom.io.Closeable
 
 
 open class Node : Closeable {
+    var id: String? = null
     private var _parent: Node? = null
     private val _childs = ArrayList<Node>()
     val childs: List<Node>
@@ -58,8 +59,6 @@ open class Node : Closeable {
 
     fun getNode(name: String) =
             childs.find { it.name == name } ?: TODO("Can't find node with name \"$name\"")
-
-    var visible: Boolean = false
 
     open fun apply(matrix: Matrix4fc): Matrix4fc = matrix
     open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {

@@ -114,6 +114,7 @@ void main() {
         val file = PsiManager.getInstance(project).findFile(sourceFile)!!
 //        val file = PsiFileFactory.getInstance(project).createFileFromText(ShaderLanguage, sourceFile.name)
         val document = FileDocumentManager.getInstance().getDocument(sourceFile)!!
+
         val language = ShaderLanguage//Language.findLanguageByID("HTML");
         val fileType = language.associatedFileType
         val myTextViewer = EditorFactory.getInstance().createEditor(document, project, sourceFile, false) as EditorImpl

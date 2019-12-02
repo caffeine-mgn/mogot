@@ -72,6 +72,16 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.TEXTURE_2D
     actual val TEXTURE_MAX_LEVEL: Int
         get() = js("WebGL2RenderingContext.TEXTURE_MAX_LEVEL")
+    actual val LINES: Int
+        get() = WebGLRenderingContext.LINES
+    actual val LINE_STRIP: Int
+        get() = WebGLRenderingContext.LINE_STRIP
+    actual val LINE_LOOP: Int
+        get() = WebGLRenderingContext.LINE_LOOP
+    actual val TRIANGLE_STRIP: Int
+        get() = WebGLRenderingContext.TRIANGLE_STRIP
+    actual val TRIANGLE_FAN: Int
+        get() = WebGLRenderingContext.TRIANGLE_FAN
 
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 

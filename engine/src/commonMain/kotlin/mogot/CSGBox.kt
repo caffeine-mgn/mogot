@@ -4,9 +4,9 @@ import mogot.math.Matrix4fc
 
 
 open class CSGBox(val engine: Engine) : CSGPrimitive() {
-    var width: Float = 0f
-    var height: Float = 0f
-    var depth: Float = 0f
+    var width: Float = 1f
+    var height: Float = 1f
+    var depth: Float = 1f
     private var geomNode3D2: Geom3D2? = null
     var material: Material? = null
 

@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBPanel
 import mogot.Engine
 import mogot.gl.Shader
-import org.joml.Vector4f
+import mogot.math.Vector4f
 import pw.binom.FlexLayout
 import pw.binom.ShaderEditViewer
 import pw.binom.appendTo

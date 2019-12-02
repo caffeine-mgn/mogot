@@ -1,9 +1,6 @@
 package mogot.math
 
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 /*
 expect interface Quaternionfc{
@@ -26,12 +23,12 @@ interface Quaternionfc {
     val w: Float
 
     fun rotateZYX(angleZ: Float, angleY: Float, angleX: Float, dest: Quaternionf): Quaternionf {
-        val sx = sin(angleX * 0.5).toFloat()
-        val cx = cosFromSin(sx.toDouble(), angleX * 0.5).toFloat()
-        val sy = sin(angleY * 0.5).toFloat()
-        val cy = cosFromSin(sy.toDouble(), angleY * 0.5).toFloat()
-        val sz = sin(angleZ * 0.5).toFloat()
-        val cz = cosFromSin(sz.toDouble(), angleZ * 0.5).toFloat()
+        val sx = sin(angleX * 0.5f)
+        val cx = cosFromSin(sx, angleX * 0.5f)
+        val sy = sin(angleY * 0.5f)
+        val cy = cosFromSin(sy, angleY * 0.5f)
+        val sz = sin(angleZ * 0.5f)
+        val cz = cosFromSin(sz, angleZ * 0.5f)
         val cycz = cy * cz
         val sysz = sy * sz
         val sycz = sy * cz
@@ -116,12 +113,12 @@ interface Quaternionfc {
     }
 
     fun rotateXYZ(angleX: Float, angleY: Float, angleZ: Float, dest: Quaternionf): Quaternionf {
-        val sx = sin(angleX * 0.5).toFloat()
-        val cx = cosFromSin(sx.toDouble(), angleX * 0.5).toFloat()
-        val sy = sin(angleY * 0.5).toFloat()
-        val cy = cosFromSin(sy.toDouble(), angleY * 0.5).toFloat()
-        val sz = sin(angleZ * 0.5).toFloat()
-        val cz = cosFromSin(sz.toDouble(), angleZ * 0.5).toFloat()
+        val sx = sin(angleX * 0.5f)
+        val cx = cosFromSin(sx, angleX * 0.5f)
+        val sy = sin(angleY * 0.5f)
+        val cy = cosFromSin(sy, angleY * 0.5f)
+        val sz = sin(angleZ * 0.5f)
+        val cz = cosFromSin(sz, angleZ * 0.5f)
         val cycz = cy * cz
         val sysz = sy * sz
         val sycz = sy * cz
@@ -151,6 +148,13 @@ interface Quaternionfc {
                 (w * rz + x * ry - y * rx + z * rw),
                 (w * rw - x * rx - y * ry - z * rz))
         return dest
+    }
+
+    fun getEulerAnglesXYZ(eulerAngles: Vector3f): Vector3f {
+        eulerAngles.x = atan2(2.0f * (x * w - y * z), 1.0f - 2.0f * (x * x + y * y))
+        eulerAngles.y = asin(2.0f * (x * z + y * w))
+        eulerAngles.z = atan2(2.0f * (z * w - x * y), 1.0f - 2.0f * (y * y + z * z))
+        return eulerAngles
     }
 }
 

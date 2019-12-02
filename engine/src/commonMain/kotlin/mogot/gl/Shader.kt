@@ -75,7 +75,7 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
         return true
     }
 
-    fun uniform(name: String, vector: Vector4fc) = uniform(name, vector.x(), vector.y(), vector.z(), vector.w())
+    fun uniform(name: String, vector: Vector4fc) = uniform(name, vector.x, vector.y, vector.z, vector.w)
 
     fun uniform(name: String, value: Float): Boolean {
         val num = gl.getUniformLocation(id, name) ?: return false

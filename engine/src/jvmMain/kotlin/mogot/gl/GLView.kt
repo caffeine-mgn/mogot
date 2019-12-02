@@ -28,6 +28,9 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         val cursorImg = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
         toolkit.createCustomCursor(cursorImg, Point(0, 0), "blank cursor")
     }
+
+    var updateOnEvent = false
+
     override var cursorVisible: Boolean
         get() = cursor == defCursor
         set(value) {
@@ -56,15 +59,35 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     val backgroundColor
         get() = renderContext.sceneColor
 
-    private object renderContext : RenderContext {
+    protected object renderContext : RenderContext {
         override val pointLights = ArrayList<PointLight>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
+    }
+
+    protected open fun mouseDown(e: MouseEvent) {
+        mouseButtonsDown.add(e.button)
+        mouseDown.dispatch(e.button)
+        if (updateOnEvent) {
+            requestFocus()
+            repaint()
+        }
+    }
+
+    protected open fun mouseUp(e: MouseEvent) {
+        mouseButtonsDown.remove(e.button)
+        mouseUp.dispatch(e.button)
+        if (updateOnEvent) {
+            requestFocus()
+            repaint()
+        }
     }
 
     init {
         addGLEventListener(object : GLEventListener {
             override fun reshape(drawable: GLAutoDrawable, x: Int, y: Int, width: Int, height: Int) {
                 setup(width, height)
+                if (updateOnEvent)
+                    repaint()
             }
 
             override fun display(drawable: GLAutoDrawable) {
@@ -83,8 +106,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
         addMouseListener(object : MouseListener {
             override fun mouseReleased(e: MouseEvent) {
-                mouseButtonsDown.remove(e.button)
-                mouseUp.dispatch(e.button)
+                mouseUp(e)
             }
 
             override fun mouseEntered(e: MouseEvent?) {
@@ -98,8 +120,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             }
 
             override fun mousePressed(e: MouseEvent) {
-                mouseButtonsDown.add(e.button)
-                mouseDown.dispatch(e.button)
+                mouseDown(e)
             }
         })
 
@@ -112,6 +133,10 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             override fun mouseDragged(e: MouseEvent) {
                 mousePosition.x = e.x
                 mousePosition.y = e.y
+                if (updateOnEvent) {
+                    requestFocus()
+                    repaint()
+                }
             }
         })
 
@@ -120,25 +145,44 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             }
 
             override fun keyPressed(e: KeyEvent) {
-                keyDown.add(e.keyCode)
+                keyDown(e)
             }
 
             override fun keyReleased(e: KeyEvent) {
-                keyDown.remove(e.keyCode)
+                keyUp(e)
             }
 
         })
+    }
+
+    protected open fun keyDown(e: KeyEvent) {
+        keyDown.add(e.keyCode)
+        if (updateOnEvent)
+            repaint()
+    }
+
+    protected open fun keyUp(e: KeyEvent) {
+        keyDown.remove(e.keyCode)
+        if (updateOnEvent)
+            repaint()
     }
 
     protected open fun setup(width: Int, height: Int) {
         gl.gl.glViewport(x, y, width, height)
         camera?.resize(width, height)
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
+        gl.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.gl.glEnable(GL2.GL_BLEND)
         repaint()
     }
 
     private val tempMatrix = Matrix4f()
     private var oldLockMouse = false
+
+    protected open fun render2(dt:Float){
+
+    }
+
     protected open fun render() {
         val time = System.nanoTime()
         val dt = (time - lastFrameTime) / 1e+9f
@@ -147,6 +191,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             oldLockMouse = lockMouse
             mousePosition.set(size.x / 2, size.y / 2)
         }
+        render2(dt)
         gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
         gl.gl.glEnable(GL2.GL_DEPTH_TEST)
         gl.gl.glEnable(GL2.GL_CULL_FACE)
@@ -166,7 +211,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         }
 
         if (root != null) {
-            update(dt,root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
             renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
             gl.gl.glDisable(GL2.GL_DEPTH_TEST)
@@ -175,7 +220,6 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
             tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
             renderNode2D(root!!, tempMatrix, renderContext)
         }
-
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
@@ -189,17 +233,17 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
     private var lastFrameTime = System.nanoTime()
 
-    private fun update(dt:Float,node: Node, camModel: Matrix4fc,ortoModel:Matrix4fc) {
+    private fun update(dt: Float, node: Node, camModel: Matrix4fc, ortoModel: Matrix4fc) {
         node.update(dt)
-        val pos = when (node){
-            is Spatial->node.apply(camModel)
-            is Spatial2D->node.apply(ortoModel)
-            else->camModel
+        val pos = when (node) {
+            is Spatial -> node.apply(camModel)
+            is Spatial2D -> node.apply(ortoModel)
+            else -> camModel
         }
 
 
         node.childs.forEach {
-            update(dt,it, camModel=pos,ortoModel = ortoModel)
+            update(dt, it, camModel = pos, ortoModel = ortoModel)
         }
     }
 

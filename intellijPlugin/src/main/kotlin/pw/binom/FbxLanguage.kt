@@ -37,13 +37,6 @@ object FlxFileType : FileType {
     override fun getDescription(): String = "FBX File"
 }
 
-class FbxFileTypeFactory : FileTypeFactory() {
-    override fun createFileTypes(consumer: FileTypeConsumer) {
-        consumer.consume(FlxFileType)
-    }
-}
-
-
 class FbxFileEditorProvider : FileEditorProvider {
     override fun getEditorTypeId(): String = "FbxEditor"
 

@@ -9,6 +9,8 @@ class Sprite(val engine: Engine) : VisualInstance2D() {
     var material: Material? = null
     private val oldSize = Vector2f(size)
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        if (!visible)
+            return
         if (size != oldSize) {
             geom.setSize(size)
             oldSize.set(size)

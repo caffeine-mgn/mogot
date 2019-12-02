@@ -1,4 +1,4 @@
-package game
+package pw.binom.sceneEditor
 
 import mogot.RenderContext
 import mogot.Texture2D
@@ -14,7 +14,7 @@ internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
     }
 
     //    var image: Image? = null
-    val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
+    val diffuseColor = Vector4fProperty(1f, 1f, 1f, 1f)
     override val shader: Shader = Shader(gl,
             vertex = """#version 300 es
 
@@ -133,7 +133,9 @@ void main() {
         if (tex != null) {
             gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
         }
-        shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
+        if (diffuseColor.resetChangeFlag()) {
+            shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
+        }
     }
 
     override fun unuse() {

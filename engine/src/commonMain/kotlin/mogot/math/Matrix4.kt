@@ -6,6 +6,7 @@ package mogot.math
 import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 interface Matrix4fc {
     fun getTranslation(dest: Vector3f): Vector3f
@@ -140,6 +141,471 @@ interface Matrix4fc {
         else
             ortho2DGeneric(left, right, bottom, top, dest)
     }
+
+    fun mul(right: Matrix4fc, dest: Matrix4f): Matrix4f {
+        if (properties and PROPERTY_IDENTITY != 0)
+            return dest.set(right)
+        else
+            if (right.properties and PROPERTY_IDENTITY != 0)
+                return dest.set(this)
+            else
+                if (properties and PROPERTY_TRANSLATION != 0 && right.properties and PROPERTY_AFFINE != 0)
+                    return mulTranslationAffine(right, dest)
+                else
+                    if (properties and PROPERTY_AFFINE != 0 && right.properties and PROPERTY_AFFINE != 0)
+                        return mulAffine(right, dest)
+                    else
+                        if (properties and PROPERTY_PERSPECTIVE != 0 && right.properties and PROPERTY_AFFINE != 0)
+                            return mulPerspectiveAffine(right, dest)
+                        else
+                            if (right.properties and PROPERTY_AFFINE != 0)
+                                return mulAffineR(right, dest)
+        return mulGeneric(right, dest)
+    }
+
+    fun invert(dest: Matrix4f): Matrix4f {
+        if (properties and PROPERTY_IDENTITY != 0) {
+            return dest.identity()
+        } else if (properties and PROPERTY_TRANSLATION != 0)
+            return invertTranslation(dest)
+        else
+            if (properties and PROPERTY_ORTHONORMAL != 0)
+                return invertOrthonormal(dest)
+            else
+                if (properties and PROPERTY_AFFINE != 0)
+                    return invertAffine(dest)
+                else
+                    if (properties and PROPERTY_PERSPECTIVE != 0)
+                        return invertPerspective(dest)
+        return invertGeneric(dest)
+    }
+
+    fun getScale(dest: Vector3f): Vector3f {
+        dest.x = sqrt(m00 * m00 + m01 * m01 + (m02 * m02))
+        dest.y = sqrt(m10 * m10 + m11 * m11 + (m12 * m12))
+        dest.z = sqrt(m20 * m20 + m21 * m21 + (m22 * m22))
+        return dest
+    }
+}
+
+private fun Matrix4fc.invertGeneric(dest: Matrix4f): Matrix4f {
+    val a: Float = m00 * m11 - m01 * m10
+    val b: Float = m00 * m12 - m02 * m10
+    val c: Float = m00 * m13 - m03 * m10
+    val d: Float = m01 * m12 - m02 * m11
+    val e: Float = m01 * m13 - m03 * m11
+    val f: Float = m02 * m13 - m03 * m12
+    val g: Float = m20 * m31 - m21 * m30
+    val h: Float = m20 * m32 - m22 * m30
+    val i: Float = m20 * m33 - m23 * m30
+    val j: Float = m21 * m32 - m22 * m31
+    val k: Float = m21 * m33 - m23 * m31
+    val l: Float = m22 * m33 - m23 * m32
+    var det = a * l - b * k + c * j + d * i - e * h + f * g
+    val nm00: Float
+    val nm01: Float
+    val nm02: Float
+    val nm03: Float
+    val nm10: Float
+    val nm11: Float
+    val nm12: Float
+    val nm13: Float
+    val nm20: Float
+    val nm21: Float
+    val nm22: Float
+    val nm23: Float
+    val nm30: Float
+    val nm31: Float
+    val nm32: Float
+    val nm33: Float
+    det = 1.0f / det
+    nm00 = (m11 * l - m12 * k + m13 * j) * det
+    nm01 = (-m01 * l + m02 * k - m03 * j) * det
+    nm02 = (m31 * f - m32 * e + m33 * d) * det
+    nm03 = (-m21 * f + m22 * e - m23 * d) * det
+    nm10 = (-m10 * l + m12 * i - m13 * h) * det
+    nm11 = (m00 * l - m02 * i + m03 * h) * det
+    nm12 = (-m30 * f + m32 * c - m33 * b) * det
+    nm13 = (m20 * f - m22 * c + m23 * b) * det
+    nm20 = (m10 * k - m11 * i + m13 * g) * det
+    nm21 = (-m00 * k + m01 * i - m03 * g) * det
+    nm22 = (m30 * e - m31 * c + m33 * a) * det
+    nm23 = (-m20 * e + m21 * c - m23 * a) * det
+    nm30 = (-m10 * j + m11 * h - m12 * g) * det
+    nm31 = (m00 * j - m01 * h + m02 * g) * det
+    nm32 = (-m30 * d + m31 * b - m32 * a) * det
+    nm33 = (m20 * d - m21 * b + m22 * a) * det
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (0)
+    return dest
+}
+
+private fun Matrix4fc.invertPerspective(dest: Matrix4f): Matrix4f {
+    val a: Float = 1.0f / (m00 * m11)
+    val l: Float = -1.0f / (m23 * m32)
+    dest.m00 = m11 * a
+    dest.m01 = 0f
+    dest.m02 = 0f
+    dest.m03 = 0f
+    dest.m10 = 0f
+    dest.m11 = m00 * a
+    dest.m12 = 0f
+    dest.m13 = 0f
+    dest.m20 = 0f
+    dest.m21 = 0f
+    dest.m22 = 0f
+    dest.m23 = -m23 * l
+    dest.m30 = 0f
+    dest.m31 = 0f
+    dest.m32 = -m32 * l
+    dest.m33 = m22 * l
+    dest.properties = (0)
+    return dest
+}
+
+private fun Matrix4fc.invertPerspectiveView(view: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val a: Float = 1.0f / (m00 * m11)
+    val l: Float = -1.0f / (m23 * m32)
+    val pm00: Float = m11 * a
+    val pm11: Float = m00 * a
+    val pm23: Float = -m23 * l
+    val pm32: Float = -m32 * l
+    val pm33: Float = m22 * l
+    val vm30: Float = -view.m00 * view.m30 - view.m01 * view.m31 - view.m02 * view.m32
+    val vm31: Float = -view.m10 * view.m30 - view.m11 * view.m31 - view.m12 * view.m32
+    val vm32: Float = -view.m20 * view.m30 - view.m21 * view.m31 - view.m22 * view.m32
+    val nm00: Float = view.m00 * pm00
+    val nm01: Float = view.m10 * pm00
+    val nm02: Float = view.m20 * pm00
+    val nm10: Float = view.m01 * pm11
+    val nm11: Float = view.m11 * pm11
+    val nm12: Float = view.m21 * pm11
+    val nm20 = vm30 * pm23
+    val nm21 = vm31 * pm23
+    val nm22 = vm32 * pm23
+    val nm30: Float = view.m02 * pm32 + vm30 * pm33
+    val nm31: Float = view.m12 * pm32 + vm31 * pm33
+    val nm32: Float = view.m22 * pm32 + vm32 * pm33
+    dest.m00 = nm00
+    dest.m01 = nm01
+    dest.m02 = nm02
+    dest.m03 = 0.0f
+    dest.m10 = nm10
+    dest.m11 = nm11
+    dest.m12 = nm12
+    dest.m13 = 0.0f
+    dest.m20 = nm20
+    dest.m21 = nm21
+    dest.m22 = nm22
+    dest.m23 = pm23
+    dest.m30 = nm30
+    dest.m31 = nm31
+    dest.m32 = nm32
+    dest.m33 = pm33
+    dest.properties = 0
+    return dest
+}
+
+private fun Matrix4fc.invertAffine(dest: Matrix4f): Matrix4f {
+    val m11m00: Float = m00 * m11
+    val m10m01: Float = m01 * m10
+    val m10m02: Float = m02 * m10
+    val m12m00: Float = m00 * m12
+    val m12m01: Float = m01 * m12
+    val m11m02: Float = m02 * m11
+    val det: Float = (m11m00 - m10m01) * m22 + (m10m02 - m12m00) * m21 + (m12m01 - m11m02) * m20
+    val s = 1.0f / det
+    val nm00: Float
+    val nm01: Float
+    val nm02: Float
+    val nm10: Float
+    val nm11: Float
+    val nm12: Float
+    val nm20: Float
+    val nm21: Float
+    val nm22: Float
+    val nm30: Float
+    val nm31: Float
+    val nm32: Float
+    val m10m22: Float = m10 * m22
+    val m10m21: Float = m10 * m21
+    val m11m22: Float = m11 * m22
+    val m11m20: Float = m11 * m20
+    val m12m21: Float = m12 * m21
+    val m12m20: Float = m12 * m20
+    val m20m02: Float = m20 * m02
+    val m20m01: Float = m20 * m01
+    val m21m02: Float = m21 * m02
+    val m21m00: Float = m21 * m00
+    val m22m01: Float = m22 * m01
+    val m22m00: Float = m22 * m00
+    nm00 = (m11m22 - m12m21) * s
+    nm01 = (m21m02 - m22m01) * s
+    nm02 = (m12m01 - m11m02) * s
+    nm10 = (m12m20 - m10m22) * s
+    nm11 = (m22m00 - m20m02) * s
+    nm12 = (m10m02 - m12m00) * s
+    nm20 = (m10m21 - m11m20) * s
+    nm21 = (m20m01 - m21m00) * s
+    nm22 = (m11m00 - m10m01) * s
+    nm30 = (m10m22 * m31 - m10m21 * m32 + m11m20 * m32 - m11m22 * m30 + m12m21 * m30 - m12m20 * m31) * s
+    nm31 = (m20m02 * m31 - m20m01 * m32 + m21m00 * m32 - m21m02 * m30 + m22m01 * m30 - m22m00 * m31) * s
+    nm32 = (m11m02 * m30 - m12m01 * m30 + m12m00 * m31 - m10m02 * m31 + m10m01 * m32 - m11m00 * m32) * s
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (0.0f)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (0.0f)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (0.0f)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (1.0f)
+    dest.properties = (PROPERTY_AFFINE.toInt())
+    return dest
+}
+
+private fun Matrix4fc.invertOrthonormal(dest: Matrix4f): Matrix4f {
+    val nm30: Float = -(m00 * m30 + m01 * m31 + m02 * m32)
+    val nm31: Float = -(m10 * m30 + m11 * m31 + m12 * m32)
+    val nm32: Float = -(m20 * m30 + m21 * m31 + m22 * m32)
+    val m01: Float = this.m01
+    val m02: Float = this.m02
+    val m12: Float = this.m12
+    dest.m00 = (m00)
+    dest.m01 = (m10)
+    dest.m02 = (m20)
+    dest.m03 = (0.0f)
+    dest.m10 = (m01)
+    dest.m11 = (m11)
+    dest.m12 = (m21)
+    dest.m13 = (0.0f)
+    dest.m20 = (m02)
+    dest.m21 = (m12)
+    dest.m22 = (m22)
+    dest.m23 = (0.0f)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (1.0f)
+    dest.properties = (PROPERTY_AFFINE or PROPERTY_ORTHONORMAL)
+    return dest
+}
+
+private fun Matrix4fc.invertTranslation(dest: Matrix4f): Matrix4f {
+    if (dest !== this)
+        dest.set(this)
+    dest.m30 = -m30
+    dest.m31 = -m31
+    dest.m32 = -m32
+    dest.properties = (PROPERTY_AFFINE or PROPERTY_TRANSLATION or PROPERTY_ORTHONORMAL)
+    return dest
+}
+
+private fun Matrix4fc.mulGeneric(right: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val nm00: Float = m00 * right.m00 + m10 * right.m01 + m20 * right.m02 + m30 * right.m03
+    val nm01: Float = m01 * right.m00 + m11 * right.m01 + m21 * right.m02 + m31 * right.m03
+    val nm02: Float = m02 * right.m00 + m12 * right.m01 + m22 * right.m02 + m32 * right.m03
+    val nm03: Float = m03 * right.m00 + m13 * right.m01 + m23 * right.m02 + m33 * right.m03
+    val nm10: Float = m00 * right.m10 + m10 * right.m11 + m20 * right.m12 + m30 * right.m13
+    val nm11: Float = m01 * right.m10 + m11 * right.m11 + m21 * right.m12 + m31 * right.m13
+    val nm12: Float = m02 * right.m10 + m12 * right.m11 + m22 * right.m12 + m32 * right.m13
+    val nm13: Float = m03 * right.m10 + m13 * right.m11 + m23 * right.m12 + m33 * right.m13
+    val nm20: Float = m00 * right.m20 + m10 * right.m21 + m20 * right.m22 + m30 * right.m23
+    val nm21: Float = m01 * right.m20 + m11 * right.m21 + m21 * right.m22 + m31 * right.m23
+    val nm22: Float = m02 * right.m20 + m12 * right.m21 + m22 * right.m22 + m32 * right.m23
+    val nm23: Float = m03 * right.m20 + m13 * right.m21 + m23 * right.m22 + m33 * right.m23
+    val nm30: Float = m00 * right.m30 + m10 * right.m31 + m20 * right.m32 + m30 * right.m33
+    val nm31: Float = m01 * right.m30 + m11 * right.m31 + m21 * right.m32 + m31 * right.m33
+    val nm32: Float = m02 * right.m30 + m12 * right.m31 + m22 * right.m32 + m32 * right.m33
+    val nm33: Float = m03 * right.m30 + m13 * right.m31 + m23 * right.m32 + m33 * right.m33
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (0)
+    return dest
+}
+
+fun Matrix4fc.mulAffineR(right: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val nm00: Float = m00 * right.m00 + m10 * right.m01 + m20 * right.m02
+    val nm01: Float = m01 * right.m00 + m11 * right.m01 + m21 * right.m02
+    val nm02: Float = m02 * right.m00 + m12 * right.m01 + m22 * right.m02
+    val nm03: Float = m03 * right.m00 + m13 * right.m01 + m23 * right.m02
+    val nm10: Float = m00 * right.m10 + m10 * right.m11 + m20 * right.m12
+    val nm11: Float = m01 * right.m10 + m11 * right.m11 + m21 * right.m12
+    val nm12: Float = m02 * right.m10 + m12 * right.m11 + m22 * right.m12
+    val nm13: Float = m03 * right.m10 + m13 * right.m11 + m23 * right.m12
+    val nm20: Float = m00 * right.m20 + m10 * right.m21 + m20 * right.m22
+    val nm21: Float = m01 * right.m20 + m11 * right.m21 + m21 * right.m22
+    val nm22: Float = m02 * right.m20 + m12 * right.m21 + m22 * right.m22
+    val nm23: Float = m03 * right.m20 + m13 * right.m21 + m23 * right.m22
+    val nm30: Float = m00 * right.m30 + m10 * right.m31 + m20 * right.m32 + m30
+    val nm31: Float = m01 * right.m30 + m11 * right.m31 + m21 * right.m32 + m31
+    val nm32: Float = m02 * right.m30 + m12 * right.m31 + m22 * right.m32 + m32
+    val nm33: Float = m03 * right.m30 + m13 * right.m31 + m23 * right.m32 + m33
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (properties and (PROPERTY_IDENTITY or PROPERTY_PERSPECTIVE or PROPERTY_TRANSLATION or PROPERTY_ORTHONORMAL).inv())
+    return dest
+}
+
+private fun Matrix4fc.mulPerspectiveAffine(view: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val nm00: Float = m00 * view.m00
+    val nm01: Float = m11 * view.m01
+    val nm02: Float = m22 * view.m02
+    val nm03: Float = m23 * view.m02
+    val nm10: Float = m00 * view.m10
+    val nm11: Float = m11 * view.m11
+    val nm12: Float = m22 * view.m12
+    val nm13: Float = m23 * view.m12
+    val nm20: Float = m00 * view.m20
+    val nm21: Float = m11 * view.m21
+    val nm22: Float = m22 * view.m22
+    val nm23: Float = m23 * view.m22
+    val nm30: Float = m00 * view.m30
+    val nm31: Float = m11 * view.m31
+    val nm32: Float = m22 * view.m32 + m32
+    val nm33: Float = m23 * view.m32
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (0)
+    return dest
+}
+
+private fun Matrix4fc.mulAffine(right: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val nm00: Float = m00 * right.m00 + m10 * right.m01 + m20 * right.m02
+    val nm01: Float = m01 * right.m00 + m11 * right.m01 + m21 * right.m02
+    val nm02: Float = m02 * right.m00 + m12 * right.m01 + m22 * right.m02
+    val nm03: Float = m03
+    val nm10: Float = m00 * right.m10 + m10 * right.m11 + m20 * right.m12
+    val nm11: Float = m01 * right.m10 + m11 * right.m11 + m21 * right.m12
+    val nm12: Float = m02 * right.m10 + m12 * right.m11 + m22 * right.m12
+    val nm13: Float = m13
+    val nm20: Float = m00 * right.m20 + m10 * right.m21 + m20 * right.m22
+    val nm21: Float = m01 * right.m20 + m11 * right.m21 + m21 * right.m22
+    val nm22: Float = m02 * right.m20 + m12 * right.m21 + m22 * right.m22
+    val nm23: Float = m23
+    val nm30: Float = m00 * right.m30 + m10 * right.m31 + m20 * right.m32 + m30
+    val nm31: Float = m01 * right.m30 + m11 * right.m31 + m21 * right.m32 + m31
+    val nm32: Float = m02 * right.m30 + m12 * right.m31 + m22 * right.m32 + m32
+    val nm33: Float = m33
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (PROPERTY_AFFINE or (this.properties and right.properties and PROPERTY_ORTHONORMAL))
+    return dest
+}
+
+private fun Matrix4fc.mulTranslationAffine(right: Matrix4fc, dest: Matrix4f): Matrix4f {
+    val nm00: Float = right.m00
+    val nm01: Float = right.m01
+    val nm02: Float = right.m02
+    val nm03: Float = m03
+    val nm10: Float = right.m10
+    val nm11: Float = right.m11
+    val nm12: Float = right.m12
+    val nm13: Float = m13
+    val nm20: Float = right.m20
+    val nm21: Float = right.m21
+    val nm22: Float = right.m22
+    val nm23: Float = m23
+    val nm30: Float = right.m30 + m30
+    val nm31: Float = right.m31 + m31
+    val nm32: Float = right.m32 + m32
+    val nm33: Float = m33
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (PROPERTY_AFFINE or (right.properties and PROPERTY_ORTHONORMAL))
+    return dest
 }
 
 private fun Matrix4fc.ortho2DGeneric(left: Float, right: Float, bottom: Float, top: Float, dest: Matrix4f): Matrix4f { // calculate right matrix elements
@@ -194,6 +660,8 @@ class Matrix4f : Matrix4fc {
     override var m31 = 0f
     override var m32 = 0f
     override var m33 = 1f
+
+    fun invert(): Matrix4f = invert(this)
 
     fun rotateZ(ang: Float): Matrix4f = rotateZ(ang, this)
 
@@ -344,8 +812,8 @@ class Matrix4f : Matrix4fc {
     }
 
     fun rotateAffine(ang: Float, x: Float, y: Float, z: Float, dest: Matrix4f): Matrix4f {
-        val s = kotlin.math.sin(ang.toDouble()) as Float
-        val c = cosFromSin(s.toDouble(), ang.toDouble()) as Float
+        val s = kotlin.math.sin(ang)
+        val c = cosFromSin(s, ang)
         val C = 1.0f - c
         val xx = x * x
         val xy = x * y
@@ -649,14 +1117,18 @@ class Matrix4f : Matrix4fc {
 
 }
 
+const val PIf=PI.toFloat()
 const val PI2 = PI * 2
-const val PIHalf = PI * 0.5
+const val PIHalf = PIf * 0.5f
+const val PIHalf2 = PI * 0.5
 fun cosFromSin(sin: Double, angle: Double): Double {
 //    if (Options.FASTMATH)
-    return kotlin.math.sin(angle + PIHalf)
+    return kotlin.math.sin(angle + PIHalf2)
 }
 
 fun cosFromSin(sin: Float, angle: Float): Float {
 //    if (Options.FASTMATH)
-    return kotlin.math.sin(angle + PIHalf).toFloat()
+    return kotlin.math.sin(angle + PIHalf)
 }
+
+operator fun Matrix4fc.times(viewMatrix: Matrix4fc): Matrix4f = mul(viewMatrix, Matrix4f())

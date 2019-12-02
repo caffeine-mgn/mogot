@@ -8,7 +8,20 @@
 
     <idea-version since-build="191"/>
     <extensions defaultExtensionNs="com.intellij">
-        <!--<fileTypeFactory implementation="pw.binom.FbxFileTypeFactory"/>-->
+        <fileType name="Scene file" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
+                  language="Scene" extensions="fbx"/>
+        <fileEditorProvider implementation="pw.binom.sceneEditor.SceneFileEditorProvider"/>
+
+        <!--
+        <group id="MogorPlugin.SceneMenu" text="Scene" description="Scene Menu">
+            <add-to-group group-id="MainMenu" anchor="last"  />
+            <action id="MogorPlugin.SceneMenu.Move" class="pw.binom.sceneEditor.MoveAction" text="Move" description="Move Selected Object" />
+        </group>
+        -->
+
+        <!--                                        -->
+
+
         <fileType name="Fbx file" implementationClass="pw.binom.FlxFileType" fieldName="INSTANCE"
                   language="FBX" extensions="fbx"/>
         <fileEditorProvider implementation="pw.binom.FbxFileEditorProvider"/>

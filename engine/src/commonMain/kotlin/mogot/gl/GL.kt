@@ -63,6 +63,11 @@ expect class GL {
     val TEXTURE0: Int
     val TEXTURE_2D: Int
     val TEXTURE_MAX_LEVEL:Int
+    val LINES:Int
+    val LINE_STRIP:Int
+    val LINE_LOOP:Int
+    val TRIANGLE_STRIP:Int
+    val TRIANGLE_FAN:Int
 }
 
 interface GLBuffer
