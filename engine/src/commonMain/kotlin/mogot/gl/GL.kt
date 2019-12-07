@@ -60,7 +60,9 @@ expect class GL {
     fun deleteBuffers(buffer: Int)
     fun enable(feature: Int)
     fun disable(feature: Int)
+    fun texParameterf(target: Int, pname: Int, param: Float)
 
+    val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
     val NEAREST: Int
     val CULL_FACE: Int
     val DEPTH_TEST: Int

@@ -16,7 +16,7 @@ open class ScreenRect(val gl: GL) : Closeable {
         ))
     }
     private val uvBuffer = BufferArray(gl = gl, static = true, draw = true).apply {
-        uploadArray(floatArrayOf(0f,0f,0f,1f,1f,1f,1f,0f))
+        uploadArray(floatArrayOf(0f,1f,0f,0f,1f,0f,1f,1f))
     }
     private val vao = VertexArray(gl)
     private val vertexSize = 12 / 3
@@ -193,6 +193,7 @@ class PostEffectPipeline(val gl: GL, var resolutionWidth: Int, var resolutionHei
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, resolutionWidth, resolutionHeight, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        //gl.texParameterf(gl.TEXTURE_2D, gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT,0.0f)
         gl.bindTexture(gl.TEXTURE_2D, null)
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture!!, 0)
         rbo = gl.genRenderbuffers()

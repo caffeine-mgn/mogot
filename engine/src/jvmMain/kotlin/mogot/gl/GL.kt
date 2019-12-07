@@ -353,6 +353,10 @@ actual class GL(val gl: GL2) {
         gl.glDisable(feature)
     }
 
+    actual fun texParameterf(target: Int, pname: Int, param: Float){
+        gl.glTexParameterf(target, pname, param)
+    }
+
     actual val CULL_FACE: Int
         get() = GL2.GL_CULL_FACE
     actual val DEPTH_TEST: Int
@@ -363,6 +367,8 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_COLOR_BUFFER_BIT
     actual val NEAREST: Int
         get() = GL2.GL_NEAREST
+    actual val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
+    get() = GL2.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {
