@@ -95,6 +95,7 @@ expect class GL {
     val TEXTURE0: Int
     val TEXTURE_2D: Int
     val TEXTURE_MAX_LEVEL:Int
+    val MULTISAMPLE: Int
 }
 
 interface GLBuffer

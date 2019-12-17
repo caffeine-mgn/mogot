@@ -128,7 +128,7 @@ class FullScreenSprite(gl: GL) {
         mat.unuse()
     }
 }
-class PostEffectPipeline(val gl: GL, var resolutionWidth: Int, var resolutionHeight: Int) {
+class PostEffectPipeline(val gl: GL) {
     private val list = mutableListOf<SimplePostEffect>()
     private val sprite: FullScreenSprite = FullScreenSprite(gl)
     private var texture: GLTexture? = null
@@ -184,7 +184,7 @@ class PostEffectPipeline(val gl: GL, var resolutionWidth: Int, var resolutionHei
     
 
 
-    fun init(){
+    fun init(resolutionWidth: Int,resolutionHeight: Int){
         fbo = gl.genFramebuffers()
         gl.bindFramebuffer(gl.FRAMEBUFFER,fbo!!)
         gl.enable(gl.TEXTURE_2D)

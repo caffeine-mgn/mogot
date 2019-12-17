@@ -2,6 +2,9 @@ package game
 
 import mogot.Camera
 import mogot.gl.GLView
+import mogot.gl.SimplePostEffect
+import mogot.gl.getFXAAShader
+import mogot.waitFrame
 import java.awt.Dialog
 import javax.swing.JFrame
 

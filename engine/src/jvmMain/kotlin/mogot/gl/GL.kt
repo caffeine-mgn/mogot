@@ -112,6 +112,9 @@ actual class GL(val gl: GL2) {
     actual val TEXTURE_MAX_LEVEL: Int
         get() = GL2.GL_TEXTURE_MAX_LEVEL
 
+    actual val MULTISAMPLE: Int
+        get() = GL2.GL_MULTISAMPLE
+
     actual fun deleteProgram(program: GLProgram) {
         program as JGLProgram
         gl.glDeleteProgram(program.id)

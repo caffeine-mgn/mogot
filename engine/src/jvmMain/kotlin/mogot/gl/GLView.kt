@@ -135,6 +135,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         gl.gl.glViewport(x, y, width, height)
         camera?.resize(width, height)
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
+        gl.disable(gl.MULTISAMPLE)
         repaint()
     }
 
@@ -232,18 +233,14 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
     protected open fun init() {
         _engine = Engine(this)
-        if(postEffectPipeline!=null){
-            postEffectPipeline?.close()
-            postEffectPipeline = null
+        if(postEffectPipeline==null){
+            postEffectPipeline =  PostEffectPipeline(gl)
+
         }
-        postEffectPipeline =  PostEffectPipeline(gl,width,height)
-        postEffectPipeline?.init()
+        postEffectPipeline?.init(width,height)
     }
 
     protected open fun dispose() {
-        if(postEffectPipeline!=null){
-            postEffectPipeline?.close()
-            postEffectPipeline = null
-        }
+        postEffectPipeline?.close()
     }
 }
