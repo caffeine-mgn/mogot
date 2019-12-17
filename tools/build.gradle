@@ -1,0 +1,72 @@
+//import org.jetbrains.grammarkit.tasks.*
+
+apply plugin: 'kotlin-platform-jvm'
+apply plugin: 'java'
+apply plugin: 'org.jetbrains.intellij'
+
+apply plugin: "org.xbib.gradle.plugin.jflex"
+
+sourceSets {
+    main {
+        java {
+            srcDir "${this.buildDir}/generated-src/jflex"
+//            srcDir "${this.buildDir}/generated-src/bnf"
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+
+dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api 'org.jogamp.jogl:jogl-all:2.3.2'
+    api 'org.jogamp.jogl:jogl-all-main:2.3.2'
+    api 'org.jogamp.gluegen:gluegen-rt-main:2.3.2'
+    api 'org.jogamp.gluegen:gluegen-rt:2.3.2'
+    api 'org.joml:joml:1.9.12'
+    api project(':engine')
+    api group: 'org.jogamp.jogl', name: 'nativewindow', version: '2.3.2'
+    api "pw.binom.io:json:$binom_io_version"
+    api "pw.binom.io:file:$binom_io_version"
+    testImplementation 'junit:junit:4.12'
+}
+
+jflex {
+    generateDir = file("$project.buildDir/generated-src/jflex/pw/binom/material/psi")
+}
+
+classes {
+    dependsOn jflex
+}
+
+compileKotlin {
+    dependsOn jflex
+}
+
+compileJava {
+    dependsOn jflex
+}
+
+/*
+task bnfGenerator {
+    inputs.files(fileTree(dir: file("src/main/bnf"), include: '** / *.bnf'))
+    outputs.dir(file("${buildDir}/generated-src/bnf"))
+
+    doLast {
+        println("inputs.files=${inputs.files.files}")
+        inputs.files.forEach {
+            def args = ['bin/bnfc-2.8-win.exe','--java', '--jflex', '-o', "${buildDir}/generated-src/bnf", it.path]
+            exec{
+                commandLine(args)
+            }
+        }
+
+    }
+}
+*/

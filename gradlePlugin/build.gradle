@@ -1,0 +1,26 @@
+apply plugin: 'kotlin-platform-jvm'
+apply plugin: 'java'
+
+dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api project(':tools')
+    api "pw.binom.io:json:$binom_io_version"
+    api "pw.binom.io:file:$binom_io_version"
+
+    testImplementation 'junit:junit:4.12'
+}
+
+
+jar {
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+
+    archiveName = "gradlePlugin.jar"
+}

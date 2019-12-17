@@ -87,7 +87,6 @@ class FpsCam(val view: SceneEditorView) : EditAction {
         y += (view.mousePosition.y - centerY) * delta / 5f
 
         node.quaternion.identity()
-        println("rotateXYZ($y, $x)    init: $e")
         node.quaternion.rotateXYZ(y, x, z)
 //            node.quaternion.rotateXYZ(x,y,0f)
 //            node.rotation2.y += (Input.mousePosition.x - oldMousePosition.x) * dt / 10f

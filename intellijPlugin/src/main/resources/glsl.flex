@@ -17,8 +17,8 @@ import com.intellij.lexer.FlexLexer;
 
 CRLF=\R
 WHITE_SPACE=[\ \n\t\f]
-FIRST_VALUE_CHARACTER=[^ \n\f\\{};\/\d\(\)=\+\-*\/\^%,!<>\.\[\]]|[a-zA-Z]
-VALUE_CHARACTER=[^ \n\f\\{};\/\(\)=\+\-*\/\^%,!<>\.\[\]]|[a-zA-Z0-9]
+FIRST_VALUE_CHARACTER=[^ \'\"\n\f\\{};\/\d\(\)=\+\-*\/\^%,!<>\.\[\]@]|[a-zA-Z]
+VALUE_CHARACTER=[^ \'\"\n\f\\{};\/\(\)=\+\-*\/\^%,!<>\.\[\]@]|[a-zA-Z0-9]
 END_OF_LINE_COMMENT=("//")[^\r\n]*
 DERECTIVE=("#")[^\r\n]*
 COMMENT_BLOCK=\/\*[\s\S]*\*\/
@@ -33,24 +33,34 @@ mDOUBLE_SUFFIX = d | D
 mNUM_FLOAT = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mFLOAT_SUFFIX}
 mNUM_DOUBLE = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mDOUBLE_SUFFIX}
 mNUM_ALL = ((\d+)(\.\d+)?[fd]?)|((\.\d+)[fd]?)
+QUOTE = \"
 %state WAITING_VALUE
 DOT = \.
-
+%state STRING
 %%
-
+<YYINITIAL> {
 //<YYINITIAL> {END_OF_LINE_COMMENT}                           { yybegin(YYINITIAL); return GLSLTypes.COMMENT; }
 //<YYINITIAL> ({mNUM_FLOAT}|{mNUM_DOUBLE}|{mDIGIT}) { return GLSLTypes.NUMBER; }
 <YYINITIAL> {mNUM_ALL} { return GLSLTypes.NUMBER; }
 //<YYINITIAL> {KEY_CHARACTER}+                                { yybegin(YYINITIAL); return GLSLTypes.KEY; }
 {DERECTIVE} { return GLSLTypes.DERECTIVE; }
+"@vertex" { return GLSLTypes.ANN_VERTEX; }
+"@normal" { return GLSLTypes.ANN_NORMAL; }
+"@uv" { return GLSLTypes.ANN_UV; }
+"@projection" { return GLSLTypes.ANN_PROJECTION; }
+"@model" { return GLSLTypes.ANN_MODEL; }
+"@property" { return GLSLTypes.ANN_PROPERTY; }
+"vec2" { return GLSLTypes.VEC2; }
 "vec3" { return GLSLTypes.VEC3; }
+"mat3" { return GLSLTypes.MAT3; }
+"mat4" { return GLSLTypes.MAT4; }
 "float" { return GLSLTypes.FLOAT; }
 "int" { return GLSLTypes.INT; }
+"bool" { return GLSLTypes.BOOL; }
 "vec4" { return GLSLTypes.VEC4; }
 "void" { return GLSLTypes.VOID; }
 "return" { return GLSLTypes.RETURN; }
-"struct" {return GLSLTypes.STRUCT; }
-"in" {return GLSLTypes.IN;}
+"class" {return GLSLTypes.CLASS; }
 
 "+=" {return GLSLTypes.ASSIGN_PLUS;}
 "-=" {return GLSLTypes.ASSIGN_MINUS;}
@@ -75,21 +85,32 @@ DOT = \.
 ">" {return GLSLTypes.OP_GT;}
 "<=" {return GLSLTypes.OP_LE;}
 ">=" {return GLSLTypes.OP_GE;}
-"out" {return GLSLTypes.OUT;}
 "for" {return GLSLTypes.FOR;}
-"uniform" {return GLSLTypes.UNIFORM;}
 {END_OF_LINE_COMMENT} { return GLSLTypes.COMMENT_LINE; }
 {COMMENT_BLOCK} { return GLSLTypes.COMMENT_BLOCK; }
-<WAITING_VALUE> {CRLF}({CRLF}|{WHITE_SPACE})+               { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-(({WHITE_SPACE}+) | ({CRLF}({CRLF}|{WHITE_SPACE})+)) { return TokenType.WHITE_SPACE; }
+//<WAITING_VALUE> {CRLF}({CRLF}|{WHITE_SPACE})+               { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+//(({WHITE_SPACE}+) | ({CRLF}({CRLF}|{WHITE_SPACE})+)) { return TokenType.WHITE_SPACE; }
 {ID} {return GLSLTypes.ID; }
 "{" { return GLSLTypes.LEFT_BRACE; }
 "}" { return GLSLTypes.RIGHT_BRACE; }
 ";" {return GLSLTypes.END_LINE;}
+({CRLF})+ {return TokenType.WHITE_SPACE;}
+({WHITE_SPACE}+) {return TokenType.WHITE_SPACE;}
 <WAITING_VALUE> {WHITE_SPACE}+                              { yybegin(WAITING_VALUE); return TokenType.WHITE_SPACE; }
 
 //<WAITING_VALUE> {FIRST_VALUE_CHARACTER}{VALUE_CHARACTER}*   { yybegin(YYINITIAL); return GLSLTypes.VALUE; }
 
 ({CRLF}|{WHITE_SPACE})+                                     { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+}
+<STRING> {
+      ({QUOTE})                      { yybegin(YYINITIAL); zzStartRead=startString;return TokenType.STRING; }
+      [^\n\r\"\\]+                   { string.append( yytext() ); }
+      \\t                            { string.append('\t'); }
+      \\n                            { string.append('\n'); }
+
+      \\r                            { string.append('\r'); }
+      \\\"                           { string.append('\"'); }
+      \\                             { string.append('\\'); }
+    }
 
 [^]                                                         { return TokenType.BAD_CHARACTER; }

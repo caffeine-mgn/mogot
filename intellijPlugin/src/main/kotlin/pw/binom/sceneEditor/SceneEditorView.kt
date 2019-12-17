@@ -8,41 +8,60 @@ import mogot.math.Vector2i
 import mogot.math.Vector3f
 import mogot.math.Vector4f
 import pw.binom.SolidMaterial
-import pw.binom.SolidTextureMaterial
-import pw.binom.io.wrap
-import pw.binom.sceneEditor.nodeLoader.OmniLightLoader
+import pw.binom.Stack
+import pw.binom.sceneEditor.nodeController.CubeServiceFactory
+import pw.binom.sceneEditor.nodeController.NodeService
+import pw.binom.sceneEditor.nodeController.OmniLightServiceFactory
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayList
+
+private val serviceFactory = listOf(OmniLightServiceFactory, CubeServiceFactory)
 
 class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile) : GLView() {
     val editorRoot = Node()
     val sceneRoot = Node()
     val editorCamera = Camera()
+    val eventSelectChanged = EventDispatcher()
     private var closed = false
     private var inited = false
-    private lateinit var omniLightMaterial: SolidTextureMaterial
+    private val frameListeners = Stack<() -> Unit>()
+    private lateinit var _default3DMaterial: Default3DMaterial
+    val default3DMaterial: Default3DMaterial
+        get() = _default3DMaterial!!
+
+    override fun setup(width: Int, height: Int) {
+        super.setup(width, height)
+        _default3DMaterial = Default3DMaterial(gl)
+    }
+
+
+    fun renderThread(func: () -> Unit) {
+        if (rendering.get()) {
+            func()
+        } else {
+            frameListeners.pushLast {
+                func()
+            }
+            repaint()
+        }
+    }
+
     private lateinit var selectorMaterial: SolidMaterial
     private val editorFactories = listOf(EditMoveFactory, FpsCamEditorFactory)
-    private val loaders = listOf(OmniLightLoader)
+    private val _services = ArrayList<NodeService>()
+    private val links = WeakHashMap<Node, NodeService>()
+    val services: List<NodeService>
+        get() = _services
 
-    private val lights = HashMap<OmniLight, LightScreenPos>()
-
-    suspend fun addOmniLight(parent: Node): OmniLight {
-        repaint()
-        engine.waitFrame()
-        val node = OmniLight()
-        node.parent = parent
-        val s = Sprite(engine)
-        s.size.set(120f / 4f, 160f / 4f)
-
-        s.material = omniLightMaterial
-        val b = LightScreenPos(editorCamera, node)
-        s.behaviour = b
-        s.parent = root
-        lights[node] = b
-        return node
+    fun link(node: Node, service: NodeService) {
+        links[node] = service
     }
+
+    fun isLinked(node: Node) = links.containsKey(node)
+    fun getService(node: Node) = links[node]
 
     init {
         sceneRoot.parent = editorRoot
@@ -61,20 +80,30 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         get() = selectedNodes
     private var selector3D: Selector3D? = null
     fun select(node: Node?) {
-        selectedNodes.clear()
-        if (node != null && node is OmniLight) {
-            selectedNodes.add(node)
-            selector3D?.also {
-                it.parent = null
-                it.close()
+        renderThread {
+            selectedNodes.forEach {
+                links[it]?.unselected(it)
             }
-            println("Selector for $node")
-            val selector = Selector3D(engine, node)
-            selector.material = selectorMaterial
-            selector.size.set(1f, 1f, 1f)
-            selector.parent = editorRoot
-            repaint()
+            selectedNodes.clear()
+            if (node != null) {
+                links[node]?.selected(node)
+                selectedNodes += node
+            }
+            eventSelectChanged.dispatch()
         }
+//        if (node != null && node is OmniLight) {
+//            selectedNodes.add(node)
+//            selector3D?.also {
+//                it.parent = null
+//                it.close()
+//            }
+//            println("Selector for $node")
+//            val selector = Selector3D(engine, node)
+//            selector.material = selectorMaterial
+//            selector.size.set(1f, 1f, 1f)
+//            selector.parent = editorRoot
+//            repaint()
+//        }
     }
 
     private var editor: EditAction? = null
@@ -121,6 +150,16 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         editor?.render(dt)
     }
 
+    private val rendering = AtomicBoolean(false)
+    override fun render() {
+        rendering.set(true)
+        while (!frameListeners.isEmpty) {
+            frameListeners.popFirst().invoke()
+        }
+        rendering.set(false)
+        super.render()
+    }
+
     fun startEditor(editor: EditAction) {
         this.editor = editor
         startDraw()
@@ -130,7 +169,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         editor = null
         stopDraw()
         repaint()
-//        save()
+        save()
         editor1.save()
     }
 
@@ -144,6 +183,9 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     override fun init() {
         super.init()
+        serviceFactory.forEach {
+            _services += it.create(this)
+        }
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
         val grid = Grid(engine)
         grid.parent = root
@@ -151,41 +193,35 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         grid.material = mat
         mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
 //        editorCamera.behaviour = FpsCam(engine)
-        val omniLightTexture = this::class.java.getResourceAsStream("/light-icon.png").use {
-            engine.resources.syncCreateTexture2D(it.wrap())
-        }
-        omniLightMaterial = SolidTextureMaterial(engine.gl).apply {
-            diffuseColor.set(0f, 0f, 0f, 0f)
-            tex = omniLightTexture
-        }
         selectorMaterial = SolidMaterial(engine.gl)
 
 
-        SceneFileLoader.load(this, loaders, file)
-        createStabs(sceneRoot)
+        SceneFileLoader.load(this, file)
+//        createStabs(sceneRoot)
         inited = true
     }
 
     fun save() {
-        SceneFileLoader.save(this, loaders, file)
+        SceneFileLoader.save(this, file)
     }
 
-    private fun createStabs(node: Node) {
-        if (node is OmniLight) {
-            val s = Sprite(engine)
-            s.size.set(120f / 4f, 160f / 4f)
+    /*
+        private fun createStabs(node: Node) {
+            if (node is OmniLight) {
+                val s = Sprite(engine)
+                s.size.set(120f / 4f, 160f / 4f)
 
-            s.material = omniLightMaterial
-            val b = LightScreenPos(editorCamera, node)
-            s.behaviour = b
-            s.parent = root
-            lights[node] = b
+                s.material = omniLightMaterial
+                val b = LightScreenPos(editorCamera, node)
+                s.behaviour = b
+                s.parent = root
+                lights[node] = b
+            }
+            node.childs.forEach {
+                createStabs(it)
+            }
         }
-        node.childs.forEach {
-            createStabs(it)
-        }
-    }
-
+    */
     override fun dispose() {
         closed = true
         super.dispose()
@@ -228,7 +264,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 }
 
 class LightScreenPos(val camera: Camera, val other: Spatial) : Behaviour() {
-    override val node
+    public override val node
         get() = super.node as Sprite
 
     override fun checkNode(node: Node?) {

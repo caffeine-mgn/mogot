@@ -262,6 +262,11 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
 
         TODO()
     }
+
+    fun remove(component: Component) {
+        componentPlace.remove(component)
+        settings.remove(component)
+    }
 }
 
 fun <T : Component> T.appendTo(layout: FlexLayout, f: (FlexLayout.Setting.() -> Unit)? = null): T {

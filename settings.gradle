@@ -11,3 +11,5 @@ rootProject.name = 'Mogot'
 include ":game"
 include ":intellijPlugin"
 include ":engine"
+include ":tools"
+include ":gradlePlugin"

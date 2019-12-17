@@ -2,20 +2,15 @@ package pw.binom.sceneEditor
 
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import mogot.Node
 import mogot.OmniLight
-import mogot.annotation.ComponentNode
 import mogot.asUpSequence
-import pw.binom.FlexLayout
-import pw.binom.appendTo
-import pw.binom.async
-import java.awt.Color
 import java.awt.Component
 import javax.swing.ImageIcon
 import javax.swing.JLabel
 import javax.swing.JTree
+import javax.swing.SpringLayout
 import javax.swing.event.TreeModelEvent
 import javax.swing.event.TreeModelListener
 import javax.swing.tree.TreeCellRenderer
@@ -27,8 +22,7 @@ private class NodeCellRender : TreeCellRenderer {
     val lightIcon = ImageIcon(this::class.java.classLoader.getResource("/light-icon-16.png"))
     override fun getTreeCellRendererComponent(tree: JTree?, value: Any, selected: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {
         value as Node
-        val componentNode = value::class.java.getAnnotation(ComponentNode::class.java)
-        label.text = value.id ?: componentNode?.displayName?.takeIf { it.isNotBlank() } ?: value::class.java.simpleName
+        label.text = value.id ?: value::class.java.simpleName
         label.icon = when (value) {
             is OmniLight -> lightIcon
             else -> null
@@ -40,24 +34,24 @@ private class NodeCellRender : TreeCellRenderer {
 class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
     private val model = SceneTreeModel(view)
     val tree = Tree(model)
-    val scrollPane = JBScrollPane(tree)
-    private val layout = FlexLayout(this, FlexLayout.Direction.COLUMN)
+//    val scrollPane = JBScrollPane(tree)
+//    private val layout = FlexLayout(this, FlexLayout.Direction.COLUMN)
+
+    private val _layout = SpringLayout()
 
     init {
-
+        this.layout = _layout
         val pp = ToolbarDecorator.createDecorator(tree)
                 .setAddAction {
                     val parent = tree.lastSelectedPathComponent as Node? ?: view.sceneRoot
 
-                    val d = CreateNodeDialog(view.project)
+                    val d = CreateNodeDialog(view, view.project)
                     if (d.showAndGet()) {
-                        when (d.selected) {
-                            OmniLight::class.java -> {
-                                async {
-                                    val light = view.addOmniLight(parent)
-                                    model.created(tree, light)
-                                }
-                            }
+                        view.renderThread {
+                            val creator = d.selected ?: return@renderThread
+                            val node = creator.create()
+                            node.parent = parent
+                            model.created(tree, node)
                         }
                     }
                 }
@@ -72,16 +66,23 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
 
         tree.cellRenderer = NodeCellRender()
         tree.showsRootHandles = true
-        pp.appendTo(layout) {
-            grow = 0f
-        }
-        scrollPane.appendTo(layout) {
-            grow = 1f
-        }
-        scrollPane.background = Color.RED
+        add(pp)
+//        add(scrollPane)
+        _layout.putConstraint(SpringLayout.NORTH, pp, 0, SpringLayout.NORTH, this)
+        _layout.putConstraint(SpringLayout.EAST, pp, 10, SpringLayout.EAST, this)
+        _layout.putConstraint(SpringLayout.WEST, pp, 0, SpringLayout.WEST, this)
+        _layout.putConstraint(SpringLayout.SOUTH, pp, 0, SpringLayout.SOUTH, this)
+
+
+//        _layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, pp)
+//        _layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.SOUTH, this)
+//        _layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, this)
+//        _layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, this)
+
+//        scrollPane.background = Color.RED
+
         tree.addTreeSelectionListener {
             view.select(it.path.lastPathComponent as Node?)
-
         }
     }
 }
