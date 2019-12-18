@@ -2,6 +2,9 @@ package game
 
 import mogot.Camera
 import mogot.gl.GLView
+import mogot.gl.SimplePostEffect
+import mogot.gl.getFXAAShader
+import mogot.waitFrame
 import java.awt.Dialog
 import javax.swing.JFrame
 
@@ -15,6 +18,7 @@ class GameView : GLView() {
         backgroundColor.set(0f, 0.5f, 0.7f, 1f)
         game = TestGame(engine)
         camera = game.camera
+        postEffectPipeline!!.addEffect(SimplePostEffect(engine, getFXAAShader(engine.gl)))
         inited = true
     }
 
