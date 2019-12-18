@@ -66,7 +66,7 @@ class TestGame(val engine: Engine) {
         camera.lookTo(Vector3f(0f, 0f, 0f))
         camera.behaviour = FpsCam(engine)
 
-        val s = Sprite(engine)
+        val s = Sprite(engine.gl)
 
         root.addChild(s)
         s.size.set(100f, 100f)

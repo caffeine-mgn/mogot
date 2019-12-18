@@ -18,6 +18,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override val mouseUp = EventValueDispatcher<Int>()
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
+    var postEffectPipeline: PostEffectPipeline? = null
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -173,6 +174,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
         gl.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
         gl.gl.glEnable(GL2.GL_BLEND)
+        gl.disable(gl.MULTISAMPLE)
         repaint()
     }
 
@@ -193,8 +195,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         }
         render2(dt)
         gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
-        gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-        gl.gl.glEnable(GL2.GL_CULL_FACE)
+
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
         camera?.applyMatrix(tempMatrix.identity())
@@ -209,16 +210,19 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
+        postEffectPipeline?.use(renderContext) {
+            if (root != null) {
+                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
+                gl.gl.glEnable(GL2.GL_CULL_FACE)
+                update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-        if (root != null) {
-            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-            renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+                gl.gl.glDisable(GL2.GL_CULL_FACE)
 
-            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-            gl.gl.glDisable(GL2.GL_CULL_FACE)
-
-            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, tempMatrix, renderContext)
+                tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+                renderNode2D(root!!, tempMatrix, renderContext)
+            }
         }
         if (lockMouse) {
             val point = locationOnScreen
@@ -227,6 +231,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
             robot.mouseMove(point.x, point.y)
         }
+
         swapBuffers()
         lastFrameTime = time
     }
@@ -272,9 +277,14 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
 
     protected open fun init() {
         _engine = Engine(this)
+        if(postEffectPipeline==null){
+            postEffectPipeline =  PostEffectPipeline(gl)
+
+        }
+        postEffectPipeline?.init(width,height)
     }
 
     protected open fun dispose() {
-
+        postEffectPipeline?.close()
     }
 }
