@@ -37,15 +37,16 @@ class ImageEditor(uniformEditor: UniformEditor, uniform: UniformEditor.Uniform) 
             if (oldFile?.path != file!!.path || file!!.lastModified() != oldFileTime || texture == null) {
                 oldFile = file
                 oldFileTime = file!!.lastModified()
-                texture?.close()
+                texture?.dec()
                 val tex = engine.resources.syncCreateTexture2D(file!!.path)
+                tex.inc()
                 texture = tex
             } else {
                 if (texture != null)
                     gl.bindTexture(gl.TEXTURE_2D, texture!!.gl)
             }
         } else {
-            texture?.close()
+            texture?.dec()
             gl.activeTexture(gl.TEXTURE0)
             gl.bindTexture(gl.TEXTURE_2D, null)
             shader.uniform(uniform.name, 0)
@@ -69,7 +70,7 @@ class ImageEditor(uniformEditor: UniformEditor, uniform: UniformEditor.Uniform) 
         }
 //        btn.text = this.file?.path ?: "no image"
         data = file?.path
-        value = file?.let { MaterialViewer.TextureFile(it) }
+        //value = file?.let { MaterialViewer.TextureFile(it) }
         dispatchChange()
     }
 

@@ -112,7 +112,7 @@ class Compiler(val parser: Parser) : Scope {
                 MethodDesc.Argument("value", floatType)
         ), false)
 
-        gvec4Type.fields += GlobalFieldDesc(gvec4Type, "rgba", vec4Type)
+        gvec4Type.fields += GlobalFieldDesc(gvec4Type, "rgba", vec4Type, SourceExp(0, 0))
     }
 
     override fun findType(type: Type): TypeDesc {
@@ -199,7 +199,8 @@ class Compiler(val parser: Parser) : Scope {
         val g = GlobalFieldDesc(
                 name = globalVar.name,
                 type = findType(globalVar.type),
-                parent = clazz?.let { findType(it, emptyList()) }
+                parent = clazz?.let { findType(it, emptyList()) },
+                source = SourceExp(globalVar.position, globalVar.length)
         )
         parser.properties[globalVar]?.let {
             properties[g] = it.properties

@@ -21,6 +21,7 @@ public String getText(){return yytext(); }
 %}
 %{
       private int readed = 0;
+      private int startString;
       public int getPosition(){return readed-yylength(); }
       TokenType next() throws java.io.IOException{
           TokenType out = advance();
@@ -30,7 +31,6 @@ public String getText(){return yytext(); }
       }
 
       private StringBuffer string = new StringBuffer();
-      private int startString;
 
       public String stringLiteral(){
             return string.toString();
@@ -130,7 +130,7 @@ DOT = \.
 //<WAITING_VALUE> {FIRST_VALUE_CHARACTER}{VALUE_CHARACTER}*   { yybegin(YYINITIAL); return TokenType.VALUE; }
 
 ({WHITE_SPACE})+                                     { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-"\""       { string.setLength(0); startString=zzStartRead; yybegin(STRING); }
+({QUOTE})       { string.setLength(0); startString=zzStartRead; yybegin(STRING); }
 }
 <STRING> {
       ({QUOTE})                      { yybegin(YYINITIAL); zzStartRead=startString;return TokenType.STRING; }

@@ -25,7 +25,7 @@ class FullScreenSprite(engine: Engine) {
         mat.unuse()
     }
 }
-
+/*
 class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     override val shader: Shader = Shader(gl, vp, fp)
 
@@ -40,7 +40,7 @@ class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }
 }
-
+*/
 class DDD : GLView() {
 
     private var closed = false
@@ -121,7 +121,7 @@ class DDD : GLView() {
            }
         """
 
-        box.material=DDShaderMaterial(engine.gl, vv.vp, vv.fp)
+//        box.material=DDShaderMaterial(engine.gl, vv.vp, vv.fp)
     }
 
     override fun dispose() {

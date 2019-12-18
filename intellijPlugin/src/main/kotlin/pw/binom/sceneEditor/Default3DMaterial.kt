@@ -1,6 +1,6 @@
 package pw.binom.sceneEditor
 
-import mogot.gl.GL
+import mogot.Engine
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import pw.binom.material.compiler.Compiler
@@ -8,7 +8,7 @@ import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
 
-class Default3DMaterial(gl: GL) : MaterialGLSL(gl) {
+class Default3DMaterial(engine: Engine) : MaterialGLSL(engine) {
 
     override val shader: Shader = run {
         val text = """
@@ -39,11 +39,12 @@ vec4 fragment(vec4 color2){
         """
         val compiler = Compiler(Parser(StringReader(text)))
         val gen = GLES300Generator(compiler)
-        Shader(gl, gen.vp, gen.fp)
+        Shader(engine.gl, gen.vp, gen.fp)
     }
 
-    override fun close() {
+    override fun dispose() {
         shader.close()
+        super.dispose()
     }
 
 }

@@ -1,5 +1,6 @@
 package pw.binom.material
 
+import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GL
 import mogot.gl.MaterialGLSL
@@ -11,22 +12,23 @@ import mogot.math.Vector4fc
 import pw.binom.SimpleMaterial
 import pw.binom.View3D
 import pw.binom.io.Closeable
-import java.io.File
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 
 class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
-    class TextureFile(val file: File) : Closeable {
+    class TextureFile(val file: VirtualFile) : Closeable {
         private var texture: Texture2D? = null
         fun getTexture2D(engine: Engine): Texture2D {
-            if (texture == null)
+            if (texture == null) {
                 texture = engine.resources.syncCreateTexture2D(file.path)
+                texture!!.inc()
+            }
             return texture!!
         }
 
         override fun close() {
-            texture?.close()
+            texture?.dec()
         }
     }
 
@@ -48,20 +50,36 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                 }
             }
         } else {
+            val old = params.remove(name)
+            if (old is TextureFile && value is TextureFile) {
+                if (old.file.parent == value.file) {
+                    params[name] = old
+                    return
+                }
+            }
+            if (old is TextureFile)
+                engine.waitFrame {
+                    old.close()
+                }
             params[name] = value
         }
     }
 
-    inner class DynamicMaterialGLSL(gl: GL) : MaterialGLSL(gl) {
-        private val standart = SimpleMaterial(gl)
+    inner class DynamicMaterialGLSL(engine: Engine) : MaterialGLSL(engine) {
+        private val standart = SimpleMaterial(engine)
+
+        init {
+            standart.inc()
+        }
 
         var dynamicShader: Shader? = null
         override val shader: Shader
             get() = dynamicShader ?: standart.shader
 
-        override fun close() {
-            standart.close()
+        override fun dispose() {
+            standart.dec()
             dynamicShader?.close()
+            super.dispose()
         }
 
         override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
@@ -134,7 +152,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         initListeners.forEach {
             it()
         }
-        material = DynamicMaterialGLSL(gl)
+        material = DynamicMaterialGLSL(engine)
         val node = GeomNode2().also {
             it.geom = Geoms.buildCube2(gl, 1f)
             it.material = material
@@ -144,7 +162,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         val l = OmniLight()
         val node1 = GeomNode().apply {
             geom = Geoms.solidSphere(gl, 1f, 30, 30)
-            material = SimpleMaterial(gl)
+            material = SimpleMaterial(engine)
         }
         node1.position.z = -30f
         node1.position.x = 30f
@@ -155,17 +173,20 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
     }
 
     override fun dispose() {
+        params.values.asSequence()
+                .mapNotNull { it as? TextureFile }
+                .forEach { it.close() }
         fpOld = ""
         vpOld = ""
+        material.dynamicShader?.close()
         root!!.childs.toTypedArray().forEach {
             if (it !is Camera)
                 it.parent = null
         }
     }
 
-    private inner class GeomNode2 : VisualInstance() {
+    private inner class GeomNode2 : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         var geom: Geom3D2? = null
-        var material: Material? = null
         override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
             material?.use(model, projection, renderContext)
             renderListeners.forEach {
@@ -177,7 +198,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
 
         override fun close() {
             geom?.close()
-            material?.close()
+            material = null
         }
     }
 }

@@ -25,7 +25,7 @@ class Property(val properties: Map<String, String>, override val position: Int, 
                     val value = (
                             NumberExpression.read(lexer)?.value
                                     ?: BooleanExpression.read(lexer)?.value?.let { if (it) "true" else "false" }
-                                    ?: StringExpression.read(lexer)?.text
+                                    ?: StringExpression.read(lexer)?.string
                                     ?: return@safe null)
                     properties[key] = value
                 }

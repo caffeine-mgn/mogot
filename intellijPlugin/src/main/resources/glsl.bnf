@@ -28,6 +28,7 @@ private item_ ::= STRUCT_DEFINITION
         |COMMENT_BLOCK
         |CRLF
 
+STRING
 private END_LINE
 private SPACE
 private ASSIGN
@@ -122,4 +123,5 @@ PRIMARY_EXP ::= CALL_METHOD_EXP
        | VAR_CHANGE_ASSIGN_EXP
        | SUBJECT
        | NUMBER
+       | STRING
        | (LEFT_PARENTHESIS EXP RIGHT_PARENTHESIS)

@@ -5,8 +5,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.MaterialNode
 import mogot.Node
 import pw.binom.glsl.psi.GLSLFile
-import pw.binom.sceneEditor.ExternalMaterial
+import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.loadMaterial
 import java.awt.BorderLayout
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -21,18 +22,20 @@ class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
     val selectBtn = JButton("select")
     val clearBtn = JButton("X")
 
-    var MaterialNode.exMaterial: VirtualFile?
+    var MaterialNode.materialFile: VirtualFile?
         get() {
-            if (this.material as? ExternalMaterial == null) {
-                this.material = ExternalMaterial(view)
+            if (this.material == null || this.material == view.default3DMaterial)
+                return null
+            if (this.material is MaterialInstance) {
+                return (this.material as MaterialInstance).root.file
             }
-            return (this.material as ExternalMaterial).file
+            TODO()
         }
         set(value) {
-            if (this.material as? ExternalMaterial == null) {
-                this.material = ExternalMaterial(view)
-            }
-            (this.material as ExternalMaterial).file = value
+            if (value == null)
+                this.material = view.default3DMaterial
+            else
+                this.material = view.engine.resources.loadMaterial(value)
         }
 
 
@@ -49,7 +52,7 @@ class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
 
     private fun setMaterial(file: VirtualFile?) {
         nodes?.forEach {
-            it.exMaterial = file
+            it.materialFile = file
         }
     }
 

@@ -14,6 +14,14 @@ import com.intellij.lexer.FlexLexer;
 %type IElementType
 %eof{  return;
 %eof}
+%{
+      private int startString;
+      private StringBuffer string = new StringBuffer();
+
+      public String stringLiteral(){
+            return string.toString();
+      }
+%}
 
 CRLF=\R
 WHITE_SPACE=[\ \n\t\f]
@@ -101,9 +109,10 @@ DOT = \.
 //<WAITING_VALUE> {FIRST_VALUE_CHARACTER}{VALUE_CHARACTER}*   { yybegin(YYINITIAL); return GLSLTypes.VALUE; }
 
 ({CRLF}|{WHITE_SPACE})+                                     { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+({QUOTE})       { string.setLength(0); startString=zzStartRead; yybegin(STRING); }
 }
 <STRING> {
-      ({QUOTE})                      { yybegin(YYINITIAL); zzStartRead=startString;return TokenType.STRING; }
+      ({QUOTE})                      { yybegin(YYINITIAL); zzStartRead=startString;return GLSLTypes.STRING; }
       [^\n\r\"\\]+                   { string.append( yytext() ); }
       \\t                            { string.append('\t'); }
       \\n                            { string.append('\n'); }

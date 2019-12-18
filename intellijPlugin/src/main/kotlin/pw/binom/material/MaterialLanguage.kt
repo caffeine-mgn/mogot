@@ -3,7 +3,6 @@ package pw.binom.material
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.lang.Language
-import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -18,7 +17,11 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiManager
 import com.intellij.psi.tree.IElementType
+import mogot.math.Vector4f
+import org.joml.Vector3f
 import pw.binom.material.compiler.Compiler
+import pw.binom.material.compiler.SingleType
+import pw.binom.material.compiler.TypeDesc
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import pw.binom.material.uniformEditor.UniformEditor
@@ -76,14 +79,14 @@ class MaterialFileEditor(val project: Project,
                     false,
                     ToolWindowAnchor.RIGHT
             )
-
-    var propertiesEditViewer = ToolWindowManager.getInstance(project).getToolWindow(MATIREAL_PROPERTIES_TOOL_WINDOW)
-            ?: ToolWindowManager.getInstance(project).registerToolWindow(
-                    MATIREAL_PROPERTIES_TOOL_WINDOW,
-                    false,
-                    ToolWindowAnchor.RIGHT
-            )
-
+    /*
+        var propertiesEditViewer = ToolWindowManager.getInstance(project).getToolWindow(MATIREAL_PROPERTIES_TOOL_WINDOW)
+                ?: ToolWindowManager.getInstance(project).registerToolWindow(
+                        MATIREAL_PROPERTIES_TOOL_WINDOW,
+                        false,
+                        ToolWindowAnchor.RIGHT
+                )
+    */
     val materialViewer = MaterialViewer(this)
     val uniformEditor = UniformEditor(this)
     val psifile = PsiManager.getInstance(project).findFile(sourceFile)!!
@@ -184,12 +187,62 @@ void main() {
     val hintManager = project.getComponent(HintManager::class.java)
 
     private fun refresh() {
+
+        fun setUniform(type: TypeDesc, name: String, value: String?) {
+            if (type is SingleType && type.clazz.name == "sampler2D") {
+                val texture = value?.let { sourceFile.parent.findFileByRelativePath(value)?.let { MaterialViewer.TextureFile(it) } }
+                materialViewer.set(name, texture)
+            }
+
+            if (type is SingleType && type.clazz.name == "float") {
+                materialViewer.set(name, value?.toFloat())
+            }
+
+            if (type is SingleType && type.clazz.name == "int") {
+                materialViewer.set(name, value?.toFloat())
+            }
+
+            if (type is SingleType && type.clazz.name == "bool") {
+                materialViewer.set(name, value == "true")
+            }
+
+            if (type is SingleType && type.clazz.name == "vec3") {
+                val vector = value?.let {
+                    it.split(',').map { it.trim().toFloat() }.let {
+                        Vector3f(it.getOrNull(0) ?: 0f, it.getOrNull(1) ?: 0f, it.getOrNull(1) ?: 0f)
+                    }
+                }
+                materialViewer.set(name, vector)
+            }
+
+            if (type is SingleType && type.clazz.name == "vec4") {
+                val vector = value?.let {
+                    it.split(',').map { it.trim().toFloat() }.let {
+                        Vector4f(
+                                it.getOrNull(0) ?: 0f,
+                                it.getOrNull(1) ?: 0f,
+                                it.getOrNull(2) ?: 0f,
+                                it.getOrNull(3) ?: 0f
+                        )
+                    }
+                }
+                materialViewer.set(name, vector)
+            }
+        }
+
         try {
             val parser = Parser(StringReader(document.text))
             val compiler = Compiler(parser)
             uniformEditor.update(compiler)
             val gen = GLES300Generator(compiler)
             materialViewer.setShader(gen.vp, gen.fp)
+            compiler.properties.asSequence()
+                    .mapNotNull {
+                        it.key to it.value["value"]
+                    }
+                    .forEach {
+                        setUniform(it.first.type, it.first.name, it.second)
+                    }
             println("OK")
         } catch (e: Throwable) {
             println("ERROR: ${e.message}")
@@ -222,6 +275,7 @@ void main() {
                 shaderEditViewer.contentManager.addContent(content)
             }
         }
+/*
         run {
             val c = propertiesEditViewer.contentManager.contents.find { it.component is UniformEditor }
             if (c == null) {
@@ -229,9 +283,9 @@ void main() {
                 propertiesEditViewer.contentManager.addContent(content)
             }
         }
-
+*/
         shaderEditViewer.setAvailable(true, null)
-        propertiesEditViewer.setAvailable(true, null)
+//        propertiesEditViewer.setAvailable(true, null)
     }
 
     private val userData = HashMap<Key<*>, Any?>()
@@ -246,7 +300,7 @@ void main() {
 
     override fun deselectNotify() {
         shaderEditViewer.setAvailable(false, null)
-        propertiesEditViewer.setAvailable(false, null)
+//        propertiesEditViewer.setAvailable(false, null)
     }
 
     override fun getBackgroundHighlighter(): BackgroundEditorHighlighter? {

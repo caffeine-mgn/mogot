@@ -1,5 +1,6 @@
 package pw.binom.material.compiler
 
+import pw.binom.material.psi.SourceExp
 import pw.binom.material.psi.TokenType
 import pw.binom.material.psi.Type
 import pw.binom.material.psi.TypePromitive
@@ -27,7 +28,7 @@ class ArrayType(scope: Scope, clazz: ClassDesc, val size: List<Int>) : TypeDesc(
     override val parentScope: Scope?
         get() = null
 
-    val sizeMethod = GlobalFieldDesc(this, "size", scope.findType(TypePromitive(TokenType.INT, emptyList()))!!)
+    val sizeMethod = GlobalFieldDesc(this, "size", scope.findType(TypePromitive(TokenType.INT, emptyList()))!!, SourceExp(0, 0))
     val getMethod = run {
         val type = if (size.size == 1)
             scope.findType(clazz, emptyList())!!

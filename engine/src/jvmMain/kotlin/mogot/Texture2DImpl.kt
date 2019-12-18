@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 
 
-actual class Texture2D(private val engine: Engine, image: SourceImage) : Resource(engine), Closeable {
+actual class Texture2D(private val engine: Engine, image: SourceImage) : ResourceImpl() {
     actual val gl = engine.gl.createTexture()
     val width = image.width
     val height = image.height
@@ -35,9 +35,6 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
 
     override fun dispose() {
         engine.gl.deleteTexture(gl)
-    }
-
-    override fun close() {
-        dispose()
+        super.dispose()
     }
 }

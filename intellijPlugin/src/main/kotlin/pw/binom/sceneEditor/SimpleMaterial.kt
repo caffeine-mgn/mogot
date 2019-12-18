@@ -1,5 +1,6 @@
 package pw.binom.sceneEditor
 
+import mogot.Engine
 import mogot.RenderContext
 import mogot.Texture2D
 import mogot.gl.GL
@@ -8,9 +9,13 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 
-internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
-    override fun close() {
+internal class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
+    private val gl
+    get()=engine.gl
+
+    override fun dispose() {
         shader.close()
+        super.dispose()
     }
 
     //    var image: Image? = null

@@ -1,11 +1,10 @@
 package mogot.gl
 
-import mogot.Material
-import mogot.RenderContext
+import mogot.*
 import mogot.math.Matrix4fc
 import mogot.math.Vector3f
 
-abstract class MaterialGLSL(val gl: GL): Material {
+abstract class MaterialGLSL(val engine: Engine): Material, ResourceImpl() {
     abstract val shader: Shader
 
     fun projection(projection: Matrix4fc){
@@ -32,9 +31,6 @@ abstract class MaterialGLSL(val gl: GL): Material {
     }
 
     override fun unuse() {
-        gl.useProgram(null)
-    }
-
-    override fun free() {
+        engine.gl.useProgram(null)
     }
 }

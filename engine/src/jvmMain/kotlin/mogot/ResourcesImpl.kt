@@ -14,11 +14,11 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
 
-actual class Resources actual constructor(private val engine: Engine) {
+actual class Resources actual constructor(actual val engine: Engine) {
 
     private val tasks = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
-    fun syncCreateTexture2D(stream:InputStream): Texture2D {
+    fun syncCreateTexture2D(stream: InputStream): Texture2D {
         val image = stream.let {
             val png = PNGDecoder(it)
             val color = if (png.hasAlpha())
@@ -88,7 +88,6 @@ actual class Resources actual constructor(private val engine: Engine) {
         val buf = ByteBuffer.allocateDirect(2 * 2 * 4)
         return Texture2D(engine, SourceImage(SourceImage.Type.RGBA, 2, 2, buf))
     }
-
 }
 
 fun <T> ExecutorService.async(f: suspend () -> T): FeaturePromise<T> {

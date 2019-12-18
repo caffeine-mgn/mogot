@@ -1,15 +1,26 @@
 package mogot
 
 import pw.binom.Stack
+import pw.binom.io.Closeable
 import pw.binom.start
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class Engine constructor(val stage: Stage) {
+class Engine constructor(val stage: Stage) : Closeable {
     val gl
         get() = stage.gl
     val resources = Resources(this)
     val frameListeners = Stack<() -> Unit>()
+    private val managers = HashMap<String, Closeable>()
+    fun <T : Closeable> manager(name: String, factory: () -> T): T {
+        return managers.getOrPut(name) { factory() } as T
+    }
+
+    override fun close() {
+        managers.values.forEach {
+            it.close()
+        }
+    }
 }
 
 /**

@@ -22,6 +22,7 @@ class GLSLSyntaxHighlighter : SyntaxHighlighterBase() {
         val BRACES = createTextAttributesKey("BRACES", DefaultLanguageHighlighterColors.BRACES)
         val BAD_CHARACTER = createTextAttributesKey("SIMPLE_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER)
         val META_DATE = createTextAttributesKey("SIMPLE_META_DATE", DefaultLanguageHighlighterColors.METADATA)
+        val STRING = createTextAttributesKey("STRING", DefaultLanguageHighlighterColors.STRING)
 
         private val BAD_CHAR_KEYS = arrayOf(BAD_CHARACTER)
         private val META_DATE_KEYS = arrayOf(META_DATE)
@@ -33,6 +34,7 @@ class GLSLSyntaxHighlighter : SyntaxHighlighterBase() {
         private val COMMENT_KEYS = arrayOf(COMMENT)
         private val PARENTHESES_KEYS = arrayOf(PARENTHESES)
         private val BRACES_KEYS = arrayOf(BRACES)
+        private val STRING_KEYS = arrayOf(STRING)
         private val EMPTY_KEYS = Array<TextAttributesKey>(0) { TODO() }
     }
 
@@ -52,7 +54,7 @@ class GLSLSyntaxHighlighter : SyntaxHighlighterBase() {
                 GLSLTypes.RETURN,
                 GLSLTypes.FOR,
                 GLSLTypes.CLASS -> KEY_KEYS
-
+                GLSLTypes.STRING -> STRING_KEYS
                 GLSLTypes.ANN_VERTEX,
                 GLSLTypes.ANN_MODEL,
                 GLSLTypes.ANN_NORMAL,

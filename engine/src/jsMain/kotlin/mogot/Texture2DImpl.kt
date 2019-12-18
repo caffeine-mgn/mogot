@@ -5,7 +5,7 @@ import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.WebGLRenderingContext
 import org.w3c.dom.Image
 
-actual class Texture2D private constructor(private val engine: Engine) : Resource(engine) {
+actual class Texture2D private constructor(private val engine: Engine) : ResourceImpl() {
 
     actual val gl = engine.gl.createTexture()
 
@@ -39,6 +39,7 @@ actual class Texture2D private constructor(private val engine: Engine) : Resourc
 
     override fun dispose() {
         engine.gl.deleteTexture(gl)
+        super.dispose()
     }
 }
 

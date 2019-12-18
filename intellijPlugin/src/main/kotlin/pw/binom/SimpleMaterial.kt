@@ -1,6 +1,7 @@
 package pw.binom
 
 import com.jogamp.opengl.GL2
+import mogot.Engine
 import mogot.gl.MaterialGLSL
 import mogot.RenderContext
 import mogot.gl.GL
@@ -8,14 +9,16 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 
-internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
-    override fun close() {
+internal class SimpleMaterial(engile:Engine) : MaterialGLSL(engile) {
+
+    override fun dispose() {
         shader.close()
+        super.dispose()
     }
 
     //    var image: Image? = null
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
-    override val shader: Shader = Shader(gl,
+    override val shader: Shader = Shader(engile.gl,
             vertex = """#version 440 core
 
 layout(location = 0) in vec3 vertexPos;

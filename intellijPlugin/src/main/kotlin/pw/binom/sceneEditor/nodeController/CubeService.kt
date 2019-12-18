@@ -31,7 +31,7 @@ class CubeService(private val view: SceneEditorView) : NodeService {
 
         override fun create(): Node {
             val node = CSGBox(view.engine)
-            node.material = ExternalMaterial(view)
+            node.material = view.default3DMaterial
             view.link(node, this@CubeService)
             return node
         }
@@ -43,7 +43,7 @@ class CubeService(private val view: SceneEditorView) : NodeService {
         println("Load $clazz...")
         val n = CSGBox(view.engine)
         view.link(n, this)
-        n.material = ExternalMaterial(view)
+        n.material = view.default3DMaterial
         json["properties"]?.obj?.fields()?.forEach {
             when (it.key) {
                 "position.x" -> n.position.x = it.value.floatValue()

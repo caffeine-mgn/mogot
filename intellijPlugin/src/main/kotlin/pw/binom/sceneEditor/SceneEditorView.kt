@@ -34,7 +34,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     override fun setup(width: Int, height: Int) {
         super.setup(width, height)
-        _default3DMaterial = Default3DMaterial(gl)
+        _default3DMaterial = Default3DMaterial(engine)
     }
 
 
@@ -189,11 +189,11 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
         val grid = Grid(engine)
         grid.parent = root
-        val mat = SolidMaterial(engine.gl)
+        val mat = SolidMaterial(engine)
         grid.material = mat
         mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
 //        editorCamera.behaviour = FpsCam(engine)
-        selectorMaterial = SolidMaterial(engine.gl)
+        selectorMaterial = SolidMaterial(engine)
 
 
         SceneFileLoader.load(this, file)
