@@ -18,6 +18,7 @@ class GameView : GLView() {
         backgroundColor.set(0f, 0.5f, 0.7f, 1f)
         game = TestGame(engine)
         camera = game.camera
+        postEffectPipeline!!.addEffect(SimplePostEffect(engine, getFXAAShader(engine.gl)))
         inited = true
     }
 
