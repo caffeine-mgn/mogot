@@ -40,6 +40,7 @@ class ExternalTexture(val engine: Engine, val file: VirtualFile) : ResourceImpl(
                 oldGl = file.inputStream.use {
                     loadPng(it)
                 }
+                oldGl!!.inc()
             }
             return oldGl!!
         }
