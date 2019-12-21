@@ -4,6 +4,24 @@ import kotlin.js.JsName
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmName
 
+interface Vector4fc {
+    val x: Float
+
+    val y: Float
+
+    val z: Float
+    val w: Float
+}
+
+open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 0f) : Vector4fc {
+    fun set(x: Float, y: Float, z: Float, w: Float) {
+        this.x = x
+        this.y = y
+        this.z = z
+        this.w = w
+    }
+}
+/*
 expect interface Vector4fc {
     @JsName("getX")
     fun x(): Float
@@ -34,3 +52,4 @@ expect class Vector4f : Vector4fc {
     @JvmField
     var w:Float
 }
+ */

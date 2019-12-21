@@ -5,6 +5,7 @@ import java.awt.Component
 import java.awt.Container
 import java.awt.Dimension
 import java.awt.LayoutManager
+import javax.swing.JComponent
 import kotlin.math.roundToInt
 import kotlin.reflect.KProperty
 
@@ -60,7 +61,7 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
 
         var calcedSize = emptyMap<Data, Int>()
         if (size - minSize > 0) {
-            val constSize = components.filter { it.setting?.grow ?: 0 == 0 }.sumBy {
+            val constSize = components.filter { it.setting?.grow ?: 0f == 0f }.sumBy {
                 it.setting?.basis ?: it.preferredSize
             }
             val growComponents = components.filter { it.setting?.grow ?: 0f > 0f }
@@ -164,10 +165,11 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
     var componentPadding = 0
     // Метод расположения компонентов в контейнере
     override fun layoutContainer(c: Container) {
+        val ins = (c as JComponent).border?.getBorderInsets(c)
         container = c
         when (direction) {
             Direction.ROW -> {
-                val mainAxisData = container.components.map {
+                val mainAxisData = container.components.filter { it.isVisible }.map {
                     Data(
                             component = it,
                             preferredSize = it.preferredSize.width,
@@ -177,7 +179,7 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
                             marginStart = settings[it]?.margin?.left ?: 0,
                             marginEnd = settings[it]?.margin?.right ?: 0)
                 }
-                val crossAxisData = container.components.map {
+                val crossAxisData = container.components.filter { it.isVisible }.map {
                     Data(
                             component = it,
                             preferredSize = it.preferredSize.height,
@@ -187,13 +189,13 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
                             marginStart = settings[it]?.margin?.top ?: 0,
                             marginEnd = settings[it]?.margin?.bottom ?: 0)
                 }
-                val mainAxis = calcAxis(mainAxisData, container.width)
-                val crossAxis = calcCrossAxis(crossAxisData, container.height)
+                val mainAxis = calcAxis(mainAxisData, container.width - container.insets.left - container.insets.right)
+                val crossAxis = calcCrossAxis(crossAxisData, container.height - container.insets.top - container.insets.bottom)
 
-                container.components.forEach { com ->
+                container.components.filter { it.isVisible }.forEach { com ->
                     val main = mainAxis.find { it.component == com }!!
                     val cross = crossAxis.find { it.component == com }!!
-                    com.setBounds(main.value, cross.value, main.length, cross.length)
+                    com.setBounds(container.insets.left + main.value, container.insets.top + cross.value, main.length, cross.length)
                 }
             }
             Direction.COLUMN -> {
@@ -217,12 +219,12 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
                             marginStart = settings[it]?.margin?.left ?: 0,
                             marginEnd = settings[it]?.margin?.right ?: 0)
                 }
-                val mainAxis = calcAxis(mainAxisData, container.height)
-                val crossAxis = calcCrossAxis(crossAxisData, container.width)
+                val mainAxis = calcAxis(mainAxisData, container.height - container.insets.top - container.insets.bottom)
+                val crossAxis = calcCrossAxis(crossAxisData, container.width - container.insets.left - container.insets.right)
                 container.components.forEach { com ->
                     val main = mainAxis.find { it.component == com }!!
                     val cross = crossAxis.find { it.component == com }!!
-                    com.setBounds(cross.value, main.value, cross.length, main.length)
+                    com.setBounds(container.insets.left + cross.value, container.insets.top + main.value, cross.length, main.length)
                 }
             }
         }
@@ -233,38 +235,50 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
         container = c
         if (direction == Direction.COLUMN) {
             return Dimension(
-                    (c.components.map {
+                    (c.components.filter { it.isVisible }.map {
                         val setting = settings[it]
                         val margin = (setting?.margin?.left ?: 0) + (setting?.margin?.right ?: 0)
                         it.preferredSize.width + margin
-                    }.max() ?: 0),
-                    c.components.map {
+                    }.max() ?: 0 + container.insets.left + container.insets.right),
+                    c.components.filter { it.isVisible }.map {
                         val setting = settings[it]
                         val margin = (setting?.margin?.top ?: 0) + (setting?.margin?.bottom ?: 0)
                         it.preferredSize.height + componentPadding + margin
-                    }.sum()
+                    }.sum() + container.insets.top + container.insets.bottom
             )
         }
         if (direction == Direction.ROW) {
             return Dimension(
-                    c.components.map {
+                    c.components.filter { it.isVisible }.map {
                         val setting = settings[it]
                         val margin = (setting?.margin?.left ?: 0) + (setting?.margin?.right ?: 0)
                         it.preferredSize.width + componentPadding + margin
-                    }.sum(),
-                    (c.components.map {
+                    }.sum() + container.insets.left + container.insets.right,
+                    (c.components.filter { it.isVisible }.map {
                         val setting = settings[it]
                         val margin = (setting?.margin?.top ?: 0) + (setting?.margin?.bottom ?: 0)
                         it.preferredSize.height + margin
-                    }.max() ?: 0)
+                    }.max() ?: 0 + container.insets.top + container.insets.bottom)
             )
         }
 
         TODO()
     }
+
+    fun remove(component: Component) {
+        componentPlace.remove(component)
+        settings.remove(component)
+    }
 }
 
-fun <T : Component> T.appendTo(layout: FlexLayout, f: (FlexLayout.Setting.() -> Unit)? = null): T {
+fun <T : Component> T.appendTo(layout: FlexLayout, grow: Int = 1): T {
+    layout.settingFor(this).grow = grow.toFloat()
+    layout.componentPlace.add(this)
+    return this
+}
+
+
+fun <T : Component> T.appendTo(layout: FlexLayout, f: (FlexLayout.Setting.() -> Unit)): T {
     if (f != null) {
         layout.settingFor(this).f()
     }

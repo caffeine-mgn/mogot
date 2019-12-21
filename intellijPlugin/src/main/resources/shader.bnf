@@ -9,8 +9,8 @@
   psiImplPackage="pw.binom.shader.psi.impl"
 
   elementTypeHolderClass="pw.binom.ShaderTypes"
-  elementTypeClass="pw.binom.ShaderElementType"
-  tokenTypeClass="pw.binom.ShaderTokenType"
+  elementTypeClass="pw.binom.material.ShaderElementType"
+  tokenTypeClass="pw.binom.material.ShaderTokenType"
 }
 
 simpleFile ::= item_*

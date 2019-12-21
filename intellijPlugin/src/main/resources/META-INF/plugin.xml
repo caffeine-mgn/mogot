@@ -8,18 +8,35 @@
 
     <idea-version since-build="191"/>
     <extensions defaultExtensionNs="com.intellij">
-        <!--<fileTypeFactory implementation="pw.binom.FbxFileTypeFactory"/>-->
+        <fileType name="Scene file" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
+                  language="Scene" extensions="scene"/>
+        <fileEditorProvider implementation="pw.binom.sceneEditor.SceneFileEditorProvider"/>
+
+        <!--
+        <group id="MogorPlugin.SceneMenu" text="Scene" description="Scene Menu">
+            <add-to-group group-id="MainMenu" anchor="last"  />
+            <action id="MogorPlugin.SceneMenu.Move" class="pw.binom.sceneEditor.MoveAction" text="Move" description="Move Selected Object" />
+        </group>
+        -->
+
+        <!--                                        -->
+
+
         <fileType name="Fbx file" implementationClass="pw.binom.FlxFileType" fieldName="INSTANCE"
                   language="FBX" extensions="fbx"/>
         <fileEditorProvider implementation="pw.binom.FbxFileEditorProvider"/>
 
-        <fileType name="Shader file" implementationClass="pw.binom.ShaderFileType" fieldName="INSTANCE"
-                  language="Shader" extensions="shr"/>
-        <lang.commenter language="Shader" implementationClass="pw.binom.glsl.GLSLCommenter"/>
-        <fileEditorProvider implementation="pw.binom.ShaderFileEditorProvider"/>
-        <lang.parserDefinition language="Shader" implementationClass="pw.binom.glsl.GLSLParserDefinition"/>
-        <lang.braceMatcher language="Shader" implementationClass="pw.binom.glsl.GLSLPairedBraceMatcher"/>
-        <lang.syntaxHighlighterFactory language="Shader" implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
+
+
+        <!-- Material -->
+        <externalAnnotator language="Material" implementationClass="pw.binom.material.ErrorAnnotator"></externalAnnotator>
+        <fileType name="Material file" implementationClass="pw.binom.material.MaterialFileType" fieldName="INSTANCE"
+                  language="Material" extensions="mat"/>
+        <lang.commenter language="Material" implementationClass="pw.binom.glsl.GLSLCommenter"/>
+        <fileEditorProvider implementation="pw.binom.material.MaterialFileEditorProvider"/>
+        <lang.parserDefinition language="Material" implementationClass="pw.binom.glsl.GLSLParserDefinition"/>
+        <lang.braceMatcher language="Material" implementationClass="pw.binom.glsl.GLSLPairedBraceMatcher"/>
+        <lang.syntaxHighlighterFactory language="Material" implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
     </extensions>
 
     <actions>

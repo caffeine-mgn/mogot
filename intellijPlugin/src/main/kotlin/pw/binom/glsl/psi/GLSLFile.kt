@@ -3,12 +3,12 @@ package pw.binom.glsl.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
-import pw.binom.ShaderFileType
-import pw.binom.ShaderLanguage
+import pw.binom.material.MaterialFileType
+import pw.binom.material.MaterialLanguage
 import javax.swing.Icon
 
-class GLSLFile(viewProvider: FileViewProvider): PsiFileBase(viewProvider,ShaderLanguage){
-    override fun getFileType(): FileType = ShaderFileType
+class GLSLFile(viewProvider: FileViewProvider): PsiFileBase(viewProvider, MaterialLanguage){
+    override fun getFileType(): FileType = MaterialFileType
 
     override fun getIcon(flags: Int): Icon? {
         return super.getIcon(flags)

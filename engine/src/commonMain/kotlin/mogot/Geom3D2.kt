@@ -12,6 +12,26 @@ import pw.binom.io.Closeable
  */
 class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: FloatArray?, uvs: FloatArray?) : Closeable {
 
+    enum class RenderMode {
+        TRIANGLES,
+        LINES
+    }
+
+    private var renderMode: Int = gl.TRIANGLES
+
+    var mode
+        get() = when (renderMode) {
+            gl.LINES -> RenderMode.LINES
+            gl.TRIANGLES -> RenderMode.TRIANGLES
+            else -> throw RuntimeException()
+        }
+        set(value) {
+            renderMode = when (value) {
+                RenderMode.LINES -> gl.LINES
+                RenderMode.TRIANGLES -> gl.TRIANGLES
+            }
+        }
+
     val indexBuffer = BufferElementArray(gl, static = true, draw = true)
     val vertexBuffer = BufferArray(gl, static = true, draw = true)
     val normalBuffer = if (normals == null) null else BufferArray(gl, static = true, draw = true).also { it.uploadArray(normals) }
@@ -79,7 +99,7 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
 
 
             normalBuffer?.bind {
-//                gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0)
+                //                gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0)
                 gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0)
                 gl.enableVertexAttribArray(1)
             }
@@ -103,12 +123,12 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
 //        println("Size: $size")
     }
 
-    fun draw(func:(()->Unit)?=null) {
+    fun draw(func: (() -> Unit)? = null) {
 //        gl.glLineWidth(30f)
         vao.bind {
             func?.invoke()
 //            gl.glDrawElements(GL2.GL_TRIANGLES, size, GL2.GL_UNSIGNED_INT, 0)
-            gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_INT, 0)
+            gl.drawElements(renderMode, size, gl.UNSIGNED_INT, 0)
 //            gl.glDrawElements(GL2.GL_LINE_STRIP, size, GL2.GL_UNSIGNED_INT, 0)
         }
 

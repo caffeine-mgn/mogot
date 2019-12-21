@@ -3,7 +3,7 @@ package mogot.gl
 import mogot.math.Matrix4fc
 
 expect class GL {
-    fun clear(mask:Int)
+    fun clear(mask: Int)
     fun createBuffer(): GLBuffer
     fun deleteBuffer(buffer: GLBuffer)
     fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int)
@@ -41,23 +41,24 @@ expect class GL {
     fun getShaderi(shader: GLShader, type: Int): Int
     fun getProgrami(program: GLProgram, type: Int): Int
     fun getProgramInfoLog(program: GLProgram): String?
-    fun bindFramebuffer(target: Int, frameBuffer: Int)
-    fun genFramebuffers(): Int
+    fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?)
+    fun createFrameBuffer(): GLFrameBuffer
     fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?)
     fun texParameteri(target: Int, pname: Int, param: Int)
     fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
-    fun genRenderbuffers(): Int
-    fun bindRenderbuffer(target: Int, renderbuffer: Int)
+    fun createRenderBuffer(): GLRenderBuffer
+    fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?)
     fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
-    fun framebufferRenderbuffer(target:Int, attachment:Int, renderbuffertarget:Int, renderbuffer:Int)
-    fun checkFramebufferStatus(target: Int):Int
+    fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer)
+    fun checkFramebufferStatus(target: Int): Int
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int)
     fun drawElements(mode: Int, count: Int, type: Int, offset: Int)
 
     fun getError(): Int
     fun deleteBuffers(texture: GLTexture)
-    fun deleteBuffers(buffer: Int)
+    fun deleteBuffer(buffer:GLRenderBuffer)
+    fun deleteBuffer(buffer:GLFrameBuffer)
     fun enable(feature: Int)
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
@@ -94,7 +95,12 @@ expect class GL {
     val LINK_STATUS: Int
     val TEXTURE0: Int
     val TEXTURE_2D: Int
-    val TEXTURE_MAX_LEVEL:Int
+    val TEXTURE_MAX_LEVEL: Int
+    val LINES: Int
+    val LINE_STRIP: Int
+    val LINE_LOOP: Int
+    val TRIANGLE_STRIP: Int
+    val TRIANGLE_FAN: Int
     val MULTISAMPLE: Int
 }
 
@@ -104,3 +110,5 @@ interface GLProgram
 interface GLShader
 interface GLUniformLocation
 interface GLTexture
+interface GLFrameBuffer
+interface GLRenderBuffer

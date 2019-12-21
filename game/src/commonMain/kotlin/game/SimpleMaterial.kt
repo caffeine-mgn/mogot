@@ -126,16 +126,12 @@ void main() {
                 gl.activeTexture(gl.TEXTURE0)
                 gl.bindTexture(gl.TEXTURE_2D, null)
             }
-//            shader.uniform("tex", field)
         }
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
-//        image?.bind()
         if (tex != null) {
-//            gl.activeTexture(gl.TEXTURE0)
             gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
-//            shader.uniform("tex", 0)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

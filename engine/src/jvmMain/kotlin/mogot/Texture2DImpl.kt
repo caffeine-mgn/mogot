@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 
 
-actual class Texture2D(private val engine: Engine, image: SourceImage) : Resource(engine), Closeable {
+actual class Texture2D(private val engine: Engine, image: SourceImage) : ResourceImpl() {
     actual val gl = engine.gl.createTexture()
     val width = image.width
     val height = image.height
@@ -18,6 +18,7 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
         get() = (gl as JGLTexture).id
 
     init {
+        println("Create texture")
         val glColor = when (image.type) {
             SourceImage.Type.RGB -> GL2.GL_RGB
             SourceImage.Type.RGBA -> GL2.GL_RGBA
@@ -34,10 +35,8 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
     }
 
     override fun dispose() {
+        println("delete texture")
         engine.gl.deleteTexture(gl)
-    }
-
-    override fun close() {
-        dispose()
+        super.dispose()
     }
 }

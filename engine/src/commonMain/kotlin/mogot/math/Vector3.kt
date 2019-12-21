@@ -57,7 +57,7 @@ interface Vector3fc {
         return dest
     }
 
-    fun normalize(dest: Vector3f): Vector3f {
+    fun normalize(dest: Vector3fm): Vector3fm {
         val invLength: Float = 1.0f / length
         dest.x = x * invLength
         dest.y = y * invLength
@@ -71,14 +71,31 @@ interface Vector3fc {
     val lengthSquared
         get() = x * x + y * y + z * z
 
+    fun copy() = Vector3f(x, y, z)
+
 
     companion object {
         val UP: Vector3fc = Vector3f(0f, 1f, 0f)
     }
 }
 
-class Vector3f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f) : Vector3fc {
-    fun set(x: Float, y: Float, z: Float): Vector3f {
+/**
+ * Mutable vector for 3 float numbers
+ */
+interface Vector3fm : Vector3fc {
+    override var x: Float
+    override var y: Float
+    override var z: Float
+    fun set(x: Float, y: Float, z: Float): Vector3fm
+    fun normalize() = normalize(this)
+}
+
+fun Vector3fm.set(other: Vector3fc) = set(other.x, other.y, other.z)
+
+open class Vector3f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f) : Vector3fm {
+    constructor(other: Vector3fc) : this(other.x, other.y, other.z)
+
+    override fun set(x: Float, y: Float, z: Float): Vector3f {
         this.x = x
         this.y = y
         this.z = z
@@ -87,24 +104,45 @@ class Vector3f(override var x: Float = 0f, override var y: Float = 0f, override 
 
     fun lerp(other: Vector3fc, t: Float) = lerp(other, t, this)
 
-    fun normalize() = normalize(this)
 
     inline fun set(other: Vector3fc) = set(other.x, other.y, other.z)
     fun add(x: Float, y: Float, z: Float): Vector3f {
-        this.x += x
-        this.y += y
-        this.z += z
-        return this
+        return set(
+                this.x + x,
+                this.y + y,
+                this.z + z
+        )
     }
 
     inline fun add(other: Vector3fc) = add(other.x, other.y, other.z)
     fun negate() = Vector3f(-x, -y, -z)
+
+    override fun toString(): String = "Vec3f($x,$y,$z)"
+    operator fun plusAssign(other: Vector3fc) {
+        add(other.x, other.y, other.z)
+        set(
+                x + other.x,
+                y + other.y,
+                z + other.z
+        )
+    }
 }
 
-operator fun Vector3fc.minus(other: Vector3f): Vector3f =
+operator fun Vector3fm.minus(other: Vector3f): Vector3f =
         Vector3f(x - other.x, y - other.y, z - other.z)
 
-operator fun Vector3fc.unaryMinus() = Vector3f(-x, -y, -z)
+operator fun Vector3fm.unaryMinus() = Vector3f(-x, -y, -z)
 
-operator fun Vector3fc.times(value: Float) = Vector3f(x * value, y * value, z * value)
-operator fun Vector3fc.times(other: Vector3fc) = Vector3f(x * other.x, y * other.y, z * other.z)
+operator fun Vector3fm.times(value: Float) = Vector3f(x * value, y * value, z * value)
+operator fun Vector3fm.times(other: Vector3fc) = Vector3f(x * other.x, y * other.y, z * other.z)
+operator fun Vector3fm.div(v: Vector3fc): Vector3f = Vector3f(x / v.x, y / v.y, z / v.z)
+operator fun Vector3fm.div(other: Float): Vector3f = Vector3f(x / other, y / other, z / other)
+interface Vector3ic {
+    val x: Int
+    val y: Int
+    val z: Int
+}
+
+class Vector3i(override var x: Int = 0, override var y: Int = 0, override var z: Int = 0) : Vector3ic {
+
+}

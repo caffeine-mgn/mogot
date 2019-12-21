@@ -62,6 +62,18 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_ARRAY_BUFFER
     actual val ELEMENT_ARRAY_BUFFER: Int
         get() = GL2.GL_ELEMENT_ARRAY_BUFFER
+    actual val TEXTURE_2D: Int
+        get() = GL2.GL_TEXTURE_2D
+    actual val LINES: Int
+        get() = GL2.GL_LINES
+    actual val LINE_STRIP: Int
+        get() = GL2.GL_LINE_STRIP
+    actual val LINE_LOOP: Int
+        get() = GL2.GL_LINE_LOOP
+    actual val TRIANGLE_STRIP: Int
+        get() = GL2.GL_TRIANGLE_STRIP
+    actual val TRIANGLE_FAN: Int
+        get() = GL2.GL_TRIANGLE_FAN
 
     actual fun createVertexArray(): GLVertexArray {
         val v = IntArray(1)
@@ -264,52 +276,62 @@ actual class GL(val gl: GL2) {
         texture as JGLTexture
         val b = IntBuffer.allocate(1)
         b.put(0, texture.id)
-        b.flip()
+        //b.flip()
         gl.glDeleteTextures(1, b)
     }
 
-    actual fun bindFramebuffer(target: Int, frameBuffer: Int){
-        gl.glBindFramebuffer(target, frameBuffer)
+    actual fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?) {
+        frameBuffer as JGLFrameBuffer?
+        gl.glBindFramebuffer(target, frameBuffer?.id ?: 0)
     }
-    actual fun genFramebuffers(): Int{
+
+    actual fun createFrameBuffer(): GLFrameBuffer {
         val fbo = IntBuffer.allocate(1)
-        gl.glGenFramebuffers(1,fbo)
-        return fbo[0]
+        gl.glGenFramebuffers(1, fbo)
+        return JGLFrameBuffer(fbo[0])
     }
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?){
-        if(pixels!=null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!)
+
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
+        if (pixels != null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!)
         else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
-    actual fun texParameteri(target: Int, pname: Int, param: Int){
+
+    actual fun texParameteri(target: Int, pname: Int, param: Int) {
         gl.glTexParameteri(target, pname, param)
     }
-    actual fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int){
+
+    actual fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int) {
         gl.glFramebufferTexture2D(target, attachment, textarget, (texture as JGLTexture).id, level)
     }
-    actual fun genRenderbuffers(): Int{
+
+    actual fun createRenderBuffer(): GLRenderBuffer {
         val rbo = IntBuffer.allocate(1)
-        gl.glGenRenderbuffers(1,rbo)
-        return rbo[0]
+        gl.glGenRenderbuffers(1, rbo)
+        return JGLRenderBuffer(rbo[0])
     }
-    actual fun bindRenderbuffer(target: Int, renderbuffer: Int){
-        gl.glBindRenderbuffer(target, renderbuffer)
+
+    actual fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?) {
+        renderbuffer as JGLRenderBuffer?
+        gl.glBindRenderbuffer(target, renderbuffer?.id ?: 0)
     }
-    actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int){
+
+    actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) {
         gl.glRenderbufferStorage(target, internalformat, width, height)
     }
-    actual fun framebufferRenderbuffer(target:Int, attachment:Int, renderbuffertarget:Int, renderbuffer:Int){
-        gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer)
+
+    actual fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer) {
+        renderbuffer as JGLRenderBuffer
+        gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer.id)
     }
-    actual fun checkFramebufferStatus(target: Int):Int{
+
+    actual fun checkFramebufferStatus(target: Int): Int {
         return gl.glCheckFramebufferStatus(target)
     }
 
-    actual fun clear(mask:Int){
+    actual fun clear(mask: Int) {
         gl.glClear(mask)
     }
 
-    actual val TEXTURE_2D: Int
-        get() = GL2.GL_TEXTURE_2D
     actual val COLOR_ATTACHMENT0: Int
         get() = GL2.GL_COLOR_ATTACHMENT0
     actual val FRAMEBUFFER: Int
@@ -329,14 +351,24 @@ actual class GL(val gl: GL2) {
         val buffer = IntBuffer.allocate(1)
         buffer.put((texture as JGLTexture).id)
         buffer.flip()
-        gl.glDeleteBuffers(1,buffer)
+        gl.glDeleteBuffers(1, buffer)
     }
 
-    actual fun deleteBuffers(buffer: Int) {
+    actual fun deleteBuffer(buffer: GLRenderBuffer) {
+        buffer as JGLRenderBuffer
+        deleteBuffers(buffer.id)
+    }
+
+    actual fun deleteBuffer(buffer: GLFrameBuffer) {
+        buffer as JGLFrameBuffer
+        deleteBuffers(buffer.id)
+    }
+
+    private fun deleteBuffers(buffer: Int) {
         val buffer_ = IntBuffer.allocate(1)
         buffer_.put(buffer)
         buffer_.flip()
-        gl.glDeleteBuffers(1,buffer_)
+        gl.glDeleteBuffers(1, buffer_)
     }
 
     actual val FRAMEBUFFER_COMPLETE: Int
@@ -352,11 +384,11 @@ actual class GL(val gl: GL2) {
         gl.glEnable(feature)
     }
 
-    actual fun disable(feature: Int){
+    actual fun disable(feature: Int) {
         gl.glDisable(feature)
     }
 
-    actual fun texParameterf(target: Int, pname: Int, param: Float){
+    actual fun texParameterf(target: Int, pname: Int, param: Float) {
         gl.glTexParameterf(target, pname, param)
     }
 
@@ -371,7 +403,7 @@ actual class GL(val gl: GL2) {
     actual val NEAREST: Int
         get() = GL2.GL_NEAREST
     actual val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
-    get() = GL2.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+        get() = GL2.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 }
 
 private fun GL2.glGetShaderi(shader: Int, pname: Int): Int {
@@ -398,3 +430,5 @@ private inline class JGLProgram(val id: Int) : GLProgram
 private inline class JGLShader(val id: Int) : GLShader
 private inline class JGLUniformLocation(val id: Int) : GLUniformLocation
 internal inline class JGLTexture(val id: Int) : GLTexture
+internal inline class JGLRenderBuffer(val id: Int) : GLRenderBuffer
+internal inline class JGLFrameBuffer(val id: Int) : GLFrameBuffer
