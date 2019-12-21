@@ -25,6 +25,7 @@ import pw.binom.material.compiler.TypeDesc
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import pw.binom.material.uniformEditor.UniformEditor
+import pw.binom.sceneEditor.loadTexture
 import java.beans.PropertyChangeListener
 import java.io.StringReader
 import javax.swing.Icon
@@ -190,7 +191,11 @@ void main() {
 
         fun setUniform(type: TypeDesc, name: String, value: String?) {
             if (type is SingleType && type.clazz.name == "sampler2D") {
-                val texture = value?.let { sourceFile.parent.findFileByRelativePath(value)?.let { MaterialViewer.TextureFile(it) } }
+                val texture = value
+                        ?.let {
+                            sourceFile.parent.findFileByRelativePath(value)
+                                    ?.let { materialViewer.engine.resources.loadTexture(it) }
+                        }
                 materialViewer.set(name, texture)
             }
 

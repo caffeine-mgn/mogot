@@ -9,11 +9,11 @@ class StatementBlock(val statements: List<Statement>, override val position: Int
         fun read(lexer: LexStream<TokenType>): StatementBlock? =
                 lexer.safe {
                     val startBlock = lexer.skipSpace(true)
-                            startBlock?.ifType(TokenType.LEFT_BRACE)
+                    startBlock?.ifType(TokenType.LEFT_BRACE)
                             ?: return@safe null
 
                     val list = ArrayList<Statement>()
-                    var endBlock:LexStream.Element<TokenType>? = null
+                    var endBlock: LexStream.Element<TokenType>? = null
                     while (true) {
                         if (lexer.checkNext(true)?.element == TokenType.RIGHT_BRACE) {
                             endBlock = lexer.skipSpace(true)!!
@@ -22,8 +22,8 @@ class StatementBlock(val statements: List<Statement>, override val position: Int
                         val l = Statement.read(lexer) ?: break
                         list += l
                     }
-
-                    StatementBlock(list,startBlock.position,endBlock!!.position+1-startBlock.position)
+                    endBlock ?: return@safe null
+                    StatementBlock(list, startBlock.position, endBlock.position + 1 - startBlock.position)
                 }
     }
 }
