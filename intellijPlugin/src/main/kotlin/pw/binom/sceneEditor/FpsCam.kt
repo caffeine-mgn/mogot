@@ -40,7 +40,6 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
     private val keyDown = HashSet<Int>()
     override fun keyDown(code: Int) {
-        println("code=$code")
         keyDown.add(code)
     }
 

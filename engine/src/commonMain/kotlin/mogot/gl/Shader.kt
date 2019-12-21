@@ -1,6 +1,5 @@
 package mogot.gl
 
-import mogot.Texture2D
 import mogot.math.Matrix4fc
 import mogot.math.Vector3fc
 import mogot.math.Vector3ic
@@ -88,7 +87,7 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
     fun uniform(name: String, value: Float): Boolean {
         val num = gl.getUniformLocation(id, name) ?: return false
         gl.uniform1f(num, value)
-        checkError()
+        checkError(name, value.toString())
         return true
     }
 
@@ -116,10 +115,10 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
         return true
     }
 
-    private fun checkError(name: String? = null) {
+    private fun checkError(name: String? = null, value: String? = null) {
         gl.getError().also {
             if (it != 0)
-                TODO("error=$it in uniform $name")
+                TODO("error=$it in uniform $name ($value)")
         }
     }
 }
@@ -176,7 +175,7 @@ private fun compileVertexShader(gl: GL, source: String): GLShader {
         gl.deleteShader(v)
         println("Vertex Shader:\n")
         source.lineSequence().forEachIndexed { index, s ->
-            println("${index+1}: $s")
+            println("${index + 1}: $s")
         }
         throw RuntimeException("ID=$v, Message: ${message}")
     }

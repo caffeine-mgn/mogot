@@ -61,7 +61,7 @@ class OmniLightService(private val view: SceneEditorView) : NodeService {
 
     private fun createStub(light: OmniLight) {
         view.renderThread {
-            val s = Sprite(view.engine)
+            val s = Sprite(view.engine.gl)
             s.size.set(120f / 4f, 160f / 4f)
             s.material = SolidTextureMaterial(view.engine).apply {
                 diffuseColor.set(0f, 0f, 0f, 0f)

@@ -4,13 +4,18 @@ import com.intellij.ide.util.TreeFileChooserFactory
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.MaterialNode
 import mogot.Node
+import pw.binom.FlexLayout
+import pw.binom.appendTo
 import pw.binom.glsl.psi.GLSLFile
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.loadMaterial
-import java.awt.BorderLayout
+import pw.binom.sceneEditor.properties.meterial.MaterialProperties
+import pw.binom.utils.equalsAllBy
+import java.awt.Color
 import javax.swing.JButton
 import javax.swing.JComponent
+import javax.swing.JPanel
 
 object MaterialPropertyFactory : PropertyFactory {
     override fun create(view: SceneEditorView): Property =
@@ -18,9 +23,16 @@ object MaterialPropertyFactory : PropertyFactory {
 
 }
 
-class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
-    val selectBtn = JButton("select")
-    val clearBtn = JButton("X")
+class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material") {
+    private val flex = FlexLayout(stage, direction = FlexLayout.Direction.COLUMN)
+
+    private val editor = JPanel().appendTo(flex, grow = 0)
+    private val editorFlex = FlexLayout(editor, direction = FlexLayout.Direction.ROW)
+    private val selectBtn = JButton("select").appendTo(editorFlex)
+    private val clearBtn = JButton("X").appendTo(editorFlex, grow = 0)
+
+    val MaterialNode.materialInstance: MaterialInstance?
+        get() = material as? MaterialInstance
 
     var MaterialNode.materialFile: VirtualFile?
         get() {
@@ -38,25 +50,54 @@ class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
                 this.material = view.engine.resources.loadMaterial(value)
         }
 
+    private var materialProperties = MaterialProperties(this).appendTo(flex, grow = 0)
+    private var instances: List<MaterialInstance>? = null
 
-    init {
-        add(selectBtn, BorderLayout.CENTER)
-        add(clearBtn, BorderLayout.EAST)
+    private fun refreshInstances() {
+        instances = nodes
+                .takeIf { it.isNotEmpty() }
+                ?.asSequence()
+                ?.map { it.materialInstance }
+                ?.takeIf { it.all { it != null } }
+                ?.map { it!! }
+                ?.takeIf { it.equalsAllBy { it.root } }
+                ?.toList()
+
+        selectBtn.text = instances?.firstOrNull()?.root?.file?.name ?: "none"
     }
 
-    private var nodes: List<MaterialNode>? = null
+    private fun updateProperties() {
 
-    override fun setNodes(nodes: List<Node>) {
-        this.nodes = nodes.mapNotNull { it as? MaterialNode }
-    }
+        materialProperties.isVisible = instances != null
 
-    private fun setMaterial(file: VirtualFile?) {
-        nodes?.forEach {
-            it.materialFile = file
+        if (instances != null) {
+            materialProperties.setMaterials(instances!!)
+        } else {
+            materialProperties.setMaterials(emptyList())
         }
     }
 
+    private var nodes: List<MaterialNode> = emptyList()
+
+    override fun setNodes(nodes: List<Node>) {
+        this.nodes = nodes.mapNotNull { it as? MaterialNode }
+        refreshInstances()
+        updateProperties()
+    }
+
+    private fun setMaterial(file: VirtualFile?) {
+        nodes.forEach {
+            it.materialFile = file
+        }
+        refreshInstances()
+        updateProperties()
+        view.repaint()
+    }
+
     init {
+        refreshInstances()
+        updateProperties()
+
         selectBtn.addActionListener {
             val chooser = TreeFileChooserFactory
                     .getInstance(view.editor1.project)
@@ -70,15 +111,12 @@ class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
             chooser.showDialog()
             val file = chooser.selectedFile
             if (file != null) {
-                println("Selected ${file}   ${file::class.java.name}")
                 setMaterial(file.virtualFile)
-                selectBtn.text = file.virtualFile.name
             }
         }
 
         clearBtn.addActionListener {
             setMaterial(null)
-            selectBtn.text = "No Material"
         }
     }
 
@@ -86,6 +124,10 @@ class MaterialProperty(val view: SceneEditorView) : Property, Panel() {
         get() = this
 
     override fun close() {
+    }
+
+    init {
+        background = Color.green
     }
 
 }

@@ -93,9 +93,12 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int) {
         val b = Float32Array(data.size)
         b.set(data.unsafeCast<Array<Float>>())
-
 //        ctx.bufferData(target, size, usage)
         ctx.bufferData(target, b, usage)
+    }
+
+    actual fun clear(mask: Int) {
+        ctx.clear(mask)
     }
 
     actual fun bindBuffer(target: Int, buffer: GLBuffer?) {

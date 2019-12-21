@@ -112,11 +112,6 @@ class UniformEditor(val editor: MaterialFileEditor) : JBPanel<JBPanel<*>>() {
             editor.materialViewer.set(it.uniform.name, null)
             componentPanel.remove(it.component)
         }
-
-        println("\n\nComponents:")
-        components.forEach {
-            println("-->$it")
-        }
     }
 
     private val componentPanel = JBPanel<JBPanel<*>>()

@@ -1,17 +1,22 @@
 package pw.binom
 
 import mogot.*
-import mogot.gl.GL
 import mogot.gl.GLView
-import mogot.gl.MaterialGLSL
-import mogot.gl.Shader
-import mogot.math.*
+import mogot.math.MATRIX4_ONE
+import mogot.math.Matrix4f
+import mogot.math.Vector2f
+import mogot.math.Vector3f
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
+import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Dimension
 import java.io.StringReader
+import javax.swing.BorderFactory
+import javax.swing.JButton
 import javax.swing.JFrame
+import javax.swing.JPanel
 
 class FullScreenSprite(engine: Engine) {
     var material: Material? = null
@@ -25,6 +30,7 @@ class FullScreenSprite(engine: Engine) {
         mat.unuse()
     }
 }
+
 /*
 class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     override val shader: Shader = Shader(gl, vp, fp)
@@ -95,12 +101,12 @@ class DDD : GLView() {
 
         println("VP:")
         vv.vp.lineSequence().forEachIndexed { index, s ->
-            println("${index+1}: $s")
+            println("${index + 1}: $s")
         }
 
         println("\n\nFP:")
         vv.fp.lineSequence().forEachIndexed { index, s ->
-            println("${index+1}: $s")
+            println("${index + 1}: $s")
         }
 
 
@@ -110,7 +116,7 @@ class DDD : GLView() {
             void main() {color=vec4(1.0f,1.0f,1.0f,1.0f);}
         """
 
-        val vp="""#version 300 es
+        val vp = """#version 300 es
            precision mediump float;
            uniform mat4 projection;
            uniform mat4 model;
@@ -139,16 +145,47 @@ class DDD : GLView() {
     }
 }
 
+class ddd : JPanel() {
+    private val flex = FlexLayout(this, FlexLayout.Direction.ROW)
+    val sppp = JButton("grow=1").appendTo(flex, grow = 1)
+    val sppp2 = JButton("grow=0").appendTo(flex, grow = 0)
+
+}
+
 object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         //val view3d = FbxViewer(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\main\\resources\\untitled.fbx").inputStream().readAllBytes())
-        val view3d = DDD()
+//        val view3d = DDD()
         val f = JFrame()
+
+        val pp = JPanel()
+        pp.setSize(400, 400)
+
+        val pp3 = JPanel()
+        pp3.setSize(400, 400)
+        val s = ddd()
+        s.setSize(400, 400)
+//        pp3.add(s)
+        pp3.background = Color.green
+
+        val pp2 = JPanel()
+        pp2.border = BorderFactory.createLineBorder(Color.red, 5, true)
+
+        f.add(pp, BorderLayout.WEST)
+        f.add(pp2, BorderLayout.EAST)
+        f.add(s, BorderLayout.CENTER)
+
+        FlexLayout(pp)
+        FlexLayout(pp2)
+
+        pp.add(JButton("TEST-------TEST"))
+        pp2.add(JButton("TEST-------TEST"))
+
         f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
         f.size = Dimension(800, 600)
-        f.add(view3d)
+//        f.add(view3d)
         f.isVisible = true
-        view3d.startRender()
+//        view3d.startRender()
     }
 }

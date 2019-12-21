@@ -278,7 +278,7 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     protected open fun init() {
         _engine = Engine(this)
         if(postEffectPipeline==null){
-            postEffectPipeline =  PostEffectPipeline(gl)
+            postEffectPipeline =  PostEffectPipeline(engine)
 
         }
         postEffectPipeline?.init(width,height)

@@ -61,11 +61,15 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
     override val shader: Shader
         get() = _shader!!
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        if (_shader == null && compiler != null) {
+    private fun checkValid() {
+        if (_shader == null) {
             val gen = GLES300Generator(compiler!!)
             _shader = Shader(engine.gl, gen.vp, gen.fp)
         }
+    }
+
+    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        checkValid()
         if (_shader == null) {
             return
         }
@@ -88,7 +92,7 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
     fun instance() = MaterialInstance(this)
 }
 
-class ExternalManager(val engine: Engine): Closeable {
+class ExternalManager(val engine: Engine) : Closeable {
     private val files = HashMap<String, ExternalMaterial>()
     fun instance(file: VirtualFile): MaterialInstance {
         val material = files.getOrPut(file.path) { ExternalMaterial(engine, file) }
@@ -100,7 +104,8 @@ class ExternalManager(val engine: Engine): Closeable {
 
     override fun close() {
         files.values.forEach {
-            while (!it.dec()){}
+            while (!it.dec()) {
+            }
         }
     }
 }

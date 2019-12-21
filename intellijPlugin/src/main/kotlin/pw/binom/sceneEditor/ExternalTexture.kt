@@ -32,6 +32,8 @@ class ExternalTexture(val engine: Engine, val file: VirtualFile) : ResourceImpl(
     private var oldGl: Texture2D? = null
     private var modificationStamp: Long? = null
 
+
+
     val gl: Texture2D
         get() {
             if (oldGl == null || modificationStamp == null || file.modificationStamp > modificationStamp ?: 0L) {
@@ -49,6 +51,21 @@ class ExternalTexture(val engine: Engine, val file: VirtualFile) : ResourceImpl(
         oldGl?.dec()
         oldGl = null
         super.dispose()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ExternalTexture
+
+        if (file != other.file) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return file.hashCode()
     }
 
 }

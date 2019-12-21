@@ -52,7 +52,6 @@ abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : E
     }
 
     override fun keyUp(code: Int) {
-        println("code=$code")
         if (code == 27) {
             resetPositions()
             stopEdit()
