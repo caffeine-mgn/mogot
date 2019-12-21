@@ -1,8 +1,6 @@
 package pw.binom.material
 
-import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
-import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -11,14 +9,16 @@ import mogot.math.Vector3ic
 import mogot.math.Vector4fc
 import pw.binom.SimpleMaterial
 import pw.binom.View3D
-import pw.binom.io.Closeable
+import pw.binom.sceneEditor.ExternalTexture
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 
 class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
+    /*
     class TextureFile(val file: VirtualFile) : Closeable {
         private var texture: Texture2D? = null
+        var id: Int = -1
         fun getTexture2D(engine: Engine): Texture2D {
             if (texture == null) {
                 texture = engine.resources.syncCreateTexture2D(file.path)
@@ -31,7 +31,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
             texture?.dec()
         }
     }
-
+*/
     lateinit var material: DynamicMaterialGLSL
 
     private var vp = ""
@@ -41,10 +41,42 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
 
     private val params = HashMap<String, Any>()
 
+    private val activeTextures = ArrayList<ExternalTexture>()
+    private val textureId = HashMap<ExternalTexture, Int>()
+
+    var ExternalTexture.id: Int
+        get() = textureId[this] ?: -1
+        set(value) {
+            textureId[this] = value
+        }
+
+    private fun updateTextureIndexes() {
+        activeTextures.forEachIndexed { index, textureFile ->
+            textureFile.id = index
+        }
+    }
+
     fun set(name: String, value: Any?) {
+        val oldValue = params.remove(name)
+        if (oldValue is ExternalTexture) {
+            activeTextures.remove(oldValue)
+            textureId.remove(oldValue)
+            oldValue.dec()
+        }
+        if (value is ExternalTexture) {
+            activeTextures.add(value)
+            value.inc()
+        }
+        if (value != null)
+            params[name] = value
+        updateTextureIndexes()
+    }
+/*
         if (value == null) {
             val oldValue = params.remove(name)
             if (oldValue is TextureFile) {
+                activeTextures.remove(oldValue)
+                updateTextureIndexes()
                 engine.waitFrame {
                     oldValue.close()
                 }
@@ -57,13 +89,18 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                     return
                 }
             }
-            if (old is TextureFile)
+            if (value is TextureFile) {
+                activeTextures += value
+            }
+            if (old is TextureFile) {
+                activeTextures.remove(old)
                 engine.waitFrame {
                     old.close()
                 }
+            }
+            updateTextureIndexes()
             params[name] = value
-        }
-    }
+            */
 
     inner class DynamicMaterialGLSL(engine: Engine) : MaterialGLSL(engine) {
         private val standart = SimpleMaterial(engine)
@@ -85,19 +122,17 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
             super.use(model, projection, renderContext)
             params.forEach { (name, value) ->
-                println("$name: $value")
-            }
-            params.forEach { (name, value) ->
                 when (value) {
                     is Int -> shader.uniform(name, value)
                     is Float -> shader.uniform(name, value)
                     is Vector3fc -> shader.uniform(name, value)
                     is Vector3ic -> shader.uniform(name, value)
                     is Vector4fc -> shader.uniform(name, value)
-                    is TextureFile -> {
-                        gl.activeTexture(gl.TEXTURE0)
-                        gl.bindTexture(gl.TEXTURE_2D, value.getTexture2D(engine).gl)
-                        shader.uniform(name, 0)
+                    is ExternalTexture -> {
+                        println("active $name to ${value.id} from ${value.file.path}")
+                        gl.activeTexture(gl.TEXTURE0 + value.id)
+                        gl.bindTexture(gl.TEXTURE_2D, value.gl.gl)
+                        shader.uniform(name, value.id)
                     }
                     else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")
                 }
@@ -119,6 +154,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
             try {
                 material.dynamicShader?.close()
                 material.dynamicShader = Shader(gl, vp, fp)
+                println("fp:\n$fp")
             } catch (e: Throwable) {
                 println("MaterialView ERROR: ${e.message}")
                 println("fp:\n$fp")
@@ -173,9 +209,12 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
     }
 
     override fun dispose() {
-        params.values.asSequence()
-                .mapNotNull { it as? TextureFile }
-                .forEach { it.close() }
+        activeTextures.forEach {
+            it.dec()
+        }
+        activeTextures.clear()
+        textureId.clear()
+        params.clear()
         fpOld = ""
         vpOld = ""
         material.dynamicShader?.close()

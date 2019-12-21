@@ -22,6 +22,8 @@ class SingleType(clazz: ClassDesc) : TypeDesc(clazz) {
 
     override fun findType(type: Type): TypeDesc? = null
     override fun findType(clazz: ClassDesc, array: List<Int>): TypeDesc? = null
+
+    override fun toString(): String = clazz.name
 }
 
 class ArrayType(scope: Scope, clazz: ClassDesc, val size: List<Int>) : TypeDesc(clazz) {
@@ -56,4 +58,6 @@ class ArrayType(scope: Scope, clazz: ClassDesc, val size: List<Int>) : TypeDesc(
             null
 
     override fun findType(clazz: ClassDesc, array: List<Int>): TypeDesc? = null
+
+    override fun toString(): String = "${clazz.name}${size.map { "[$it]" }.joinToString("")}"
 }

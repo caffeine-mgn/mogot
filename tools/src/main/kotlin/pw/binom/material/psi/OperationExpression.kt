@@ -24,7 +24,7 @@ class OperationExpression(
                         TokenType.OP_DIV -> DIV
                         TokenType.OP_TIMES -> TIMES
                         TokenType.OP_PLUS -> PLUS
-                        TokenType.OP_MINUS -> PLUS
+                        TokenType.OP_MINUS -> MINUS
                         TokenType.OP_GT -> GT
                         TokenType.OP_GE -> GE
                         TokenType.OP_LT -> LT
