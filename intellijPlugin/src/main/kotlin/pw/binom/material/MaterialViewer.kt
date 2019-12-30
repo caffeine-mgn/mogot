@@ -190,15 +190,15 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         }
         material = DynamicMaterialGLSL(engine)
         val node = GeomNode2().also {
-            it.geom = Geoms.buildCube2(gl, 1f)
-            it.material = material
+            it.geom.value = Geoms.buildCube2(gl, 1f)
+            it.material.value = material
         }
         root!!.addChild(node)
 
         val l = OmniLight()
         val node1 = GeomNode().apply {
-            geom = Geoms.solidSphere(gl, 1f, 30, 30)
-            material = SimpleMaterial(engine)
+            geom.value = Geoms.solidSphere(gl, 1f, 30, 30)
+            material.value = SimpleMaterial(engine)
         }
         node1.position.z = -30f
         node1.position.x = 30f
@@ -225,19 +225,19 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
     }
 
     private inner class GeomNode2 : VisualInstance(), MaterialNode by MaterialNodeImpl() {
-        var geom: Geom3D2? = null
+        var geom = ResourceHolder<Geom3D2>()
         override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-            material?.use(model, projection, renderContext)
+            material.value?.use(model, projection, renderContext)
             renderListeners.forEach {
                 it()
             }
-            geom?.draw()
-            material?.unuse()
+            geom.value?.draw()
+            material.value?.unuse()
         }
 
         override fun close() {
-            geom?.close()
-            material = null
+            geom.dispose()
+            material.dispose()
         }
     }
 }

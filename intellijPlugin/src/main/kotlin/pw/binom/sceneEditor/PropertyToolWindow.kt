@@ -31,10 +31,10 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
         }
         properties.clear()
         nodes.asSequence()
-                .flatMap { it.second.getProperties(it.first).asSequence() }
+                .flatMap { it.second.getProperties(editor.viewer, it.first).asSequence() }
                 .distinct()
                 .filter { property ->
-                    nodes.all { property in it.second.getProperties(it.first) }
+                    nodes.all { property in it.second.getProperties(editor.viewer, it.first) }
                 }
                 .map { editor.getProperty(it) }
                 .forEach {

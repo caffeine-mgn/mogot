@@ -3,13 +3,13 @@ package pw.binom.sceneEditor
 import mogot.*
 import mogot.math.Matrix4fc
 
-class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance() {
+class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), MaterialNode {
     val size = Vector3fProperty()
-    var material: Material? = null
-    private var geom: Geom3D2? = null
+    override val material = ResourceHolder<Material>()
+    private val geom = ResourceHolder<Geom3D2>()
 
     override fun close() {
-        geom?.close()
+        geom.dispose()
         super.close()
     }
 
@@ -58,26 +58,25 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance() {
         draw(-1f, 1f, -1f)
         draw(1f, -1f, 1f)
 
-        geom?.close()
-        geom = Geom3D2(
+        this.geom.value = Geom3D2(
                 gl = engine.gl,
                 vertex = vertex,
                 index = IntArray(vertex.size) { it },
                 normals = null,
                 uvs = null
         )
-        geom!!.mode = Geom3D2.RenderMode.LINES
+        geom.value!!.mode = Geometry.RenderMode.LINES
     }
 
     override fun apply(matrix: Matrix4fc): Matrix4fc = node.matrix
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         val mat = material ?: return
-        if (geom == null || size.resetChangeFlag()) {
+        if (geom.value == null || size.resetChangeFlag()) {
             rebuildGeom()
         }
-        mat.use(model, projection, renderContext)
-        geom!!.draw()
-        mat.unuse()
+        mat.value?.use(model, projection, renderContext)
+        geom.value?.draw()
+        mat.value?.unuse()
     }
 }

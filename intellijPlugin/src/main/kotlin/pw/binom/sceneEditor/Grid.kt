@@ -49,7 +49,7 @@ class Grid(engine: Engine) : VisualInstance() {
                 normals = null,
                 uvs = null
         )
-        geom.mode = Geom3D2.RenderMode.LINES
+        geom.mode = Geometry.RenderMode.LINES
     }
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {

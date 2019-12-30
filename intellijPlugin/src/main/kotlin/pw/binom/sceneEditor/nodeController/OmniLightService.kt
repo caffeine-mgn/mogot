@@ -1,113 +1,107 @@
 package pw.binom.sceneEditor.nodeController
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.databind.node.ObjectNode
-import mogot.Node
-import mogot.OmniLight
-import mogot.Sprite
+import com.intellij.openapi.vfs.VirtualFile
+import mogot.*
 import pw.binom.SolidTextureMaterial
+import pw.binom.io.Closeable
 import pw.binom.io.wrap
-import pw.binom.sceneEditor.LightScreenPos
-import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.obj
+import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
 
-object OmniLightServiceFactory : NodeServiceFactory {
-    override fun create(view: SceneEditorView): NodeService =
-            OmniLightService(view)
+object OmniNodeCreator : NodeCreator {
+    override val name: String
+        get() = "Omni Light"
+    override val icon: Icon = ImageIcon(this::class.java.classLoader.getResource("/light-icon-16.png"))
+
+    override fun create(view: SceneEditorView): Node {
+        val node = OmniLight()
+        createStub(view, node)
+        return node
+    }
 }
 
-class OmniLightService(private val view: SceneEditorView) : NodeService {
-    private val lightIcon = ImageIcon(this::class.java.classLoader.getResource("/light-icon-16.png"))
+private class OmniManager(val engine: Engine) : Closeable {
+    val lights = HashMap<OmniLight, LightScreenPos>()
 
-    val omniLightTexture = this::class.java.getResourceAsStream("/light-icon.png").use {
-        view.engine.resources.syncCreateTexture2D(it.wrap())
+    lateinit var omniLightTexture: Texture2D
+
+    init {
+        engine.editor.renderThread {
+            omniLightTexture = this::class.java.getResourceAsStream("/light-icon.png").use {
+                engine.resources.syncCreateTexture2D(it.wrap())
+            }
+        }
     }
 
-    private val props = listOf(PositionPropertyFactory)
-    override fun getProperties(node: Node): List<PropertyFactory> = props
+    override fun close() {
 
-    private val lights = HashMap<OmniLight, LightScreenPos>()
-    override val createItems: List<NodeService.CreateItem> = listOf(object : NodeService.CreateItem {
-        override val name: String
-            get() = "Omni Light"
-        override val icon: Icon?
-            get() = lightIcon
+    }
+}
 
-        override fun create(): Node {
-            val node = OmniLight()
-            view.link(node, this@OmniLightService)
-            createStub(node)
-            return node
+private val Engine.omniManager: OmniManager
+    get() = manager("omniManager") { OmniManager(this) }
+
+private fun createStub(view: SceneEditorView, light: OmniLight) {
+    view.renderThread {
+        val s = Sprite(view.engine.gl)
+        s.size.set(120f / 4f, 160f / 4f)
+        s.material = SolidTextureMaterial(view.engine).apply {
+            diffuseColor.set(0f, 0f, 0f, 0f)
+            tex = view.engine.omniManager.omniLightTexture
         }
-    })
+        val b = LightScreenPos(view.editorCamera, light)
+        s.behaviour = b
+        s.parent = view.editorRoot
+        view.engine.omniManager.lights[light] = b
 
-    override fun selected(node: Node) {
-        super.selected(node)
-        val sprite = lights[node]!!.node
+        println("Create stub for $light $s and $b")
+    }
+}
+
+object OmniLightService : NodeService {
+
+    private val props = listOf(PositionPropertyFactory)
+    override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
+    override fun isEditor(node: Node): Boolean = node is OmniLight
+    override fun delete(view: SceneEditorView, node: Node) {
+        node as OmniLight ?: return
+        view.engine.omniManager.lights.remove(node)?.node?.let {
+            it.parent = null
+            it.close()
+        }
+    }
+
+    override fun selected(view: SceneEditorView, node: Node) {
+        val sprite = view.engine.omniManager.lights[node]!!.node
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
     }
 
-    override fun unselected(node: Node) {
-        val sprite = lights[node]!!.node
+    override fun unselected(view: SceneEditorView, node: Node) {
+        val sprite = view.engine.omniManager.lights[node]!!.node
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0f, 0f, 0f, 0f)
-        super.unselected(node)
     }
 
-    private fun createStub(light: OmniLight) {
-        view.renderThread {
-            val s = Sprite(view.engine.gl)
-            s.size.set(120f / 4f, 160f / 4f)
-            s.material = SolidTextureMaterial(view.engine).apply {
-                diffuseColor.set(0f, 0f, 0f, 0f)
-                tex = omniLightTexture
-            }
-            val b = LightScreenPos(view.editorCamera, light)
-            s.behaviour = b
-            s.parent = view.editorRoot
-            lights[light] = b
 
-            println("Create stub for $light $s and $b")
-        }
-    }
-
-    override fun load(clazz: String, json: ObjectNode): Node? {
+    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != OmniLight::class.java.name)
             return null
         println("Load $clazz...")
         val n = OmniLight()
-        createStub(n)
-        view.link(n, this)
-        json["properties"]?.obj?.fields()?.forEach {
-            when (it.key) {
-                "position.x" -> n.position.x = it.value.floatValue()
-                "position.y" -> n.position.y = it.value.floatValue()
-                "position.z" -> n.position.z = it.value.floatValue()
-                "specular" -> n.specular = it.value.floatValue()
-            }
-        }
-        println("Loaded!")
+        createStub(view, n)
+        SpatialService.loadTransform(n, properties)
         return n
     }
 
-    override fun save(node: Node): ObjectNode? {
-        val node = (node as? OmniLight) ?: return null
-        val r = JsonNodeFactory.instance.objectNode()
-        val properties = JsonNodeFactory.instance.objectNode()
-        r["properties"] = properties
-        properties.set("position.x", JsonNodeFactory.instance.numberNode(node.position.x))
-        properties.set("position.y", JsonNodeFactory.instance.numberNode(node.position.y))
-        properties.set("position.z", JsonNodeFactory.instance.numberNode(node.position.z))
-        properties.set("specular", JsonNodeFactory.instance.numberNode(node.specular))
-        return r
+    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
+        if (node !is OmniLight) return null
+        val out = HashMap<String, String>()
+        SpatialService.saveTransform(node, out)
+        out["specular"] = node.specular.toString()
+        return out
     }
-
-    override fun close() {
-    }
-
 }

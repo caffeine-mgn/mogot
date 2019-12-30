@@ -4,12 +4,14 @@ import com.intellij.codeHighlighting.BackgroundEditorHighlighter
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.undo.*
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorLocation
 import com.intellij.openapi.fileEditor.FileEditorState
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -17,7 +19,9 @@ import com.intellij.openapi.wm.ToolWindowManager
 import pw.binom.sceneEditor.properties.Property
 import pw.binom.sceneEditor.properties.PropertyFactory
 import java.beans.PropertyChangeListener
+import javax.swing.JButton
 import javax.swing.JComponent
+import javax.swing.JPanel
 
 
 class SceneEditor(val project: Project,
@@ -25,10 +29,6 @@ class SceneEditor(val project: Project,
 
     private val SCENE_TOOL_WINDOW = "Scene"
     private val PROPERTIES_TOOL_WINDOW = "Properties"
-
-    companion object {
-
-    }
 
     private val undoManager = UndoManager.getInstance(project)
 
@@ -38,6 +38,29 @@ class SceneEditor(val project: Project,
     private val properties = HashMap<PropertyFactory, Property>()
 
     fun getProperty(factory: PropertyFactory): Property = properties.getOrPut(factory) { factory.create(viewer) }
+    private val _module
+        get() = ModuleUtil.findModuleForFile(sourceFile, project)
+
+    private val _contentRoots
+        get() = _module?.let { ModuleRootManager.getInstance(it) }?.contentRoots
+
+    fun getRelativePath(file: VirtualFile): String {
+        val roots = _contentRoots ?: return file.path
+        return roots.asSequence()
+                .map {
+                    file.path.startsWith(it.path) ?: return@map null
+                    file.path.removePrefix(it.path)
+                }.filterNotNull().firstOrNull() ?: file.path
+    }
+
+    fun findFileByRelativePath(path: String): VirtualFile? {
+        val roots = _contentRoots ?: return null
+        return _contentRoots?.asSequence()
+                ?.map {
+                    it.findFileByRelativePath(path)
+                }
+                ?.firstOrNull() ?: LocalFileSystem.getInstance().findFileByPath(path)
+    }
 
     init {
         structToolWindow = ToolWindowManager.getInstance(project).getToolWindow(SCENE_TOOL_WINDOW)
@@ -53,61 +76,29 @@ class SceneEditor(val project: Project,
                         false,
                         ToolWindowAnchor.RIGHT
                 )
-
-/*
-        bus.subscribe(CommandListener.TOPIC, object : CommandListener {
-            override fun commandStarted(event: CommandEvent) {
-                println("commandStarted $event")
-            }
-
-            override fun beforeCommandFinished(event: CommandEvent) {
-                println("beforeCommandFinished $event")
-            }
-
-            override fun undoTransparentActionFinished() {
-                println("undoTransparentActionFinished")
-            }
-
-            override fun commandFinished(event: CommandEvent) {
-                println("commandFinished $event")
-            }
-
-            override fun beforeUndoTransparentActionFinished() {
-                println("beforeUndoTransparentActionFinished")
-            }
-
-            override fun undoTransparentActionStarted() {
-                println("undoTransparentActionStarted")
-            }
-        })
-        */
-        /*
-        val multicaster: EditorEventMulticaster = EditorFactory.getInstance().eventMulticaster
-        multicaster.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                println("documentChanged")
-            }
-
-            override fun beforeDocumentChange(event: DocumentEvent) {
-                println("beforeDocumentChange")
-            }
-        }, this)
-        */
     }
 
     private val userData = HashMap<Key<*>, Any?>()
-
-    val viewer = SceneEditorView(this, project, sourceFile)
-    val sceneStruct = SceneStruct(viewer)
+    private var _viewer: SceneEditorView? = null
+    val viewer
+        get() = _viewer!!
+    lateinit var sceneStruct: SceneStruct
     val propertyTool = PropertyToolWindow(this)
 
+
     init {
-        viewer.eventSelectChanged.on {
-            propertyTool.setNodes(viewer.selected)
+        if (_module == null) {
+
+        } else {
+            _viewer = SceneEditorView(this, project, sourceFile)
+            sceneStruct = SceneStruct(_viewer!!)
+            viewer.eventSelectChanged.on {
+                propertyTool.setNodes(viewer.selected)
+            }
         }
     }
 
-    private val component = viewer
+    private val component: JComponent = _viewer ?: JButton("Scene must be inside some resource folder")
 
     override fun isModified(): Boolean {
 
@@ -130,28 +121,43 @@ class SceneEditor(val project: Project,
     override fun <T : Any?> getUserData(key: Key<T>): T? =
             userData[key] as T?
 
+    fun ToolWindow.useContent(component: JComponent) {
+        contentManager.removeAllContents(true)
+        val c = contentManager.factory.createContent(component, "", false)
+        contentManager.addContent(c)
+
+//        var c = contentManager.contents.firstOrNull()
+//        if (c == null) {
+//            c = contentManager.factory.createContent(component, "", false)
+//            contentManager.addContent(c)
+//        } else {
+//            c.component = component
+//        }
+    }
+
     override fun selectNotify() {
         println("selectNotify")
         save()
+        println("first!")
+        structToolWindow.useContent(sceneStruct)
+
+        println("second!")
+        propertyToolWindow.useContent(propertyTool)
+        /*
         //таб активен
+        val c = structToolWindow.contentManager.contents.find { it.component is SceneStruct }!!.component
         run {
-            val c = structToolWindow.contentManager.contents.find { it.component is SceneStruct }
-            if (c == null) {
-                val content = structToolWindow.contentManager.factory.createContent(sceneStruct, "", false)
-                structToolWindow.contentManager.addContent(content)
-                sceneStruct
-            } else c.component as SceneStruct
+            val content = structToolWindow.contentManager.factory.createContent(sceneStruct, "", false)
+            structToolWindow.contentManager.addContent(content)
+            sceneStruct
         }
 
         run {
-            val c = propertyToolWindow.contentManager.contents.find { it.component is PropertyToolWindow }
-            if (c == null) {
-                val content = propertyToolWindow.contentManager.factory.createContent(propertyTool, "", false)
-                propertyToolWindow.contentManager.addContent(content)
-                propertyTool
-            } else c.component as PropertyToolWindow
+            val content = propertyToolWindow.contentManager.factory.createContent(propertyTool, "", false)
+            propertyToolWindow.contentManager.addContent(content)
+            propertyTool
         }
-
+*/
         structToolWindow.setAvailable(true, null)
         propertyToolWindow.setAvailable(true, null)
     }
@@ -181,7 +187,7 @@ class SceneEditor(val project: Project,
 
     //private val document = FileDocumentManager.getInstance().getDocument(sourceFile)!!
     override fun dispose() {
-        component.destroy()
+        _viewer?.destroy()
     }
 
     val ref = object : DocumentReference {

@@ -49,7 +49,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     if (d.showAndGet()) {
                         view.renderThread {
                             val creator = d.selected ?: return@renderThread
-                            val node = creator.create()
+                            val node = creator.create(view) ?: return@renderThread
                             node.parent = parent
                             model.created(tree, node)
                         }
@@ -59,6 +59,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     val node = tree.lastSelectedPathComponent as Node?
                     node ?: return@setRemoveAction
                     model.delete(tree, node)
+                    view.getService(node)?.delete(view, node)
                     node.parent = null
                     node.close()
                 }

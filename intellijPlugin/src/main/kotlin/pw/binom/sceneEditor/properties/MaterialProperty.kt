@@ -32,22 +32,22 @@ class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material")
     private val clearBtn = JButton("X").appendTo(editorFlex, grow = 0)
 
     val MaterialNode.materialInstance: MaterialInstance?
-        get() = material as? MaterialInstance
+        get() = material.value as? MaterialInstance
 
     var MaterialNode.materialFile: VirtualFile?
         get() {
-            if (this.material == null || this.material == view.default3DMaterial)
+            if (this.material.value == null || this.material.value == view.default3DMaterial)
                 return null
-            if (this.material is MaterialInstance) {
+            if (this.material.value is MaterialInstance) {
                 return (this.material as MaterialInstance).root.file
             }
             TODO()
         }
         set(value) {
             if (value == null)
-                this.material = view.default3DMaterial
+                this.material.value = view.default3DMaterial
             else
-                this.material = view.engine.resources.loadMaterial(value)
+                this.material.value = view.engine.resources.loadMaterial(value)
         }
 
     private var materialProperties = MaterialProperties(this).appendTo(flex, grow = 0)

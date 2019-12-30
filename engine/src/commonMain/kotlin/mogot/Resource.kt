@@ -1,5 +1,7 @@
 package mogot
 
+import kotlin.reflect.KProperty
+
 interface Resource {
     /**
      * Must be call for increment link counter
@@ -45,5 +47,33 @@ abstract class ResourceImpl : Resource {
      */
     protected open fun dispose() {
         disposeListener?.invoke(this)
+    }
+}
+
+/**
+ * Struct for hold some Resource. Automatic call inc and dec on the resource when you try to set new value
+ */
+class ResourceHolder<T : Resource>(init: T? = null) {
+    fun dispose() {
+        value = null
+    }
+
+    var value: T? = null
+        set(value) {
+            if (value === field)
+                return
+            field?.dec()
+            field = value
+            field?.inc()
+        }
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = value
+
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        this.value = value
+    }
+
+    init {
+        value = init
     }
 }

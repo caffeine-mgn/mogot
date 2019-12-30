@@ -1,5 +1,5 @@
 package mogot.math
-
+/*
 actual interface Vector4fc {
     @JsName("getX")
     actual fun x(): Float
@@ -33,3 +33,4 @@ actual class Vector4f actual constructor(actual var x: Float, actual var y: Floa
     override fun z(): Float = z
     override fun w(): Float = w
 }
+*/

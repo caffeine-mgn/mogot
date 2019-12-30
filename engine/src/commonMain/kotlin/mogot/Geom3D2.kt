@@ -10,25 +10,20 @@ import pw.binom.io.Closeable
 /**
  * VBO хранит вертиксы, нормали и т.п.
  */
-class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: FloatArray?, uvs: FloatArray?) : Closeable {
-
-    enum class RenderMode {
-        TRIANGLES,
-        LINES
-    }
+class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: FloatArray?, uvs: FloatArray?) : Geometry, ResourceImpl() {
 
     private var renderMode: Int = gl.TRIANGLES
 
-    var mode
+    override var mode
         get() = when (renderMode) {
-            gl.LINES -> RenderMode.LINES
-            gl.TRIANGLES -> RenderMode.TRIANGLES
+            gl.LINES -> Geometry.RenderMode.LINES
+            gl.TRIANGLES -> Geometry.RenderMode.TRIANGLES
             else -> throw RuntimeException()
         }
         set(value) {
             renderMode = when (value) {
-                RenderMode.LINES -> gl.LINES
-                RenderMode.TRIANGLES -> gl.TRIANGLES
+                Geometry.RenderMode.LINES -> gl.LINES
+                Geometry.RenderMode.TRIANGLES -> gl.TRIANGLES
             }
         }
 
@@ -123,11 +118,10 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
 //        println("Size: $size")
     }
 
-    fun draw(func: (() -> Unit)? = null) {
+    override fun draw() {
 //        gl.glLineWidth(30f)
         vao.bind {
-            func?.invoke()
-//            gl.glDrawElements(GL2.GL_TRIANGLES, size, GL2.GL_UNSIGNED_INT, 0)
+            //            gl.glDrawElements(GL2.GL_TRIANGLES, size, GL2.GL_UNSIGNED_INT, 0)
             gl.drawElements(renderMode, size, gl.UNSIGNED_INT, 0)
 //            gl.glDrawElements(GL2.GL_LINE_STRIP, size, GL2.GL_UNSIGNED_INT, 0)
         }
@@ -135,14 +129,15 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
         checkError()
     }
 
-    override fun close() {
+    override fun dispose() {
         indexBuffer.close()
         vertexBuffer.close()
         normalBuffer?.close()
         uvBuffer?.close()
+        super.dispose()
     }
 
-    fun checkError() {
+    private fun checkError() {
         gl.getError().also {
             if (it != 0)
                 TODO("error=$it")

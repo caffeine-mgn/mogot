@@ -4,11 +4,12 @@ import org.khronos.webgl.Int8Array
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.set
 import org.w3c.dom.Image
+import pw.binom.io.FileSystem
 import kotlin.browser.window
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-actual class Resources actual constructor(private val engine: Engine) {
+actual class Resources actual constructor(actual val engine: Engine, actual val fileSystem: FileSystem<Unit>) {
     actual suspend fun createTexture2D(path: String): Texture2D {
         val img = loadImage(path)
         return Texture2D(engine, img)
