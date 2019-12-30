@@ -1,7 +1,7 @@
 package pw.binom
 
 import mogot.*
-import mogot.fbx.FbxImporter
+import pw.binom.fbx.file.FbxImporter
 import java.io.ByteArrayInputStream
 
 class FbxViewer(private val file: ByteArray) : View3D() {
@@ -10,13 +10,13 @@ class FbxViewer(private val file: ByteArray) : View3D() {
         val model = FbxImporter.import(ByteArrayInputStream(file))
         val fbx = FbxImporter.import(gl, model) { SimpleMaterial(engine) }
         val l = OmniLight()
-        val bb = CSGBox(Engine(this))
+        val bb = CSGBox(engine)
         bb.width = 1f
         bb.depth = 1f
         bb.height = 1f
-        bb.material = SimpleMaterial(engine)
-        l.position.set(-30f,30f,30f)
-        l.parent=root
+        bb.material.value = SimpleMaterial(engine)
+        l.position.set(-30f, 30f, 30f)
+        l.parent = root
         root!!.addChild(fbx)
         root!!.addChild(bb)
         resetCam()

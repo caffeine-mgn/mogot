@@ -12,6 +12,8 @@ import pw.binom.material.psi.Parser
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.io.File
+import java.io.FileInputStream
 import java.io.StringReader
 import javax.swing.BorderFactory
 import javax.swing.JButton
@@ -47,7 +49,7 @@ class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     }
 }
 */
-class DDD : GLView() {
+class DDD : GLView(MockFileSystem()) {
 
     private var closed = false
     private var inited = false
@@ -135,7 +137,7 @@ class DDD : GLView() {
         super.dispose()
     }
 
-    fun startRender() {
+    fun startRender1() {
         while (!inited) {
             Thread.sleep(1)
         }
@@ -155,37 +157,21 @@ class ddd : JPanel() {
 object Main {
     @JvmStatic
     fun main(args: Array<String>) {
-        //val view3d = FbxViewer(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\main\\resources\\untitled.fbx").inputStream().readAllBytes())
+//        val view3d = FbxViewer(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\main\\resources\\untitled.fbx").inputStream().readAllBytes())
 //        val view3d = DDD()
         val f = JFrame()
 
-        val pp = JPanel()
-        pp.setSize(400, 400)
-
-        val pp3 = JPanel()
-        pp3.setSize(400, 400)
-        val s = ddd()
-        s.setSize(400, 400)
-//        pp3.add(s)
-        pp3.background = Color.green
-
-        val pp2 = JPanel()
-        pp2.border = BorderFactory.createLineBorder(Color.red, 5, true)
-
-        f.add(pp, BorderLayout.WEST)
-        f.add(pp2, BorderLayout.EAST)
-        f.add(s, BorderLayout.CENTER)
-
-        FlexLayout(pp)
-        FlexLayout(pp2)
-
-        pp.add(JButton("TEST-------TEST"))
-        pp2.add(JButton("TEST-------TEST"))
+        val view =FileInputStream(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\assets\\box.fbx")).use {
+            FbxViewer(it.readBytes())
+        }
+//        f.contentPane.add(view.glcanvas)
+        f.contentPane.add(view)
 
         f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
         f.size = Dimension(800, 600)
 //        f.add(view3d)
+//        view.startRender()
         f.isVisible = true
-//        view3d.startRender()
+        view.startRender()
     }
 }

@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 
-abstract class View3D : GLView() {
+abstract class View3D : GLView(MockFileSystem()) {
 
     private var _x = 0
     private var _y = 0

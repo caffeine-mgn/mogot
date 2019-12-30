@@ -7,7 +7,7 @@ import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
-
+/*
 object MaterialFile {
     fun parse(resolver: PathResolver, file: String): Parser {
         val material = resolver.getFile(file) ?: throw FileNotFoundException("Can't find material file \"$file\"")
@@ -25,3 +25,4 @@ object MaterialFile {
         }
     }
 }
+*/

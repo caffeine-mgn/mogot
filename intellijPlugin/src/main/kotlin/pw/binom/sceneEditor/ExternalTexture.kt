@@ -12,7 +12,7 @@ class ExternalTexture(val engine: Engine, val file: VirtualFile) : ResourceImpl(
 
     private fun loadPng(stream: InputStream): Texture2D {
         val image = stream.let {
-            val png = PNGDecoder(it.wrap())
+            val png = PNGDecoder(it)
             val color = if (png.hasAlpha())
                 PNGDecoder.Format.RGBA
             else

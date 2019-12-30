@@ -3,17 +3,18 @@ package mogot
 import mogot.math.Matrix4fc
 
 
-class GeomNode : VisualInstance() {
-    var geom: Geom3D2?=null
-    var material: Material?=null
+class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
+    val geom = ResourceHolder<Geometry>()
+
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        material?.use(model, projection, renderContext)
-        geom?.draw()
-        material?.unuse()
+        material.value?.use(model, projection, renderContext)
+        geom.value?.draw()
+        material.value?.unuse()
     }
 
     override fun free() {
         super.free()
-        geom?.close()
+        geom.dispose()
+        material.dispose()
     }
 }

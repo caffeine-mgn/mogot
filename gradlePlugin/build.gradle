@@ -6,14 +6,18 @@ dependencies {
     api project(':tools')
     api "pw.binom.io:json:$binom_io_version"
     api "pw.binom.io:file:$binom_io_version"
-
+    compileOnly gradleApi()
     testImplementation 'junit:junit:4.12'
 }
 
 
 jar {
     from {
-        (configurations.runtime).collect {
+        configurations.forEach{
+            println("config->$it")
+        }
+        (configurations.runtimeClasspath).collect {
+            println("dep->$it")
             it.isDirectory() ? it : zipTree(it)
         }
     } {

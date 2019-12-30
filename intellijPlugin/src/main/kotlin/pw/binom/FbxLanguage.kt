@@ -19,6 +19,7 @@ import javax.swing.JComponent
 
 object FbxLanguage : Language("FBX") {
     val ICON = IconLoader.getIcon("/fbx.png")
+
 }
 
 object FlxFileType : FileType {

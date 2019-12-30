@@ -83,6 +83,43 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual val TRIANGLE_FAN: Int
         get() = WebGLRenderingContext.TRIANGLE_FAN
 
+    actual val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
+        get() = js("WebGL2RenderingContext.MAX_TEXTURE_MAX_ANISOTROPY_EXT")
+    actual val NEAREST: Int
+        get() = WebGLRenderingContext.NEAREST
+    actual val CULL_FACE: Int
+        get() = WebGLRenderingContext.CULL_FACE
+    actual val DEPTH_TEST: Int
+        get() = WebGLRenderingContext.DEPTH_TEST
+    actual val DEPTH_BUFFER_BIT: Int
+        get() = WebGLRenderingContext.DEPTH_BUFFER_BIT
+    actual val COLOR_BUFFER_BIT: Int
+        get() = WebGLRenderingContext.COLOR_BUFFER_BIT
+    actual val FRAMEBUFFER_COMPLETE: Int
+        get() = WebGLRenderingContext.FRAMEBUFFER_COMPLETE
+    actual val DEPTH_STENCIL_ATTACHMENT: Int
+        get() = WebGLRenderingContext.DEPTH_STENCIL_ATTACHMENT
+    actual val DEPTH24_STENCIL8: Int
+        get() = js("WebGL2RenderingContext.DEPTH24_STENCIL8")
+    actual val RENDERBUFFER: Int
+        get() = WebGLRenderingContext.RENDERBUFFER
+    actual val COLOR_ATTACHMENT0: Int
+        get() = WebGLRenderingContext.COLOR_ATTACHMENT0
+    actual val FRAMEBUFFER: Int
+        get() = WebGLRenderingContext.FRAMEBUFFER
+    actual val TEXTURE_MAG_FILTER: Int
+        get() = WebGLRenderingContext.TEXTURE_MAG_FILTER
+    actual val LINEAR: Int
+        get() = WebGLRenderingContext.LINEAR
+    actual val TEXTURE_MIN_FILTER: Int
+        get() = WebGLRenderingContext.TEXTURE_MIN_FILTER
+    actual val UNSIGNED_BYTE: Int
+        get() = WebGLRenderingContext.UNSIGNED_BYTE
+    actual val RGB: Int
+        get() = WebGLRenderingContext.RGB
+    actual val MULTISAMPLE: Int
+        get() = js("WebGL2RenderingContext.MULTISAMPLE")
+
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
     actual fun deleteBuffer(buffer: GLBuffer) {
@@ -271,9 +308,79 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         texture as JGLTexture?
         ctx.bindTexture(target, texture?.js)
     }
+
+    actual fun deleteBuffer(buffer: GLRenderBuffer) {
+        buffer as JSGLRenderBuffer
+        ctx.deleteRenderbuffer(buffer.js)
+    }
+
+    actual fun deleteBuffer(buffer: GLFrameBuffer) {
+        buffer as JSGLFrameBuffer
+        ctx.deleteFramebuffer(buffer.js)
+    }
+
+    actual fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?) {
+        frameBuffer as JSGLFrameBuffer?
+        ctx.bindFramebuffer(target, frameBuffer?.js)
+    }
+
+    actual fun createFrameBuffer(): GLFrameBuffer =
+            JSGLFrameBuffer(ctx.createFramebuffer()!!)
+
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
+        TODO()
+        //ctx.texImage2D(target,level,internalformat,width,height,border,format,type,pixels)
+    }
+
+    actual fun texParameteri(target: Int, pname: Int, param: Int) {
+        ctx.texParameteri(target, pname, param)
+    }
+
+    actual fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int) {
+        texture as JGLTexture
+        ctx.framebufferTexture2D(target, attachment, textarget, texture.js, level)
+    }
+
+    actual fun createRenderBuffer(): GLRenderBuffer =
+            JSGLRenderBuffer(ctx.createRenderbuffer()!!)
+
+    actual fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?) {
+        renderbuffer as JSGLRenderBuffer?
+        ctx.bindRenderbuffer(target, renderbuffer?.js)
+    }
+
+    actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) {
+        ctx.renderbufferStorage(target, internalformat, width, height)
+    }
+
+    actual fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer) {
+        renderbuffer as JSGLRenderBuffer
+        ctx.framebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer.js)
+    }
+
+    actual fun checkFramebufferStatus(target: Int): Int =
+            ctx.checkFramebufferStatus(target)
+
+    actual fun deleteBuffers(texture: GLTexture) {
+        deleteTexture(texture)
+    }
+
+    actual fun enable(feature: Int) {
+        ctx.enable(feature)
+    }
+
+    actual fun disable(feature: Int) {
+        ctx.disable(feature)
+    }
+
+    actual fun texParameterf(target: Int, pname: Int, param: Float) {
+        ctx.texParameterf(target, pname, param)
+    }
 }
 
 private inline class JSBuffer(val js: WebGLBuffer) : GLBuffer
+private inline class JSGLRenderBuffer(val js: WebGLRenderbuffer) : GLRenderBuffer
+private inline class JSGLFrameBuffer(val js: WebGLFramebuffer) : GLFrameBuffer
 private inline class JSVertexArray(val js: WebGLVertexArray) : GLVertexArray
 private inline class JSGLProgram(val js: WebGLProgram) : GLProgram
 private inline class JSGLShader(val js: WebGLShader) : GLShader

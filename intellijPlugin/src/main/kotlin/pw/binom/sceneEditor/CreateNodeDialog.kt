@@ -5,18 +5,18 @@ import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBPanel
 import pw.binom.FlexLayout
+import pw.binom.Services
 import pw.binom.appendTo
-import pw.binom.sceneEditor.nodeController.NodeService
 import java.awt.Component
 import javax.swing.*
 import javax.swing.event.ListDataListener
 
-class NodeListRender : ListCellRenderer<NodeService.CreateItem> {
+class NodeListRender : ListCellRenderer<NodeCreator> {
     private val label = JLabel().apply {
         isOpaque = true
     }
 
-    override fun getListCellRendererComponent(list: JList<out NodeService.CreateItem>, value: NodeService.CreateItem, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+    override fun getListCellRendererComponent(list: JList<out NodeCreator>, value: NodeCreator, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
 
         if (isSelected) {
             label.background = list.selectionBackground
@@ -38,9 +38,9 @@ class CreateNodeDialog(view: SceneEditorView, project: Project) : DialogWrapper(
     private val layout = FlexLayout(root, FlexLayout.Direction.COLUMN)
     override fun createCenterPanel(): JComponent = root
     private val model = NodeListModel(view)
-    private val list = JBList<NodeService.CreateItem>(model)
+    private val list = JBList<NodeCreator>(model)
 
-    var selected: NodeService.CreateItem? = null
+    var selected: NodeCreator? = null
         private set
 
     init {
@@ -68,9 +68,10 @@ class CreateNodeDialog(view: SceneEditorView, project: Project) : DialogWrapper(
 
 }
 
-private class NodeListModel(view: SceneEditorView) : ListModel<NodeService.CreateItem> {
-    private val classes = view.services.flatMap { it.createItems }
-    override fun getElementAt(index: Int): NodeService.CreateItem = classes[index]
+private class NodeListModel(view: SceneEditorView) : ListModel<NodeCreator> {
+    private val creators by Services.byClassSequence(NodeCreator::class.java)
+    private val classes = creators.toList()
+    override fun getElementAt(index: Int): NodeCreator = classes[index]
 
     override fun getSize(): Int = classes.size
 
