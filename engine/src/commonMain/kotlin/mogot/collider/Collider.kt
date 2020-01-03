@@ -5,8 +5,7 @@ import mogot.math.*
 
 interface Collider {
     var node: Spatial?
-    fun rayCast(position: Vector3fc, direction: Vector3fc, dest: Vector3fm?): Boolean
-    fun rayCast(ray: Ray, dest: Vector3fm?): Boolean = rayCast(ray.position, ray.direction, dest)
+    fun rayCast(ray: Ray, dest: Vector3fm?): Boolean// = rayCast(ray.position, ray.direction, dest)
 
     companion object {
         fun rayCastTrangle(p0: Vector3fc, p1: Vector3fc, p2: Vector3fc, rayPosition: Vector3fc, rayDirection: Vector3fc, dest: Vector3fm?): Boolean {

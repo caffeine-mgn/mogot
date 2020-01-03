@@ -153,6 +153,11 @@ inline fun Vector3fm.set(other: Vector3fc) = set(other.x, other.y, other.z)
 
 inline fun <T : Vector3fm> T.add(other: Vector3fc) = add(other.x, other.y, other.z)
 
+fun Vector3fc.add(other: Vector3fc, dest: Vector3fm): Vector3fm {
+    dest.set(x + other.x, y + other.y, z + other.z)
+    return dest
+}
+
 inline fun <T : Vector3fm> T.add(x: Float, y: Float, z: Float) = set(
         this.x + x,
         this.y + y,

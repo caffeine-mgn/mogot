@@ -30,20 +30,18 @@ class PanelCollider(width: Float, height: Float) : Collider {
         p2.set(width / 2, 0f, -height / 2f)
         p3.set(-width / 2, 0f, height / 2f)
         p4.set(width / 2, 0f, height / 2f)
-
-//        p1 *= node.matrix
-//        p2 *= node.matrix
-//        p3 *= node.matrix
-//        p4 *= node.matrix
     }
 
-    override fun rayCast(position: Vector3fc, direction: Vector3fc, dest: Vector3fm?): Boolean {
-        node!!.globalTransfrorm(TEMP_MATRIX)
-        val localPosition = position.mul(TEMP_MATRIX, LOCAL_POS)
-        val localDirection = direction.mul(TEMP_MATRIX, LOCAL_Dir)
+    private val tempRay = MutableRay()
+    override fun rayCast(ray: Ray, dest: Vector3fm?): Boolean {
+        val node = node ?: return false
+        node.globalToLocalMatrix(TEMP_MATRIX)
+        ray.mul(TEMP_MATRIX, tempRay)
+        val localPosition = tempRay.position
+        val localDirection = tempRay.direction
 
         update()
-
+        node.globalTransfrorm(TEMP_MATRIX)
         if (Collider.rayCastTrangle(p1, p2, p4, localPosition, localDirection, dest)) {
             dest?.mul(TEMP_MATRIX)
             return true
@@ -54,30 +52,6 @@ class PanelCollider(width: Float, height: Float) : Collider {
             return true
         }
         return false
-
-        var f = Intersectionf.intersectRayTriangle(
-                localPosition, localDirection,
-                p1,
-                p2,
-                p4,
-                0f
-        )
-        if (f == -1f) {
-            f = Intersectionf.intersectRayTriangle(
-                    localPosition, localDirection,
-                    p1,
-                    p3,
-                    p4,
-                    0f
-            )
-        }
-
-        if (f != -1f && dest != null) {
-            dest.set(localDirection).mul(f).add(localPosition).mul(node!!.matrix)
-        }
-
-        return f != -1f
-
     }
 
 }

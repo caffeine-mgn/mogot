@@ -303,3 +303,69 @@ fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quater
     dest.z = (sy * cp * cr - cy * sp * sr)
     return dest
 }
+
+fun Quaternionf.setFromUnnormalized(mat: Matrix4fc): Quaternionf {
+    setFromUnnormalized(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22)
+    return this
+}
+
+fun Quaternionf.setFromUnnormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
+    var nm00 = m00
+    var nm01 = m01
+    var nm02 = m02
+    var nm10 = m10
+    var nm11 = m11
+    var nm12 = m12
+    var nm20 = m20
+    var nm21 = m21
+    var nm22 = m22
+    val lenX = (1.0 / sqrt(m00 * m00 + m01 * m01 + (m02 * m02).toDouble())).toFloat()
+    val lenY = (1.0 / sqrt(m10 * m10 + m11 * m11 + (m12 * m12).toDouble())).toFloat()
+    val lenZ = (1.0 / sqrt(m20 * m20 + m21 * m21 + (m22 * m22).toDouble())).toFloat()
+    nm00 *= lenX
+    nm01 *= lenX
+    nm02 *= lenX
+    nm10 *= lenY
+    nm11 *= lenY
+    nm12 *= lenY
+    nm20 *= lenZ
+    nm21 *= lenZ
+    nm22 *= lenZ
+    setFromNormalized(nm00, nm01, nm02, nm10, nm11, nm12, nm20, nm21, nm22)
+}
+
+fun Quaternionf.setFromNormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
+    var t: Float
+    val tr = m00 + m11 + m22
+    if (tr >= 0.0f) {
+        t = sqrt(tr + 1.0f)
+        w = t * 0.5f
+        t = 0.5f / t
+        x = (m12 - m21) * t
+        y = (m20 - m02) * t
+        z = (m01 - m10) * t
+    } else {
+        if (m00 >= m11 && m00 >= m22) {
+            t = sqrt(m00 - (m11 + m22) + 1.0f)
+            x = t * 0.5f
+            t = 0.5f / t
+            y = (m10 + m01) * t
+            z = (m02 + m20) * t
+            w = (m12 - m21) * t
+        } else if (m11 > m22) {
+            t = sqrt(m11 - (m22 + m00) + 1.0f)
+            y = t * 0.5f
+            t = 0.5f / t
+            z = (m21 + m12) * t
+            x = (m10 + m01) * t
+            w = (m20 - m02) * t
+        } else {
+            t = sqrt(m22 - (m00 + m11) + 1.0f)
+            z = t * 0.5f
+            t = 0.5f / t
+            x = (m02 + m20) * t
+            y = (m21 + m12) * t
+            w = (m01 - m10) * t
+        }
+    }
+}

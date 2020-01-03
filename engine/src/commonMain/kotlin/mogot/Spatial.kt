@@ -12,6 +12,19 @@ open class Spatial : Node() {
 
     private var updateMatrix = false
 
+    fun globalToLocalMatrix(dest: Matrix4f){
+        dest.identity()
+        parent?.currentToRoot {
+            if (it.isSpatial) {
+                it as Spatial
+                dest.set(it.apply(dest))
+            }
+            true
+        }
+        dest.rotateAffine(quaternion)
+        dest.translate(-position)
+    }
+
     private inner class Vector3fWithChangeCounter(x: Float, y: Float, z: Float) : Vector3f(x, y, z) {
 
         override var x: Float

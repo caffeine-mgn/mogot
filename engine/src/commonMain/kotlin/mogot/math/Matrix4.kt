@@ -226,23 +226,23 @@ private fun Matrix4fc.invertGeneric(dest: Matrix4f): Matrix4f {
     val nm31: Float = Math.fma(m00, j, Math.fma(-m01, h, m02 * g)) * det
     val nm32: Float = Math.fma(-m30, d, Math.fma(m31, b, -m32 * a)) * det
     val nm33: Float = Math.fma(m20, d, Math.fma(-m21, b, m22 * a)) * det
-    dest.m00=(nm00)
-    dest.m01=(nm01)
-    dest.m02=(nm02)
-    dest.m03=(nm03)
-    dest.m10=(nm10)
-    dest.m11=(nm11)
-    dest.m12=(nm12)
-    dest.m13=(nm13)
-    dest.m20=(nm20)
-    dest.m21=(nm21)
-    dest.m22=(nm22)
-    dest.m23=(nm23)
-    dest.m30=(nm30)
-    dest.m31=(nm31)
-    dest.m32=(nm32)
-    dest.m33=(nm33)
-    dest.properties=(0)
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (0)
     return dest
 }
 
@@ -431,23 +431,23 @@ private fun Matrix4fc.mulGeneric(right: Matrix4fc, dest: Matrix4f): Matrix4f {
     val nm31: Float = Math.fma(m01, right.m30, Math.fma(m11, right.m31, Math.fma(m21, right.m32, m31 * right.m33)))
     val nm32: Float = Math.fma(m02, right.m30, Math.fma(m12, right.m31, Math.fma(m22, right.m32, m32 * right.m33)))
     val nm33: Float = Math.fma(m03, right.m30, Math.fma(m13, right.m31, Math.fma(m23, right.m32, m33 * right.m33)))
-    dest.m00=(nm00)
-    dest.m01=(nm01)
-    dest.m02=(nm02)
-    dest.m03=(nm03)
-    dest.m10=(nm10)
-    dest.m11=(nm11)
-    dest.m12=(nm12)
-    dest.m13=(nm13)
-    dest.m20=(nm20)
-    dest.m21=(nm21)
-    dest.m22=(nm22)
-    dest.m23=(nm23)
-    dest.m30=(nm30)
-    dest.m31=(nm31)
-    dest.m32=(nm32)
-    dest.m33=(nm33)
-    dest.properties=(0)
+    dest.m00 = (nm00)
+    dest.m01 = (nm01)
+    dest.m02 = (nm02)
+    dest.m03 = (nm03)
+    dest.m10 = (nm10)
+    dest.m11 = (nm11)
+    dest.m12 = (nm12)
+    dest.m13 = (nm13)
+    dest.m20 = (nm20)
+    dest.m21 = (nm21)
+    dest.m22 = (nm22)
+    dest.m23 = (nm23)
+    dest.m30 = (nm30)
+    dest.m31 = (nm31)
+    dest.m32 = (nm32)
+    dest.m33 = (nm33)
+    dest.properties = (0)
     return dest
 }
 
@@ -1173,7 +1173,7 @@ fun Matrix4f.translationRotateScale(tx: Float, ty: Float, tz: Float,
     return this
 }
 
-fun Matrix4fc.unprojectRay(winX: Float, winY: Float, viewport: IntArray, originDest: Vector3f, dirDest: Vector3fm):Matrix4fc {
+fun Matrix4fc.unprojectRay(winX: Float, winY: Float, viewport: IntArray, originDest: Vector3f, dirDest: Vector3fm): Matrix4fc {
     val a = m00 * m11 - m01 * m10
     val b = m00 * m12 - m02 * m10
     val c = m00 * m13 - m03 * m10
@@ -1218,11 +1218,11 @@ fun Matrix4fc.unprojectRay(winX: Float, winY: Float, viewport: IntArray, originD
     val y0 = py * invW0
     val z0 = pz * invW0
     originDest.x = nearX
-    originDest . y = nearY
+    originDest.y = nearY
     originDest.z = nearZ
     dirDest.x = x0 - nearX
-    dirDest . y = y0 -nearY
-    dirDest . z = z0 -nearZ
+    dirDest.y = y0 - nearY
+    dirDest.z = z0 - nearZ
     return this
 }
 
@@ -1312,5 +1312,26 @@ fun Matrix4fc.unprojectInv(winX: Float, winY: Float, winZ: Float, viewport: IntA
     dest.x = (m00 * ndcX + m10 * ndcY + m20 * ndcZ + m30) * invW
     dest.y = (m01 * ndcX + m11 * ndcY + m21 * ndcZ + m31) * invW
     dest.z = (m02 * ndcX + m12 * ndcY + m22 * ndcZ + m32) * invW
+    return dest
+}
+
+fun Matrix4fc.sub(subtrahend: Matrix4fc, dest: Matrix4f): Matrix4f {
+    dest.m00 = m00 - subtrahend.m00
+    dest.m01 = m01 - subtrahend.m01
+    dest.m02 = m02 - subtrahend.m02
+    dest.m03 = m03 - subtrahend.m03
+    dest.m10 = m10 - subtrahend.m10
+    dest.m11 = m11 - subtrahend.m11
+    dest.m12 = m12 - subtrahend.m12
+    dest.m13 = m13 - subtrahend.m13
+    dest.m20 = m20 - subtrahend.m20
+    dest.m21 = m21 - subtrahend.m21
+    dest.m22 = m22 - subtrahend.m22
+    dest.m23 = m23 - subtrahend.m23
+    dest.m30 = m30 - subtrahend.m30
+    dest.m31 = m31 - subtrahend.m31
+    dest.m32 = m32 - subtrahend.m32
+    dest.m33 = m33 - subtrahend.m33
+    dest.properties = 0
     return dest
 }
