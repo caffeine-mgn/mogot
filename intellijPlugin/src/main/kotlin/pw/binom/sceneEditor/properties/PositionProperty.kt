@@ -28,12 +28,12 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Position")
     private var changeEventEnabled = true
 
     private var nodes: List<Node>? = null
-    override fun setNodes(nodes: List<Node>) {
-        changeEventEnabled = false
-        this.nodes = nodes
 
+    fun update() {
+        val nodes = nodes ?: return
         val spatials = nodes.asSequence().mapNotNull { it as? Spatial }
 
+        changeEventEnabled = false
         if (spatials.isEmpty) {
             editor.isEnabled = false
             editor.value.set(Float.NaN, Float.NaN, Float.NaN)
@@ -43,6 +43,12 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Position")
             editor.value.set(spatials.map { it.position }.common)
         }
         changeEventEnabled = true
+    }
+
+    override fun setNodes(nodes: List<Node>) {
+        this.nodes = nodes
+        update()
+
     }
 
     init {

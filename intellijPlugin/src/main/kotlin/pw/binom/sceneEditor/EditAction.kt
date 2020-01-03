@@ -5,6 +5,9 @@ import mogot.Spatial
 import mogot.collider.PanelCollider
 import mogot.isSpatial
 import mogot.math.*
+import pw.binom.sceneEditor.properties.PositionProperty
+import java.awt.MouseInfo
+import java.awt.Robot
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
@@ -89,6 +92,14 @@ abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : E
     }
 }
 
+private fun SceneEditorView.updatePropertyPosition() {
+    editor1.propertyTool.properties
+            .mapNotNull { it as? PositionProperty }
+            .forEach {
+                it.update()
+            }
+}
+
 class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: EditMoveOneAxis.Type) : EditMove(view, selected) {
     enum class Type {
         X, Y, Z
@@ -156,6 +167,7 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: Edi
             it.parentSpatial?.globalToLocal(pos, pos)
             it.position.set(pos)
         }
+        view.updatePropertyPosition()
         startValue = value
     }
 
@@ -197,8 +209,47 @@ class EditMoveZAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view
     }
 }
 */
-class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
 
+class MouseMoveReset(val view: SceneEditorView) {
+    val robot = Robot()
+
+    fun check(): Vector2i? {
+        var needRefresh = false
+        val viewLocation = view.locationOnScreen
+        val mouseLocation = MouseInfo.getPointerInfo().location
+        var x = mouseLocation.x
+        var y = mouseLocation.y
+        if (mouseLocation.x < viewLocation.x) {
+            x = viewLocation.x + view.width
+            needRefresh = true
+        }
+
+        if (mouseLocation.x > viewLocation.x + view.width) {
+            x = viewLocation.x
+            needRefresh = true
+        }
+
+        if (mouseLocation.y < viewLocation.y) {
+            y = viewLocation.y + view.height
+            needRefresh = true
+        }
+
+        if (mouseLocation.y > viewLocation.y + view.height) {
+            y = viewLocation.y
+            needRefresh = true
+        }
+
+        if (needRefresh) {
+            println("mouse=${mouseLocation} view=${viewLocation} (${view.width} x ${view.height})")
+            robot.mouseMove(x, y)
+            return Vector2i(x, y)
+        }
+        return null
+    }
+}
+
+class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
+    private val mouseMoveReset = MouseMoveReset(view)
     override fun keyDown(code: Int) {
         if (code == 88) {
             resetPositions()
@@ -236,13 +287,25 @@ class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(vi
         super.keyUp(code)
     }
 
-    private var oldX = view.mousePosition.x
-    private var oldY = view.mousePosition.y
+    private var oldX = MouseInfo.getPointerInfo().location.x
+    private var oldY = MouseInfo.getPointerInfo().location.y
     private var slow = false
 
     override fun render(dt: Float) {
-        val x = view.mousePosition.x
-        val y = view.mousePosition.y
+        val x: Int
+        val y: Int
+        val resetPos = mouseMoveReset.check()
+        if (resetPos != null) {
+            oldX = resetPos.x
+            oldY = resetPos.y
+            x = resetPos.x
+            y = resetPos.y
+        } else {
+            val loc = MouseInfo.getPointerInfo().location
+            x = loc.x
+            y = loc.y
+        }
+
 
         val cof = if (slow) 0.01f else 0.05f
         println("cof=$cof")
@@ -251,10 +314,14 @@ class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(vi
         oldX = x
         oldY = y
 
-        selected.asSequence().map { it as? Spatial }.filterNotNull().forEach {
-            it.position += xd
-            it.position += yd
-        }
+        selected.asSequence()
+                .map { it as? Spatial }
+                .filterNotNull()
+                .forEach {
+                    it.position += xd
+                    it.position += yd
+                }
+        view.updatePropertyPosition()
     }
 
 }
