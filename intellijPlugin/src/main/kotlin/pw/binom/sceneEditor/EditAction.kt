@@ -1,15 +1,15 @@
 package pw.binom.sceneEditor
 
-import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.command.UndoConfirmationPolicy
-import com.intellij.openapi.command.WriteCommandAction
-import mogot.Node
+import mogot.*
 import mogot.Spatial
 import mogot.math.right
 import mogot.math.times
+import mogot.math.*
+import mogot.CSGBox
 import mogot.math.up
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
+import mogot.collider.PanelCollider
 
 interface EditAction {
     fun keyDown(code: Int) {}
@@ -45,7 +45,7 @@ abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : E
         }
     }
 
-    protected fun stopEdit() {
+    protected open fun stopEdit() {
         view.stopEditing()
         view.lockMouse = false
         view.cursorVisible = true
@@ -79,12 +79,45 @@ abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : E
 }
 
 class EditMoveXAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
-    override fun render(dt: Float) {
-        val x = view.mousePosition.x - view.size.x / 2
 
-        selected.asSequence().map { it as? Spatial }.filterNotNull().forEach {
-            it.position.x += x * 0.01f
-        }
+    private val grid = Grid(view.engine)
+    private val collader = PanelCollider(100f, 100f)
+    private val box = CSGBox(view.engine)
+
+    val node = (selected[0] as Spatial)
+
+    init {
+        collader.node = grid
+        grid.parent = view.editorRoot
+        grid.position.set(node.position)
+        grid.material.value = view.default3DMaterial
+        box.parent = view.editorRoot
+        box.material.value = view.default3DMaterial
+        box.width = 1.1f
+        box.height = 1.1f
+        box.depth = 1.1f
+        view.lockMouse = false
+        view.cursorVisible = true
+    }
+
+    override fun stopEdit() {
+        grid.parent = null
+        grid.close()
+        box.parent = null
+        box.close()
+        super.stopEdit()
+    }
+
+    override fun render(dt: Float) {
+//        view.editorCamera.position.set(10f, 10f, 10f)
+//        view.editorCamera.lookTo(Vector3f(0f, 0f, 0f))
+        val x = view.mousePosition.x
+        val y = view.mousePosition.y
+        val ray = MutableRay()
+//        view.editorCamera.screenPointToRay(view.editorCamera.width / 2, view.editorCamera.height / 2, ray)
+        view.editorCamera.screenPointToRay(x, y, ray)
+        collader.rayCast(ray, box.position)
+        println("-----------------------\nRay: $ray\nPosition=${box.position}\n-----------------------")
     }
 }
 

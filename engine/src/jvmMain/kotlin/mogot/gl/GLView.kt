@@ -2,6 +2,7 @@ package mogot.gl
 
 import com.jogamp.opengl.*
 import com.jogamp.opengl.awt.GLJPanel
+import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
 import pw.binom.io.FileSystem
@@ -64,6 +65,10 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
     protected object renderContext : RenderContext {
         override val pointLights = ArrayList<PointLight>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
+    }
+
+    init {
+        animator = FPSAnimator(this, 60)
     }
 
     protected open fun mouseDown(e: MouseEvent) {
@@ -311,8 +316,12 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
     }
 
     fun startRender() {
-        if (animator.isStarted)
-            animator.resume()
+        if (animator != null) {
+            if (animator.isStarted)
+                animator.resume()
+            else
+                animator.start()
+        }
     }
 
     fun stopRender() {

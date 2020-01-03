@@ -2,10 +2,110 @@ package mogot
 
 import mogot.math.*
 
+val Node.isSpatial
+    get() = (type and 0x1) > 0
+
 open class Spatial : Node() {
-    val position = Vector3f()
-    val quaternion = Quaternionf()
-    val scale = Vector3f(1f, 1f, 1f)
+
+    override val type: Int
+        get() = 0x1
+
+    private var updateMatrix = false
+
+    private inner class Vector3fWithChangeCounter(x: Float, y: Float, z: Float) : Vector3f(x, y, z) {
+
+        override var x: Float
+            get() = super.x
+            set(value) {
+                super.x = value
+                updateMatrix = true
+            }
+
+        override var y: Float
+            get() = super.y
+            set(value) {
+                super.y = value
+                updateMatrix = true
+            }
+
+        override var z: Float
+            get() = super.z
+            set(value) {
+                super.z = value
+                updateMatrix = true
+            }
+    }
+
+    private inner class QuaternionfProperty : Quaternionf() {
+        override var x: Float
+            get() = super.x
+            set(value) {
+                super.x = value
+                updateMatrix = true
+            }
+
+        override var y: Float
+            get() = super.y
+            set(value) {
+                super.y = value
+                updateMatrix = true
+            }
+
+        override var z: Float
+            get() = super.z
+            set(value) {
+                super.z = value
+                updateMatrix = true
+            }
+
+        override var w: Float
+            get() = super.w
+            set(value) {
+                super.w = value
+                updateMatrix = true
+            }
+    }
+
+    val position: Vector3fm = Vector3fWithChangeCounter(0f, 0f, 0f)
+    val quaternion: Quaternionfm = QuaternionfProperty()
+    val scale: Vector3fm = Vector3fWithChangeCounter(1f, 1f, 1f)
+    private val _transform = Matrix4f()
+
+    val parentSpatial: Spatial?
+        get() {
+            val parent = parent ?: return null
+            parent.currentToRoot {
+                if (it.isSpatial)
+                    return it as Spatial
+                true
+            }
+            return null
+        }
+
+    val transform: Matrix4fc
+        get() {
+            if (updateMatrix) {
+                _transform
+                        .translationRotateScale(
+                                position.x, position.y, position.z,
+                                quaternion.x, quaternion.y, quaternion.z, quaternion.w,
+                                scale.x, scale.y, scale.z
+                        )
+                updateMatrix = false
+            }
+            return _transform
+        }
+
+    fun globalTransfrorm(dest: Matrix4f): Matrix4f {
+        val parent = parentSpatial?.transform
+        if (parent == null)
+            dest.set(transform)
+        else {
+            dest.set(parent)
+            dest.mul(transform, dest)
+        }
+        return dest
+    }
 
     protected var _matrix = Matrix4f()
 
@@ -36,8 +136,10 @@ open class Spatial : Node() {
         return this._matrix
     }
 
-    fun lookTo(position: Vector3f) {
+    fun lookTo(position: Vector3fc) {
         quaternion.identity()
-        quaternion.lookAlong(position - this.position, Vector3fc.UP)
+        val g = globalTransfrorm(Matrix4f())
+        val v = g.getTranslation(Vector3f())
+        quaternion.lookAlong(position - v, Vector3fc.UP)
     }
 }

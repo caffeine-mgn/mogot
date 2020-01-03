@@ -4,7 +4,7 @@ package pw.binom
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.Quaternionf
-import mogot.math.Vector3f
+import mogot.math.*
 import mogot.math.forward
 import mogot.math.times
 import java.awt.event.MouseEvent

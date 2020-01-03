@@ -10,7 +10,7 @@ class TestGame(val engine: Engine) {
     init {
         camera.parent = root
 
-        val mat = SimpleMaterial(engine.gl).also {
+        val mat = SimpleMaterial(engine).also {
             it.tex = engine.resources.createEmptyTexture2D()
         }
 
@@ -19,7 +19,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = mat
+            material.value = mat
         }
 
         CSGBox(engine).apply {
@@ -27,7 +27,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = mat
+            material.value = mat
             position.set(7f, 5f, 5f)
         }
 
@@ -36,7 +36,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = mat
+            material.value = mat
             position.set(3f, 5f, 5f)
         }
 
@@ -45,7 +45,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = mat
+            material.value = mat
             position.set(5f, 7f, 5f)
         }
 
@@ -54,7 +54,7 @@ class TestGame(val engine: Engine) {
             width = 1f
             depth = 1f
             height = 1f
-            material = mat
+            material.value = mat
             position.set(5f, 3f, 5f)
         }
         camera.position.x = 5f

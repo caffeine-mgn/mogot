@@ -50,7 +50,7 @@ interface Vector3fc {
 
     val z: Float
 
-    fun lerp(other: Vector3fc, t: Float, dest: Vector3f): Vector3f {
+    fun lerp(other: Vector3fc, t: Float, dest: Vector3fm): Vector3fm {
         dest.x = x + (other.x - x) * t
         dest.y = y + (other.y - y) * t
         dest.z = z + (other.z - z) * t
@@ -73,6 +73,9 @@ interface Vector3fc {
 
     fun copy() = Vector3f(x, y, z)
 
+    fun negated(dest: Vector3fm) = dest.set(-x, -y, -z)
+    fun negated() = negated(Vector3f())
+
 
     companion object {
         val UP: Vector3fc = Vector3f(0f, 1f, 0f)
@@ -86,57 +89,108 @@ interface Vector3fm : Vector3fc {
     override var x: Float
     override var y: Float
     override var z: Float
-    fun set(x: Float, y: Float, z: Float): Vector3fm
-    fun normalize() = normalize(this)
-}
-
-fun Vector3fm.set(other: Vector3fc) = set(other.x, other.y, other.z)
-
-open class Vector3f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f) : Vector3fm {
-    constructor(other: Vector3fc) : this(other.x, other.y, other.z)
-
-    override fun set(x: Float, y: Float, z: Float): Vector3f {
+    fun negate() = negated(this)
+    fun set(x: Float, y: Float, z: Float): Vector3fm {
         this.x = x
         this.y = y
         this.z = z
         return this
     }
 
+    fun set(value: Float): Vector3fm = set(value, value, value)
+    fun normalize() = normalize(this)
+}
+
+fun <T : Vector3fm> T.mul(other: Float): T {
+    x *= other
+    y *= other
+    z *= other
+    return this
+}
+
+fun Vector3fm.mul(matrix: Matrix4fc): Vector3fm {
+    mul(matrix, this)
+    return this
+}
+
+fun Vector3f.div(matrix: Matrix4fc): Vector3f {
+    div(matrix, this)
+    return this
+}
+
+fun Vector3fc.div(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
+    val rx = matrix.m00 / x + matrix.m10 / y + matrix.m20 / z + matrix.m30
+    val ry = matrix.m01 / x + matrix.m11 / y + matrix.m21 / z + matrix.m31
+    val rz = matrix.m02 / x + matrix.m12 / y + matrix.m22 / z + matrix.m32
+    dest.x = rx
+    dest.y = ry
+    dest.z = rz
+    return dest
+}
+
+fun Vector3fc.mul(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
+    val rx = matrix.m00 * x + matrix.m10 * y + matrix.m20 * z + matrix.m30
+    val ry = matrix.m01 * x + matrix.m11 * y + matrix.m21 * z + matrix.m31
+    val rz = matrix.m02 * x + matrix.m12 * y + matrix.m22 * z + matrix.m32
+    dest.x = rx
+    dest.y = ry
+    dest.z = rz
+    return dest
+}
+
+fun Vector3fm.sub(other: Vector3fc): Vector3fm = sub(other, this)
+
+fun Vector3fc.sub(other: Vector3fc, dest: Vector3fm): Vector3fm {
+    dest.set(
+            x - other.x,
+            y - other.y,
+            z - other.z
+    )
+    return dest
+}
+
+inline fun Vector3fm.set(other: Vector3fc) = set(other.x, other.y, other.z)
+
+inline fun <T : Vector3fm> T.add(other: Vector3fc) = add(other.x, other.y, other.z)
+
+inline fun <T : Vector3fm> T.add(x: Float, y: Float, z: Float) = set(
+        this.x + x,
+        this.y + y,
+        this.z + z
+)
+
+operator fun Vector3fm.timesAssign(matrix: Matrix4fc) {
+    mul(matrix, this)
+}
+
+open class Vector3f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f) : Vector3fm {
+    constructor(other: Vector3fc) : this(other.x, other.y, other.z)
+
     fun lerp(other: Vector3fc, t: Float) = lerp(other, t, this)
 
 
-    inline fun set(other: Vector3fc) = set(other.x, other.y, other.z)
-    fun add(x: Float, y: Float, z: Float): Vector3f {
-        return set(
-                this.x + x,
-                this.y + y,
-                this.z + z
-        )
-    }
-
-    inline fun add(other: Vector3fc) = add(other.x, other.y, other.z)
-    fun negate() = Vector3f(-x, -y, -z)
-
+    //    inline fun set(other: Vector3fc) = set(other.x, other.y, other.z)
     override fun toString(): String = "Vec3f($x,$y,$z)"
-    operator fun plusAssign(other: Vector3fc) {
-        add(other.x, other.y, other.z)
-        set(
-                x + other.x,
-                y + other.y,
-                z + other.z
-        )
-    }
 }
 
-operator fun Vector3fm.minus(other: Vector3f): Vector3f =
+operator fun Vector3fm.plusAssign(other: Vector3fc) {
+    add(other.x, other.y, other.z)
+//    set(
+//            x + other.x,
+//            y + other.y,
+//            z + other.z
+//    )
+}
+
+operator fun Vector3fc.minus(other: Vector3fc): Vector3f =
         Vector3f(x - other.x, y - other.y, z - other.z)
 
-operator fun Vector3fm.unaryMinus() = Vector3f(-x, -y, -z)
-
-operator fun Vector3fm.times(value: Float) = Vector3f(x * value, y * value, z * value)
-operator fun Vector3fm.times(other: Vector3fc) = Vector3f(x * other.x, y * other.y, z * other.z)
-operator fun Vector3fm.div(v: Vector3fc): Vector3f = Vector3f(x / v.x, y / v.y, z / v.z)
-operator fun Vector3fm.div(other: Float): Vector3f = Vector3f(x / other, y / other, z / other)
+operator fun Vector3fc.unaryMinus() = negated()
+operator fun Vector3fc.times(matrix: Matrix4fc) = this.mul(matrix, Vector3f())
+operator fun Vector3fc.times(value: Float) = Vector3f(x * value, y * value, z * value)
+operator fun Vector3fc.times(other: Vector3fc) = Vector3f(x * other.x, y * other.y, z * other.z)
+operator fun Vector3fc.div(v: Vector3fc): Vector3f = Vector3f(x / v.x, y / v.y, z / v.z)
+operator fun Vector3fc.div(other: Float): Vector3f = Vector3f(x / other, y / other, z / other)
 interface Vector3ic {
     val x: Int
     val y: Int
@@ -146,3 +200,9 @@ interface Vector3ic {
 class Vector3i(override var x: Int = 0, override var y: Int = 0, override var z: Int = 0) : Vector3ic {
 
 }
+
+val VECTOR_UP: Vector3fc = Vector3f(0f, 1f, 0f)
+val VECTOR_LEFT: Vector3fc = Vector3f(-1f, 1f, 0f)
+
+val Vector3fc.isNaN
+    get() = x.isNaN() || y.isNaN() || z.isNaN()
