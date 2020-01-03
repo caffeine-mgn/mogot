@@ -99,6 +99,7 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: Edi
     protected val ray = MutableRay()
     protected val vec = Vector3f()
     private var startValue: Float
+    private var slow = false
 
     init {
         grid.parent = view.editorRoot
@@ -143,18 +144,35 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: Edi
         }
 
         val pos = Vector3f()
+        val cof = if (slow) 0.1f else 1f
         node.forEach {
             pos.set(it.position)
             it.parentSpatial?.localToGlobal(pos, pos)
             when (type) {
-                Type.X -> pos.x += value - startValue
-                Type.Y -> pos.y += startValue - value
-                Type.Z -> pos.z += startValue - value
+                Type.X -> pos.x += (value - startValue) * cof
+                Type.Y -> pos.y += (startValue - value) * cof
+                Type.Z -> pos.z += (startValue - value) * cof
             }
             it.parentSpatial?.globalToLocal(pos, pos)
             it.position.set(pos)
         }
         startValue = value
+    }
+
+    override fun keyDown(code: Int) {
+        if (code == 16) {
+            slow = true
+            return
+        }
+        super.keyDown(code)
+    }
+
+    override fun keyUp(code: Int) {
+        if (code == 16) {
+            slow = false
+            return
+        }
+        super.keyUp(code)
     }
 }
 
@@ -186,31 +204,50 @@ class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(vi
             resetPositions()
             view.stopEditing()
             view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.X))
+            return
         }
 
         if (code == 89) {
             resetPositions()
             view.stopEditing()
             view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.Y))
+            return
         }
 
         if (code == 90) {
             resetPositions()
             view.stopEditing()
             view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.Z))
+            return
         }
-//        super.keyDown(code)
+        if (code == 16) {
+            slow = true
+            return
+        }
+        println("code=$code")
+        super.keyDown(code)
+    }
+
+    override fun keyUp(code: Int) {
+        if (code == 16) {
+            slow = false
+            return
+        }
+        super.keyUp(code)
     }
 
     private var oldX = view.mousePosition.x
     private var oldY = view.mousePosition.y
+    private var slow = false
 
     override fun render(dt: Float) {
         val x = view.mousePosition.x
         val y = view.mousePosition.y
 
-        val yd = view.editorCamera.quaternion.up * (y - oldY).toFloat() * -0.01f
-        val xd = view.editorCamera.quaternion.right * (x - oldX).toFloat() * 0.01f
+        val cof = if (slow) 0.01f else 0.05f
+        println("cof=$cof")
+        val yd = view.editorCamera.quaternion.up * (oldY - y).toFloat() * cof
+        val xd = view.editorCamera.quaternion.right * (x - oldX).toFloat() * cof
         oldX = x
         oldY = y
 
