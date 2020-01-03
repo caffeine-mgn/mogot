@@ -18,6 +18,7 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
     private fun update() {
         check(size > 0)
         check(size1 > 0f)
+        geom?.dec()
         val vertex = FloatArray((size + 1) * 2 * 3 * 2)
         val sizeHalf = (size / 2f) * size1
         val sizeFull = (size) * size1
@@ -41,7 +42,6 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
             vertex[c++] = 0f
             vertex[c++] = y * size1 - sizeHalf
         }
-        geom?.dec()
         geom = Geom3D2(
                 gl = engine.gl,
                 vertex = vertex,

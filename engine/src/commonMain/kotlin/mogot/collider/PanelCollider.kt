@@ -41,7 +41,7 @@ class PanelCollider(width: Float, height: Float) : Collider {
         val localDirection = tempRay.direction
 
         update()
-        node.globalTransfrorm(TEMP_MATRIX)
+        node.localToGlobalMatrix(TEMP_MATRIX)
         if (Collider.rayCastTrangle(p1, p2, p4, localPosition, localDirection, dest)) {
             dest?.mul(TEMP_MATRIX)
             return true

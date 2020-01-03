@@ -1,15 +1,12 @@
 package pw.binom.sceneEditor
 
-import mogot.*
+import mogot.Node
 import mogot.Spatial
-import mogot.math.right
-import mogot.math.times
+import mogot.collider.PanelCollider
+import mogot.isSpatial
 import mogot.math.*
-import mogot.CSGBox
-import mogot.math.up
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
-import mogot.collider.PanelCollider
 
 interface EditAction {
     fun keyDown(code: Int) {}
@@ -34,9 +31,23 @@ object EditMoveFactory : EditActionFactory {
 
 abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : EditAction {
 
+    protected val node = selected.filter { it.isSpatial }.map { it as Spatial }
+    protected val avgVec: Vector3f
+
+    init {
+        val tmpVec = Vector3f()
+        val vec = Vector3f()
+        node.forEach {
+            tmpVec.set(0f)
+            it.localToGlobal(tmpVec, tmpVec)
+            vec += tmpVec
+        }
+        avgVec = vec / node.size.toFloat()
+    }
+
     private val oldPositions = selected.asSequence()
-            .map { it as? Spatial }
-            .filterNotNull()
+            .filter { it.isSpatial }
+            .map { it as Spatial }
             .associateWith { it.position.copy() }
 
     protected fun resetPositions() {
@@ -73,55 +84,82 @@ abstract class EditMove(val view: SceneEditorView, val selected: List<Node>) : E
     }
 
     init {
-        view.lockMouse = true
-        view.cursorVisible = false
+//        view.lockMouse = true
+//        view.cursorVisible = false
     }
 }
 
-class EditMoveXAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
+class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: EditMoveOneAxis.Type) : EditMove(view, selected) {
+    enum class Type {
+        X, Y, Z
+    }
 
-    private val grid = Grid(view.engine)
-    private val collader = PanelCollider(100f, 100f)
-    private val box = CSGBox(view.engine)
-
-    val node = (selected[0] as Spatial)
+    protected val grid = Line(view.engine)
+    protected val collader = PanelCollider(100f, 100f)
+    protected val ray = MutableRay()
+    protected val vec = Vector3f()
+    private var startValue: Float
 
     init {
-        collader.node = grid
         grid.parent = view.editorRoot
-        grid.position.set(node.position)
+        grid.position.set(avgVec)
         grid.material.value = view.default3DMaterial
-        box.parent = view.editorRoot
-        box.material.value = view.default3DMaterial
-        box.width = 1.1f
-        box.height = 1.1f
-        box.depth = 1.1f
-        view.lockMouse = false
-        view.cursorVisible = true
+        collader.node = grid
+    }
+
+    init {
+        if (type == Type.Y) {
+            grid.quaternion.rotateXYZ(0f, 0f, -PIf / 2f)
+        }
+
+        if (type == Type.Z) {
+            grid.quaternion.rotateXYZ(0f, -PIf / 2f, 0f)
+        }
+        view.editorCamera.screenPointToRay(view.mousePosition.x, view.mousePosition.y, ray)
+        collader.rayCast(ray, vec)
+        startValue = when (type) {
+            EditMoveOneAxis.Type.X -> vec.x
+            EditMoveOneAxis.Type.Y -> vec.y
+            EditMoveOneAxis.Type.Z -> vec.z
+        }
     }
 
     override fun stopEdit() {
         grid.parent = null
         grid.close()
-        box.parent = null
-        box.close()
         super.stopEdit()
     }
 
     override fun render(dt: Float) {
-//        view.editorCamera.position.set(10f, 10f, 10f)
-//        view.editorCamera.lookTo(Vector3f(0f, 0f, 0f))
-        val x = view.mousePosition.x
-        val y = view.mousePosition.y
-        val ray = MutableRay()
-//        view.editorCamera.screenPointToRay(view.editorCamera.width / 2, view.editorCamera.height / 2, ray)
-        view.editorCamera.screenPointToRay(x, y, ray)
-        collader.rayCast(ray, box.position)
-        println("-----------------------\nRay: $ray\nPosition=${box.position}\n-----------------------")
+        view.editorCamera.screenPointToRay(view.mousePosition.x, view.mousePosition.y, ray)
+        collader.rayCast(ray, vec)
+        val value = when (type) {
+            Type.X -> vec.x
+            Type.Y -> vec.y
+            Type.Z -> vec.z
+        }
+        if (value == startValue) {
+            return
+        }
+
+        val pos = Vector3f()
+        node.forEach {
+            pos.set(it.position)
+            it.parentSpatial?.localToGlobal(pos, pos)
+            when (type) {
+                Type.X -> pos.x += value - startValue
+                Type.Y -> pos.y += startValue - value
+                Type.Z -> pos.z += startValue - value
+            }
+            it.parentSpatial?.globalToLocal(pos, pos)
+            it.position.set(pos)
+        }
+        startValue = value
     }
 }
 
-class EditMoveYAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
+/*
+class EditMoveYAxie(view: SceneEditorView, selected: List<Node>) : EditMoveOneAxis(view, selected) {
     override fun render(dt: Float) {
         val y = view.mousePosition.y - view.size.y / 2
 
@@ -140,35 +178,41 @@ class EditMoveZAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view
         }
     }
 }
-
+*/
 class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(view, selected) {
 
     override fun keyDown(code: Int) {
         if (code == 88) {
             resetPositions()
             view.stopEditing()
-            view.startEditor(EditMoveXAxie(view, selected))
+            view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.X))
         }
+
         if (code == 89) {
             resetPositions()
             view.stopEditing()
-            view.startEditor(EditMoveYAxie(view, selected))
+            view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.Y))
         }
 
         if (code == 90) {
             resetPositions()
             view.stopEditing()
-            view.startEditor(EditMoveZAxie(view, selected))
+            view.startEditor(EditMoveOneAxis(view, selected, EditMoveOneAxis.Type.Z))
         }
 //        super.keyDown(code)
     }
 
-    override fun render(dt: Float) {
-        val x = view.mousePosition.x - view.size.x / 2
-        val y = view.mousePosition.y - view.size.y / 2
+    private var oldX = view.mousePosition.x
+    private var oldY = view.mousePosition.y
 
-        val yd = view.editorCamera.quaternion.up * y.toFloat() * -0.01f
-        val xd = view.editorCamera.quaternion.right * x.toFloat() * 0.01f
+    override fun render(dt: Float) {
+        val x = view.mousePosition.x
+        val y = view.mousePosition.y
+
+        val yd = view.editorCamera.quaternion.up * (y - oldY).toFloat() * -0.01f
+        val xd = view.editorCamera.quaternion.right * (x - oldX).toFloat() * 0.01f
+        oldX = x
+        oldY = y
 
         selected.asSequence().map { it as? Spatial }.filterNotNull().forEach {
             it.position += xd

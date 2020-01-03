@@ -11,8 +11,21 @@ open class Spatial : Node() {
         get() = 0x1
 
     private var updateMatrix = false
+    private val tmpMatrix = Matrix4f()
 
-    fun globalToLocalMatrix(dest: Matrix4f){
+    fun localToGlobal(point: Vector3fc, dest: Vector3fm): Vector3fm {
+        localToGlobalMatrix(tmpMatrix)
+        point.mul(tmpMatrix, dest)
+        return dest
+    }
+
+    fun globalToLocal(point: Vector3fc, dest: Vector3fm): Vector3fm {
+        globalToLocalMatrix(tmpMatrix)
+        point.mul(tmpMatrix, dest)
+        return dest
+    }
+
+    fun globalToLocalMatrix(dest: Matrix4f): Matrix4f {
         dest.identity()
         parent?.currentToRoot {
             if (it.isSpatial) {
@@ -23,6 +36,18 @@ open class Spatial : Node() {
         }
         dest.rotateAffine(quaternion)
         dest.translate(-position)
+        return dest
+    }
+
+    fun localToGlobalMatrix(dest: Matrix4f): Matrix4f {
+        val parent = parentSpatial?.transform
+        if (parent == null)
+            dest.set(transform)
+        else {
+            dest.set(parent)
+            dest.mul(transform, dest)
+        }
+        return dest
     }
 
     private inner class Vector3fWithChangeCounter(x: Float, y: Float, z: Float) : Vector3f(x, y, z) {
@@ -109,17 +134,6 @@ open class Spatial : Node() {
             return _transform
         }
 
-    fun globalTransfrorm(dest: Matrix4f): Matrix4f {
-        val parent = parentSpatial?.transform
-        if (parent == null)
-            dest.set(transform)
-        else {
-            dest.set(parent)
-            dest.mul(transform, dest)
-        }
-        return dest
-    }
-
     protected var _matrix = Matrix4f()
 
     val matrix: Matrix4fc
@@ -151,7 +165,7 @@ open class Spatial : Node() {
 
     fun lookTo(position: Vector3fc) {
         quaternion.identity()
-        val g = globalTransfrorm(Matrix4f())
+        val g = localToGlobalMatrix(Matrix4f())
         val v = g.getTranslation(Vector3f())
         quaternion.lookAlong(position - v, Vector3fc.UP)
     }
