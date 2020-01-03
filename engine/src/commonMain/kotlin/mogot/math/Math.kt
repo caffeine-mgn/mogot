@@ -6,6 +6,7 @@ expect object Math  {
     fun sin(value: Double):Double
     fun cos(value: Double):Double
     fun toRadians(value: Double):Double
+    fun fma(a: Float, b: Float, c: Float): Float
 }
 
 val MATRIX4_ONE: Matrix4fc = Matrix4f().identity()

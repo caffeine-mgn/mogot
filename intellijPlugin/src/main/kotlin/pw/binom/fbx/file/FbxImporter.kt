@@ -3,7 +3,7 @@ package pw.binom.fbx.file
 import mogot.*
 import mogot.gl.GL
 import mogot.math.Quaternionf
-import mogot.math.Vector3f
+import mogot.math.*
 import java.io.InputStream
 import java.util.logging.Logger
 

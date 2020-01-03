@@ -2,7 +2,8 @@ package mogot
 
 import mogot.math.Quaternionfc
 import mogot.math.Vector3f
-import mogot.math.Vector3fc
+import mogot.math.*
+import mogot.math.Vector3fm
 
 
 class AnimationBehaviour : Behaviour() {
@@ -83,7 +84,7 @@ class AnimationBehaviour : Behaviour() {
     }
 
 
-    private fun calcPos(time: Float, dest: Vector3f) {
+    private fun calcPos(time: Float, dest: Vector3fm) {
         if (positions.isEmpty())
             return
 

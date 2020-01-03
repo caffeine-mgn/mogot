@@ -38,7 +38,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private val frameListeners = Stack<() -> Unit>()
     private lateinit var _default3DMaterial: Default3DMaterial
     val default3DMaterial: Default3DMaterial
-        get() = _default3DMaterial!!
+        get() = _default3DMaterial
 
     override fun setup(width: Int, height: Int) {
         engine.manager("Editor") { EditorHolder(this) }
@@ -197,7 +197,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         val grid = Grid(engine)
         grid.parent = root
         val mat = SolidMaterial(engine)
-        grid.material = mat
+        grid.material.value = mat
         mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
 //        editorCamera.behaviour = FpsCam(engine)
         selectorMaterial = SolidMaterial(engine)

@@ -5,6 +5,8 @@ import pw.binom.io.Closeable
 
 
 open class Node : Closeable {
+    open val type
+        get() = 0
     var id: String? = null
     private var _parent: Node? = null
     private val _childs = ArrayList<Node>()
@@ -93,6 +95,24 @@ fun Node.walk(func: (Node) -> Boolean) {
         childs.forEach {
             it.walk(func)
         }
+}
+
+fun Node.rootToCurrent(func: (Node) -> Unit) {
+    parent?.rootToCurrent(func)
+    func(this)
+}
+
+
+/**
+ * Called [func] for all node from current to root until [func] does not return false
+ */
+inline fun Node.currentToRoot(func: (Node) -> Boolean) {
+    var node: Node? = this
+    while (node != null) {
+        if (!func(node))
+            break
+        node = node.parent
+    }
 }
 
 fun Node.asUpSequence() = object : Sequence<Node> {

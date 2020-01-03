@@ -5,25 +5,60 @@ import mogot.math.*
 
 class Camera : Spatial() {
     val projectionMatrix = Matrix4f()
-    private var width = 0
-    private var height = 0
+
+    var width = 0
+        private set
+    var height = 0
+        private set
+
+    var near = 0.3f
+        set(value) {
+            field = value
+            resize(width, height)
+        }
+
+    var fieldOfView = 60f
+        set(value) {
+            field = value
+            resize(width, height)
+        }
+
+    var far = 1000f
+        set(value) {
+            field = value
+            resize(width, height)
+        }
 
     fun resize(width: Int, height: Int) {
         this.width = width
         this.height = height
-        projectionMatrix.identity().perspective(Math.toRadians(45.0).toFloat(), width.toFloat() / height.toFloat(), 0.1f, 1000f)
+        projectionMatrix.identity().setPerspective(
+                Math.toRadians(fieldOfView.toDouble()).toFloat(),
+                width.toFloat() / height.toFloat(),
+                near,
+                far, false)
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
+/*
+        parent?.currentToRoot {
+            if (it.isSpatial) {
+                it as Spatial
+                viewMatrix4f.set(it.apply(viewMatrix4f))
+            }
+            true
+        }
+        */
         this.asUpSequence().mapNotNull { it as? Spatial }.forEach {
             viewMatrix4f.set(it.apply(viewMatrix4f))
         }
+
         viewMatrix4f.rotateAffine(quaternion)
         viewMatrix4f.translate(-position)
     }
 
     /**
-     * Проэцирует глобальную матрицу на экран данной камеры. Результат кладется в [dest]
+     * Проэцирует глобальную матрицу [matrix] на экран данной камеры. Результат кладется в [dest]
      *
      * @param matrix глобальная матрица позиции <b>относительно данной камеры</b>
      * @param dest вектор, в который кладётся проекция [matrix] на экран данной камеры
@@ -42,15 +77,146 @@ class Camera : Spatial() {
         clipCoords.y = pos.x * proj.m01 + pos.y * proj.m11 + pos.z * proj.m21 + proj.m31
 
         val ndc = TEMP_VEC_2F
-        ndc.x = clipCoords.x / clipCoords.z;
-        ndc.y = clipCoords.y / clipCoords.z;
+        ndc.x = clipCoords.x / clipCoords.z
+        ndc.y = clipCoords.y / clipCoords.z
 
         dest.x = ((width.toFloat() / 2 * ndc.x) + (ndc.x + width.toFloat() / 2)).toInt()
         dest.y = (-(height.toFloat() / 2 * ndc.y) + (ndc.y + height.toFloat() / 2)).toInt()
         return true
+    }
+
+    fun screenPointToRay(x: Int, y: Int, dest: MutableRay): MutableRay {
+        val mat = Matrix4f()
+        applyMatrix(mat)
+        val matInvert = mat.invert(Matrix4f())
+        /*
+        val mx = x.toFloat() / width * 2f - 1f
+        val my = y.toFloat() / height * 2f - 1f
+        val r = projectionMatrix//.mul(mat, Matrix4f()).invert(Matrix4f())
+        //projectionMatrix.mul(mat, Matrix4f())//.invert(Matrix4f())
+        r.unprojectInv(
+                (width - x).toFloat(),
+                (height - y).toFloat(),
+                near,
+                intArrayOf(0, 0, width, height),
+                dest.direction
+        )
+        dest.direction.z = -far
+        //dest.direction.set(mx, my, 0f).mul(projectionMatrix.invert(Matrix4f()))
+        dest.position.set(0f, 0f, -near).mul(matInvert)//.mul(projectionMatrix)
+        dest.direction.mul(matInvert)
+        dest.direction.normalize()
+
+//        mat.mul(projectionMatrix).unprojectRay(
+//                x.toFloat(),
+//                y.toFloat(),
+//                intArrayOf(0, 0, width, height),
+//                dest.position,
+//                dest.direction
+//        )
+        */
+        matInvert.mul(projectionMatrix.invert(Matrix4f())).unprojectInvRay(
+                x.toFloat(),
+                (height - y).toFloat(),
+                intArrayOf(0, 0, width, height),
+                dest.position,
+                dest.direction
+        )
+        dest.direction.normalize()
+        return dest
+//        val v = Vector3f()
+//        v.z = -near
+//        v.mul(matInvert)
+//        mat.getTranslation(TEMP_VEC_3F_1)
+//        dest.direction.mul(mat).sub(TEMP_VEC_3F_1)
+//        dest.direction.normalize()
+//        return dest
+//        r.unprojectRay(
+//                x.toFloat(),
+//                y.toFloat(),
+//                intArrayOf(0, 0, width, height),
+//                dest.position,
+//                dest.direction
+//        )
+
+
+//        (projectionMatrix * mat).invert()
+//                .unprojectInvRay(
+//                        x.toFloat(),
+//                        (height - y).toFloat(),
+//                        intArrayOf(0, 0, width, height),
+//                        dest.position,
+//                        dest.direction
+//                )
+//        dest.direction.normalize()
+//        return dest
+//
+//        println("$mx, $my")
+//        val pp = Vector4f(mx, my, 1f, 1f).mul(projectionMatrix)
+//        //pp.mul(mat)
+//        pp.w = 1.0f / pp.w
+//        pp.x *= pp.w
+//        pp.y *= pp.w
+//        pp.z *= pp.w
+//        val ppp = Vector3f(pp.x, pp.y, pp.z).normalize()
+//        println("pp=$ppp")
+
+
+//        globalTransfrorm(mat)
+
+//        val matProjection = mat * projectionMatrix
+//        val matInverse = matProjection.invert(Matrix4f())
+//        val winZ = 1.0f
+//        val _in = Vector4f(
+//                x.toFloat() / (width * 0.5f) - 1f,
+//                y.toFloat() / (height * 0.5f) - 1f,
+//                1f,
+//                1f)
+//        val pos = _in.mul(matInverse, Vector4f())
+//        println("pos=$pos")
+//
+//        pos.w = 1.0f / pos.w;
+//        pos.x *= pos.w
+//        pos.y *= pos.w
+//        pos.z *= pos.w
+//        println("pos=${pos.x} ${pos.y}, ${pos.z}")
+//        println("matProjection=$matInverse")
+//        println("mat=$mat")
+
+//        matInverse.unprojectRay(
+//                x.toFloat(),
+//                (height - y).toFloat(),
+//                intArrayOf(0, 0, width, height),
+//                dest.position,
+//                dest.direction
+//        )
+
+
+//        globalTransfrorm(mat)
+//        val m = projectionMatrix.mul(mat, Matrix4f())
+
+//        m.unprojectRay(x.toFloat(), (height - y).toFloat(), intArrayOf(0, 0, width,height), dest.position, dest.direction)
+
+//        mat.unprojectRay(
+//                x.toFloat(),
+//                (y).toFloat(),
+//                intArrayOf(0, 0, width, height),
+//                dest.position,
+//                dest.direction
+//        )
+//        dest.direction.normalize()
+//        return dest
     }
 }
 
 val TEMP_VEC_2F = Vector2f()
 val TEMP_VEC_3F_1 = Vector3f()
 val TEMP_VEC_3F_2 = Vector3f()
+
+fun Vector4fc.toVector3f(dest: Vector3f): Vector3f {
+    val w = 1.0f / w
+    dest.set(x * w, y * w, z * w)
+    return dest
+}
+
+fun Vector4fc.toVector3f(): Vector3f = toVector3f(Vector3f())

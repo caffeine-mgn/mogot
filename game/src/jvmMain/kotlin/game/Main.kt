@@ -8,7 +8,7 @@ import mogot.waitFrame
 import java.awt.Dialog
 import javax.swing.JFrame
 
-class GameView : GLView() {
+class GameView : GLView(TODO()) {
     public override var camera: Camera? = null
     lateinit var game: TestGame
     private var closed = false
@@ -27,14 +27,14 @@ class GameView : GLView() {
         super.dispose()
     }
 
-    fun startRender() {
-        while (!inited) {
-            Thread.sleep(1)
-        }
-        while (!closed) {
-            display()
-        }
-    }
+//    fun startRender() {
+//        while (!inited) {
+//            Thread.sleep(1)
+//        }
+//        while (!closed) {
+//            display()
+//        }
+//    }
 }
 
 object Main {
