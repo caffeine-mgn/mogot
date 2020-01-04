@@ -38,7 +38,6 @@ open class DesktopAssertTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        println("->HELLO")
         check(assertPath != null) { "assertPath not set" }
         check(outputPath != null) { "outputPath not set" }
 

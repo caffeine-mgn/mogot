@@ -1,7 +1,6 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.ide.util.TreeFileChooserFactory
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.GeomNode
 import mogot.Node
@@ -77,7 +76,7 @@ object GeomService : NodeService {
         if (clazz != GeomNode::class.java.name) return null
         val node = GeomNode()
         node.material.value = view.default3DMaterial
-        SpatialService.loadTransform(node, properties)
+        SpatialService.loadSpatial(node, properties)
         val virtualFile = properties["file"]?.let { view.editor1.findFileByRelativePath(it) }
         virtualFile ?: return null
         val fbx = view.engine.resources.loadFbx(virtualFile)
@@ -90,7 +89,7 @@ object GeomService : NodeService {
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
         if (node !is GeomNode) return null
         val out = HashMap<String, String>()
-        SpatialService.saveTransform(node, out)
+        SpatialService.saveSpatial(node, out)
         val geom = node.geom.value as FbxGeom
         if (geom.fbx.file.isInLocalFileSystem) {
             out["file"] = view.editor1.getRelativePath(geom.fbx.file)

@@ -15,6 +15,7 @@ object SpatialLoader : SceneLoader.NodeLoader {
     }
 
     fun load(spatial: Spatial, data: Map<String, String>) {
+        NodeLoader.loadNode(spatial, data)
         spatial.position.set(
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f,

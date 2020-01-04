@@ -7,13 +7,15 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 
 object SpatialService : NodeService {
-    fun saveTransform(spatial: Spatial, output: MutableMap<String, String>) {
+    fun saveSpatial(spatial: Spatial, output: MutableMap<String, String>) {
+        EmptyNodeService.saveNode(spatial, output)
         output["position.x"] = spatial.position.x.toString()
         output["position.y"] = spatial.position.y.toString()
         output["position.z"] = spatial.position.z.toString()
     }
 
-    fun loadTransform(spatial: Spatial, data: Map<String, String>) {
+    fun loadSpatial(spatial: Spatial, data: Map<String, String>) {
+        EmptyNodeService.loadNode(spatial, data)
         spatial.position.set(
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f,
@@ -25,7 +27,7 @@ object SpatialService : NodeService {
         if (clazz != Spatial::class.java.name)
             return null
         val node = Spatial()
-        loadTransform(node, properties)
+        loadSpatial(node, properties)
         return node
     }
 
@@ -33,7 +35,7 @@ object SpatialService : NodeService {
         if (node::class.java !== Spatial::class.java)
             return null
         val out = HashMap<String, String>()
-        saveTransform(node as Spatial, out)
+        saveSpatial(node as Spatial, out)
         return out
     }
 
