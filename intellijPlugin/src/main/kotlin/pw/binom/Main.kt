@@ -8,6 +8,7 @@ import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import pw.binom.sceneEditor.Default3DMaterial
+import pw.binom.sceneEditor.FrustumNode
 import pw.binom.sceneEditor.Grid
 import java.awt.BorderLayout
 import java.awt.Color
@@ -57,7 +58,9 @@ class DDD : GLView(MockFileSystem()) {
     var cam = Camera()
 
     override var camera: Camera? = cam
-    private lateinit var box:CSGBox
+    private lateinit var box: CSGBox
+
+    private val cam2 = Camera()
 
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
@@ -74,10 +77,36 @@ class DDD : GLView(MockFileSystem()) {
         cam.position.set(3f, 3f, 3f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
         box.material.value = mat
+
+        cam2.parent = root
+        cam2.resize(200, 200)
+        cam2.far = 10f
     }
+
+    var nn: FrustumNode? = null
 
     override fun render() {
         super.render()
+    }
+
+    var cc = 0
+
+    override fun render2(dt: Float) {
+        if (cc > 60) {
+            nn?.let {
+                it.parent = null
+                it.close()
+            }
+            nn = null
+            cc = 0
+        }
+        if (nn == null) {
+            nn = FrustumNode(engine, cam2)
+            nn!!.material.value = Default3DMaterial(engine)
+            nn!!.parent = root
+        }
+        cc++
+        super.render2(dt)
     }
 
     override fun dispose() {

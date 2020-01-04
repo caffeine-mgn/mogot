@@ -10,6 +10,72 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 interface Matrix4fc {
+
+    companion object{
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(-1, -1, -1)` when using the identity matrix.
+         *
+         * screen bottom left
+         */
+        const val CORNER_NXNYNZ = 0
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(1, -1, -1)` when using the identity matrix.
+         *
+         * screen bottom right
+         */
+        const val CORNER_PXNYNZ = 1
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(1, 1, -1)` when using the identity matrix.
+         *
+         * screen top right
+         */
+        const val CORNER_PXPYNZ = 2
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(-1, 1, -1)` when using the identity matrix.
+         *
+         * screen top left
+         */
+        const val CORNER_NXPYNZ = 3
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(1, -1, 1)` when using the identity matrix.
+         *
+         * projection bottom right
+         */
+        const val CORNER_PXNYPZ = 4
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(-1, -1, 1)` when using the identity matrix.
+         *
+         * projection bottom left
+         */
+        const val CORNER_NXNYPZ = 5
+
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(-1, 1, 1)` when using the identity matrix.
+         *
+         * projection top left
+         */
+        const val CORNER_NXPYPZ = 6
+        /**
+         * Argument to the first parameter of [frustumCorner]
+         * identifying the corner `(1, 1, 1)` when using the identity matrix.
+         *
+         * projection top right
+         */
+        const val CORNER_PXPYPZ = 7
+    }
+
     fun getTranslation(dest: Vector3fm): Vector3fm {
         dest.x = m30
         dest.y = m31
@@ -1334,4 +1400,157 @@ fun Matrix4fc.sub(subtrahend: Matrix4fc, dest: Matrix4f): Matrix4f {
     dest.m33 = m33 - subtrahend.m33
     dest.properties = 0
     return dest
+}
+
+fun Matrix4fc.frustumCorner(corner: Int, point: Vector3fm): Vector3fm {
+    val d1: Float
+    val d2: Float
+    val d3: Float
+    val n1x: Float
+    val n1y: Float
+    val n1z: Float
+    val n2x: Float
+    val n2y: Float
+    val n2z: Float
+    val n3x: Float
+    val n3y: Float
+    val n3z: Float
+    when (corner) {
+        Matrix4fc.CORNER_NXNYNZ -> {
+            n1x = m03 + m00
+            n1y = m13 + m10
+            n1z = m23 + m20
+            d1 = m33 + m30 // left
+            n2x = m03 + m01
+            n2y = m13 + m11
+            n2z = m23 + m21
+            d2 = m33 + m31 // bottom
+            n3x = m03 + m02
+            n3y = m13 + m12
+            n3z = m23 + m22
+            d3 = m33 + m32 // near
+        }
+        Matrix4fc.CORNER_PXNYNZ -> {
+            n1x = m03 - m00
+            n1y = m13 - m10
+            n1z = m23 - m20
+            d1 = m33 - m30 // right
+            n2x = m03 + m01
+            n2y = m13 + m11
+            n2z = m23 + m21
+            d2 = m33 + m31 // bottom
+            n3x = m03 + m02
+            n3y = m13 + m12
+            n3z = m23 + m22
+            d3 = m33 + m32 // near
+        }
+        Matrix4fc.CORNER_PXPYNZ -> {
+            n1x = m03 - m00
+            n1y = m13 - m10
+            n1z = m23 - m20
+            d1 = m33 - m30 // right
+            n2x = m03 - m01
+            n2y = m13 - m11
+            n2z = m23 - m21
+            d2 = m33 - m31 // top
+            n3x = m03 + m02
+            n3y = m13 + m12
+            n3z = m23 + m22
+            d3 = m33 + m32 // near
+        }
+        Matrix4fc.CORNER_NXPYNZ -> {
+            n1x = m03 + m00
+            n1y = m13 + m10
+            n1z = m23 + m20
+            d1 = m33 + m30 // left
+            n2x = m03 - m01
+            n2y = m13 - m11
+            n2z = m23 - m21
+            d2 = m33 - m31 // top
+            n3x = m03 + m02
+            n3y = m13 + m12
+            n3z = m23 + m22
+            d3 = m33 + m32 // near
+        }
+        Matrix4fc.CORNER_PXNYPZ -> {
+            n1x = m03 - m00
+            n1y = m13 - m10
+            n1z = m23 - m20
+            d1 = m33 - m30 // right
+            n2x = m03 + m01
+            n2y = m13 + m11
+            n2z = m23 + m21
+            d2 = m33 + m31 // bottom
+            n3x = m03 - m02
+            n3y = m13 - m12
+            n3z = m23 - m22
+            d3 = m33 - m32 // far
+        }
+        Matrix4fc.CORNER_NXNYPZ -> {
+            n1x = m03 + m00
+            n1y = m13 + m10
+            n1z = m23 + m20
+            d1 = m33 + m30 // left
+            n2x = m03 + m01
+            n2y = m13 + m11
+            n2z = m23 + m21
+            d2 = m33 + m31 // bottom
+            n3x = m03 - m02
+            n3y = m13 - m12
+            n3z = m23 - m22
+            d3 = m33 - m32 // far
+        }
+        Matrix4fc.CORNER_NXPYPZ -> {
+            n1x = m03 + m00
+            n1y = m13 + m10
+            n1z = m23 + m20
+            d1 = m33 + m30 // left
+            n2x = m03 - m01
+            n2y = m13 - m11
+            n2z = m23 - m21
+            d2 = m33 - m31 // top
+            n3x = m03 - m02
+            n3y = m13 - m12
+            n3z = m23 - m22
+            d3 = m33 - m32 // far
+        }
+        Matrix4fc.CORNER_PXPYPZ -> {
+            n1x = m03 - m00
+            n1y = m13 - m10
+            n1z = m23 - m20
+            d1 = m33 - m30 // right
+            n2x = m03 - m01
+            n2y = m13 - m11
+            n2z = m23 - m21
+            d2 = m33 - m31 // top
+            n3x = m03 - m02
+            n3y = m13 - m12
+            n3z = m23 - m22
+            d3 = m33 - m32 // far
+        }
+        else -> throw IllegalArgumentException("corner") //$NON-NLS-1$
+    }
+    val c23x: Float
+    val c23y: Float
+    val c23z: Float
+    c23x = n2y * n3z - n2z * n3y
+    c23y = n2z * n3x - n2x * n3z
+    c23z = n2x * n3y - n2y * n3x
+    val c31x: Float
+    val c31y: Float
+    val c31z: Float
+    c31x = n3y * n1z - n3z * n1y
+    c31y = n3z * n1x - n3x * n1z
+    c31z = n3x * n1y - n3y * n1x
+    val c12x: Float
+    val c12y: Float
+    val c12z: Float
+    c12x = n1y * n2z - n1z * n2y
+    c12y = n1z * n2x - n1x * n2z
+    c12z = n1x * n2y - n1y * n2x
+    val invDot = 1.0f / (n1x * c23x + n1y * c23y + n1z * c23z)
+    point.x = (-c23x * d1 - c31x * d2 - c12x * d3) * invDot
+    point.y = (-c23y * d1 - c31y * d2 - c12y * d3) * invDot
+    point.z = (-c23z * d1 - c31z * d2 - c12z * d3) * invDot
+    return point
 }

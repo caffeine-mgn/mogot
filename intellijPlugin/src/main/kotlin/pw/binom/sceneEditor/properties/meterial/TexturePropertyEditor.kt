@@ -5,6 +5,7 @@ import mogot.EventDispatcher
 import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.sceneEditor.ExternalTexture
+import pw.binom.sceneEditor.ExternalTextureFS
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.loadTexture
 import pw.binom.sceneEditor.properties.Panel
@@ -23,7 +24,7 @@ object TexturePropertyEditorFactory : MaterialProperties.PropertyEditorFactory {
 }
 
 class TexturePropertyEditor(val panel: MaterialProperties, override val uniform: List<MaterialInstance.Uniform>) : Panel(), MaterialProperties.PropertyEditor {
-    private var texture: ExternalTexture? = null
+    private var texture: ExternalTextureFS? = null
         set(value) {
             field?.dec()
             field = value
@@ -35,7 +36,7 @@ class TexturePropertyEditor(val panel: MaterialProperties, override val uniform:
     override var value: Any?
         get() = texture
         set(value) {
-            texture = value as ExternalTexture?
+            texture = value as ExternalTextureFS?
         }
     override val component: JComponent
         get() = this
@@ -56,7 +57,7 @@ class TexturePropertyEditor(val panel: MaterialProperties, override val uniform:
     init {
         val u = uniform.first()
         texture = if (eqAll) {
-            u.materialInstance.get(u) as? ExternalTexture
+            u.materialInstance.get(u) as? ExternalTextureFS
         } else {
             null
         }

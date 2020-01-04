@@ -11,7 +11,7 @@ object MaterialNodeUtils {
         material.uniforms.forEach {
             val value = material.get(it) ?: return@forEach
             val valueStr = when (value) {
-                is ExternalTexture -> "TEX ${view.editor1.getRelativePath(value.file)}"
+                is ExternalTextureFS -> "TEX ${view.editor1.getRelativePath(value.file)}"
                 is Vector2fc -> "VEC2 ${value.x};${value.y}"
                 is Vector3fc -> "VEC3 ${value.x};${value.y};${value.z}"
                 is Vector4fc -> "VEC4 ${value.x};${value.y};${value.z};${value.w}"

@@ -28,7 +28,7 @@ object CubeNodeCreator : NodeCreator {
 object CubeService : NodeService {
     private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
-    override fun isEditor(node: Node): Boolean = node is CSGBox
+    override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {
     }
 
