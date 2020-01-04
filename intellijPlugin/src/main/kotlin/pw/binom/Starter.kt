@@ -19,5 +19,7 @@ class Starter : StartupActivity {
         Services.reg(FbxModelNodeCreator)
         Services.reg(SpatialService)
         Services.reg(GeomService)
+        Services.reg(CameraService)
+        Services.reg(CameraNodeCreator)
     }
 }

@@ -25,4 +25,6 @@ class VertexArray(val gl: GL) : Closeable {
         gl.deleteVertexArray(id)
 //        gl.glDeleteVertexArrays(id, IntArray(1) { id }, 0)
     }
+
+    override fun toString(): String ="VertexArray($id)"
 }

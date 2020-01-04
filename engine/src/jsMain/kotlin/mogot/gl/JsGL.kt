@@ -167,6 +167,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.enableVertexAttribArray(index)
     }
 
+    actual fun disableVertexAttribArray(index: Int) {
+        ctx.disableVertexAttribArray(index)
+    }
+
     actual fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int) {
         ctx.vertexAttribPointer(index, size, type, normalized, stride, offset)
     }

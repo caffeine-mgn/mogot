@@ -2,7 +2,7 @@ package mogot
 
 import mogot.gl.BufferArray
 import mogot.gl.BufferElementArray
-import mogot.gl.GL
+import mogot.gl.*
 import mogot.gl.VertexArray
 import mogot.math.Vector3f
 import pw.binom.io.Closeable
@@ -37,6 +37,7 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
     val size = index.size
     val boxMin = Vector3f()
     val boxMax = Vector3f()
+    private var closed = false
 
     init {
 
@@ -63,10 +64,7 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
             if (z > boxMax.z)
                 boxMax.z = z
         }
-
-
         vao.bind {
-
             indexBuffer.uploadArray(index)
             indexBuffer.bind()
 
@@ -81,66 +79,53 @@ class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: 
                 uvBuffer.uploadArray(uvs)
                 uvBuffer.bind()
                 this.uvBuffer = uvBuffer
-
-//                gl.glVertexAttribPointer(2, 2, GL2.GL_FLOAT, false, 0, 0)
                 gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 0, 0)
-//                gl.glEnableVertexAttribArray(2)
-//                gl.glEnableVertexAttribArray(2)
                 gl.enableVertexAttribArray(2)
             }
 
-
-
-
-
             normalBuffer?.bind {
-                //                gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0)
                 gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0)
                 gl.enableVertexAttribArray(1)
             }
-
-//            uvBuffer?.bind {
-//                GL45.glVertexAttribPointer(2, 2, GL45.GL_FLOAT, false, 0, 0)
-//                GL45.glEnableVertexAttribArray(2)
-//            }
-
         }
-
-//        println("Vertex:")
-//        vertex.forEachIndexed { index, fl ->
-//            println("$index => $fl")
-//        }
-//
-//        println("\nIndex:")
-//        index.forEachIndexed { index, i ->
-//            println("$index => $i")
-//        }
-//        println("Size: $size")
+        gl.checkError { "After create geoms" }
+        println("Geom created! this=${hashCode()} $vao")
     }
 
     override fun draw() {
-//        gl.glLineWidth(30f)
+        check(!closed) { "Geom already closed" }
+        gl.checkError { "Before render" }
         vao.bind {
-            //            gl.glDrawElements(GL2.GL_TRIANGLES, size, GL2.GL_UNSIGNED_INT, 0)
+            gl.checkError { "this=${hashCode()} Bind error. ${vao}" }
             gl.drawElements(renderMode, size, gl.UNSIGNED_INT, 0)
-//            gl.glDrawElements(GL2.GL_LINE_STRIP, size, GL2.GL_UNSIGNED_INT, 0)
+            gl.checkError()
         }
 
-        checkError()
+        gl.checkError()
     }
 
     override fun dispose() {
-        indexBuffer.close()
-        vertexBuffer.close()
-        normalBuffer?.close()
-        uvBuffer?.close()
-        super.dispose()
-    }
-
-    private fun checkError() {
-        gl.getError().also {
-            if (it != 0)
-                TODO("error=$it")
+        check(!closed) { "Geom already closed" }
+        println("Dispose this=${hashCode()} $vao")
+        gl.checkError { "Before dispose" }
+        vao.bind {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+            gl.bindBuffer(gl.ARRAY_BUFFER, null)
+            gl.disableVertexAttribArray(0)
         }
+        vao.close()
+        gl.checkError { "1" }
+        indexBuffer.close()
+        gl.checkError { "1" }
+        vertexBuffer.close()
+        gl.checkError { "2" }
+        normalBuffer?.close()
+        gl.checkError { "3" }
+        uvBuffer?.close()
+        gl.checkError { "4" }
+
+        gl.checkError { "dispose error" }
+        super.dispose()
+        closed = true
     }
 }

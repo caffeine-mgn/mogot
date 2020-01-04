@@ -138,7 +138,9 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: Edi
 
     override fun stopEdit() {
         grid.parent = null
-        grid.close()
+        view.renderThread {
+            grid.close()
+        }
         super.stopEdit()
     }
 

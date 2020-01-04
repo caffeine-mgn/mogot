@@ -1,3 +1,9 @@
 package mogot
 
-open class VisualInstance:Spatial()
+val Node.isVisualInstance
+    get() = (type and 0x2) > 0
+
+open class VisualInstance : Spatial() {
+    override val type: Int
+        get() = 0x2 or super.type
+}

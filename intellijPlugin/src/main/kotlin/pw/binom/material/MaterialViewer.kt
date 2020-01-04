@@ -129,7 +129,6 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                     is Vector3ic -> shader.uniform(name, value)
                     is Vector4fc -> shader.uniform(name, value)
                     is ExternalTexture -> {
-                        println("active $name to ${value.id} from ${value.file.path}")
                         gl.activeTexture(gl.TEXTURE0 + value.id)
                         gl.bindTexture(gl.TEXTURE_2D, value.gl.gl)
                         shader.uniform(name, value.id)

@@ -4,7 +4,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
-import pw.binom.io.wrap
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -24,20 +23,19 @@ object OmniNodeCreator : NodeCreator {
 }
 
 private class OmniManager(val engine: Engine) : Closeable {
-    val lights = HashMap<OmniLight, LightScreenPos>()
+    val lights = HashMap<OmniLight, FlatScreenBehaviour>()
 
-    lateinit var omniLightTexture: Texture2D
+    lateinit var omniLightTexture: ExternalTexture
 
     init {
         engine.editor.renderThread {
-            omniLightTexture = this::class.java.getResourceAsStream("/light-icon.png").use {
-                engine.resources.syncCreateTexture2D(it.wrap())
-            }
+            omniLightTexture = engine.resources.loadTextureResource("/light-icon.png")
+            omniLightTexture.inc()
         }
     }
 
     override fun close() {
-
+        omniLightTexture.dec()
     }
 }
 
@@ -50,9 +48,9 @@ private fun createStub(view: SceneEditorView, light: OmniLight) {
         s.size.set(120f / 4f, 160f / 4f)
         s.material = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
-            tex = view.engine.omniManager.omniLightTexture
+            tex = view.engine.omniManager.omniLightTexture.gl
         }
-        val b = LightScreenPos(view.editorCamera, light)
+        val b = FlatScreenBehaviour(view.editorCamera, light)
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.omniManager.lights[light] = b
@@ -67,7 +65,7 @@ object OmniLightService : NodeService {
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is OmniLight
     override fun delete(view: SceneEditorView, node: Node) {
-        node as OmniLight ?: return
+        if (node !is OmniLight) return
         view.engine.omniManager.lights.remove(node)?.node?.let {
             it.parent = null
             it.close()
@@ -90,11 +88,10 @@ object OmniLightService : NodeService {
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != OmniLight::class.java.name)
             return null
-        println("Load $clazz...")
-        val n = OmniLight()
-        createStub(view, n)
-        SpatialService.loadTransform(n, properties)
-        return n
+        val node = OmniLight()
+        createStub(view, node)
+        SpatialService.loadTransform(node, properties)
+        return node
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {

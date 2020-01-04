@@ -18,7 +18,6 @@ typealias Panel = JBPanel<JBPanel<*>>
 
 object PositionPropertyFactory : PropertyFactory {
     override fun create(view: SceneEditorView): Property = PositionProperty(view)
-
 }
 
 class PositionProperty(val view: SceneEditorView) : Property, Spoler("Position") {
@@ -48,13 +47,14 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Position")
     override fun setNodes(nodes: List<Node>) {
         this.nodes = nodes
         update()
-
     }
 
     init {
         editor.eventChange.on {
-            if (changeEventEnabled)
+            if (changeEventEnabled) {
                 nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach { it.position.set(editor.value) }
+                view.repaint()
+            }
         }
     }
 

@@ -136,7 +136,7 @@ open class Spatial : Node() {
 
     protected var _matrix = Matrix4f()
 
-    val matrix: Matrix4fc
+    open val matrix: Matrix4fc
         get() = _matrix
 
     fun globalMatrix(dest: Matrix4f) {
