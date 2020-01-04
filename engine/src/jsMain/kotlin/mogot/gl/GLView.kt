@@ -26,7 +26,6 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
 
     val engine = Engine(this, fileSystem)
     private var oldLockMouse = false
-    private var oldLockMouse1 = false
 
     override fun draw() {
         val time = window.performance.now().unsafeCast<Float>()

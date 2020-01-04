@@ -69,7 +69,7 @@ object CameraService : NodeService {
         if (clazz != Camera::class.java.name)
             return null
         val node = Camera()
-        SpatialService.loadTransform(node, properties)
+        SpatialService.loadSpatial(node, properties)
         node.resize(800, 600)
         properties["near"]?.toFloatOrNull()?.let { node.near = it }
         properties["far"]?.toFloatOrNull()?.let { node.far = it }
@@ -82,7 +82,7 @@ object CameraService : NodeService {
         if (node !is Camera)
             return null
         val out = HashMap<String, String>()
-        SpatialService.saveTransform(node, out)
+        SpatialService.saveSpatial(node, out)
         out["near"] = node.near.toString()
         out["far"] = node.far.toString()
         out["fieldOfView"] = node.fieldOfView.toString()

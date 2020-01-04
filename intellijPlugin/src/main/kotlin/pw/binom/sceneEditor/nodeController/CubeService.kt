@@ -3,7 +3,6 @@ package pw.binom.sceneEditor.nodeController
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
 import mogot.Node
-import mogot.Spatial
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
@@ -36,7 +35,7 @@ object CubeService : NodeService {
         if (clazz != CSGBox::class.java.name)
             return null
         val node = CSGBox(view.engine)
-        SpatialService.loadTransform(node, properties)
+        SpatialService.loadSpatial(node, properties)
         MaterialNodeUtils.load(view, node, properties)
         return node
     }
@@ -45,7 +44,7 @@ object CubeService : NodeService {
         if (node !is CSGBox)
             return null
         val out = HashMap<String, String>()
-        SpatialService.saveTransform(node, out)
+        SpatialService.saveSpatial(node, out)
         MaterialNodeUtils.save(view, node, out)
         return out
     }

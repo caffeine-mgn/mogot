@@ -90,14 +90,14 @@ object OmniLightService : NodeService {
             return null
         val node = OmniLight()
         createStub(view, node)
-        SpatialService.loadTransform(node, properties)
+        SpatialService.loadSpatial(node, properties)
         return node
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
         if (node !is OmniLight) return null
         val out = HashMap<String, String>()
-        SpatialService.saveTransform(node, out)
+        SpatialService.saveSpatial(node, out)
         out["specular"] = node.specular.toString()
         return out
     }

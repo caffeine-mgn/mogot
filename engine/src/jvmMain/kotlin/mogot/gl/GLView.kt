@@ -53,6 +53,10 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
         }
     private val robot = Robot()
     protected open var camera: Camera? = null
+        set(value) {
+            value?.resize(width, height)
+            field = value
+        }
     protected open val root
         get() = camera?.asUpSequence()?.last()
 
@@ -242,7 +246,8 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
             gl.gl.glEnable(GL2.GL_DEPTH_TEST)
             gl.gl.glEnable(GL2.GL_CULL_FACE)
             update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-            renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+            if (camera != null)
+                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
             gl.gl.glDisable(GL2.GL_DEPTH_TEST)
             gl.gl.glDisable(GL2.GL_CULL_FACE)
