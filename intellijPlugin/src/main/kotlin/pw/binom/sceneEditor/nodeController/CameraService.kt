@@ -5,6 +5,7 @@ import mogot.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.properties.CameraPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
@@ -54,7 +55,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.camerasManager.cameras[camera] = b
-        camera.resize(view.width, view.height)
+        camera.resize(800, 600)
         camera.near = 0.3f
         camera.far = 30f
         camera.fieldOfView = 45f
@@ -62,13 +63,14 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
 }
 
 object CameraService : NodeService {
-    private val props = listOf(PositionPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, CameraPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != Camera::class.java.name)
             return null
         val node = Camera()
         SpatialService.loadTransform(node, properties)
+        node.resize(800, 600)
         properties["near"]?.toFloatOrNull()?.let { node.near = it }
         properties["far"]?.toFloatOrNull()?.let { node.far = it }
         properties["fieldOfView"]?.toFloatOrNull()?.let { node.fieldOfView = it }
