@@ -6,6 +6,7 @@ import mogot.Node
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -25,7 +26,7 @@ object CubeNodeCreator : NodeCreator {
 }
 
 object CubeService : NodeService {
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {

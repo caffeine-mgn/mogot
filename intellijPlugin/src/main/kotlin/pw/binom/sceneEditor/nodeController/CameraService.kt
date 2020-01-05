@@ -5,6 +5,7 @@ import mogot.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.CameraPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -63,7 +64,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
 }
 
 object CameraService : NodeService {
-    private val props = listOf(PositionPropertyFactory, CameraPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, CameraPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != Camera::class.java.name)

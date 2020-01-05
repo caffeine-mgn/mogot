@@ -20,7 +20,6 @@ import javax.swing.JPanel
 object MaterialPropertyFactory : PropertyFactory {
     override fun create(view: SceneEditorView): Property =
             MaterialProperty(view)
-
 }
 
 class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material") {

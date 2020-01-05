@@ -12,6 +12,7 @@ import pw.binom.loadFbx
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -69,7 +70,7 @@ private fun makeFbxScene(view: SceneEditorView, fbx: ExternalFbx): Spatial {
 
 object GeomService : NodeService {
 
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {

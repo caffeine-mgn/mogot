@@ -5,6 +5,7 @@ import mogot.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
@@ -61,7 +62,7 @@ private fun createStub(view: SceneEditorView, light: OmniLight) {
 
 object OmniLightService : NodeService {
 
-    private val props = listOf(PositionPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is OmniLight
     override fun delete(view: SceneEditorView, node: Node) {
