@@ -8,5 +8,6 @@ interface SimpleExpression : Expression {
                         ?: NumberExpression.read(lexer)
                         ?: StringExpression.read(lexer)
                         ?: IdAccessExpression.read(exp, lexer)
+                        ?: UnarExpression.read(lexer)
     }
 }

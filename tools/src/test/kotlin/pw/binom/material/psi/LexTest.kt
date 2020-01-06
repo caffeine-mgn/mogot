@@ -21,7 +21,7 @@ fun makeStream(txt: String): LexStream<TokenType> {
 class LexTest {
 
     @Test
-    fun lexerTest(){
+    fun lexerTest() {
         val l = GLSLLexer(StringReader("vec3 vec4ee"))
         l.next()
         l.position.eq(0)
@@ -163,6 +163,61 @@ class LexTest {
 
             StatementBlock.read(stream).notNull()
             StatementBlock.read(stream).notNull()
+        }
+    }
+
+    @Test
+    fun lineCommentTest() {
+        val stream = makeStream("""
+                        //line comment
+                        float value
+        """)
+
+        val cc = Global.read(stream)
+        (cc is GlobalVar).eq(true)
+    }
+
+    @Test
+    fun blockCommentTest() {
+        val stream = makeStream("""
+                        /**first line
+                        second line *//*  also comment  */float value
+        """)
+
+        val cc = Global.read(stream)
+        (cc is GlobalVar).eq(true)
+    }
+
+    @Test
+    fun unarExpression() {
+        run {
+            val stream = makeStream("++i")
+            UnarExpression.read(stream).notNull().also {
+                it as UnarExpression
+                it.prefix.eq(true)
+                it.operator.eq(OperationExpression.Operator.PLUS)
+                it.exp as IdAccessExpression
+            }
+        }
+
+        run {
+            val stream = makeStream("--i")
+            UnarExpression.read(stream).notNull().also {
+                it as UnarExpression
+                it.prefix.eq(true)
+                it.operator.eq(OperationExpression.Operator.MINUS)
+                it.exp as IdAccessExpression
+            }
+        }
+
+        run {
+            val stream = makeStream("i--")
+            UnarExpression.read(stream).notNull().also {
+                it as UnarExpression
+                it.prefix.eq(false)
+                it.operator.eq(OperationExpression.Operator.MINUS)
+                it.exp as IdAccessExpression
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ internal class SimpleMaterial(engile:Engine) : MaterialGLSL(engile) {
     }
 
     //    var image: Image? = null
+
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
     override val shader: Shader = Shader(engile.gl,
             vertex = """#version 440 core

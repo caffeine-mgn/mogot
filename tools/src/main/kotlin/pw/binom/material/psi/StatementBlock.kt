@@ -19,6 +19,7 @@ class StatementBlock(val statements: List<Statement>, override val position: Int
                             endBlock = lexer.skipSpace(true)!!
                             break
                         }
+                        CommentDef.read(lexer)
                         val l = Statement.read(lexer) ?: break
                         list += l
                     }
