@@ -8,10 +8,8 @@ interface Statement {
         fun read(lexer: LexStream<TokenType>): Statement? = run {
             CommentDef.read(lexer)
             StatementBlock.read(lexer)
-                    ?: LocalDefineAssignStatement.read(lexer)
-                    ?: AssignStatement.read(lexer)
+                    ?: UnitStatement.read(lexer)
                     ?: ReturnStatement.read(lexer)
-                    ?: ExpStatement.read(lexer)
                     ?: ForStatement.read(lexer)
         }
     }

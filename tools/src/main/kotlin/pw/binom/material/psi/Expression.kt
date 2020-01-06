@@ -8,7 +8,7 @@ interface Expression {
         fun read(lexer: LexStream<TokenType>): Expression? = run {
             CommentDef.read(lexer)
             OperationExpression.read(lexer)
-                    ?: SubjectExpression.read(lexer)
+                    ?: UnitExpression.read(lexer)
         }
     }
 }

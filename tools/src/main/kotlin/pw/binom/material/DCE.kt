@@ -3,13 +3,13 @@ package pw.binom.material
 import pw.binom.material.compiler.*
 
 class DCE(val compiler: Compiler) {
-    val methodsVP = HashSet<MethodDesc>()
-    val methodsFP = HashSet<MethodDesc>()
-    val fieldsVP = HashSet<GlobalFieldDesc>()
-    val fieldsFP = HashSet<GlobalFieldDesc>()
+    val methodsVP = LinkedHashSet<MethodDesc>()
+    val methodsFP = LinkedHashSet<MethodDesc>()
+    val fieldsVP = LinkedHashSet<GlobalFieldDesc>()
+    val fieldsFP = LinkedHashSet<GlobalFieldDesc>()
 
-    val classesVP = HashSet<ClassDesc>()
-    val classesFP = HashSet<ClassDesc>()
+    val classesVP = LinkedHashSet<ClassDesc>()
+    val classesFP = LinkedHashSet<ClassDesc>()
 
     private var visitVP = true
 
@@ -68,6 +68,14 @@ class DCE(val compiler: Compiler) {
             methodsFP += expression.methodDesc
     }
 
+    private fun visit(expression: IncDecExpressionDesc) {
+        visit(expression.exp)
+    }
+
+    private fun visit(expression: ExpParenthesisDest){
+        visit(expression.exp)
+    }
+
     private fun visit(expression: ExpressionDesc) {
         when (expression) {
             is MethodCallExpressionDesc -> visit(expression)
@@ -76,6 +84,8 @@ class DCE(val compiler: Compiler) {
             }
             is OperationExpressionDesc -> visit(expression)
             is FieldAccessExpressionDesc -> visit(expression)
+            is IncDecExpressionDesc -> visit(expression)
+            is ExpParenthesisDest -> visit(expression)
             else -> TODO("->${expression::class.java.name}")
         }
     }

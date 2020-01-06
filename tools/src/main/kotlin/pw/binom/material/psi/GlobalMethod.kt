@@ -19,8 +19,9 @@ class GlobalMethod(
                     val methodName = lexer.skipSpace()
                             ?.takeIf { it.element.isPrimitive || it.element == TokenType.ID }
                             ?: return@safe null
+                    val r=
                     lexer.skipSpace(true)
-                            ?.ifType(TokenType.LEFT_PARENTHESIS)
+                            r?.ifType(TokenType.LEFT_PARENTHESIS)
                             ?: return@safe null
                     val args = ArrayList<Argument>()
                     while (true) {

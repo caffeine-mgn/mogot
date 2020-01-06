@@ -53,7 +53,7 @@ class GLSLSyntaxHighlighter : SyntaxHighlighterBase() {
                 GLSLTypes.VOID,
                 GLSLTypes.RETURN,
                 GLSLTypes.FOR,
-                GLSLTypes.CLASS -> KEY_KEYS
+                GLSLTypes.CLASS, GLSLTypes.TRUE, GLSLTypes.FALSE -> KEY_KEYS
                 GLSLTypes.STRING -> STRING_KEYS
                 GLSLTypes.ANN_VERTEX,
                 GLSLTypes.ANN_MODEL,

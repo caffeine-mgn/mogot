@@ -8,17 +8,85 @@ import mogot.gl.GL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
+import pw.binom.material.compiler.Compiler
+import pw.binom.material.generator.gles300.GLES300Generator
+import pw.binom.material.psi.Parser
+import java.io.StringReader
 
-internal class SimpleMaterial(engile:Engine) : MaterialGLSL(engile) {
+private val shaderText = """
+@vertex
+vec3 vertexPos
+
+@normal
+vec3 normalList
+
+@uv
+vec2 vertexUV
+
+@projection
+mat4 projection
+
+@model
+mat4 model
+vec3 normal
+
+class Light {
+    vec3 position
+    vec3 diffuse
+    float specular
+}
+
+@property(hidden=true)
+Light lights[10]
+
+@property(hidden=true)
+int lights_len
+
+vec4 vertex(){
+    vec3 ff = vec3(0f,0f,0f)
+    mat3 normalMatrix = mat3(transpose(inverse(model)))
+    normal = vec3(normalMatrix * normalList)
+    return vec4(projection * model * vec4(vertexPos, 1f))
+}
+
+vec4 fragment(vec4 color2){
+    vec4 cc = vec4(0.5f,0.5f,0.5f,1f)
+
+    for (int i=0; i<lights_len; i++) {
+        vec3 lightDir = lights[i].position - vertexPos
+        vec3 N = normalize(normal)
+        vec3 L = normalize(lightDir)
+
+        float lambertTerm = dot(N,L)
+        float cosTheta = dot( N,L )
+        float distation = length(lightDir)
+        vec3 E = normalize(-vertexPos)
+        vec3 R = normalize(-reflect(L, N))
+        float LightPower = 1000f
+        cc += vec4(lights[i].diffuse, 1f) * LightPower * cosTheta / (distation * distation)
+
+    }
+    return cc
+}
+ 
+"""
+
+internal class SimpleMaterial(engile: Engine) : MaterialGLSL(engile) {
 
     override fun dispose() {
         shader.close()
         super.dispose()
     }
 
-    //    var image: Image? = null
 
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
+    override val shader: Shader = run {
+        val gen = Parser(StringReader(shaderText))
+                .let { Compiler(it) }
+                .let { GLES300Generator(it) }
+        Shader(engile.gl,gen.vp,gen.fp)
+    }
+    /*
     override val shader: Shader = Shader(engile.gl,
             vertex = """#version 440 core
 
@@ -106,7 +174,7 @@ void main() {
 }
 """
     )
-
+*/
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
 //        image?.bind()

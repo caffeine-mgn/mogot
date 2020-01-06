@@ -23,6 +23,7 @@ enum class TokenType {
     LEFT_BRACE,
     RIGHT_BRACE,
     END_LINE,
+    CMD_SEPARATOR,
     COMMENT_LINE,
     ASSIGN_DIV,
     ASSIGN_TIMES,
@@ -30,9 +31,13 @@ enum class TokenType {
     UNARY_PLUS,
     ASSIGN_MINUS,
     UNARY_MINUS,
+    INC,
+    DEC,
     IN,
     OP_LE,
     OP_GE,
+    OP_NE,
+    OP_EQ,
     FOR,
     OUT,
     INT,
@@ -67,7 +72,7 @@ enum class TokenType {
 
     val isOperation
         get() = when (this) {
-            OP_PLUS, OP_MINUS, OP_LE, OP_GE, OP_LT, OP_GT, OP_DIV, OP_TIMES, OP_MINUS -> true
+            OP_PLUS, OP_MINUS, OP_LE, OP_GE, OP_LT, OP_GT, OP_DIV, OP_TIMES, OP_NE, OP_EQ -> true
             else -> false
         }
 
