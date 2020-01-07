@@ -287,8 +287,11 @@ val Quaternionfc.pitch: Float
 val Quaternionfc.roll: Float
     get() = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))
 
+fun Quaternionfm.setRotation(yaw: Float, pitch: Float, roll: Float): Quaternionfm =
+        setRotation(yaw, pitch, roll, this)
+
 // yaw (Z), pitch (Y), roll (X)
-fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quaternionf): Quaternionf {
+fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quaternionfm): Quaternionfm {
     // Abbreviations for the various angular functions
     val cy = cos(yaw * 0.5f)
     val sy = sin(yaw * 0.5f)

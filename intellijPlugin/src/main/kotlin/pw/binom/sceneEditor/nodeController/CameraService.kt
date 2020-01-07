@@ -70,7 +70,7 @@ object CameraService : NodeService {
         if (clazz != Camera::class.java.name)
             return null
         val node = Camera()
-        SpatialService.loadSpatial(node, properties)
+        SpatialService.loadSpatial(view.engine, node, properties)
         node.resize(800, 600)
         properties["near"]?.toFloatOrNull()?.let { node.near = it }
         properties["far"]?.toFloatOrNull()?.let { node.far = it }
@@ -83,7 +83,7 @@ object CameraService : NodeService {
         if (node !is Camera)
             return null
         val out = HashMap<String, String>()
-        SpatialService.saveSpatial(node, out)
+        SpatialService.saveSpatial(view.engine, node, out)
         out["near"] = node.near.toString()
         out["far"] = node.far.toString()
         out["fieldOfView"] = node.fieldOfView.toString()
@@ -121,6 +121,7 @@ object CameraService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is Camera) return
+        EmptyNodeService.nodeDeleted(view.engine, node)
         view.engine.camerasManager.cameras.remove(node)?.node?.let {
             it.parent = null
             it.close()

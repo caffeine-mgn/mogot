@@ -8,9 +8,9 @@ object OmniLightNodeLoader : SceneLoader.NodeLoader {
     override val nodeClass: String
         get() = "mogot.OmniLight"
 
-    override suspend fun load(engine: Engine, props: Map<String, String>): Node {
+    override suspend fun load(engine: Engine, behavioursLoader: BehavioursLoader, props: Map<String, String>): Node {
         val node = OmniLight()
-        SpatialLoader.load(node, props)
+        SpatialLoader.load(engine, node, behavioursLoader, props)
         return node
     }
 }

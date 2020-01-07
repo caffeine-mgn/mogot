@@ -67,6 +67,7 @@ object OmniLightService : NodeService {
     override fun isEditor(node: Node): Boolean = node is OmniLight
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is OmniLight) return
+        EmptyNodeService.nodeDeleted(view.engine, node)
         view.engine.omniManager.lights.remove(node)?.node?.let {
             it.parent = null
             it.close()
@@ -91,14 +92,14 @@ object OmniLightService : NodeService {
             return null
         val node = OmniLight()
         createStub(view, node)
-        SpatialService.loadSpatial(node, properties)
+        SpatialService.loadSpatial(view.engine, node, properties)
         return node
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
         if (node !is OmniLight) return null
         val out = HashMap<String, String>()
-        SpatialService.saveSpatial(node, out)
+        SpatialService.saveSpatial(view.engine, node, out)
         out["specular"] = node.specular.toString()
         return out
     }

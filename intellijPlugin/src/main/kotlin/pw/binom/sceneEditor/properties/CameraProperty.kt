@@ -2,16 +2,11 @@ package pw.binom.sceneEditor.properties
 
 import mogot.Node
 import mogot.Camera
-import mogot.Spatial
-import mogot.math.set
 import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.ui.FloatValue
-import pw.binom.ui.Vector3Editor
-import pw.binom.utils.common
 import pw.binom.utils.equalsAll
-import pw.binom.utils.isEmpty
 import pw.binom.utils.isNotEmpty
 import javax.swing.JComponent
 

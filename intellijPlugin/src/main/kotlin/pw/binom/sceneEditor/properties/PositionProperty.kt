@@ -3,13 +3,11 @@ package pw.binom.sceneEditor.properties
 import com.intellij.ui.components.JBPanel
 import mogot.Node
 import mogot.Spatial
-import mogot.math.Vector3f
-import mogot.math.Vector3fc
 import mogot.math.set
 import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.ui.Vector3Editor
+import pw.binom.ui.Vector3Value
 import pw.binom.utils.common
 import pw.binom.utils.isEmpty
 import javax.swing.JComponent
@@ -23,7 +21,7 @@ object PositionPropertyFactory : PropertyFactory {
 class PositionProperty(val view: SceneEditorView) : Property, Spoler("Position") {
 
     private val flex = FlexLayout(stage)
-    val editor = Vector3Editor().appendTo(flex)
+    val editor = Vector3Value().appendTo(flex)
     private var changeEventEnabled = true
 
     private var nodes: List<Node>? = null
