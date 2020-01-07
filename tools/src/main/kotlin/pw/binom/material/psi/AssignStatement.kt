@@ -7,7 +7,7 @@ class AssignStatement(
         val exp: Expression,
         val operator: OperationExpression.Operator?,
         override val position: Int,
-        override val length: Int) : Statement {
+        override val length: Int) : UnitStatement {
 
     companion object {
         private fun TokenType.fromAssign() = when (this) {
@@ -21,7 +21,7 @@ class AssignStatement(
 
         fun read(lexer: LexStream<TokenType>): AssignStatement? =
                 lexer.safe {
-                    val left = SubjectExpression.read(lexer) ?: return@safe null
+                    val left = UnitExpression.read(lexer) ?: return@safe null
                     if (left !is AssignebleExpression) return@safe null
                     val eq = lexer.skipSpace(true)
                             ?.takeIf { it.element.isAssign }

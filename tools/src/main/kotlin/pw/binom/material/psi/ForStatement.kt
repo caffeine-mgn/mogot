@@ -14,11 +14,12 @@ class ForStatement(
         fun read(lex: LexStream<TokenType>) = lex.safe {
             val start = lex.skipSpace(true)?.ifType(TokenType.FOR) ?: return@safe null
             lex.skipSpace(true)?.ifType(TokenType.LEFT_PARENTHESIS) ?: return@safe null
-            val init = Statement.read(lex)
-            lex.skipSpace(false)?.ifType(TokenType.END_LINE) ?: return@safe null
+            val init = UnitStatement.read(lex)
+            lex.skipSpace(false)?.ifType(TokenType.CMD_SEPARATOR) ?: return@safe null
             val end = Expression.read(lex)
-            lex.skipSpace(false)?.ifType(TokenType.END_LINE) ?: return@safe null
-            val step = Statement.read(lex)
+            val r = lex.skipSpace(false)
+                    r?.ifType(TokenType.CMD_SEPARATOR) ?: return@safe null
+            val step = UnitStatement.read(lex)
             lex.skipSpace(true)?.ifType(TokenType.RIGHT_PARENTHESIS) ?: return@safe null
             val statement = Statement.read(lex) ?: return@safe null
 

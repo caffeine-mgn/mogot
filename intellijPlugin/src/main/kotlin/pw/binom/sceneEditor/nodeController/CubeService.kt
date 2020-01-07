@@ -6,6 +6,7 @@ import mogot.Node
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -25,17 +26,18 @@ object CubeNodeCreator : NodeCreator {
 }
 
 object CubeService : NodeService {
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {
+        EmptyNodeService.nodeDeleted(view.engine, node)
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != CSGBox::class.java.name)
             return null
         val node = CSGBox(view.engine)
-        SpatialService.loadSpatial(node, properties)
+        SpatialService.loadSpatial(view.engine, node, properties)
         MaterialNodeUtils.load(view, node, properties)
         return node
     }
@@ -44,7 +46,7 @@ object CubeService : NodeService {
         if (node !is CSGBox)
             return null
         val out = HashMap<String, String>()
-        SpatialService.saveSpatial(node, out)
+        SpatialService.saveSpatial(view.engine, node, out)
         MaterialNodeUtils.save(view, node, out)
         return out
     }

@@ -12,6 +12,7 @@ import pw.binom.loadFbx
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
@@ -69,14 +70,14 @@ private fun makeFbxScene(view: SceneEditorView, fbx: ExternalFbx): Spatial {
 
 object GeomService : NodeService {
 
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory)
+    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != GeomNode::class.java.name) return null
         val node = GeomNode()
         node.material.value = view.default3DMaterial
-        SpatialService.loadSpatial(node, properties)
+        SpatialService.loadSpatial(view.engine, node, properties)
         val virtualFile = properties["file"]?.let { view.editor1.findFileByRelativePath(it) }
         virtualFile ?: return null
         val fbx = view.engine.resources.loadFbx(virtualFile)
@@ -89,7 +90,7 @@ object GeomService : NodeService {
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
         if (node !is GeomNode) return null
         val out = HashMap<String, String>()
-        SpatialService.saveSpatial(node, out)
+        SpatialService.saveSpatial(view.engine, node, out)
         val geom = node.geom.value as FbxGeom
         if (geom.fbx.file.isInLocalFileSystem) {
             out["file"] = view.editor1.getRelativePath(geom.fbx.file)
@@ -108,6 +109,7 @@ object GeomService : NodeService {
     override fun isEditor(node: Node): Boolean = node::class.java === GeomNode::class.java
 
     override fun delete(view: SceneEditorView, node: Node) {
+        EmptyNodeService.nodeDeleted(view.engine, node)
     }
 
 }

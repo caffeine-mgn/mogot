@@ -156,7 +156,11 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                 println("fp:\n$fp")
             } catch (e: Throwable) {
                 println("MaterialView ERROR: ${e.message}")
-                println("fp:\n$fp")
+                println("fp:")
+                fp.lines().forEachIndexed { index, s ->
+                    println("$index -> $s")
+                }
+                e.printStackTrace()
                 material.dynamicShader = null
             }
         }

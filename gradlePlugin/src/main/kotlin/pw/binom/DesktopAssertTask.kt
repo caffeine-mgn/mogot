@@ -24,11 +24,11 @@ open class DesktopAssertTask : DefaultTask() {
         }
     }
 
-    private fun processDirectory(file: File, outputDir: File) {
+    private fun processDirectory(file: File, outputDir: File, behavioursGenerator: BehavioursGenerator?) {
         when (file.extension.toLowerCase()) {
             "png" -> ImageCompiler.compile(file, File(outputDir, file.name + ".bin"))
             "mat" -> MaterialCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "scene" -> SceneCompiler.compile(file, File(outputDir, file.name + ".bin"))
+            "scene" -> SceneCompiler.compile(file, File(outputDir, file.name + ".bin"), behavioursGenerator)
         }
 
 //        inputDir.listFiles()?.asSequence()?.filter { it.isFile }?.forEach {
@@ -43,13 +43,20 @@ open class DesktopAssertTask : DefaultTask() {
 
         val assertPath = assertPath!!
         val outputPath = outputPath!!
+        val behavioursGenerator = BehavioursGenerator()
 
         assertPath.walkTopDown().onEnter {
             true
         }.forEach {
             val file = if (it.isAbsolute) it else it.absoluteFile
             val outDir = File(outputPath, file.path.removePrefix(assertPath.path)).parentFile
-            processDirectory(file, outDir)
+            processDirectory(file, outDir, behavioursGenerator)
+        }
+        val genDir = File(project.buildDir, "mogotGen/BehavioursCreator.kt")
+        genDir.parentFile.mkdirs()
+        genDir.outputStream().bufferedWriter().use {
+            behavioursGenerator.generate("BehavioursCreator", it)
+            it.flush()
         }
     }
 }

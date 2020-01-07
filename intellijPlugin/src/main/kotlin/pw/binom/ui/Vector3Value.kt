@@ -7,7 +7,7 @@ import pw.binom.appendTo
 import java.awt.Color
 import javax.swing.JPanel
 
-class Vector3Editor : JPanel() {
+class Vector3Value : JPanel() {
     private val flex = FlexLayout(this)
     private val x = FloatValue(" X ").appendTo(flex)
     private val y = FloatValue(" Y ").appendTo(flex)
@@ -15,25 +15,25 @@ class Vector3Editor : JPanel() {
 
     val value = object : Vector3fm {
         override var x: Float
-            get() = this@Vector3Editor.x.value
+            get() = this@Vector3Value.x.value
             set(value) {
-                this@Vector3Editor.x.value = value
+                this@Vector3Value.x.value = value
             }
         override var y: Float
-            get() = this@Vector3Editor.y.value
+            get() = this@Vector3Value.y.value
             set(value) {
-                this@Vector3Editor.y.value = value
+                this@Vector3Value.y.value = value
             }
         override var z: Float
-            get() = this@Vector3Editor.z.value
+            get() = this@Vector3Value.z.value
             set(value) {
-                this@Vector3Editor.z.value = value
+                this@Vector3Value.z.value = value
             }
 
         override fun set(x: Float, y: Float, z: Float): Vector3fm {
-            this@Vector3Editor.x.value = x
-            this@Vector3Editor.y.value = y
-            this@Vector3Editor.z.value = z
+            this@Vector3Value.x.value = x
+            this@Vector3Value.y.value = y
+            this@Vector3Value.z.value = z
             return this
         }
 

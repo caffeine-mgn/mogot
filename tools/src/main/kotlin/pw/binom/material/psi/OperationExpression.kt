@@ -16,7 +16,9 @@ class OperationExpression(
         GT("compareTo", "compareTo"),
         GE("compareTo", "compareTo"),
         LT("compareTo", "compareTo"),
-        LE("compareTo", "compareTo");
+        LE("compareTo", "compareTo"),
+        NE("equals","equals"),
+        EQ("equals","equals");
 
         companion object {
             fun fromToken(token: TokenType) =
@@ -29,6 +31,8 @@ class OperationExpression(
                         TokenType.OP_GE -> GE
                         TokenType.OP_LT -> LT
                         TokenType.OP_LE -> LE
+                        TokenType.OP_NE -> NE
+                        TokenType.OP_EQ -> EQ
                         else -> throw IllegalArgumentException("Unknown operator $token")
                     }
         }
@@ -37,7 +41,7 @@ class OperationExpression(
     companion object {
         fun read(lexer: LexStream<TokenType>): OperationExpression? =
                 lexer.safe {
-                    val left = SubjectExpression.read(lexer) ?: return@safe null
+                    val left = UnitExpression.read(lexer) ?: return@safe null
                     val operator = lexer.skipSpace(true)
                             ?.takeIf { it.element.isOperation }
                             ?: return@safe null
