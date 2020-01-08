@@ -1,6 +1,6 @@
 package mogot.math
 
-import mogot.test.eq
+import mogot.eq
 import org.junit.Test
 import org.joml.Quaternionf as OQuaternionf
 import org.joml.Vector3f as OVector3f

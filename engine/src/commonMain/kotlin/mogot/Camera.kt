@@ -60,14 +60,14 @@ class Camera : Spatial() {
     }
 
     /**
-     * Проэцирует глобальную матрицу [matrix] на экран данной камеры. Результат кладется в [dest]
+     * Project [position] to screen of this camera. Result will push to [dest]
      *
-     * @param matrix глобальная матрица позиции <b>относительно данной камеры</b>
-     * @param dest вектор, в который кладётся проекция [matrix] на экран данной камеры
+     * @param position global position in world
+     * @param dest result place holder
      */
-    fun worldToScreenPoint(matrix: Matrix4fc, dest: Vector2i): Boolean {
-        val pos = TEMP_VEC_3F_1
-        matrix.getTranslation(pos)
+    fun worldToScreenPoint(position: Vector3fc, dest: Vector2i): Boolean {
+        val pos = TEMP_VEC_3F_1.set(position)
+        globalToLocal(pos,pos)
         val clipCoords = pos//TEMP_VEC_3F_2
 
 

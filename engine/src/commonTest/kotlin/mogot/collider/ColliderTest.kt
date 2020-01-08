@@ -1,8 +1,8 @@
 package mogot.collider
 
+import mogot.eq
 import mogot.math.Vector3f
 import kotlin.test.Test
-import mogot.test.assertEquals
 import kotlin.test.assertTrue
 
 class ColliderTest {
@@ -16,8 +16,8 @@ class ColliderTest {
         val rayDir = Vector3f(0f, -1f, 0f)
         val out = Vector3f(-10f, -10f, -10f)
         assertTrue(Collider.rayCastTrangle(p0, p1, p2, rayPos, rayDir, out))
-        assertEquals(0f, out.x)
-        assertEquals(-1f, out.y)
-        assertEquals(0f, out.z)
+        out.x.eq(0f)
+        out.y.eq(-1f)
+        out.z.eq(0f)
     }
 }

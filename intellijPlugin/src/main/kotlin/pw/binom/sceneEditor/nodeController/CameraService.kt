@@ -53,7 +53,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.camerasManager.cameraLightTexture.gl
         }
-        val b = FlatScreenBehaviour(view.editorCamera, camera)
+        val b = FlatScreenBehaviour(view.engine, view.editorCamera, camera)
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.camerasManager.cameras[camera] = b

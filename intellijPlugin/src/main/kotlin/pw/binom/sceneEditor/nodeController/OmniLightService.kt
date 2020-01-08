@@ -51,7 +51,7 @@ private fun createStub(view: SceneEditorView, light: OmniLight) {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.omniManager.omniLightTexture.gl
         }
-        val b = FlatScreenBehaviour(view.editorCamera, light)
+        val b = FlatScreenBehaviour(view.engine, view.editorCamera, light)
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.omniManager.lights[light] = b
