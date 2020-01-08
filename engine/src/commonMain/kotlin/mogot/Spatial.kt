@@ -34,7 +34,15 @@ open class Spatial : Node() {
             }
             true
         }
-        dest.rotateAffine(-quaternion)
+
+//        dest.translationRotateScale(
+//                        position.x, position.y, position.z,
+//                        quaternion.x, quaternion.y, quaternion.z, quaternion.w,
+//                        scale.x, scale.y, scale.z
+//                )
+
+        dest.scale(scale)
+        dest.rotate(-quaternion)
         dest.translate(-position)
         return dest
     }
@@ -139,20 +147,20 @@ open class Spatial : Node() {
     open val matrix: Matrix4fc
         get() = _matrix
 
-    fun globalMatrix(dest: Matrix4f) {
-        dest.identity()
-        apply2(dest)
-        asUpSequence().mapNotNull { it as? Spatial }.forEach {
-            dest.set(it.apply2(dest))
-        }
-    }
+//    fun globalMatrix(dest: Matrix4f) {
+//        dest.identity()
+//        apply2(dest)
+//        asUpSequence().mapNotNull { it as? Spatial }.forEach {
+//            dest.set(it.apply2(dest))
+//        }
+//    }
 
-    private fun apply2(matrix: Matrix4f): Matrix4fc {
-        matrix.translate(position)
-        matrix.rotate(quaternion)
-        matrix.scale(scale)
-        return matrix
-    }
+//    private fun apply2(matrix: Matrix4f): Matrix4fc {
+//        matrix.translate(position)
+//        matrix.rotate(quaternion)
+//        matrix.scale(scale)
+//        return matrix
+//    }
 
     override fun apply(matrix: Matrix4fc): Matrix4fc {
         this._matrix.set(matrix)
@@ -165,8 +173,17 @@ open class Spatial : Node() {
 
     fun lookTo(position: Vector3fc, up: Vector3fc = Vector3fc.UP) {
         quaternion.identity()
-        val g = localToGlobalMatrix(Matrix4f())
-        val v = g.getTranslation(Vector3f())
-        quaternion.lookAlong(position - v, up)
+//        val v = localToGlobal(Vector3f(),Vector3f())
+        val v = globalToLocal(position, Vector3f())
+
+//        position.sub(v,v)
+        //v.negate()
+        //println("lookTo($v)")
+//        val g = localToGlobalMatrix(Matrix4f())
+//        val v = g.getTranslation(Vector3f())
+//        quaternion.lookAlong(position - v, up)
+        //v.negate()
+        quaternion.lookAt(v,up)
+        //quaternion.lookAlong(v, up)
     }
 }

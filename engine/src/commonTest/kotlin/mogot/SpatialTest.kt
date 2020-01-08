@@ -1,12 +1,26 @@
 package mogot
 
-import mogot.math.Matrix4f
-import mogot.math.Vector3f
+import mogot.math.*
 import kotlin.test.Test
 import mogot.test.assertEquals
 import mogot.test.eq
 
 class SpatialTest {
+
+    @Test
+    fun lookToTest() {
+        val s = Spatial()
+        s.quaternion.lookAlong(Vector3f(0f, 0f, 1f), Vector3fc.UP)
+        s.quaternion.mul(Vector3f(0f, 0f, 1f), Vector3f()).also {
+            it.x.eq(0f)
+            it.y.eq(0f)
+            it.z.eq(-1f)
+        }
+        s.lookTo(Vector3f(0f, 0f, 1f))
+        s.quaternion.yaw.eq(PIf)
+        s.quaternion.pitch.eq(0f)
+        s.quaternion.roll.eq(PIf)
+    }
 
     @Test
     fun transform() {

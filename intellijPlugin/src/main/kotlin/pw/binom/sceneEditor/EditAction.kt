@@ -55,7 +55,6 @@ class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val se
 //        v.position.set(3f, 0f, 0f)
 //        v.quaternion.identity()
 //        v.quaternion.lookAlong(-camera.quaternion.forward, Vector3fc.UP)
-        println("camera.quaternion.forward=${camera.quaternion.forward}")
 //        s.position.set(camPosition)
 //        s.position *= camera.quaternion.forward
     }
