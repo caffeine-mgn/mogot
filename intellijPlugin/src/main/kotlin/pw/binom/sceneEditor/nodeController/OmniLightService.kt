@@ -75,13 +75,13 @@ object OmniLightService : NodeService {
     }
 
     override fun selected(view: SceneEditorView, node: Node) {
-        val sprite = view.engine.omniManager.lights[node]!!.node
+        val sprite = view.engine.omniManager.lights[node]?.node ?: return
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
-        val sprite = view.engine.omniManager.lights[node]!!.node
+        val sprite = view.engine.omniManager.lights[node]?.node ?: return
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0f, 0f, 0f, 0f)
     }

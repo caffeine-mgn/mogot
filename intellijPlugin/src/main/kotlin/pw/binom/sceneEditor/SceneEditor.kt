@@ -67,11 +67,17 @@ class SceneEditor(val project: Project,
      * Return real file path using resource root dirs
      */
     fun findFileByRelativePath(path: String): VirtualFile? {
-        return _contentRoots?.asSequence()
-                ?.map {
+        val r = _contentRoots
+                ?.asSequence()
+                ?.mapNotNull {
                     it.findFileByRelativePath(path)
                 }
-                ?.firstOrNull() ?: LocalFileSystem.getInstance().findFileByPath(path)
+                ?.firstOrNull()
+        if (r == null) {
+            println("Can't resolve $path roots: ${_contentRoots?.toList()}")
+            return LocalFileSystem.getInstance().findFileByPath(path)
+        }
+        return r
     }
 
     init {

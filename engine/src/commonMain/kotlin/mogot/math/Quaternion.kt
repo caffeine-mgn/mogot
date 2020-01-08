@@ -259,6 +259,19 @@ interface Quaternionfm : Quaternionfc {
     }
 }
 
+fun Quaternionfc.invert(dest: Quaternionfm): Quaternionfm {
+    val invNorm: Float = 1.0f / (x * x + y * y + z * z + w * w)
+    dest.x = -x * invNorm
+    dest.y = -y * invNorm
+    dest.z = -z * invNorm
+    dest.w = w * invNorm
+    return dest
+}
+
+fun Quaternionfm.invert() = invert(this)
+
+operator fun Quaternionfc.unaryMinus() = invert(Quaternionf())
+
 open class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 1f) : Quaternionfm {
     override fun toString(): String =
             "Quaternionf($x, $y, $z, $w)"
@@ -275,20 +288,56 @@ val Quaternionfc.up: Vector3fc
     get() = positiveY(Vector3f())
 
 val Quaternionfc.forward: Vector3fc
-    get() = positiveZ(Vector3f()).negate()
+    get() = positiveY(Vector3f()).negate()
 
 
-val Quaternionfc.yaw: Float
+val Quaternionfc.roll: Float
     get() = atan2(2.0f * (y * z + w * x), (w * w - x * x - y * y + z * z))
 
 val Quaternionfc.pitch: Float
     get() = asin(-2.0f * (x * z - w * y))
 
-val Quaternionfc.roll: Float
+val Quaternionfc.yaw: Float
     get() = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))
 
 fun Quaternionfm.setRotation(yaw: Float, pitch: Float, roll: Float): Quaternionfm =
         setRotation(yaw, pitch, roll, this)
+
+class RotationVector(val quaternion: Quaternionfm) : Vector3fm {
+    override var x: Float
+        get() = quaternion.roll
+        set(value) {
+            quaternion.setRotation(z, y, value)
+        }
+    override var y: Float
+        get() = quaternion.pitch
+        set(value) {
+            quaternion.setRotation(z, value, x)
+        }
+    override var z: Float
+        get() = quaternion.yaw
+        set(value) {
+            quaternion.setRotation(value, y, x)
+        }
+}
+
+fun Quaternionfc.mul(q: Quaternionfc, dest: Quaternionfm): Quaternionfm {
+    dest.set(w * q.x + x * q.w + y * q.z - z * q.y,
+            w * q.y - x * q.z + y * q.w + z * q.x,
+            w * q.z + x * q.y - y * q.x + z * q.w,
+            w * q.w - x * q.x - y * q.y - z * q.z)
+    return dest
+}
+
+fun Quaternionfc.mul(vector: Vector3fc, dest: Vector3fm): Vector3fm {
+    val tempX: Float = w * w * vector.x + 2 * y * w * vector.z - 2 * z * w * vector.y + x * x * vector.x + 2 * y * x * vector.y + 2 * z * x * vector.z - z * z * vector.x - y * y * vector.x
+    val tempY: Float = 2 * x * y * vector.x + y * y * vector.y + 2 * z * y * vector.z + (2 * w * z
+            * vector.x) - z * z * vector.y + w * w * vector.y - 2 * x * w * vector.z - x * x * vector.y
+    val tempZ: Float = 2 * x * z * vector.x + 2 * y * z * vector.y + z * z * vector.z - (2 * w * y
+            * vector.x) - y * y * vector.z + 2 * w * x * vector.y - x * x * vector.z + w * w * vector.z
+    dest.set(tempX, tempY, tempZ)
+    return dest
+}
 
 // yaw (Z), pitch (Y), roll (X)
 fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quaternionfm): Quaternionfm {
@@ -307,12 +356,12 @@ fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quater
     return dest
 }
 
-fun Quaternionf.setFromUnnormalized(mat: Matrix4fc): Quaternionf {
+fun Quaternionfm.setFromUnnormalized(mat: Matrix4fc): Quaternionfm {
     setFromUnnormalized(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22)
     return this
 }
 
-fun Quaternionf.setFromUnnormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
+fun Quaternionfm.setFromUnnormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
     var nm00 = m00
     var nm01 = m01
     var nm02 = m02
@@ -337,7 +386,7 @@ fun Quaternionf.setFromUnnormalized(m00: Float, m01: Float, m02: Float, m10: Flo
     setFromNormalized(nm00, nm01, nm02, nm10, nm11, nm12, nm20, nm21, nm22)
 }
 
-fun Quaternionf.setFromNormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
+fun Quaternionfm.setFromNormalized(m00: Float, m01: Float, m02: Float, m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float) {
     var t: Float
     val tr = m00 + m11 + m22
     if (tr >= 0.0f) {

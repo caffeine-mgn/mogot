@@ -1,25 +1,14 @@
-package pw.binom
+package game.game
 
-import com.jetbrains.rd.util.string.printToString
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.*
-import pw.binom.material.compiler.Compiler
-import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
+import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
-import pw.binom.sceneEditor.FrustumNode
 import pw.binom.sceneEditor.Grid
-import java.awt.BorderLayout
-import java.awt.Color
+import pw.binom.sceneEditor.RotateAllAxes
 import java.awt.Dimension
-import java.io.File
-import java.io.FileInputStream
-import java.io.StringReader
-import javax.swing.BorderFactory
-import javax.swing.JButton
 import javax.swing.JFrame
-import javax.swing.JPanel
 
 class FullScreenSprite(engine: Engine) {
     var material: Material? = null
@@ -58,9 +47,8 @@ class DDD : GLView(MockFileSystem()) {
     var cam = Camera()
 
     override var camera: Camera? = cam
-    private lateinit var box: CSGBox
-
-    private val cam2 = Camera()
+//    private lateinit var box: CSGBox
+    lateinit var rotateAllAxes: RotateAllAxes
 
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
@@ -72,41 +60,22 @@ class DDD : GLView(MockFileSystem()) {
         grid.material.value = mat
 
         cam.parent = root
-        box = CSGBox(engine)
-        box.parent = root
-        cam.position.set(3f, 3f, 3f)
+        cam.position.set(5f, 5f, 5f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
-        box.material.value = mat
+        cam.behaviour = FpsCamB(engine)
 
-        cam2.parent = root
-        cam2.resize(200, 200)
-        cam2.far = 10f
+//        box = CSGBox(engine)
+//        box.parent = root
+//        box.material.value = mat
+
+        rotateAllAxes = RotateAllAxes(
+                engine, root, cam, listOf(grid)
+        )
     }
-
-    var nn: FrustumNode? = null
 
     override fun render() {
+        rotateAllAxes.render(0f)
         super.render()
-    }
-
-    var cc = 0
-
-    override fun render2(dt: Float) {
-        if (cc > 60) {
-            nn?.let {
-                it.parent = null
-                it.close()
-            }
-            nn = null
-            cc = 0
-        }
-        if (nn == null) {
-            nn = FrustumNode(engine, cam2)
-            nn!!.material.value = Default3DMaterial(engine)
-            nn!!.parent = root
-        }
-        cc++
-        super.render2(dt)
     }
 
     override fun dispose() {

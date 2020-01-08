@@ -5,6 +5,8 @@ import mogot.Spatial
 import mogot.collider.PanelCollider
 import mogot.isSpatial
 import mogot.math.*
+import mogot.*
+import pw.binom.SimpleMaterial
 import pw.binom.sceneEditor.properties.PositionProperty
 import java.awt.MouseInfo
 import java.awt.Robot
@@ -17,6 +19,46 @@ interface EditAction {
     fun mouseDown(e: MouseEvent) {}
     fun mouseUp(e: MouseEvent) {}
     fun render(dt: Float) {}
+}
+
+class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val selected: List<Spatial>) : EditAction {
+    val initPositions = selected.asSequence().map {
+        it to it.localToGlobalMatrix(Matrix4f())
+    }.toMap()
+    lateinit var s: Grid
+    lateinit var v: CSGBox
+
+    init {
+        val camPosition = camera.localToGlobal(Vector3f(0f, 0f, 0f), Vector3f())
+        v = CSGBox(engine)
+        v.width=2f
+        v.parent = camera
+        v.material.value = Default3DMaterial(engine)
+
+        s = Grid(engine)
+        s.parent = camera
+        s.material.value = Default3DMaterial(engine)
+//        s.parent = editorRoot
+//        s.position.set(camPosition)
+//        s.position *= camera.quaternion.forward
+        s.position.z = -5f
+        v.position.z = -5f
+        println()
+    }
+
+    override fun render(dt: Float) {
+        super.render(dt)
+        val camPosition = camera.globalToLocal(Vector3f(0f, 0f, 0f), Vector3f())
+
+//        v.position.set(camera.position)
+//        v.position.y-=3f
+//        v.position.set(3f, 0f, 0f)
+//        v.quaternion.identity()
+//        v.quaternion.lookAlong(-camera.quaternion.forward, Vector3fc.UP)
+        println("camera.quaternion.forward=${camera.quaternion.forward}")
+//        s.position.set(camPosition)
+//        s.position *= camera.quaternion.forward
+    }
 }
 
 interface EditActionFactory {
@@ -164,7 +206,7 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Node>, val type: Edi
             when (type) {
                 Type.X -> pos.x += (value - startValue) * cof
                 Type.Y -> pos.y += (startValue - value) * cof
-                Type.Z -> pos.z += (startValue - value) * cof
+                Type.Z -> pos.z += (value - startValue) * cof
             }
             it.parentSpatial?.globalToLocal(pos, pos)
             it.position.set(pos)

@@ -34,7 +34,7 @@ open class Spatial : Node() {
             }
             true
         }
-        dest.rotateAffine(quaternion)
+        dest.rotateAffine(-quaternion)
         dest.translate(-position)
         return dest
     }
@@ -163,10 +163,10 @@ open class Spatial : Node() {
         return this._matrix
     }
 
-    fun lookTo(position: Vector3fc) {
+    fun lookTo(position: Vector3fc, up: Vector3fc = Vector3fc.UP) {
         quaternion.identity()
         val g = localToGlobalMatrix(Matrix4f())
         val v = g.getTranslation(Vector3f())
-        quaternion.lookAlong(position - v, Vector3fc.UP)
+        quaternion.lookAlong(position - v, up)
     }
 }

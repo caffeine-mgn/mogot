@@ -61,11 +61,11 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.render(model, projection, renderContext)
-        val mat = material ?: return
+        val mat = material.value ?: return
         if (geom == null)
             update()
-        mat.value?.use(model, projection, renderContext)
+        mat.use(model, projection, renderContext)
         geom!!.draw()
-        mat.value?.unuse()
+        mat.unuse()
     }
 }

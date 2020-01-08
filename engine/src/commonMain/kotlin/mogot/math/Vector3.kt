@@ -128,6 +128,13 @@ fun Vector3fc.div(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
     return dest
 }
 
+fun Vector3fc.mul(vector: Vector3fc, dest: Vector3fm): Vector3fm {
+    dest.x = x * vector.x
+    dest.y = x * vector.y
+    dest.z = x * vector.z
+    return dest
+}
+
 fun Vector3fc.mul(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
     val rx = matrix.m00 * x + matrix.m10 * y + matrix.m20 * z + matrix.m30
     val ry = matrix.m01 * x + matrix.m11 * y + matrix.m21 * z + matrix.m31
@@ -163,6 +170,10 @@ inline fun <T : Vector3fm> T.add(x: Float, y: Float, z: Float) = set(
         this.y + y,
         this.z + z
 )
+
+operator fun Vector3fm.timesAssign(vector: Vector3fc) {
+    mul(vector, this)
+}
 
 operator fun Vector3fm.timesAssign(matrix: Matrix4fc) {
     mul(matrix, this)

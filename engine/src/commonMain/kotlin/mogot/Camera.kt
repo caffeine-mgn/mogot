@@ -40,7 +40,7 @@ class Camera : Spatial() {
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
-/*
+        /*
         parent?.currentToRoot {
             if (it.isSpatial) {
                 it as Spatial
@@ -49,6 +49,8 @@ class Camera : Spatial() {
             true
         }
         */
+        globalToLocalMatrix(viewMatrix4f)
+        return
         this.asUpSequence().mapNotNull { it as? Spatial }.forEach {
             viewMatrix4f.set(it.apply(viewMatrix4f))
         }
@@ -87,7 +89,7 @@ class Camera : Spatial() {
 
     fun screenPointToRay(x: Int, y: Int, dest: MutableRay): MutableRay {
         val mat = Matrix4f()
-        applyMatrix(mat)
+        globalToLocalMatrix(mat)
         val matInvert = mat.invert(Matrix4f())
         /*
         val mx = x.toFloat() / width * 2f - 1f
