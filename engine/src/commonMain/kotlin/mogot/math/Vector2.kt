@@ -20,7 +20,7 @@ interface Vector2fc {
     val y: Float
 }
 
-class Vector2f(override var x: Float = 0f, override var y: Float = 0f) : Vector2fc {
+open class Vector2f(override var x: Float = 0f, override var y: Float = 0f) : Vector2fc {
     constructor(other: Vector2fc) : this(other.x, other.y)
 
     fun set(x: Float, y: Float): Vector2f {
@@ -28,6 +28,8 @@ class Vector2f(override var x: Float = 0f, override var y: Float = 0f) : Vector2
         this.y = y
         return this
     }
+
+    override fun toString(): String = "Vec2f($x $y)"
 
     inline fun set(other: Vector2fc) = set(other.x, other.y)
 }

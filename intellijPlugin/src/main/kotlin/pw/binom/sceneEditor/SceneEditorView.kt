@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.Vector2i
+import mogot.math.Vector2f
 import mogot.math.Vector3f
 import mogot.math.Vector4f
 import pw.binom.MockFileSystem
@@ -279,6 +280,30 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 }
 
 
+class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = true
+        return b
+    }
+}
 
 class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
     private var changeFlag = true

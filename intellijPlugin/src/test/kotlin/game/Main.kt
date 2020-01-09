@@ -3,14 +3,11 @@ package game.game
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.*
-import mogot.math.Math.sin
-import mogot.math.Math.toRadians
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
 import pw.binom.sceneEditor.FrustumNode
 import pw.binom.sceneEditor.Grid
 import pw.binom.sceneEditor.RotateAllAxes
-import pw.binom.sceneEditor.properties.BehaviourProperty
 import java.awt.Dimension
 import javax.swing.JFrame
 import kotlin.math.sin
@@ -66,7 +63,8 @@ class DDD : GLView(MockFileSystem()) {
 
     override var camera: Camera? = cam
     private val cam2 = Camera()
-    private lateinit var box: CSGBox
+    private lateinit var box1: CSGBox
+    private lateinit var box2: CSGBox
     var rotateAllAxes: RotateAllAxes? = null
 
     override fun init() {
@@ -91,28 +89,30 @@ class DDD : GLView(MockFileSystem()) {
         cam2.position.set(5f, 2f, 0f)
         //RotationVector(cam2.quaternion).y = toRadians(45.0).toFloat()
         cam2.lookTo(Vector3f(0f, 0f, 0f))
-        println(cam2.globalToLocalMatrix(Matrix4f()))
 
         FrustumNode(engine, cam2).also {
-            it.parent = cam2
+            it.parent = root
             it.material.value = mat
         }
 
-        run {
-            box = CSGBox(engine)
-            box.width = 0.1f
-            box.height = 0.1f
-            box.depth = 0.1f
-            box.parent = cam2
-            box.position.z = 2f
-            box.material.value = mat
-        }
+        box1 = CSGBox(engine)
+        box1.parent = root
+        box1.material.value = mat
+        box1.position.set(2f, 0f, 0f)
 
-        box = CSGBox(engine)
-        box.parent = root
-        box.material.value = mat
-        //box.behaviour = FFF()
-        cam.lookTo(box.position)
+        box2 = CSGBox(engine)
+        box2.parent = root
+        box2.material.value = mat
+        box2.position.set(-2f, 0f, 0f)
+        box2.width = 0.5f
+/*
+        box3 = CSGBox(engine)
+        box3.parent = root
+        box3.material.value = mat
+        box3.position.set(2f, 0f, 2f)
+        box3.width=0.5f
+*/
+        cam.lookTo(Vector3f(0f, 0f, 0f))
 
     }
 
@@ -120,14 +120,15 @@ class DDD : GLView(MockFileSystem()) {
         if (isKeyDown(32)) {
             if (rotateAllAxes == null)
                 rotateAllAxes = RotateAllAxes(
-                        engine, root, cam, listOf(box),
+                        engine, root, cam, listOf(box1, box2/*, box3*/),
                         mousePosition
                 )
             rotateAllAxes!!.render(0f)
         } else {
+            rotateAllAxes?.onStop()
             rotateAllAxes = null
         }
-        cam2.lookTo(box.position)
+        cam2.lookTo(box1.position)
         super.render()
     }
 

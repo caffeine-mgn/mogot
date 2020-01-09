@@ -20,6 +20,7 @@ interface EditAction {
     fun mouseDown(e: MouseEvent) {}
     fun mouseUp(e: MouseEvent) {}
     fun render(dt: Float) {}
+    fun onStop() {}
 }
 
 class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val selected: List<Spatial>, val mousePos: Vector2i) : EditAction {
@@ -28,26 +29,35 @@ class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val se
     }.toMap()
     val avgPosition = selected.asSequence().map { it.position }.avg()
     val screenPos = camera.worldToScreenPoint(avgPosition) ?: TODO()
-    lateinit var s: Grid
-    lateinit var v: CSGBox
     var mx = mousePos.x
     var my = mousePos.y
     var vmx = mousePos.x
     var vmy = mousePos.y
-    val imx = mousePos.x
-    val imy = mousePos.y
     val startAngle = atan2(mousePos.y.toFloat() - screenPos.y, mousePos.x.toFloat() - screenPos.x)
 
-    init {
+    private val center = Line2D(engine.gl).also {
+        it.parent = editorRoot
+        it.material = Default3DMaterial(engine)
+    }
 
+    override fun onStop() {
+        center.parent = null
+        center.close()
     }
 
     override fun render(dt: Float) {
         super.render(dt)
+        if (initPositions.isEmpty())
+            TODO()
         vmx += mousePos.x - mx
         vmy += mousePos.y - my
         mx = mousePos.x
         my = mousePos.y
+        center.position.set(screenPos.x.toFloat(),screenPos.y.toFloat())
+        center.lineTo.set(
+                mousePos.x.toFloat()-screenPos.x,
+                mousePos.y.toFloat()-screenPos.y
+        )
 
         val angle = atan2(vmy.toFloat() - screenPos.y, vmx.toFloat() - screenPos.x)
 
@@ -55,20 +65,23 @@ class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val se
         val q = Quaternionf()
         val axis = camera.quaternion.mul(Vector3f(0f, 0f, 1f), Vector3f())
         q.rotateAxis(rotateAngle, axis.x, axis.y, axis.z)
-        selected.forEach {
-            it.setGlobalTransform(initPositions[it]!!.rotate(q, Matrix4f()))
-            //q.mul(it.quaternion,it.quaternion)
-        }
-        println("${toDegrees(rotateAngle)}")
-        //val camPosition = camera.globalToLocal(Vector3f(0f, 0f, 0f), Vector3f())
 
-//        v.position.set(camera.position)
-//        v.position.y-=3f
-//        v.position.set(3f, 0f, 0f)
-//        v.quaternion.identity()
-//        v.quaternion.lookAlong(-camera.quaternion.forward, Vector3fc.UP)
-//        s.position.set(camPosition)
-//        s.position *= camera.quaternion.forward
+        if (initPositions.size == 1)
+            initPositions.forEach {
+                it.key.setGlobalTransform(it.value.rotate(q, Matrix4f()))
+            }
+        else
+            initPositions.forEach {
+                /*
+                val v = it.value.getTranslation(Vector3f())
+                v.sub(avgPosition, v)
+                println("vec=${v}")
+                q.mul(v, v)
+                */
+                val m = Matrix4f().rotate(q)
+                m.mul(it.value, m)
+                it.key.setGlobalTransform(m)
+            }
     }
 }
 
