@@ -16,13 +16,13 @@ class QuaternionTest {
         j.lookAlong(Vector3f(0f, 0f, 1f), Vector3fc.UP)
 
 
-        j.eq(o)
+        j.eqO(o)
     }
 }
 
-fun Quaternionf.eq(q:OQuaternionf){
-    x.eq(q.x)
-    y.eq(q.y)
-    z.eq(q.z)
-    w.eq(q.w)
+fun Quaternionf.eqO(q:OQuaternionf){
+    x.eq(q.x,0.01f)
+    y.eq(q.y,0.01f)
+    z.eq(q.z,0.01f)
+    w.eq(q.w,0.01f)
 }

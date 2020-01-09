@@ -1,6 +1,5 @@
 package mogot
 
-import pw.binom.Stack
 import pw.binom.io.Closeable
 
 abstract class ObjectPool<T : Any> : Closeable {

@@ -48,7 +48,7 @@ class CameraTest {
         println("ray=$ray")
         ray.direction.x.eq(0f, 0.001f)
         ray.direction.y.eq(0f)
-        ray.direction.z.eq(-1f, 0.01f)
+        ray.direction.z.eq(1f, 0.01f)
         ray.position.x.eq(0f)
         ray.position.y.eq(0f)
         ray.position.z.eq(-0.7f, 0.1f)

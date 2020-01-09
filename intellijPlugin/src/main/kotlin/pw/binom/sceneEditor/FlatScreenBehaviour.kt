@@ -17,7 +17,7 @@ class FlatScreenBehaviour(val engine: Engine, val camera: Camera, val other: Spa
         other.localToGlobal(p, p)
 
         val p2 = tempVec
-        if (camera.worldToScreenPoint2(p, p2)) {
+        if (camera.worldToScreenPoint(p, p2)) {
             node.visible = true
             node.position.set(p2.x.toFloat() - node.size.x / 2f, p2.y.toFloat() - node.size.y / 2f)
         } else {

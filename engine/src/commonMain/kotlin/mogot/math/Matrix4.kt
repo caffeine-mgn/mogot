@@ -253,7 +253,7 @@ interface Matrix4fc {
         return invertGeneric(dest)
     }
 
-    fun getScale(dest: Vector3f): Vector3f {
+    fun getScale(dest: Vector3fm): Vector3fm {
         dest.x = sqrt(m00 * m00 + m01 * m01 + (m02 * m02))
         dest.y = sqrt(m10 * m10 + m11 * m11 + (m12 * m12))
         dest.z = sqrt(m20 * m20 + m21 * m21 + (m22 * m22))

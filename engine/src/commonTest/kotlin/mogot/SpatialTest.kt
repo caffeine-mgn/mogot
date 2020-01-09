@@ -6,6 +6,57 @@ import kotlin.test.Test
 class SpatialTest {
 
     @Test
+    fun localToGlobalMatrix() {
+        val root = Spatial()
+        val child = Spatial()
+        child.parent = root
+        root.position.set(3f, 3f, 3f)
+        child.position.set(2f, 2f, 2f)
+        child.localToGlobalMatrix(Matrix4f()).getTranslation(Vector3f()).also {
+            it.x.eq(5f)
+            it.y.eq(5f)
+            it.z.eq(5f)
+        }
+    }
+
+    @Test
+    fun globalToLocalMatrix() {
+        val root = Spatial()
+        val child = Spatial()
+        child.parent = root
+        root.position.set(3f, 3f, 3f)
+        child.position.set(2f, 2f, 2f)
+        child.globalToLocalMatrix(Matrix4f()).getTranslation(Vector3f()).also {
+            it.x.eq(-5f)
+            it.y.eq(-5f)
+            it.z.eq(-5f)
+        }
+    }
+
+    @Test
+    fun setGlobalTransform() {
+        val s = Spatial()
+        s.position.set(5f, 5f, 5f)
+        val globalMat = s.localToGlobalMatrix(Matrix4f())
+        val root = Spatial()
+        root.position.set(3f, 3f, 3f)
+        s.parent = root
+        s.setGlobalTransform(globalMat)
+
+        s.localToGlobal(Vector3fc.ZERO, Vector3f()).also {
+            it.x.eq(5f)
+            it.y.eq(5f)
+            it.z.eq(5f)
+        }
+
+        s.position.also {
+            it.x.eq(2f)
+            it.y.eq(2f)
+            it.z.eq(2f)
+        }
+    }
+
+    @Test
     fun lookToTest() {
         val s = Spatial()
         s.quaternion.lookAlong(Vector3f(0f, 0f, 1f), Vector3fc.UP)
@@ -78,18 +129,21 @@ class SpatialTest {
 
     @Test
     fun localToGlobal() {
+        val c = Spatial()
+        c.position.set(1f, 2f, 3f)
         val s = Spatial()
+        s.parent = c
         s.position.set(0f, 1f, 0f)
         s.localToGlobal(Vector3f(5f, 5f, 5f), Vector3f()).also {
-            it.x.eq(5f)
-            it.y.eq(6f)
-            it.z.eq(5f)
+            it.x.eq(5f + c.position.x)
+            it.y.eq(6f + c.position.y)
+            it.z.eq(5f + c.position.z)
         }
 
         s.localToGlobal(Vector3f(0f, 0f, 0f), Vector3f()).also {
-            it.x.eq(s.position.x)
-            it.y.eq(s.position.y)
-            it.z.eq(s.position.z)
+            it.x.eq(s.position.x + c.position.x)
+            it.y.eq(s.position.y + c.position.y)
+            it.z.eq(s.position.z + c.position.z)
         }
     }
 }

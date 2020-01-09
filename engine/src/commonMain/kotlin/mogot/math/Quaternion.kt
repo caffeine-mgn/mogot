@@ -278,6 +278,8 @@ fun Quaternionfm.invert() = invert(this)
 operator fun Quaternionfc.unaryMinus() = invert(Quaternionf())
 
 open class Quaternionf(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 1f) : Quaternionfm {
+    constructor(quaternion: Quaternionfc) : this(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
+
     override fun toString(): String =
             "Quaternionf($x, $y, $z, $w)"
 }

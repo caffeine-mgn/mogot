@@ -67,7 +67,7 @@ class DDD : GLView(MockFileSystem()) {
     override var camera: Camera? = cam
     private val cam2 = Camera()
     private lateinit var box: CSGBox
-    lateinit var rotateAllAxes: RotateAllAxes
+    var rotateAllAxes: RotateAllAxes? = null
 
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
@@ -111,14 +111,22 @@ class DDD : GLView(MockFileSystem()) {
         box = CSGBox(engine)
         box.parent = root
         box.material.value = mat
-        box.behaviour = FFF()
-//        rotateAllAxes = RotateAllAxes(
-//                engine, root, cam, listOf(grid)
-//        )
+        //box.behaviour = FFF()
+        cam.lookTo(box.position)
+
     }
 
     override fun render() {
-        //rotateAllAxes.render(0f)
+        if (isKeyDown(32)) {
+            if (rotateAllAxes == null)
+                rotateAllAxes = RotateAllAxes(
+                        engine, root, cam, listOf(box),
+                        mousePosition
+                )
+            rotateAllAxes!!.render(0f)
+        } else {
+            rotateAllAxes = null
+        }
         cam2.lookTo(box.position)
         super.render()
     }
@@ -142,7 +150,7 @@ object Main {
 //        f.contentPane.add(view.glcanvas)
         f.contentPane.add(view)
 
-        f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
+        f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.size = Dimension(800, 600)
 //        f.add(view3d)
 //        view.startRender()

@@ -59,6 +59,13 @@ class Camera : Spatial() {
         viewMatrix4f.translate(-position)
     }
 
+    fun worldToScreenPoint(position: Vector3fc): Vector2i? {
+        val out = Vector2i()
+        if (!worldToScreenPoint(position, out))
+            return null
+        return out
+    }
+
     /**
      * Project [position] to screen of this camera. Result will push to [dest]
      *
@@ -67,7 +74,7 @@ class Camera : Spatial() {
      */
     fun worldToScreenPoint(position: Vector3fc, dest: Vector2i): Boolean {
         val pos = TEMP_VEC_3F_1.set(position)
-        globalToLocal(pos,pos)
+        globalToLocal(pos, pos)
         val clipCoords = pos//TEMP_VEC_3F_2
 
 

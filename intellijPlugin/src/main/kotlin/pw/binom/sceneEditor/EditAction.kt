@@ -12,6 +12,7 @@ import java.awt.MouseInfo
 import java.awt.Robot
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
+import kotlin.math.atan2
 
 interface EditAction {
     fun keyDown(code: Int) {}
@@ -21,34 +22,45 @@ interface EditAction {
     fun render(dt: Float) {}
 }
 
-class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val selected: List<Spatial>) : EditAction {
+class RotateAllAxes(engine: Engine, editorRoot: Node, val camera: Camera, val selected: List<Spatial>, val mousePos: Vector2i) : EditAction {
     val initPositions = selected.asSequence().map {
         it to it.localToGlobalMatrix(Matrix4f())
     }.toMap()
+    val avgPosition = selected.asSequence().map { it.position }.avg()
+    val screenPos = camera.worldToScreenPoint(avgPosition) ?: TODO()
     lateinit var s: Grid
     lateinit var v: CSGBox
+    var mx = mousePos.x
+    var my = mousePos.y
+    var vmx = mousePos.x
+    var vmy = mousePos.y
+    val imx = mousePos.x
+    val imy = mousePos.y
+    val startAngle = atan2(mousePos.y.toFloat() - screenPos.y, mousePos.x.toFloat() - screenPos.x)
 
     init {
-        val camPosition = camera.localToGlobal(Vector3f(0f, 0f, 0f), Vector3f())
-        v = CSGBox(engine)
-        v.width=2f
-        v.parent = camera
-        v.material.value = Default3DMaterial(engine)
 
-        s = Grid(engine)
-        s.parent = camera
-        s.material.value = Default3DMaterial(engine)
-//        s.parent = editorRoot
-//        s.position.set(camPosition)
-//        s.position *= camera.quaternion.forward
-        s.position.z = -5f
-        v.position.z = -5f
-        println()
     }
 
     override fun render(dt: Float) {
         super.render(dt)
-        val camPosition = camera.globalToLocal(Vector3f(0f, 0f, 0f), Vector3f())
+        vmx += mousePos.x - mx
+        vmy += mousePos.y - my
+        mx = mousePos.x
+        my = mousePos.y
+
+        val angle = atan2(vmy.toFloat() - screenPos.y, vmx.toFloat() - screenPos.x)
+
+        val rotateAngle = startAngle - angle
+        val q = Quaternionf()
+        val axis = camera.quaternion.mul(Vector3f(0f, 0f, 1f), Vector3f())
+        q.rotateAxis(rotateAngle, axis.x, axis.y, axis.z)
+        selected.forEach {
+            it.setGlobalTransform(initPositions[it]!!.rotate(q, Matrix4f()))
+            //q.mul(it.quaternion,it.quaternion)
+        }
+        println("${toDegrees(rotateAngle)}")
+        //val camPosition = camera.globalToLocal(Vector3f(0f, 0f, 0f), Vector3f())
 
 //        v.position.set(camera.position)
 //        v.position.y-=3f
@@ -367,4 +379,20 @@ class EditMoveAllAxie(view: SceneEditorView, selected: List<Node>) : EditMove(vi
         view.updatePropertyPosition()
     }
 
+}
+
+
+fun Sequence<Vector3fc>.avg(): Vector3f {
+    val out = Vector3f()
+    var count = 0
+    forEach {
+        out.add(it)
+        count++
+    }
+    if (count == 0)
+        return out
+    out.x = if (out.x == 0f) 0f else out.x / count.toFloat()
+    out.y = if (out.y == 0f) 0f else out.y / count.toFloat()
+    out.z = if (out.z == 0f) 0f else out.z / count.toFloat()
+    return out
 }
