@@ -10,7 +10,7 @@ class TestGame(val engine: Engine) {
     init {
         camera.parent = root
 
-        val mat = SimpleMaterial(engine.gl).also {
+        val mat = SimpleMaterial(engine).also {
             it.tex = engine.resources.createEmptyTexture2D()
         }
 

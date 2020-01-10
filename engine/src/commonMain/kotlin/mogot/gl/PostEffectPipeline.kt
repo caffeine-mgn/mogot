@@ -138,15 +138,21 @@ class PostEffectPipeline(val engine: Engine) {
     private val sprite: FullScreenSprite = FullScreenSprite(engine)
     private var texture: GLTexture? = null
 
+    var MSAAEnabled = true
+
+    var MSAALevel: FrameBuffer.MSAALevels = FrameBuffer.MSAALevels.MSAAx4
+
+
     var fbo: GLFrameBuffer? = null
     var rbo: GLRenderBuffer? = null
 
     fun close() {
+        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
         fbo?.let {
             gl.deleteBuffer(it)
             fbo = null
         }
-        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.bindTexture(texture2dTarget, null)
         rbo?.let {
             gl.deleteBuffer(rbo!!)
             rbo = null
@@ -163,6 +169,7 @@ class PostEffectPipeline(val engine: Engine) {
     }
 
     fun use(renderContext: RenderContext, drawScene: () -> Unit) {
+        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
         gl.enable(gl.DEPTH_TEST)
         gl.enable(gl.CULL_FACE)
         gl.bindFrameBuffer(gl.FRAMEBUFFER, checkNotNull(fbo) { "Frame buffer not created" })
@@ -174,7 +181,7 @@ class PostEffectPipeline(val engine: Engine) {
         gl.disable(gl.CULL_FACE)
 
         list.forEach { currentFrameEffect ->
-            gl.bindTexture(gl.TEXTURE_2D, checkNotNull(texture))
+            gl.bindTexture(texture2dTarget, checkNotNull(texture))
             gl.clear(gl.COLOR_BUFFER_BIT)
             sprite.material = currentFrameEffect
             sprite.draw(renderContext)
@@ -182,27 +189,40 @@ class PostEffectPipeline(val engine: Engine) {
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)
         sprite.material = sprite.defaultMaterial
-        gl.bindTexture(gl.TEXTURE_2D, checkNotNull(texture))
+        gl.bindTexture(texture2dTarget, checkNotNull(texture))
         sprite.draw(renderContext)
-        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.bindTexture(texture2dTarget, null)
     }
 
 
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
         fbo = gl.createFrameBuffer()
         gl.bindFrameBuffer(gl.FRAMEBUFFER, fbo!!)
-        gl.enable(gl.TEXTURE_2D)
+        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
+        gl.enable(texture2dTarget)
+        gl.enable(gl.MULTISAMPLE)
         texture = gl.createTexture()
-        gl.bindTexture(gl.TEXTURE_2D, texture!!)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, resolutionWidth, resolutionHeight, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.bindTexture(texture2dTarget, texture!!)
+        if(!MSAAEnabled) {
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, resolutionWidth, resolutionHeight, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+            gl.texParameteri(texture2dTarget, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+            gl.texParameteri(texture2dTarget, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        }
+        else {
+            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE,MSAALevel.level,  gl.RGB ,resolutionWidth, resolutionHeight,false)
+        }
+
         //gl.texParameterf(gl.TEXTURE_2D, gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT,0.0f)
-        gl.bindTexture(gl.TEXTURE_2D, null)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture!!, 0)
+
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture2dTarget, texture!!, 0)
         rbo = gl.createRenderBuffer()
         gl.bindRenderBuffer(gl.RENDERBUFFER, rbo!!)
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, resolutionWidth, resolutionHeight)
+        if(MSAAEnabled){
+            gl.renderbufferStorageMultisample(gl.RENDERBUFFER,MSAALevel.level,gl.DEPTH24_STENCIL8,resolutionWidth,resolutionHeight)
+        }else {
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, resolutionWidth, resolutionHeight)
+        }
+        gl.bindTexture(texture2dTarget, null)
         gl.bindRenderBuffer(gl.RENDERBUFFER, null)
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rbo!!)
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE)

@@ -44,11 +44,13 @@ expect class GL {
     fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?)
     fun createFrameBuffer(): GLFrameBuffer
     fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?)
+    fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean)
     fun texParameteri(target: Int, pname: Int, param: Int)
     fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
     fun createRenderBuffer(): GLRenderBuffer
     fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?)
     fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
+    fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int)
     fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer)
     fun checkFramebufferStatus(target: Int): Int
 
@@ -95,6 +97,7 @@ expect class GL {
     val LINK_STATUS: Int
     val TEXTURE0: Int
     val TEXTURE_2D: Int
+    val TEXTURE_2D_MULTISAMPLE: Int
     val TEXTURE_MAX_LEVEL: Int
     val LINES: Int
     val LINE_STRIP: Int

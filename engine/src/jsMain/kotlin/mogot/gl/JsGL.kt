@@ -70,6 +70,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.TEXTURE0
     actual val TEXTURE_2D: Int
         get() = WebGLRenderingContext.TEXTURE_2D
+    actual val TEXTURE_2D_MULTISAMPLE: Int
+        get() = WebGLRenderingContext.TEXTURE_2D
     actual val TEXTURE_MAX_LEVEL: Int
         get() = js("WebGL2RenderingContext.TEXTURE_MAX_LEVEL")
     actual val LINES: Int

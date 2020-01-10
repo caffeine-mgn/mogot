@@ -64,6 +64,8 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_ELEMENT_ARRAY_BUFFER
     actual val TEXTURE_2D: Int
         get() = GL2.GL_TEXTURE_2D
+    actual val TEXTURE_2D_MULTISAMPLE: Int
+        get() = GL2.GL_TEXTURE_2D_MULTISAMPLE
     actual val LINES: Int
         get() = GL2.GL_LINES
     actual val LINE_STRIP: Int
@@ -296,6 +298,10 @@ actual class GL(val gl: GL2) {
         else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
 
+    actual fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean){
+        gl.glTexImage2DMultisample(target,samples,internalformat,width,height,fixedsamplelocations)
+    }
+
     actual fun texParameteri(target: Int, pname: Int, param: Int) {
         gl.glTexParameteri(target, pname, param)
     }
@@ -317,6 +323,10 @@ actual class GL(val gl: GL2) {
 
     actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) {
         gl.glRenderbufferStorage(target, internalformat, width, height)
+    }
+
+    actual fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int){
+        gl.glRenderbufferStorageMultisample(target,samples,internalformat,width,height)
     }
 
     actual fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer) {

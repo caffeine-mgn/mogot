@@ -1,5 +1,6 @@
 package game
 
+import mogot.Engine
 import mogot.RenderContext
 import mogot.Texture2D
 import mogot.gl.GL
@@ -8,14 +9,14 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 
-internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
-    override fun close() {
+internal class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
+    fun close() {
         shader.close()
     }
 
     //    var image: Image? = null
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
-    override val shader: Shader = Shader(gl,
+    override val shader: Shader = Shader(engine.gl,
             vertex = """#version 300 es
 
 #ifdef GL_ES
@@ -119,26 +120,26 @@ void main() {
             field = value
             shader.use()
             if (tex != null) {
-                gl.activeTexture(gl.TEXTURE0)
-                gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+                engine.gl.activeTexture(engine.gl.TEXTURE0)
+                engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.gl)
                 shader.uniform("tex", 0)
             } else {
-                gl.activeTexture(gl.TEXTURE0)
-                gl.bindTexture(gl.TEXTURE_2D, null)
+                engine.gl.activeTexture(engine.gl.TEXTURE0)
+                engine.gl.bindTexture(engine.gl.TEXTURE_2D, null)
             }
         }
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
         if (tex != null) {
-            gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.gl)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }
 
     override fun unuse() {
 //        if (tex != null)
-        gl.bindTexture(gl.TEXTURE_2D, null)
+        engine.gl.bindTexture(engine.gl.TEXTURE_2D, null)
         super.unuse()
     }
 }
