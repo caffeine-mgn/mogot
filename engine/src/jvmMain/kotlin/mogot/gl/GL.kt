@@ -100,6 +100,10 @@ actual class GL(val gl: GL2) {
         gl.glEnableVertexAttribArray(index)
     }
 
+    actual fun disableVertexAttribArray(index: Int) {
+        gl.glDisableVertexAttribArray(index)
+    }
+
     actual fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int) {
         gl.glVertexAttribPointer(index, size, type, normalized, stride, offset.toLong())
     }

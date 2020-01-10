@@ -129,7 +129,6 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                     is Vector3ic -> shader.uniform(name, value)
                     is Vector4fc -> shader.uniform(name, value)
                     is ExternalTexture -> {
-                        println("active $name to ${value.id} from ${value.file.path}")
                         gl.activeTexture(gl.TEXTURE0 + value.id)
                         gl.bindTexture(gl.TEXTURE_2D, value.gl.gl)
                         shader.uniform(name, value.id)
@@ -157,7 +156,11 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                 println("fp:\n$fp")
             } catch (e: Throwable) {
                 println("MaterialView ERROR: ${e.message}")
-                println("fp:\n$fp")
+                println("fp:")
+                fp.lines().forEachIndexed { index, s ->
+                    println("$index -> $s")
+                }
+                e.printStackTrace()
                 material.dynamicShader = null
             }
         }
@@ -190,15 +193,15 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         }
         material = DynamicMaterialGLSL(engine)
         val node = GeomNode2().also {
-            it.geom = Geoms.buildCube2(gl, 1f)
-            it.material = material
+            it.geom.value = Geoms.buildCube2(gl, 1f)
+            it.material.value = material
         }
         root!!.addChild(node)
 
         val l = OmniLight()
         val node1 = GeomNode().apply {
-            geom = Geoms.solidSphere(gl, 1f, 30, 30)
-            material = SimpleMaterial(engine)
+            geom.value = Geoms.solidSphere(gl, 1f, 30, 30)
+            material.value = SimpleMaterial(engine)
         }
         node1.position.z = -30f
         node1.position.x = 30f
@@ -225,19 +228,19 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
     }
 
     private inner class GeomNode2 : VisualInstance(), MaterialNode by MaterialNodeImpl() {
-        var geom: Geom3D2? = null
+        var geom = ResourceHolder<Geom3D2>()
         override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-            material?.use(model, projection, renderContext)
+            material.value?.use(model, projection, renderContext)
             renderListeners.forEach {
                 it()
             }
-            geom?.draw()
-            material?.unuse()
+            geom.value?.draw()
+            material.value?.unuse()
         }
 
         override fun close() {
-            geom?.close()
-            material = null
+            geom.dispose()
+            material.dispose()
         }
     }
 }

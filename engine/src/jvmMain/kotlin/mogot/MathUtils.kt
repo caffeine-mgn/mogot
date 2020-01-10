@@ -22,9 +22,6 @@ fun Matrix4fc.toDoubleArray(): DoubleArray {
     return matrixArray2
 }
 
-val VECTOR_UP: Vector3fc = Vector3f(0f, 1f, 0f)
-val VECTOR_LEFT: Vector3fc = Vector3f(-1f, 1f, 0f)
-
 val Quaternionfc.right: Vector3f
     get() = positiveX(Vector3f())
 

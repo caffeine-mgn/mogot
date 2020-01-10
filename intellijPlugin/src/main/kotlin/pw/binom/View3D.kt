@@ -4,14 +4,14 @@ package pw.binom
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.Quaternionf
-import mogot.math.Vector3f
+import mogot.math.*
 import mogot.math.forward
 import mogot.math.times
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 
-abstract class View3D : GLView() {
+abstract class View3D : GLView(MockFileSystem()) {
 
     private var _x = 0
     private var _y = 0

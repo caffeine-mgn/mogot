@@ -5,10 +5,11 @@ import mogot.math.*
 import org.khronos.webgl.WebGLRenderingContext
 import org.w3c.dom.events.KeyboardEvent
 import org.w3c.dom.events.MouseEvent
+import pw.binom.io.FileSystem
 import kotlin.browser.document
 import kotlin.browser.window
 
-open class GLView : AbstractGLView() {
+open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
     open var camera: Camera? = null
     protected open val root
         get() = camera?.asUpSequence()?.last()
@@ -23,9 +24,8 @@ open class GLView : AbstractGLView() {
 
     private val viewMatrix = Matrix4f()
 
-    val engine = Engine(this)
+    val engine = Engine(this, fileSystem)
     private var oldLockMouse = false
-    private var oldLockMouse1 = false
 
     override fun draw() {
         val time = window.performance.now().unsafeCast<Float>()
@@ -58,7 +58,7 @@ open class GLView : AbstractGLView() {
         if (root != null) {
 //            update(root!!, viewMatrix)
 //            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
-            update(dt,root!!, camModel = viewMatrix, ortoModel = MATRIX4_ONE)
+            update(dt, root!!, camModel = viewMatrix, ortoModel = MATRIX4_ONE)
             renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
 
             gl.ctx.disable(WebGLRenderingContext.DEPTH_TEST)
@@ -166,17 +166,17 @@ open class GLView : AbstractGLView() {
     }
 
     private var lastFrameTime = window.performance.now().unsafeCast<Float>()
-    private fun update(dt:Float,node: Node, camModel: Matrix4fc,ortoModel:Matrix4fc) {
+    private fun update(dt: Float, node: Node, camModel: Matrix4fc, ortoModel: Matrix4fc) {
         node.update(dt)
-        val pos = when (node){
-            is Spatial->node.apply(camModel)
-            is Spatial2D->node.apply(ortoModel)
-            else->camModel
+        val pos = when (node) {
+            is Spatial -> node.apply(camModel)
+            is Spatial2D -> node.apply(ortoModel)
+            else -> camModel
         }
 
 
         node.childs.forEach {
-            update(dt,it, camModel=pos,ortoModel = ortoModel)
+            update(dt, it, camModel = pos, ortoModel = ortoModel)
         }
     }
 

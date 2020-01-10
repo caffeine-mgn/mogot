@@ -21,7 +21,7 @@ fun makeStream(txt: String): LexStream<TokenType> {
 class LexTest {
 
     @Test
-    fun lexerTest(){
+    fun lexerTest() {
         val l = GLSLLexer(StringReader("vec3 vec4ee"))
         l.next()
         l.position.eq(0)
@@ -163,6 +163,136 @@ class LexTest {
 
             StatementBlock.read(stream).notNull()
             StatementBlock.read(stream).notNull()
+        }
+    }
+
+    @Test
+    fun operator() {
+        val stream = makeStream("""i<10""")
+        OperationExpression.read(stream).notNull()
+    }
+
+    @Test
+    fun lineCommentTest() {
+        val stream = makeStream("""
+                        //line comment
+                        float value
+        """)
+
+        val cc = Global.read(stream)
+        (cc is GlobalVar).eq(true)
+    }
+
+    @Test
+    fun blockCommentTest() {
+        val stream = makeStream("""
+                        /**first line
+                        second line *//*  also comment  */float value
+        """)
+
+        val cc = Global.read(stream)
+        (cc is GlobalVar).eq(true)
+    }
+
+    @Test
+    fun unarExpression() {
+        run {
+            val stream = makeStream("++i")
+            IncDecExpression.read(stream).notNull().also {
+                it as IncDecExpression
+                it.prefix.eq(true)
+                it.operator.eq(OperationExpression.Operator.PLUS)
+                it.exp as IdAccessExpression
+            }
+        }
+
+        run {
+            val stream = makeStream("--i")
+            IncDecExpression.read(stream).notNull().also {
+                it as IncDecExpression
+                it.prefix.eq(true)
+                it.operator.eq(OperationExpression.Operator.MINUS)
+                it.exp as IdAccessExpression
+            }
+        }
+
+        run {
+            val stream = makeStream("i--")
+            IncDecExpression.read(stream).notNull().also {
+                it as IncDecExpression
+                it.prefix.eq(false)
+                it.operator.eq(OperationExpression.Operator.MINUS)
+                it.exp as IdAccessExpression
+            }
+        }
+    }
+
+    @Test
+    fun forTest() {
+        Parser(StringReader("""
+        bool test(vec4 color2){
+            for (;;){
+                
+            }
+        }
+        """))
+
+        Parser(StringReader("""
+        bool test(vec4 color2){
+            for (int i=0;i<10;i++){
+                
+            }
+        }
+        """))
+    }
+
+    class SS
+
+    @Test
+    fun invertTest() {
+        Expression.read(lexer = makeStream("-10")).notNull().also {
+            it as InvertExpression
+            it.exp as NumberExpression
+        }
+    }
+
+    @Test
+    fun compareTest() {
+        run {
+            Expression.read(lexer = makeStream("i<10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.LT)
+            }
+        }
+        run {
+            Expression.read(lexer = makeStream("i<=10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.LE)
+            }
+        }
+        run {
+            Expression.read(lexer = makeStream("i>10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.GT)
+            }
+        }
+        run {
+            Expression.read(lexer = makeStream("i>=10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.GE)
+            }
+        }
+        run {
+            Expression.read(lexer = makeStream("i==10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.EQ)
+            }
+        }
+        run {
+            Expression.read(lexer = makeStream("i!=10")).notNull().also {
+                it as OperationExpression
+                it.operator.eq(OperationExpression.Operator.NE)
+            }
         }
     }
 }

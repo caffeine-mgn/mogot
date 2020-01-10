@@ -89,8 +89,10 @@ DOT = \.
 
 "=" {return TokenType.ASSIGN;}
 "+" {return TokenType.OP_PLUS;}
-"++" {return TokenType.UNARY_PLUS;}
-"--" {return TokenType.UNARY_MINUS;}
+"!=" {return TokenType.OP_NE;}
+"==" {return TokenType.OP_EQ;}
+"++" {return TokenType.INC;}
+"--" {return TokenType.DEC;}
 "-" {return TokenType.OP_MINUS;}
 "*" {return TokenType.OP_TIMES;}
 "/" {return TokenType.OP_DIV;}
@@ -123,7 +125,7 @@ DOT = \.
 "}" { return TokenType.RIGHT_BRACE; }
 
 ({CRLF})+ {return TokenType.END_LINE;}
-";" {return TokenType.END_LINE;}
+";" {return TokenType.CMD_SEPARATOR;}
 
 //<WAITING_VALUE> {WHITE_SPACE}+                              { yybegin(WAITING_VALUE); return TokenType.WHITE_SPACE; }
 

@@ -37,7 +37,10 @@ class MaterialProperties(val property: MaterialProperty) : Panel() {
                 .flatMap { it.uniforms.asSequence() }
                 .groupBy { it.name }
                 .values
-
+        println("Uniforms:")
+        uniforms.flatten().forEach {
+            println("${it.name} (${it.type.name} <- ${it.materialInstance.root.file})")
+        }
         uniforms
                 .asSequence()
                 .mapNotNull { uniformList ->

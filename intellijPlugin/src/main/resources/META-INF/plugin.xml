@@ -5,9 +5,20 @@
     <vendor email="dummy" url="dummy">dummy</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <idea-version since-build="191"/>
+
     <extensions defaultExtensionNs="com.intellij">
+        <facetType implementation="pw.binom.facet.AssetsFacetType"/>
+        <postStartupActivity implementation="pw.binom.Starter"/>
+
+        <projectListeners>
+            <listener class="pw.binom.module.ModuleChangeListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener" />
+        </projectListeners>
+
+        <!-- SceneEditor -->
         <fileType name="Scene file" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>
         <fileEditorProvider implementation="pw.binom.sceneEditor.SceneFileEditorProvider"/>
@@ -26,17 +37,24 @@
                   language="FBX" extensions="fbx"/>
         <fileEditorProvider implementation="pw.binom.FbxFileEditorProvider"/>
 
+        <!--
+        <fileType.fileViewProviderFactory filetype="FBX"
+                                          implementationClass="pw.binom.fbx.FbxFileViewProviderFactory"/>
+
+        -->
 
 
         <!-- Material -->
-        <externalAnnotator language="Material" implementationClass="pw.binom.material.ErrorAnnotator"></externalAnnotator>
+        <externalAnnotator language="Material"
+                           implementationClass="pw.binom.material.ErrorAnnotator"></externalAnnotator>
         <fileType name="Material file" implementationClass="pw.binom.material.MaterialFileType" fieldName="INSTANCE"
                   language="Material" extensions="mat"/>
         <lang.commenter language="Material" implementationClass="pw.binom.glsl.GLSLCommenter"/>
         <fileEditorProvider implementation="pw.binom.material.MaterialFileEditorProvider"/>
         <lang.parserDefinition language="Material" implementationClass="pw.binom.glsl.GLSLParserDefinition"/>
         <lang.braceMatcher language="Material" implementationClass="pw.binom.glsl.GLSLPairedBraceMatcher"/>
-        <lang.syntaxHighlighterFactory language="Material" implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="Material"
+                                       implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
     </extensions>
 
     <actions>

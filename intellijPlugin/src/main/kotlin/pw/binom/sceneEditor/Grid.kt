@@ -3,7 +3,7 @@ package pw.binom.sceneEditor
 import mogot.*
 import mogot.math.Matrix4fc
 
-class Grid(engine: Engine) : VisualInstance() {
+class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     /**
      * кол-во квадратов
      */
@@ -13,12 +13,12 @@ class Grid(engine: Engine) : VisualInstance() {
      * размер одного квадрата
      */
     private val size1 = 1f
-    private var geom: Geom3D2
-    var material: Material? = null
+    private var geom: Geom3D2? = null
 
-    init {
-        check(size>0)
-        check(size1>0f)
+    private fun update() {
+        check(size > 0)
+        check(size1 > 0f)
+        geom?.dec()
         val vertex = FloatArray((size + 1) * 2 * 3 * 2)
         val sizeHalf = (size / 2f) * size1
         val sizeFull = (size) * size1
@@ -49,15 +49,23 @@ class Grid(engine: Engine) : VisualInstance() {
                 normals = null,
                 uvs = null
         )
-        geom.mode = Geom3D2.RenderMode.LINES
+        geom!!.mode = Geometry.RenderMode.LINES
+        geom!!.inc()
+    }
+
+    override fun close() {
+        geom?.dec()
+        material.dispose()
+        super.close()
     }
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.render(model, projection, renderContext)
         val mat = material ?: return
-
-        mat.use(model, projection, renderContext)
-        geom.draw()
-        mat.unuse()
+        if (geom == null)
+            update()
+        mat.value?.use(model, projection, renderContext)
+        geom!!.draw()
+        mat.value?.unuse()
     }
 }

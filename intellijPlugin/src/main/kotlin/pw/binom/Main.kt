@@ -1,17 +1,20 @@
 package pw.binom
 
+import com.jetbrains.rd.util.string.printToString
 import mogot.*
 import mogot.gl.GLView
-import mogot.math.MATRIX4_ONE
-import mogot.math.Matrix4f
-import mogot.math.Vector2f
-import mogot.math.Vector3f
+import mogot.math.*
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
+import pw.binom.sceneEditor.Default3DMaterial
+import pw.binom.sceneEditor.FrustumNode
+import pw.binom.sceneEditor.Grid
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.io.File
+import java.io.FileInputStream
 import java.io.StringReader
 import javax.swing.BorderFactory
 import javax.swing.JButton
@@ -47,7 +50,7 @@ class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     }
 }
 */
-class DDD : GLView() {
+class DDD : GLView(MockFileSystem()) {
 
     private var closed = false
     private var inited = false
@@ -55,137 +58,81 @@ class DDD : GLView() {
     var cam = Camera()
 
     override var camera: Camera? = cam
+    private lateinit var box: CSGBox
+
+    private val cam2 = Camera()
 
     override fun init() {
+        backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
+        val mat = Default3DMaterial(engine)
         inited = true
+        val grid = Grid(engine)
+        grid.parent = root
+        grid.material.value = mat
 
         cam.parent = root
-        val box = CSGBox(engine)
+        box = CSGBox(engine)
         box.parent = root
         cam.position.set(3f, 3f, 3f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
-//        box.material = SimpleMaterial(engine.gl)
+        box.material.value = mat
 
-        val shader = """
-            @vertex
-            vec3 vertexPos
-            
-            @normal
-            vec3 normalList
-            
-            @uv
-            vec2 vertexUV
-            
-            @projection
-            mat4 projection
-            
-            @model
-            mat4 model
-            
-            vec3 normal
-            
-            vec4 vertex(){
-                mat3 normalMatrix = mat3(transpose(inverse(model)))
-                normal = vec3(normalMatrix * normalList)
-                return vec4(projection * model * vec4(vertexPos, 1f))
+        cam2.parent = root
+        cam2.resize(200, 200)
+        cam2.far = 10f
+    }
+
+    var nn: FrustumNode? = null
+
+    override fun render() {
+        super.render()
+    }
+
+    var cc = 0
+
+    override fun render2(dt: Float) {
+        if (cc > 60) {
+            nn?.let {
+                it.parent = null
+                it.close()
             }
-            
-            vec4 fragment(vec4 color2){
-                return vec4(1f,1f,1f,1f)
-            }
-        """
-        val p = Parser(StringReader(shader))
-        val compiler = Compiler(p)
-        val vv = GLES300Generator(compiler)
-
-        println("VP:")
-        vv.vp.lineSequence().forEachIndexed { index, s ->
-            println("${index + 1}: $s")
+            nn = null
+            cc = 0
         }
-
-        println("\n\nFP:")
-        vv.fp.lineSequence().forEachIndexed { index, s ->
-            println("${index + 1}: $s")
+        if (nn == null) {
+            nn = FrustumNode(engine, cam2)
+            nn!!.material.value = Default3DMaterial(engine)
+            nn!!.parent = root
         }
-
-
-        val fp = """#version 300 es
-            precision mediump float;
-            out vec4 color;
-            void main() {color=vec4(1.0f,1.0f,1.0f,1.0f);}
-        """
-
-        val vp = """#version 300 es
-           precision mediump float;
-           uniform mat4 projection;
-           uniform mat4 model;
-           layout(location = 0) in vec3 vertexPos;
-           
-           void main() {
-               gl_Position = projection * model * vec4(vertexPos, 1.0);
-           }
-        """
-
-//        box.material=DDShaderMaterial(engine.gl, vv.vp, vv.fp)
+        cc++
+        super.render2(dt)
     }
 
     override fun dispose() {
         closed = true
         super.dispose()
     }
-
-    fun startRender() {
-        while (!inited) {
-            Thread.sleep(1)
-        }
-        while (!closed) {
-            display()
-        }
-    }
-}
-
-class ddd : JPanel() {
-    private val flex = FlexLayout(this, FlexLayout.Direction.ROW)
-    val sppp = JButton("grow=1").appendTo(flex, grow = 1)
-    val sppp2 = JButton("grow=0").appendTo(flex, grow = 0)
-
 }
 
 object Main {
     @JvmStatic
     fun main(args: Array<String>) {
-        //val view3d = FbxViewer(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\main\\resources\\untitled.fbx").inputStream().readAllBytes())
-//        val view3d = DDD()
+//        val view3d = FbxViewer(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\main\\resources\\untitled.fbx").inputStream().readAllBytes())
+        val view = DDD()
         val f = JFrame()
 
-        val pp = JPanel()
-        pp.setSize(400, 400)
-
-        val pp3 = JPanel()
-        pp3.setSize(400, 400)
-        val s = ddd()
-        s.setSize(400, 400)
-//        pp3.add(s)
-        pp3.background = Color.green
-
-        val pp2 = JPanel()
-        pp2.border = BorderFactory.createLineBorder(Color.red, 5, true)
-
-        f.add(pp, BorderLayout.WEST)
-        f.add(pp2, BorderLayout.EAST)
-        f.add(s, BorderLayout.CENTER)
-
-        FlexLayout(pp)
-        FlexLayout(pp2)
-
-        pp.add(JButton("TEST-------TEST"))
-        pp2.add(JButton("TEST-------TEST"))
+//        val view =FileInputStream(File("C:\\Users\\User\\IdeaProjects\\test2\\src\\assets\\box.fbx")).use {
+//            FbxViewer(it.readBytes())
+//        }
+//        f.contentPane.add(view.glcanvas)
+        f.contentPane.add(view)
 
         f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
         f.size = Dimension(800, 600)
 //        f.add(view3d)
+//        view.startRender()
         f.isVisible = true
-//        view3d.startRender()
+        view.startRender()
     }
 }

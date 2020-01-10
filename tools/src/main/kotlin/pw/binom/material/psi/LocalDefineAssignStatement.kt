@@ -8,7 +8,7 @@ class LocalDefineAssignStatement(
         val name: String,
         val exp: Expression,
         override val position: Int,
-        override val length: Int) : Statement {
+        override val length: Int) : UnitStatement {
     companion object {
         fun read(lexer: LexStream<TokenType>): LocalDefineAssignStatement? = lexer.safe {
             val clazz = ClassId.read(lexer) ?: return@safe null

@@ -1,8 +1,8 @@
 package mogot
 
-import pw.binom.io.InputStream
 import java.io.EOFException
 import java.io.IOException
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.zip.CRC32

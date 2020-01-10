@@ -3,6 +3,7 @@ package pw.binom.material.generator.gles300
 import pw.binom.material.compiler.*
 import pw.binom.material.generator.GLESGenerator
 import pw.binom.material.psi.OperationExpression
+import kotlin.math.exp
 
 class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
 
@@ -27,24 +28,23 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
                     || compiler.properties.containsKey(it)) {
                 sb.append("uniform ")
             }
-            if (compiler.vertex == it) {
-                sb.append("layout(location = 0) in ")
-            }
-            if (compiler.normal == it) {
-                sb.append("layout(location = 1) in ")
-            }
-            if (compiler.uv == it) {
-                sb.append("layout(location = 2) in ")
-            }
-            if (vertex) {
-                if (it in dce.fieldsFP) {
-                    sb.append("out ")
-                }
-            } else {
-                if (it in dce.fieldsVP) {
-                    sb.append("in ")
+            when {
+                compiler.vertex == it -> sb.append("layout(location = 0) in ")
+                compiler.normal == it -> sb.append("layout(location = 1) in ")
+                compiler.uv == it -> sb.append("layout(location = 2) in ")
+                else -> {
+                    if (vertex) {
+                        if (it in dce.fieldsFP) {
+                            sb.append("out ")
+                        }
+                    } else {
+                        if (it in dce.fieldsVP) {
+                            sb.append("in ")
+                        }
+                    }
                 }
             }
+
             gen(it.type, sb) {
                 sb.append(" ").append(it.name)
             }
@@ -151,10 +151,12 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
             OperationExpression.Operator.PLUS -> "+"
             OperationExpression.Operator.MINUS -> "-"
             OperationExpression.Operator.DIV -> "/"
-            OperationExpression.Operator.GE -> "<="
-            OperationExpression.Operator.GT -> "<*>"
-            OperationExpression.Operator.LE -> ">="
-            OperationExpression.Operator.LT -> ">"
+            OperationExpression.Operator.GE -> ">="
+            OperationExpression.Operator.GT -> ">"
+            OperationExpression.Operator.LE -> "<="
+            OperationExpression.Operator.LT -> "<"
+            OperationExpression.Operator.NE -> "!="
+            OperationExpression.Operator.EQ -> "=="
         }?.let { sb.append(it) }
         sb.append("=")
         gen(statement.exp, sb)
@@ -173,6 +175,25 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
         sb.append(if (expression.value) "true" else "false")
     }
 
+    private fun gen(expression: IncDecExpressionDesc, sb: Appendable) {
+        val op = when (expression.operator) {
+            OperationExpression.Operator.PLUS -> "++"
+            OperationExpression.Operator.MINUS -> "--"
+            else -> throw IllegalArgumentException("Unknown unar operator ${expression.operator}")
+        }
+        if (expression.prefix)
+            sb.append(op)
+        gen(expression.exp, sb)
+        if (!expression.prefix)
+            sb.append(op)
+    }
+
+    private fun gen(expression: ExpParenthesisDest, sb: Appendable) {
+        sb.append("(")
+        gen(expression.exp, sb)
+        sb.append(")")
+    }
+
     private fun gen(expression: ExpressionDesc, sb: Appendable) {
         when (expression) {
             is FieldAccessExpressionDesc -> gen(expression, sb)
@@ -180,6 +201,8 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
             is NumberExpressionDesc -> gen(expression, sb)
             is OperationExpressionDesc -> gen(expression, sb)
             is BooleanExpressionDesc -> gen(expression, sb)
+            is IncDecExpressionDesc -> gen(expression, sb)
+            is ExpParenthesisDest -> gen(expression, sb)
             else -> TODO("Unknown Expression: ${expression::class.java.name}")
         }
     }
@@ -191,10 +214,12 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
             OperationExpression.Operator.PLUS -> "+"
             OperationExpression.Operator.MINUS -> "-"
             OperationExpression.Operator.DIV -> "/"
-            OperationExpression.Operator.GE -> "<="
-            OperationExpression.Operator.GT -> "<*>"
-            OperationExpression.Operator.LE -> ">="
-            OperationExpression.Operator.LT -> ">"
+            OperationExpression.Operator.GE -> ">="
+            OperationExpression.Operator.GT -> ">"
+            OperationExpression.Operator.LE -> "<="
+            OperationExpression.Operator.LT -> "<"
+            OperationExpression.Operator.NE -> "!="
+            OperationExpression.Operator.EQ -> "=="
         }
         sb.append(op)
         gen(expression.right, sb)
@@ -219,8 +244,17 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
         sb.append(text)
     }
 
-    private fun gen(expression: MethodCallExpressionDesc, sb: Appendable) {
+    private fun genGenericMethodCall(expression: MethodCallExpressionDesc, sb: Appendable): Boolean {
         val method = expression.methodDesc
+        if (method.parent is ArrayType && method.name == "get") {
+            gen(expression.from!!, sb)
+            expression.args.forEach {
+                sb.append("[")
+                gen(it, sb)
+                sb.append("]")
+            }
+            return true
+        }
 
         if (method.name == "times" && expression.from != null && method.args.size == 1 && !method.external) {
             val arg = method.args[0].type
@@ -230,26 +264,41 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
                     gen(expression.from, sb)
                     sb.append("*")
                     gen(expression.args[0], sb)
-                    return
+                    return true
                 }
 
                 (parent == compiler.mat4Type || parent == compiler.mat3Type) && (arg == compiler.vec4Type || arg == compiler.vec3Type) -> {
                     gen(expression.from, sb)
                     sb.append("*")
                     gen(expression.args[0], sb)
-                    return
+                    return true
                 }
             }
         }
-        if (method.parent is ArrayType && method.name == "get") {
-            gen(expression.from!!, sb)
-            expression.args.forEach {
-                sb.append("[")
-                gen(it, sb)
-                sb.append("]")
+
+        if (method.name == "unarMinus" && expression.args.isEmpty() && expression.from?.resultType != null) {
+
+            val fromType = expression.from.resultType
+            if (fromType == compiler.intType
+                    || fromType == compiler.floatType
+                    || fromType == compiler.vec2Type
+                    || fromType == compiler.vec3Type
+                    || fromType == compiler.vec4Type) {
+                sb.append("-")
+                gen(expression.from, sb)
+                return true
             }
-            return
         }
+        return false
+    }
+
+    private fun gen(expression: MethodCallExpressionDesc, sb: Appendable) {
+        if (genGenericMethodCall(expression, sb))
+            return
+        val method = expression.methodDesc
+
+
+
         if (!method.external) {
             expression.from?.let {
                 gen(it, sb)

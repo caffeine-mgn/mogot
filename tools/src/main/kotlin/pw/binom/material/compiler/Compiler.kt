@@ -35,17 +35,59 @@ class Compiler(val parser: Parser) : Scope {
         classes += gvec4Class
     }
 
-    val floatType = findType(TypePromitive(TokenType.FLOAT, emptyList()))!! as SingleType
-    val vec3Type = findType(TypePromitive(TokenType.VEC3, emptyList()))!! as SingleType
-    val mat4Type = findType(TypePromitive(TokenType.MAT4, emptyList()))!! as SingleType
-    val mat3Type = findType(TypePromitive(TokenType.MAT3, emptyList()))!! as SingleType
-    val vec4Type = findType(TypePromitive(TokenType.VEC4, emptyList()))!! as SingleType
-    val gvec4Type = findType(TypeId("gvec4", emptyList()))!! as SingleType
-    val vec2Type = findType(TypePromitive(TokenType.VEC2, emptyList()))!! as SingleType
-    val intType = findType(TypePromitive(TokenType.INT, emptyList()))!! as SingleType
-    val sampler2DType = findType(TypeId("sampler2D", emptyList()))!! as SingleType
+    val floatType = findType(TypePromitive(TokenType.FLOAT, emptyList())) as SingleType
+    val vec3Type = findType(TypePromitive(TokenType.VEC3, emptyList())) as SingleType
+    val mat4Type = findType(TypePromitive(TokenType.MAT4, emptyList())) as SingleType
+    val mat3Type = findType(TypePromitive(TokenType.MAT3, emptyList())) as SingleType
+    val vec4Type = findType(TypePromitive(TokenType.VEC4, emptyList())) as SingleType
+    val gvec4Type = findType(TypeId("gvec4", emptyList())) as SingleType
+    val vec2Type = findType(TypePromitive(TokenType.VEC2, emptyList())) as SingleType
+    val intType = findType(TypePromitive(TokenType.INT, emptyList())) as SingleType
+    val sampler2DType = findType(TypeId("sampler2D", emptyList())) as SingleType
 
     init {
+
+        intType.methods += MethodDesc(this, null, "unarMinus", intType, listOf(), false)
+        floatType.methods += MethodDesc(this, null, "unarMinus", floatType, listOf(), false)
+        vec2Type.methods += MethodDesc(this, null, "unarMinus", vec2Type, listOf(), false)
+        vec3Type.methods += MethodDesc(this, null, "unarMinus", vec3Type, listOf(), false)
+        vec4Type.methods += MethodDesc(this, null, "unarMinus", vec4Type, listOf(), false)
+
+
+        rootMethods += MethodDesc(this, null, "clamp", floatType, listOf(
+                MethodDesc.Argument("a", floatType),
+                MethodDesc.Argument("a", floatType),
+                MethodDesc.Argument("b", floatType)
+        ), false)
+
+        rootMethods += MethodDesc(this, null, "max", floatType, listOf(
+                MethodDesc.Argument("a", floatType),
+                MethodDesc.Argument("b", floatType)
+        ), false)
+
+        rootMethods += MethodDesc(this, null, "pow", floatType, listOf(
+                MethodDesc.Argument("a", floatType),
+                MethodDesc.Argument("b", floatType)
+        ), false)
+
+
+        rootMethods += MethodDesc(this, null, "normalize", vec3Type, listOf(
+                MethodDesc.Argument("vector", vec3Type)
+        ), false)
+
+        rootMethods += MethodDesc(this, null, "length", floatType, listOf(
+                MethodDesc.Argument("vector", vec3Type)
+        ), false)
+
+        rootMethods += MethodDesc(this, null, "dot", floatType, listOf(
+                MethodDesc.Argument("a", vec3Type),
+                MethodDesc.Argument("b", vec3Type)
+        ), false)
+
+        rootMethods += MethodDesc(this, null, "reflect", vec3Type, listOf(
+                MethodDesc.Argument("a", vec3Type),
+                MethodDesc.Argument("b", vec3Type)
+        ), false)
 
         rootMethods += MethodDesc(this, null, "vec3", vec3Type, listOf(
                 MethodDesc.Argument("x", floatType),
@@ -113,6 +155,14 @@ class Compiler(val parser: Parser) : Scope {
         ), false)
 
         gvec4Type.fields += GlobalFieldDesc(gvec4Type, "rgba", vec4Type, SourceExp(0, 0))
+        vec4Type.fields += GlobalFieldDesc(gvec4Type, "x", floatType, SourceExp(0, 0))
+        vec4Type.fields += GlobalFieldDesc(gvec4Type, "y", floatType, SourceExp(0, 0))
+        vec4Type.fields += GlobalFieldDesc(gvec4Type, "z", floatType, SourceExp(0, 0))
+        vec4Type.fields += GlobalFieldDesc(gvec4Type, "w", floatType, SourceExp(0, 0))
+
+        vec3Type.fields += GlobalFieldDesc(gvec4Type, "x", floatType, SourceExp(0, 0))
+        vec3Type.fields += GlobalFieldDesc(gvec4Type, "y", floatType, SourceExp(0, 0))
+        vec3Type.fields += GlobalFieldDesc(gvec4Type, "z", floatType, SourceExp(0, 0))
     }
 
     override fun findType(type: Type): TypeDesc {
@@ -231,7 +281,7 @@ class Compiler(val parser: Parser) : Scope {
                     )
                 },
                 parent = clazz?.let { findType(it, emptyList()) },
-                external = true
+                external = false
         )
         out.statementBlock = compile(out, method.statement)
         return out
@@ -265,7 +315,10 @@ class Compiler(val parser: Parser) : Scope {
         }
         val exp = expression.exp?.let { compile(scope, null, it) }
         val method = (exp?.resultType ?: scope).findMethod(expression.method, args.map { it.resultType })
-                ?: throw CompileException("Undefined Method ${expression.method}", expression.position, expression.length)
+                ?: if (exp == null)
+                    throw CompileException("Undefined Method ${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.position, expression.length)
+                else
+                    throw CompileException("Undefined Method ${exp.resultType}.${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.position, expression.length)
         return MethodCallExpressionDesc(method, args, exp)
     }
 
@@ -300,6 +353,20 @@ class Compiler(val parser: Parser) : Scope {
         return FieldAccessExpressionDesc(field, ss as? ExpressionDesc)
     }
 
+    private fun compile(scope: Scope, expression: IncDecExpression): IncDecExpressionDesc {
+        val exp = compile(scope, null, expression.exp)
+        if (exp.resultType !is SingleType)
+            throw CompileException("Can't apply increment to non single type", expression.position, expression.length)
+        val type = exp.resultType as SingleType
+        if (type != intType)
+            throw CompileException("Can't apply increment to non int type", expression.position, expression.length)
+        return IncDecExpressionDesc(
+                exp,
+                expression.operator,
+                expression.prefix
+        )
+    }
+
     private fun compile(scope: Scope, expression: ArrayAccessExpression) =
             compile(scope, null, MethodCallExpression(
                     expression.exp,
@@ -307,6 +374,14 @@ class Compiler(val parser: Parser) : Scope {
                     listOf(expression.index),
                     expression.position, expression.length
             ))
+
+    private fun compile(scope: Scope, expression: InvertExpression): MethodCallExpressionDesc {
+        val exp = MethodCallExpression(expression.exp, "unarMinus", listOf(), expression.position, expression.length)
+        return compile(scope, exp)
+    }
+
+    private fun compile(scope: Scope, expression: ExpParenthesis): ExpParenthesisDest =
+            ExpParenthesisDest(compile(scope, null, expression.exp))
 
     private fun compile(scope: Scope, from: ExpressionDesc?, expression: Expression): ExpressionDesc =
             when (expression) {
@@ -316,6 +391,9 @@ class Compiler(val parser: Parser) : Scope {
                 is IdAccessExpression -> compile(scope, expression)
                 is BooleanExpression -> compile(scope, expression)
                 is ArrayAccessExpression -> compile(scope, expression)
+                is IncDecExpression -> compile(scope, expression)
+                is InvertExpression -> compile(scope, expression)
+                is ExpParenthesis -> compile(scope, expression)
                 else -> TODO("Unknown ${expression::class.java.name}")
             }
 

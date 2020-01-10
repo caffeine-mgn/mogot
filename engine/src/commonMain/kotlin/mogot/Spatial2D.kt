@@ -4,12 +4,17 @@ import mogot.math.Math
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 import mogot.math.Vector2f
+val Node.isSpatial2D
+    get() = (type and 0x4) > 0
 
 open class Spatial2D:Node(){
     val position = Vector2f()
     val scale = Vector2f(1f,1f)
     var rotation: Float = 0f
     protected var _matrix = Matrix4f()
+
+    override val type: Int
+        get() = 0x4 or super.type
 
     val matrix: Matrix4fc
         get() = _matrix

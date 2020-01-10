@@ -7,20 +7,28 @@ import mogot.gl.GLView
 import mogot.math.Vector2i
 import mogot.math.Vector3f
 import mogot.math.Vector4f
+import pw.binom.MockFileSystem
+import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
-import pw.binom.sceneEditor.nodeController.CubeServiceFactory
-import pw.binom.sceneEditor.nodeController.NodeService
-import pw.binom.sceneEditor.nodeController.OmniLightServiceFactory
+import pw.binom.io.Closeable
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
 
-private val serviceFactory = listOf(OmniLightServiceFactory, CubeServiceFactory)
+private class EditorHolder(val view: SceneEditorView) : Closeable {
+    override fun close() {
+    }
 
-class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile) : GLView() {
+}
+
+val Engine.editor: SceneEditorView
+    get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
+
+class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile) : GLView(MockFileSystem()) {
+
     val editorRoot = Node()
     val sceneRoot = Node()
     val editorCamera = Camera()
@@ -30,11 +38,18 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private val frameListeners = Stack<() -> Unit>()
     private lateinit var _default3DMaterial: Default3DMaterial
     val default3DMaterial: Default3DMaterial
-        get() = _default3DMaterial!!
+        get() = _default3DMaterial
 
     override fun setup(width: Int, height: Int) {
+        engine.manager("Editor") { EditorHolder(this) }
         super.setup(width, height)
         _default3DMaterial = Default3DMaterial(engine)
+        _default3DMaterial.inc()
+    }
+
+    override fun destroy() {
+        _default3DMaterial.dec()
+        super.destroy()
     }
 
 
@@ -51,17 +66,18 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     private lateinit var selectorMaterial: SolidMaterial
     private val editorFactories = listOf(EditMoveFactory, FpsCamEditorFactory)
-    private val _services = ArrayList<NodeService>()
+    private val _services by Services.byClassSequence(NodeService::class.java)
     private val links = WeakHashMap<Node, NodeService>()
-    val services: List<NodeService>
-        get() = _services
 
-    fun link(node: Node, service: NodeService) {
-        links[node] = service
+    fun getService(node: Node): NodeService? {
+        var service = links[node]
+        if (service == null) {
+            service = _services.find { it.isEditor(node) }
+            if (service != null)
+                links[node] = service
+        }
+        return service
     }
-
-    fun isLinked(node: Node) = links.containsKey(node)
-    fun getService(node: Node) = links[node]
 
     init {
         sceneRoot.parent = editorRoot
@@ -82,11 +98,11 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     fun select(node: Node?) {
         renderThread {
             selectedNodes.forEach {
-                links[it]?.unselected(it)
+                getService(it)?.unselected(this, it)
             }
             selectedNodes.clear()
             if (node != null) {
-                links[node]?.selected(node)
+                getService(node)?.selected(this, node)
                 selectedNodes += node
             }
             eventSelectChanged.dispatch()
@@ -183,14 +199,11 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     override fun init() {
         super.init()
-        serviceFactory.forEach {
-            _services += it.create(this)
-        }
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
         val grid = Grid(engine)
         grid.parent = root
         val mat = SolidMaterial(engine)
-        grid.material = mat
+        grid.material.value = mat
         mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
 //        editorCamera.behaviour = FpsCam(engine)
         selectorMaterial = SolidMaterial(engine)
@@ -222,7 +235,9 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             }
         }
     */
+
     override fun dispose() {
+        println("SceneEditorView.dispose")
         closed = true
         super.dispose()
     }
@@ -263,26 +278,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 }
 
-class LightScreenPos(val camera: Camera, val other: Spatial) : Behaviour() {
-    public override val node
-        get() = super.node as Sprite
 
-    override fun checkNode(node: Node?) {
-        node as Sprite?
-    }
-
-    override fun onUpdate(delta: Float) {
-        val p2 = tempVec
-        if (camera.worldToScreenPoint(other.matrix, p2)) {
-            node.visible = true
-            node.position.set(p2.x.toFloat() - node.size.x / 2f, p2.y.toFloat() - node.size.y / 2f)
-        } else {
-            node.visible = false
-        }
-    }
-
-    private val tempVec = Vector2i()
-}
 
 class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
     private var changeFlag = true

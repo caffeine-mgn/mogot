@@ -11,15 +11,15 @@ class LexStream<T>(private val func: () -> Element<T>?) {
 
     private val stack = Stack<Int>()
 
-    private fun pushState() {
+    fun pushState() {
         stack.pushLast(cursor)
     }
 
-    private fun skipState() {
+    fun skipState() {
         stack.popLast()
     }
 
-    private fun popState() {
+    fun popState() {
         val cur = stack.popLast()
         cursor = cur
     }
@@ -43,7 +43,7 @@ class LexStream<T>(private val func: () -> Element<T>?) {
         return elements[cursor++]
     }
 
-    fun <T : Any?> safe(func: () -> T): T {
+    inline fun <T : Any?> safe(func: () -> T): T {
         pushState()
         val r = func()
         if (r == null)

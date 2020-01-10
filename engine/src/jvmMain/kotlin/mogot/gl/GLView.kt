@@ -2,8 +2,10 @@ package mogot.gl
 
 import com.jogamp.opengl.*
 import com.jogamp.opengl.awt.GLJPanel
+import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
+import pw.binom.io.FileSystem
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Point
@@ -12,7 +14,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 
 
-open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
+open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
     override val mouseDown = EventValueDispatcher<Int>()
     override val mouseUp = EventValueDispatcher<Int>()
@@ -51,6 +53,10 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         }
     private val robot = Robot()
     protected open var camera: Camera? = null
+        set(value) {
+            value?.resize(width, height)
+            field = value
+        }
     protected open val root
         get() = camera?.asUpSequence()?.last()
 
@@ -63,6 +69,10 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     protected object renderContext : RenderContext {
         override val pointLights = ArrayList<PointLight>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
+    }
+
+    init {
+        animator = FPSAnimator(this, 60)
     }
 
     protected open fun mouseDown(e: MouseEvent) {
@@ -181,8 +191,29 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     private val tempMatrix = Matrix4f()
     private var oldLockMouse = false
 
-    protected open fun render2(dt:Float){
+    protected open fun render2(dt: Float) {
 
+    }
+
+    private var added = false
+
+    override fun addNotify() {
+        if (added)
+            return
+        added = true
+        super.addNotify()
+    }
+
+    override fun destroy() {
+        if (added) {
+            super.removeNotify()
+        }
+        super.destroy()
+    }
+
+
+    override fun removeNotify() {
+//        super.removeNotify()
     }
 
     protected open fun render() {
@@ -210,20 +241,21 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
-       postEffectPipeline?.use(renderContext) {
-            if (root != null) {
-                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-                gl.gl.glEnable(GL2.GL_CULL_FACE)
-                update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+//        postEffectPipeline?.use(renderContext) {
+        if (root != null) {
+            gl.gl.glEnable(GL2.GL_DEPTH_TEST)
+            gl.gl.glEnable(GL2.GL_CULL_FACE)
+            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+            if (camera != null)
                 renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-                gl.gl.glDisable(GL2.GL_CULL_FACE)
+            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+            gl.gl.glDisable(GL2.GL_CULL_FACE)
 
-                tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-                renderNode2D(root!!, tempMatrix, renderContext)
-            }
+            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+            renderNode2D(root!!, tempMatrix, renderContext)
         }
+//        }
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
@@ -276,15 +308,28 @@ open class GLView : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     }
 
     protected open fun init() {
-        _engine = Engine(this)
-        if(postEffectPipeline==null){
-            postEffectPipeline =  PostEffectPipeline(engine)
+        _engine = Engine(this, fileSystem)
+        if (postEffectPipeline == null) {
+            postEffectPipeline = PostEffectPipeline(engine)
 
         }
-        postEffectPipeline?.init(width,height)
+        postEffectPipeline?.init(width, height)
     }
 
     protected open fun dispose() {
         postEffectPipeline?.close()
+    }
+
+    fun startRender() {
+        if (animator != null) {
+            if (animator.isStarted)
+                animator.resume()
+            else
+                animator.start()
+        }
+    }
+
+    fun stopRender() {
+        animator.pause()
     }
 }

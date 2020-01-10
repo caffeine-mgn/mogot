@@ -63,6 +63,8 @@ DOT = \.
 "mat3" { return GLSLTypes.MAT3; }
 "mat4" { return GLSLTypes.MAT4; }
 "float" { return GLSLTypes.FLOAT; }
+"true" { return GLSLTypes.TRUE; }
+"false" { return GLSLTypes.FALSE; }
 "int" { return GLSLTypes.INT; }
 "bool" { return GLSLTypes.BOOL; }
 "vec4" { return GLSLTypes.VEC4; }

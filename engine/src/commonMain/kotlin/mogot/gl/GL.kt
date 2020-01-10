@@ -1,6 +1,8 @@
+@file:JvmName("GLCommonKt")
 package mogot.gl
 
 import mogot.math.Matrix4fc
+import kotlin.jvm.JvmName
 
 expect class GL {
     fun clear(mask: Int)
@@ -14,6 +16,7 @@ expect class GL {
     fun deleteVertexArray(array: GLVertexArray)
     fun bindVertexArray(array: GLVertexArray?)
     fun enableVertexAttribArray(index: Int)
+    fun disableVertexAttribArray(index: Int)
     fun createProgram(): GLProgram
     fun deleteProgram(program: GLProgram)
     fun createShader(type: Int): GLShader
@@ -59,8 +62,8 @@ expect class GL {
 
     fun getError(): Int
     fun deleteBuffers(texture: GLTexture)
-    fun deleteBuffer(buffer:GLRenderBuffer)
-    fun deleteBuffer(buffer:GLFrameBuffer)
+    fun deleteBuffer(buffer: GLRenderBuffer)
+    fun deleteBuffer(buffer: GLFrameBuffer)
     fun enable(feature: Int)
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
@@ -115,3 +118,15 @@ interface GLUniformLocation
 interface GLTexture
 interface GLFrameBuffer
 interface GLRenderBuffer
+
+inline fun GL.checkError() {
+    val err = getError()
+    if (err != 0)
+        throw IllegalStateException("OpenGL Error #$err")
+}
+
+inline fun GL.checkError(message: () -> String) {
+    val err = getError()
+    if (err != 0)
+        throw IllegalStateException("OpenGL Error #$err: ${message()}")
+}

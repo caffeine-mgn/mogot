@@ -5,8 +5,10 @@ interface Expression {
     val length: Int
 
     companion object {
-        fun read(lexer: LexStream<TokenType>): Expression? =
-                OperationExpression.read(lexer)
-                        ?: SubjectExpression.read(lexer)
+        fun read(lexer: LexStream<TokenType>): Expression? = run {
+            CommentDef.read(lexer)
+            OperationExpression.read(lexer)
+                    ?: UnitExpression.read(lexer)
+        }
     }
 }

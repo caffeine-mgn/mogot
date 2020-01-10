@@ -262,8 +262,6 @@ void main() {
                 refresh()
             }
         })
-
-        refresh()
     }
 
     override fun getComponent(): JComponent = component
