@@ -49,7 +49,7 @@ private fun SceneEditorView.updatePropertyPosition() {
 
 class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMove(view, selected) {
 
-    private val axisLine = Grid(view.engine)
+    private val axisLine = Line(view.engine)
     private val collader = PanelCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
     private val ray = MutableRay()
     private val vec = Vector3f()
@@ -66,17 +66,25 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: 
     }
 
     init {
-        if (type == Axis.Y) {
-            val angleToCam = atan2(
-                    avgPosition.x - view.editorCamera.position.x,
-                    avgPosition.z - view.editorCamera.position.z
-            )
-            axisLine.quaternion.setRotation(-PIf / 2f, angleToCam, 0f)
+        when (type) {
+            Axis.X -> {
+                axisLine.axis = Axis.X
+                axisLine.quaternion.identity()
+            }
+            Axis.Y -> {
+                val angleToCam = atan2(
+                        avgPosition.x - view.editorCamera.position.x,
+                        avgPosition.z - view.editorCamera.position.z
+                )
+                axisLine.quaternion.setRotation(0f, angleToCam, -PIf / 2f)
+                axisLine.axis = Axis.Z
+            }
+            Axis.Z -> {
+                axisLine.axis = Axis.X
+                axisLine.quaternion.rotateXYZ(0f, -PIf / 2f, 0f)
+            }
         }
 
-        if (type == Axis.Z) {
-            axisLine.quaternion.rotateXYZ(0f, -PIf / 2f, 0f)
-        }
         view.editorCamera.screenPointToRay(virtualMouse.x, virtualMouse.y, ray)
         collader.rayCast(ray, vec)
         startVec.set(vec)

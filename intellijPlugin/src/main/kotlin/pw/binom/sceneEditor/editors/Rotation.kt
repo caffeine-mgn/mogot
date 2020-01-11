@@ -27,18 +27,25 @@ object RotateAllAxesFactory : EditActionFactory {
 abstract class EditorWithVirtualMouse(val view: SceneEditorView) : EditAction {
     val engine
         get() = view.engine
+
     var oldMousePosition = Vector2i(engine.stage.mousePosition)
     var virtualMouse = Vector2i(engine.stage.mousePosition)
+    val mouseMoveResetUtil = MouseMoveResetUtil(view)
 
     override fun render(dt: Float) {
-        virtualMouse.add(
-                engine.stage.mousePosition.x - oldMousePosition.x,
-                engine.stage.mousePosition.y - oldMousePosition.y
-        )
-        oldMousePosition.set(
-                engine.stage.mousePosition.x,
-                engine.stage.mousePosition.y
-        )
+        val newPos = mouseMoveResetUtil.check()
+        if (newPos == null) {
+            virtualMouse.add(
+                    engine.stage.mousePosition.x - oldMousePosition.x,
+                    engine.stage.mousePosition.y - oldMousePosition.y
+            )
+            oldMousePosition.set(
+                    engine.stage.mousePosition.x,
+                    engine.stage.mousePosition.y
+            )
+        } else {
+            oldMousePosition.set(newPos)
+        }
     }
 
     override fun keyDown(code: Int) {
@@ -167,11 +174,6 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
         }
     }
 
-    private val ray = MutableRay()
-
-//    var startAngle = angle1()
-//    var startAngle2 = angle2()
-
     override fun render(dt: Float) {
         super.render(dt)
         val q = Quaternionf()
@@ -193,22 +195,25 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
 
         if (initPositions.size == 1)
             initPositions.forEach {
-                it.key.setGlobalTransform(it.value.rotate(q, Matrix4f()))
+                val m = Matrix4f().rotate(q)
+                        .mul(it.value)
+                        .setTranslation(it.value.getTranslation(Vector3f()))
+                it.key.setGlobalTransform(m)
             }
         else
             initPositions.forEach {
                 val m = Matrix4f().rotate(q)
-                m.mul(it.value, m)
+                        .mul(it.value)
                 it.key.setGlobalTransform(m)
             }
     }
 
     override fun onStop() {
+        super.onStop()
         grid.parent = null
         view.renderThread {
             grid.close()
         }
-        super.onStop()
     }
 }
 
@@ -225,7 +230,10 @@ class RotateAllAxes(view: SceneEditorView, root: Node, camera: Camera, selected:
 
         if (initPositions.size == 1)
             initPositions.forEach {
-                it.key.setGlobalTransform(it.value.rotate(q, Matrix4f()))
+                val m = Matrix4f().rotate(q)
+                        .mul(it.value)
+                        .setTranslation(it.value.getTranslation(Vector3f()))
+                it.key.setGlobalTransform(m)
             }
         else
             initPositions.forEach {
@@ -248,13 +256,6 @@ class RotateAllAxes(view: SceneEditorView, root: Node, camera: Camera, selected:
             Keys.Z -> {
                 resetInitPosition()
                 view.startEditor(RotateOneAxis(view, root, camera, selected, Axis.Z))
-            }
-            Keys.ESCAPE -> {
-                resetInitPosition()
-                view.stopEditing()
-            }
-            Keys.ENTER -> {
-                view.stopEditing()
             }
             else -> super.keyUp(code)
         }
