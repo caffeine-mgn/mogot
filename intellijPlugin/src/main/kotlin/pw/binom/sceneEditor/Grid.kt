@@ -13,12 +13,11 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
      * размер одного квадрата
      */
     private val size1 = 1f
-    private var geom: Geom3D2? = null
+    private var geom by ResourceHolder<Geom3D2>()
 
     private fun update() {
         check(size > 0)
         check(size1 > 0f)
-        geom?.dec()
         val vertex = FloatArray((size + 1) * 2 * 3 * 2)
         val sizeHalf = (size / 2f) * size1
         val sizeFull = (size) * size1
@@ -50,11 +49,10 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
                 uvs = null
         )
         geom!!.mode = Geometry.RenderMode.LINES
-        geom!!.inc()
     }
 
     override fun close() {
-        geom?.dec()
+        geom = null
         material.dispose()
         super.close()
     }

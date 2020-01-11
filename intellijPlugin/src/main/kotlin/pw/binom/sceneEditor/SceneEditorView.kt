@@ -13,6 +13,8 @@ import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
+import pw.binom.sceneEditor.editors.EditMoveFactory
+import pw.binom.sceneEditor.editors.RotateAllAxesFactory
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
@@ -66,7 +68,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 
     private lateinit var selectorMaterial: SolidMaterial
-    private val editorFactories = listOf(EditMoveFactory, FpsCamEditorFactory)
+    private val editorFactories = listOf(EditMoveFactory, RotateAllAxesFactory, FpsCamEditorFactory)
     private val _services by Services.byClassSequence(NodeService::class.java)
     private val links = WeakHashMap<Node, NodeService>()
 
@@ -178,11 +180,13 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 
     fun startEditor(editor: EditAction) {
+        this.editor?.onStop()
         this.editor = editor
         startDraw()
     }
 
     fun stopEditing() {
+        editor?.onStop()
         editor = null
         stopDraw()
         repaint()

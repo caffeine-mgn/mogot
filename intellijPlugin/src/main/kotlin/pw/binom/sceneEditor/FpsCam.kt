@@ -1,6 +1,7 @@
 package pw.binom.sceneEditor
 
 import mogot.math.*
+import pw.binom.sceneEditor.editors.EditActionFactory
 import java.awt.event.MouseEvent
 
 object FpsCamEditorFactory : EditActionFactory {

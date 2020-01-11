@@ -28,12 +28,11 @@ class Line2D(val gl: GL) : VisualInstance2D() {
         mat.use(model, projection, renderContext)
         geom!!.draw()
         mat.unuse()
-        println("render! $position -> $lineTo")
     }
 
     override fun close() {
+        super.close()
         geom = null
         material = null
-        super.close()
     }
 }

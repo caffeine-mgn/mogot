@@ -5,9 +5,12 @@ import mogot.gl.GLView
 import mogot.math.*
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
+import pw.binom.sceneEditor.EditAction
 import pw.binom.sceneEditor.FrustumNode
 import pw.binom.sceneEditor.Grid
-import pw.binom.sceneEditor.RotateAllAxes
+import pw.binom.sceneEditor.editors.EditMoveOneAxis
+import pw.binom.sceneEditor.editors.RotateAllAxes
+import pw.binom.sceneEditor.editors.RotateOneAxis
 import java.awt.Dimension
 import javax.swing.JFrame
 import kotlin.math.sin
@@ -65,7 +68,7 @@ class DDD : GLView(MockFileSystem()) {
     private val cam2 = Camera()
     private lateinit var box1: CSGBox
     private lateinit var box2: CSGBox
-    var rotateAllAxes: RotateAllAxes? = null
+    var rotateAllAxes: EditAction? = null
 
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
@@ -119,9 +122,10 @@ class DDD : GLView(MockFileSystem()) {
     override fun render() {
         if (isKeyDown(32)) {
             if (rotateAllAxes == null)
-                rotateAllAxes = RotateAllAxes(
-                        engine, root, cam, listOf(box1, box2/*, box3*/),
-                        mousePosition
+                rotateAllAxes = RotateOneAxis(
+                        engine, root, cam, listOf(box1, box2/*, box3*/)
+                        ,EditMoveOneAxis.Type.Y
+
                 )
             rotateAllAxes!!.render(0f)
         } else {

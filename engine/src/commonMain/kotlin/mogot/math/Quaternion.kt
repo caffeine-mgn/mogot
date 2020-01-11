@@ -229,6 +229,8 @@ interface Quaternionfc {
     }
 }
 
+fun Quaternionfm.set(quaternion: Quaternionfc) = set(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
+
 interface Quaternionfm : Quaternionfc {
     override var x: Float
     override var y: Float
