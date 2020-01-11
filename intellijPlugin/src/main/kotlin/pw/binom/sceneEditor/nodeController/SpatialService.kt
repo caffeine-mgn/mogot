@@ -3,6 +3,7 @@ package pw.binom.sceneEditor.nodeController
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import mogot.Engine
+import mogot.math.*
 import mogot.Spatial
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
@@ -13,6 +14,11 @@ object SpatialService : NodeService {
         output["position.x"] = spatial.position.x.toString()
         output["position.y"] = spatial.position.y.toString()
         output["position.z"] = spatial.position.z.toString()
+
+        val rot = RotationVector(spatial.quaternion)
+        output["rotation.x"] = rot.x.toString()
+        output["rotation.y"] = rot.y.toString()
+        output["rotation.z"] = rot.z.toString()
     }
 
     fun loadSpatial(engine: Engine, spatial: Spatial, data: Map<String, String>) {
@@ -21,6 +27,13 @@ object SpatialService : NodeService {
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f,
                 data["position.z"]?.toFloat() ?: 0f
+        )
+
+        val rot = RotationVector(spatial.quaternion)
+        rot.set(
+                data["rotation.x"]?.toFloat() ?: 0f,
+                data["rotation.y"]?.toFloat() ?: 0f,
+                data["rotation.z"]?.toFloat() ?: 0f
         )
     }
 

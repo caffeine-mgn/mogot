@@ -53,7 +53,7 @@ abstract class ResourceImpl : Resource {
 /**
  * Struct for hold some Resource. Automatic call inc and dec on the resource when you try to set new value
  */
-class ResourceHolder<T : Resource>(init: T? = null) {
+class ResourceHolder<T : Resource>(var init: T? = null) {
     fun dispose() {
         value = null
     }

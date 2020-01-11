@@ -2,9 +2,9 @@ package mogot.collider
 
 import mogot.Camera
 import mogot.Spatial
+import mogot.eq
 import mogot.math.MutableRay
 import mogot.math.Vector3f
-import mogot.test.eq
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

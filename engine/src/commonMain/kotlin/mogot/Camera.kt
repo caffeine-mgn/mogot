@@ -40,7 +40,7 @@ class Camera : Spatial() {
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
-/*
+        /*
         parent?.currentToRoot {
             if (it.isSpatial) {
                 it as Spatial
@@ -49,6 +49,8 @@ class Camera : Spatial() {
             true
         }
         */
+        globalToLocalMatrix(viewMatrix4f)
+        return
         this.asUpSequence().mapNotNull { it as? Spatial }.forEach {
             viewMatrix4f.set(it.apply(viewMatrix4f))
         }
@@ -57,15 +59,22 @@ class Camera : Spatial() {
         viewMatrix4f.translate(-position)
     }
 
+    fun worldToScreenPoint(position: Vector3fc): Vector2i? {
+        val out = Vector2i()
+        if (!worldToScreenPoint(position, out))
+            return null
+        return out
+    }
+
     /**
-     * Проэцирует глобальную матрицу [matrix] на экран данной камеры. Результат кладется в [dest]
+     * Project [position] to screen of this camera. Result will push to [dest]
      *
-     * @param matrix глобальная матрица позиции <b>относительно данной камеры</b>
-     * @param dest вектор, в который кладётся проекция [matrix] на экран данной камеры
+     * @param position global position in world
+     * @param dest result place holder
      */
-    fun worldToScreenPoint(matrix: Matrix4fc, dest: Vector2i): Boolean {
-        val pos = TEMP_VEC_3F_1
-        matrix.getTranslation(pos)
+    fun worldToScreenPoint(position: Vector3fc, dest: Vector2i): Boolean {
+        val pos = TEMP_VEC_3F_1.set(position)
+        globalToLocal(pos, pos)
         val clipCoords = pos//TEMP_VEC_3F_2
 
 
@@ -87,7 +96,7 @@ class Camera : Spatial() {
 
     fun screenPointToRay(x: Int, y: Int, dest: MutableRay): MutableRay {
         val mat = Matrix4f()
-        applyMatrix(mat)
+        globalToLocalMatrix(mat)
         val matInvert = mat.invert(Matrix4f())
         /*
         val mx = x.toFloat() / width * 2f - 1f

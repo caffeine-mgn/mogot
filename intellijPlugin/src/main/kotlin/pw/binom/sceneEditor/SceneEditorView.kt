@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.Vector2i
+import mogot.math.Vector2f
 import mogot.math.Vector3f
 import mogot.math.Vector4f
 import pw.binom.MockFileSystem
@@ -12,6 +13,8 @@ import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
+import pw.binom.sceneEditor.editors.EditMoveFactory
+import pw.binom.sceneEditor.editors.RotateAllAxesFactory
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
@@ -65,7 +68,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 
     private lateinit var selectorMaterial: SolidMaterial
-    private val editorFactories = listOf(EditMoveFactory, FpsCamEditorFactory)
+    private val editorFactories = listOf(EditMoveFactory, RotateAllAxesFactory, FpsCamEditorFactory)
     private val _services by Services.byClassSequence(NodeService::class.java)
     private val links = WeakHashMap<Node, NodeService>()
 
@@ -177,11 +180,13 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 
     fun startEditor(editor: EditAction) {
+        this.editor?.onStop()
         this.editor = editor
         startDraw()
     }
 
     fun stopEditing() {
+        editor?.onStop()
         editor = null
         stopDraw()
         repaint()
@@ -279,6 +284,30 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 }
 
 
+class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = true
+        return b
+    }
+}
 
 class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
     private var changeFlag = true

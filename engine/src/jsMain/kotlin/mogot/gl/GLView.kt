@@ -43,7 +43,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         gl.ctx.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
         gl.ctx.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.ctx.enable(WebGLRenderingContext.CULL_FACE)
-        camera?.applyMatrix(viewMatrix.identity())
+        camera?.globalToLocalMatrix(viewMatrix.identity())
         renderContext.pointLights.clear()
         root?.walk {
             if (it is PointLight)

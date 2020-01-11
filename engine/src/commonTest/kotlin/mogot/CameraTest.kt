@@ -2,8 +2,6 @@ package mogot
 
 import mogot.math.*
 import kotlin.test.Test
-import mogot.test.assertEquals
-import mogot.test.eq
 
 class CameraTest {
 
@@ -21,6 +19,18 @@ class CameraTest {
         ray.position.x.eq(0f)
         ray.position.y.eq(0f)
         ray.position.z.eq(-0.7f, 0.1f)
+    }
+
+    @Test
+    fun screenProjection() {
+        val cam = Camera()
+        cam.resize(200, 200)
+        cam.position.set(3f, 3f, 3f)
+        cam.lookTo(Vector3f(0f, 0f, 0f))
+        val pos = Vector2i()
+        cam.worldToScreenPoint(Vector3f(), pos).eq(true)
+        pos.x.eq(100)
+        pos.y.eq(99)
     }
 
     @Test
@@ -78,7 +88,7 @@ class CameraTest {
         println("ray=$ray")
         ray.direction.also {
             it.x.eq(-0.1f, 0.1f)
-            it.y.eq(-0.1f, 0.1f)
+            it.y.eq(-0.99f, 0.01f)
             it.z.eq(0f, 0.1f)
         }
         ray.position.also {

@@ -11,7 +11,7 @@ import kotlin.math.sqrt
 
 interface Matrix4fc {
 
-    companion object{
+    companion object {
         /**
          * Argument to the first parameter of [frustumCorner]
          * identifying the corner `(-1, -1, -1)` when using the identity matrix.
@@ -253,7 +253,7 @@ interface Matrix4fc {
         return invertGeneric(dest)
     }
 
-    fun getScale(dest: Vector3f): Vector3f {
+    fun getScale(dest: Vector3fm): Vector3fm {
         dest.x = sqrt(m00 * m00 + m01 * m01 + (m02 * m02))
         dest.y = sqrt(m10 * m10 + m11 * m11 + (m12 * m12))
         dest.z = sqrt(m20 * m20 + m21 * m21 + (m22 * m22))
@@ -1553,4 +1553,14 @@ fun Matrix4fc.frustumCorner(corner: Int, point: Vector3fm): Vector3fm {
     point.y = (-c23y * d1 - c31y * d2 - c12y * d3) * invDot
     point.z = (-c23z * d1 - c31z * d2 - c12z * d3) * invDot
     return point
+}
+
+fun Matrix4f.setTranslation(translation: Vector3fc): Matrix4f = setTranslation(translation.x, translation.y, translation.z)
+
+fun Matrix4f.setTranslation(x: Float, y: Float, z: Float): Matrix4f {
+    this.m30 = x
+    this.m31 = y
+    this.m32 = z
+    properties = properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY).inv()
+    return this
 }

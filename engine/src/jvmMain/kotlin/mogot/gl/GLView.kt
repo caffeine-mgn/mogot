@@ -229,7 +229,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
 
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
-        camera?.applyMatrix(tempMatrix.identity())
+        camera?.globalToLocalMatrix(tempMatrix.identity())
 
         renderContext.pointLights.clear()
         root?.walk {
