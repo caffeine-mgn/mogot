@@ -35,9 +35,8 @@ class MouseMoveResetUtil(val view: SceneEditorView) {
         }
 
         if (needRefresh) {
-            println("mouse=${mouseLocation} view=${viewLocation} (${view.width} x ${view.height})")
             robot.mouseMove(x, y)
-            return Vector2i(x, y)
+            return Vector2i(x-viewLocation.x, y-viewLocation.y)
         }
         return null
     }
