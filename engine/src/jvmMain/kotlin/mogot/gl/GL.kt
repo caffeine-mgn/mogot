@@ -183,6 +183,11 @@ actual class GL(val gl: GL2) {
         gl.glUniform1f(uniformLocation.id, value)
     }
 
+    actual fun uniform1b(uniformLocation: GLUniformLocation, value: Boolean){
+        uniformLocation as JGLUniformLocation
+        gl.glUniform1i(uniformLocation.id, if (value) 1 else 0)
+    }
+
     actual fun uniform1i(uniformLocation: GLUniformLocation, value: Int) {
         uniformLocation as JGLUniformLocation
         gl.glUniform1i(uniformLocation.id, value)

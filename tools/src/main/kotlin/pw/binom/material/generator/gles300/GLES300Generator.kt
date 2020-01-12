@@ -3,12 +3,173 @@ package pw.binom.material.generator.gles300
 import pw.binom.material.compiler.*
 import pw.binom.material.generator.GLESGenerator
 import pw.binom.material.psi.OperationExpression
-import kotlin.math.exp
+import java.math.BigInteger
+import java.util.*
+import kotlin.collections.HashSet
 
-class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
+class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(compiler) {
+
+    class GeneratedResult(val vp: String, val fp: String)
+
+    companion object {
+        const val VAR_PROJECTION = "gles_projection"
+        const val VAR_VERTEX = "gles_vertex"
+        const val VAR_NORMAL = "gles_normal"
+        const val VAR_UV = "gles_uv"
+        const val VAR_MODEL = "gles_model"
+
+        fun mix(compiler: List<Compiler>): GeneratedResult {
+            val gens = compiler.map { GLES300Generator(it) }
+
+            val sb = StringBuilder()
+            sb.append("#version 300 es\n")
+            sb.append("precision mediump float;\n")
+            sb.append("out vec4 resultColor;\n")
+            gens.forEach {
+                sb.append(it.fp)
+            }
+            sb.append("void main() {\n")
+            sb.append("resultColor=vec4(0.0f,0.0f,0.0f,0.0f);\n")
+            gens.forEach {
+                if (it.fragmentMethod != null)
+                    sb.append("resultColor = ${it.fragmentMethod.name}(resultColor);\n")
+            }
+            sb.append("}")
+            val fp = sb.toString()
+            sb.clear()
+            sb.append("#version 300 es\n")
+            sb.append("precision mediump float;\n")
+
+            if (gens.any { it.isUseVertex }) {
+                sb.append("layout(location = 0) in vec3 $VAR_VERTEX;\n")
+            }
+
+            if (gens.any { it.isUseNormal }) {
+                sb.append("layout(location = 1) in vec3 $VAR_NORMAL;\n")
+            }
+
+            if (gens.any { it.isUseUV }) {
+                sb.append("layout(location = 2) in vec2 $VAR_UV;\n")
+            }
+
+            if (gens.any { it.isUseModel }) {
+                sb.append("uniform mat4 $VAR_MODEL;\n")
+            }
+
+            if (gens.any { it.isUseProjection }) {
+                sb.append("uniform mat4 $VAR_PROJECTION;\n")
+            }
+
+            gens.forEach {
+                sb.append(it.vp)
+            }
+            sb.append("void main() {\n\tgl_Position=")
+            sb.append(gens.mapNotNull { it.vertexMethod?.name?.let { "$it()" } }.joinToString("+"))
+            sb.append(";\n")
+            sb.append("}")
+
+            println("Generated:\nVP:\n ${sb}\n\nFP:\n$fp")
+
+            return GeneratedResult(
+                    vp = sb.toString(),
+                    fp = fp
+            )
+        }
+    }
+
+    private val id = run {
+        val maxLimit = BigInteger("5000000000000")
+        val minLimit = BigInteger("25000000000")
+        val bigInteger: BigInteger = maxLimit.subtract(minLimit)
+        val randNum = Random()
+        val len: Int = maxLimit.bitLength()
+        var res = BigInteger(len, randNum)
+
+        if (res < minLimit)
+            res = res.add(minLimit)
+        if (res >= bigInteger)
+            res = res.mod(bigInteger).add(minLimit)
+        res.toString(16)
+    }
+
+    val fragmentMethod: MethodDesc?
+    val vertexMethod: MethodDesc?
+
+    //change methodsNames
+    init {
+        fragmentMethod = dce.methodsFP.find { it.name == "fragment" }
+        vertexMethod = dce.methodsVP.find { it.name == "vertex" }
+        val changed = HashSet<Any>()
+        dce.methodsFP.forEach {
+            if (it.statementBlock != null && it !in changed) {
+                it.name = "m$id${it.name}"
+                changed += it
+            }
+        }
+
+        dce.methodsVP.forEach {
+            if (it.statementBlock != null && it !in changed) {
+                it.name = "m$id${it.name}"
+                changed += it
+            }
+        }
+/*
+        dce.fieldsFP.forEach {
+            if (!compiler.isExternal(it) && !compiler.isProperty(it) && it !in changed) {
+                it.name = "f$id${it.name}"
+                changed += it
+            }
+        }
+
+        dce.fieldsVP.forEach {
+            if (!compiler.isExternal(it) && !compiler.isProperty(it) && it.parent == null && it !in changed) {
+                it.name = "f$id${it.name}"
+                changed += it
+            }
+        }
+        */
+        (dce.fieldsVP.asSequence() + dce.fieldsFP.asSequence()).forEach {
+            when (it) {
+                compiler.vertex -> it.name = VAR_VERTEX
+                compiler.normal -> it.name = VAR_NORMAL
+                compiler.projection -> it.name = VAR_PROJECTION
+                compiler.model -> it.name = VAR_MODEL
+                compiler.uv -> it.name = VAR_UV
+                else -> {
+                    if (!compiler.isExternal(it) && !compiler.isProperty(it) && it.parent == null && it !in changed) {
+                        it.name = "f$id${it.name}"
+                        changed += it
+                    }
+                }
+            }
+        }
+    }
 
     val vp = genVP()
     val fp = genFP()
+    /*
+        protected val MethodDesc.genName: String
+            get() {
+                if (this.statementBlock == null)
+                    return name
+                return "m$id$glslName"
+            }
+    */
+
+    val isUseVertex
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.vertex == it }
+
+    val isUseNormal
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.normal == it }
+
+    val isUseProjection
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.projection == it }
+
+    val isUseModel
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.model == it }
+
+    val isUseUV
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.uv == it }
 
     private fun genFields(vertex: Boolean, fields: Set<GlobalFieldDesc>, sb: Appendable) {
         val classes = if (vertex)
@@ -21,8 +182,8 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
         }
 
 
-        fields.forEach {
-            println()
+        fields.asSequence().filter { it.parent == null }.filter { !compiler.isExternal(it) }.forEach {
+
             if (compiler.model == it
                     || compiler.projection == it
                     || compiler.properties.containsKey(it)) {
@@ -45,8 +206,17 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
                 }
             }
 
+            val variableName = when {
+                compiler.vertex == it -> VAR_VERTEX
+                compiler.normal == it -> VAR_NORMAL
+                compiler.uv == it -> VAR_UV
+                compiler.projection == it -> VAR_PROJECTION
+                compiler.model == it -> VAR_MODEL
+                else -> it.name
+            }
+
             gen(it.type, sb) {
-                sb.append(" ").append(it.name)
+                sb.append(" ").append(variableName)
             }
             sb.append(";\n")
         }
@@ -55,29 +225,29 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
     private fun genFP(): String {
         val sb = StringBuilder()
 
-        sb.append("#version 300 es\n")
-        sb.append("precision mediump float;\n")
-        sb.append("out vec4 resultColor;\n")
+//        sb.append("#version 300 es\n")
+//        sb.append("precision mediump float;\n")
+
         genFields(false, dce.fieldsFP, sb)
 
         dce.methodsFP.forEach {
             gen(it, sb)
         }
-        sb.append("void main() {\n\tresultColor = fragment(vec4(0.0f,0.0f,0.0f,0.0f));\n}")
+
         return sb.toString()
     }
 
     private fun genVP(): String {
         val sb = StringBuilder()
 
-        sb.append("#version 300 es\n")
-        sb.append("precision mediump float;\n")
+//        sb.append("#version 300 es\n")
+//        sb.append("precision mediump float;\n")
         genFields(true, dce.fieldsVP, sb)
 
         dce.methodsVP.forEach {
             gen(it, sb)
         }
-        sb.append("void main() {\n\tgl_Position=vertex();\n}")
+//        sb.append("void main() {\n\tgl_Position=vertex();\n}")
         return sb.toString()
     }
 
@@ -127,6 +297,17 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
         gen(statement.statement, sb)
     }
 
+    private fun gen(statement: IfStatementDesc, sb: Appendable) {
+        sb.append("if (")
+        gen(statement.condition, sb)
+        sb.append(")")
+        gen(statement.thenBlock, sb)
+        if (statement.elseBlock != null) {
+            sb.append(" else ")
+            gen(statement.elseBlock, sb)
+        }
+    }
+
     private fun gen(statement: StatementExprDesc, sb: Appendable) {
         gen(statement.exp, sb)
         sb.append(";\n")
@@ -139,6 +320,7 @@ class GLES300Generator(compiler: Compiler) : GLESGenerator(compiler) {
             is ReturnStatementDest -> gen(statement, sb)
             is WhileDesc -> gen(statement, sb)
             is StatementExprDesc -> gen(statement, sb)
+            is IfStatementDesc -> gen(statement, sb)
             else -> TODO("->${statement::class.java.name}")
         }
     }

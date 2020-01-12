@@ -83,7 +83,7 @@ internal class SimpleMaterial(engile: Engine) : MaterialGLSL(engile) {
     override val shader: Shader = run {
         val gen = Parser(StringReader(shaderText))
                 .let { Compiler(it) }
-                .let { GLES300Generator(it) }
+                .let { GLES300Generator.mix(listOf(it)) }
         Shader(engile.gl,gen.vp,gen.fp)
     }
     /*

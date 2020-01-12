@@ -221,6 +221,10 @@ class Compiler(val parser: Parser) : Scope {
     var uv: GlobalFieldDesc? = null
     var projection: GlobalFieldDesc? = null
 
+    fun isProperty(field: GlobalFieldDesc) = properties.containsKey(field)
+    fun isExternal(field: GlobalFieldDesc) =
+            field == model || field == vertex || field == normal || field == uv || field == projection
+
     init {
         global.forEach {
             when (it) {
@@ -417,6 +421,14 @@ class Compiler(val parser: Parser) : Scope {
         return AssignStatementDesc(left, right, statement.operator)
     }
 
+    private fun compile(scope: Scope, statement: IfStatement): IfStatementDesc {
+        return IfStatementDesc(
+                condition = compile(scope, null, statement.condition),
+                thenBlock = compile(scope, statement.thenBlock),
+                elseBlock = statement?.elseBlock?.let { compile(scope, it) }
+        )
+    }
+
     private fun compile(scope: Scope, statement: ForStatement): StatementBlockDesc {
         val block = StatementBlockDesc(scope)
         statement.init?.let { compile(block, it) }?.let { block.statements += it }
@@ -450,6 +462,7 @@ class Compiler(val parser: Parser) : Scope {
                 is LocalDefineAssignStatement -> compile(scope, statement)
                 is AssignStatement -> compile(scope, statement)
                 is ForStatement -> compile(scope, statement)
+                is IfStatement -> compile(scope, statement)
                 is ExpStatement -> compile(scope, statement)
                 else -> throw CompileException("Unknown type: ${statement::class.java.name}", statement.position, statement.length)
             }

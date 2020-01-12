@@ -5,6 +5,10 @@ import pw.binom.material.compiler.*
 
 abstract class GLESGenerator(val compiler: Compiler) {
 
+    init {
+        GLSLFixVarPassLayout.fix(compiler)
+    }
+
     protected val dce = DCE(compiler)
 
     protected val MethodDesc.glslName: String

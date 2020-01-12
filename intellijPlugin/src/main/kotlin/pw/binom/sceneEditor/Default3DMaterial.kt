@@ -38,7 +38,7 @@ vec4 fragment(vec4 color2){
 
         """
         val compiler = Compiler(Parser(StringReader(text)))
-        val gen = GLES300Generator(compiler)
+        val gen = GLES300Generator.mix(listOf(compiler))
         Shader(engine.gl, gen.vp, gen.fp)
     }
 

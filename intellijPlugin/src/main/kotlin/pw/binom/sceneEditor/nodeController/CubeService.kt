@@ -2,7 +2,9 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
+import mogot.MaterialNode
 import mogot.Node
+import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
@@ -52,8 +54,14 @@ object CubeService : NodeService {
     }
 
     override fun selected(view: SceneEditorView, node: Node) {
+        node as MaterialNode
+        val m = node.material.value as MaterialInstance?
+        m?.selected = true
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
+        node as MaterialNode
+        val m = node.material.value as MaterialInstance?
+        m?.selected = false
     }
 }

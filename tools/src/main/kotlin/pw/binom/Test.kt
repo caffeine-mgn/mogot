@@ -89,7 +89,7 @@ object Test {
         """.trimIndent()
         val p = Parser(StringReader(program))
         val compiler = Compiler(p)
-        val vv = GLES300Generator(compiler)
+        val vv = GLES300Generator.mix(listOf(compiler))
 
         println("vp:\n${vv.vp}\n---------------------\nfp:\n${vv.fp}")
 //        val parser = GLSLParser()
