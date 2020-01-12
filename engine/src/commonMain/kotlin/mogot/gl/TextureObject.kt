@@ -1,41 +1,50 @@
 package mogot.gl
 
-import mogot.Engine
 import pw.binom.io.Closeable
 
-class TextureObject(val engine: Engine,val width:Int, val height:Int,val minFilter:FilterParameter = FilterParameter.Linear, magFilter:FilterParameter = FilterParameter.Linear, val multisample: MSAALevels = MSAALevels.MSAADisable):Closeable {
+class TextureObject(val gl:GL,val width:Int, val height:Int,val minFilter:FilterParameter = FilterParameter.Linear, magFilter:FilterParameter = FilterParameter.Linear, val multisample: MSAALevels = MSAALevels.Disable):Closeable {
     enum class FilterParameter{
         Nearest,
         Linear
     }
     enum class MSAALevels(val level:Int){
-        MSAADisable(0),
+        Disable(0),
         MSAAx2(2),
         MSAAx4(4),
         MSAAx8(8),
         MSAAx16(16)
     }
-    val glTexture:GLTexture = engine.gl.createTexture()
-    val target = if(multisample == MSAALevels.MSAADisable) engine.gl.TEXTURE_2D_MULTISAMPLE else engine.gl.TEXTURE_2D
+    val glTexture:GLTexture = gl.createTexture()
+    val target = if(multisample == MSAALevels.Disable) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
     init {
-        engine.gl.enable(target)
+        gl.enable(target)
         bind()
-        if(multisample == MSAALevels.MSAADisable) {
-            engine.gl.enable(engine.gl.MULTISAMPLE)
-            engine.gl.texImage2DMultisample(engine.gl.TEXTURE_2D_MULTISAMPLE, multisample.level, engine.gl.RGB, width, height, false)
+        if(multisample != MSAALevels.Disable) {
+            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, gl.RGB, width, height, false)
+        }else{
+            gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,width,height,0,gl.RGB,gl.UNSIGNED_BYTE,null)
         }
         unbind()
     }
     fun bind(){
-        engine.gl.bindTexture(target,glTexture)
+        gl.bindTexture(target,glTexture)
     }
     fun unbind(){
-        engine.gl.bindTexture(target,null)
+        gl.bindTexture(target,null)
     }
     override fun close() {
-        engine.gl.disable(target)
-        if(multisample != MSAALevels.MSAADisable)
-            engine.gl.disable(engine.gl.MULTISAMPLE)
+        gl.disable(target)
+
+    }
+
+    fun enable(){
+        if(multisample != MSAALevels.Disable)
+            gl.enable(gl.MULTISAMPLE)
+    }
+
+    fun disable(){
+        if(multisample != MSAALevels.Disable)
+            gl.disable(gl.MULTISAMPLE)
     }
 
 

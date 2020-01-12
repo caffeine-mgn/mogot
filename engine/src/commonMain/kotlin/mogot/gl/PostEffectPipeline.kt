@@ -136,31 +136,15 @@ class PostEffectPipeline(val engine: Engine) {
         get() = engine.gl
     private val list = mutableListOf<SimplePostEffect>()
     private val sprite: FullScreenSprite = FullScreenSprite(engine)
-    private var texture: GLTexture? = null
 
-    var MSAAEnabled = true
+    var MSAAEnabled = false
 
-    var MSAALevel: FrameBuffer.MSAALevels = FrameBuffer.MSAALevels.MSAAx4
+    var MSAALevel: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable
 
-
-    var fbo: GLFrameBuffer? = null
-    var rbo: GLRenderBuffer? = null
+    private var renderTargetTexture:RenderTargetTexture? = null
 
     fun close() {
-        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
-        fbo?.let {
-            gl.deleteBuffer(it)
-            fbo = null
-        }
-        gl.bindTexture(texture2dTarget, null)
-        rbo?.let {
-            gl.deleteBuffer(rbo!!)
-            rbo = null
-        }
-        /*texture?.let {
-            gl.deleteTexture(it)
-            texture = null
-        }*/
+
     }
 
     fun addEffect(effect: SimplePostEffect) {
@@ -169,66 +153,35 @@ class PostEffectPipeline(val engine: Engine) {
     }
 
     fun use(renderContext: RenderContext, drawScene: () -> Unit) {
-        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
+        val renderTargetTexture = requireNotNull(renderTargetTexture)
         gl.enable(gl.DEPTH_TEST)
         gl.enable(gl.CULL_FACE)
-        gl.bindFrameBuffer(gl.FRAMEBUFFER, checkNotNull(fbo) { "Frame buffer not created" })
+        renderTargetTexture.begin()
         gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
-
         drawScene()
-        //gl.bindFramebuffer(gl.FRAMEBUFFER,0)
+        renderTargetTexture.end()
         gl.disable(gl.DEPTH_TEST)
         gl.disable(gl.CULL_FACE)
 
         list.forEach { currentFrameEffect ->
-            gl.bindTexture(texture2dTarget, checkNotNull(texture))
+            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!,renderTargetTexture.getGlTexture())
+            renderTargetTexture.begin()
             gl.clear(gl.COLOR_BUFFER_BIT)
             sprite.material = currentFrameEffect
             sprite.draw(renderContext)
+            renderTargetTexture.end()
         }
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)
         sprite.material = sprite.defaultMaterial
-        gl.bindTexture(texture2dTarget, checkNotNull(texture))
+        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!,renderTargetTexture.getGlTexture())
         sprite.draw(renderContext)
-        gl.bindTexture(texture2dTarget, null)
+        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
     }
 
 
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
-        fbo = gl.createFrameBuffer()
-        gl.bindFrameBuffer(gl.FRAMEBUFFER, fbo!!)
-        val texture2dTarget = if(MSAAEnabled) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
-        gl.enable(texture2dTarget)
-        gl.enable(gl.MULTISAMPLE)
-        texture = gl.createTexture()
-        gl.bindTexture(texture2dTarget, texture!!)
-        if(!MSAAEnabled) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, resolutionWidth, resolutionHeight, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
-            gl.texParameteri(texture2dTarget, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-            gl.texParameteri(texture2dTarget, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-        }
-        else {
-            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE,MSAALevel.level,  gl.RGB ,resolutionWidth, resolutionHeight,false)
-        }
-
-        //gl.texParameterf(gl.TEXTURE_2D, gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT,0.0f)
-
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture2dTarget, texture!!, 0)
-        rbo = gl.createRenderBuffer()
-        gl.bindRenderBuffer(gl.RENDERBUFFER, rbo!!)
-        if(MSAAEnabled){
-            gl.renderbufferStorageMultisample(gl.RENDERBUFFER,MSAALevel.level,gl.DEPTH24_STENCIL8,resolutionWidth,resolutionHeight)
-        }else {
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, resolutionWidth, resolutionHeight)
-        }
-        gl.bindTexture(texture2dTarget, null)
-        gl.bindRenderBuffer(gl.RENDERBUFFER, null)
-        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rbo!!)
-        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE)
-        //LOG.log(Level.SEVERE,"ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
-            println("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
-        gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
+        renderTargetTexture = RenderTargetTexture(engine.gl,resolutionWidth,resolutionHeight)
     }
 
 }
