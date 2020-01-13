@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
+import mogot.math.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
@@ -52,7 +53,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.camerasManager.cameraLightTexture.gl
         }
-        val b = FlatScreenBehaviour(view.editorCamera, camera)
+        val b = FlatScreenBehaviour(view.engine, view.editorCamera, camera)
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.camerasManager.cameras[camera] = b

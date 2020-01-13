@@ -156,10 +156,11 @@ private fun compileFragmentShader(gl: GL, source: String): GLShader {
     if (gl.getShaderi(v, gl.COMPILE_STATUS) == 0) {
         val message = gl.getShaderInfoLog(v)
         gl.deleteShader(v)
-//        println("Source:\n")
-//        source.lines().forEachIndexed { index, s ->
-//            println("${index + 1}: $s")
-//        }
+        println("Can't compile Fragment Shader: $message")
+        println("Source:\n")
+        source.lines().forEachIndexed { index, s ->
+            println("${index + 1}: $s")
+        }
         throw RuntimeException("Message: $message")
     }
     return v

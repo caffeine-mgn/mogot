@@ -1,25 +1,20 @@
-package pw.binom
+package game.game
 
-import com.jetbrains.rd.util.string.printToString
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.*
-import pw.binom.material.compiler.Compiler
-import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
+import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
+import pw.binom.sceneEditor.EditAction
 import pw.binom.sceneEditor.FrustumNode
 import pw.binom.sceneEditor.Grid
-import java.awt.BorderLayout
-import java.awt.Color
+import pw.binom.sceneEditor.editors.EditMoveOneAxis
+import pw.binom.sceneEditor.editors.RotateAllAxes
+import pw.binom.sceneEditor.editors.RotateOneAxis
 import java.awt.Dimension
-import java.io.File
-import java.io.FileInputStream
-import java.io.StringReader
-import javax.swing.BorderFactory
-import javax.swing.JButton
 import javax.swing.JFrame
-import javax.swing.JPanel
+import kotlin.math.sin
+import kotlin.math.cos
 
 class FullScreenSprite(engine: Engine) {
     var material: Material? = null
@@ -50,6 +45,18 @@ class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     }
 }
 */
+
+class FFF : Behaviour() {
+    var r = 0f
+    override fun onUpdate(delta: Float) {
+        val node = node as? Spatial ?: return
+        r += delta
+        node.position.x = sin(r) * 3f
+        node.position.z = cos(r) * 3f
+        super.onUpdate(delta)
+    }
+}
+
 class DDD : GLView(MockFileSystem()) {
 
     private var closed = false
@@ -58,9 +65,10 @@ class DDD : GLView(MockFileSystem()) {
     var cam = Camera()
 
     override var camera: Camera? = cam
-    private lateinit var box: CSGBox
-
     private val cam2 = Camera()
+    private lateinit var box1: CSGBox
+    private lateinit var box2: CSGBox
+    var rotateAllAxes: EditAction? = null
 
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
@@ -72,41 +80,60 @@ class DDD : GLView(MockFileSystem()) {
         grid.material.value = mat
 
         cam.parent = root
-        box = CSGBox(engine)
-        box.parent = root
-        cam.position.set(3f, 3f, 3f)
-        cam.lookTo(Vector3f(0f, 0f, 0f))
-        box.material.value = mat
-
+        cam.position.set(5f, 5f, 5f)
+        //cam.lookTo(Vector3f(6f, 6f, 6f))
+        cam.behaviour = FpsCamB(engine)
         cam2.parent = root
         cam2.resize(200, 200)
-        cam2.far = 10f
-    }
 
-    var nn: FrustumNode? = null
+        cam2.far = 30f
+
+        cam2.quaternion.identity()
+        cam2.position.set(5f, 2f, 0f)
+        //RotationVector(cam2.quaternion).y = toRadians(45.0).toFloat()
+        cam2.lookTo(Vector3f(0f, 0f, 0f))
+
+        FrustumNode(engine, cam2).also {
+            it.parent = root
+            it.material.value = mat
+        }
+
+        box1 = CSGBox(engine)
+        box1.parent = root
+        box1.material.value = mat
+        box1.position.set(2f, 0f, 0f)
+
+        box2 = CSGBox(engine)
+        box2.parent = root
+        box2.material.value = mat
+        box2.position.set(-2f, 0f, 0f)
+        box2.width = 0.5f
+/*
+        box3 = CSGBox(engine)
+        box3.parent = root
+        box3.material.value = mat
+        box3.position.set(2f, 0f, 2f)
+        box3.width=0.5f
+*/
+        cam.lookTo(Vector3f(0f, 0f, 0f))
+
+    }
 
     override fun render() {
+        if (isKeyDown(32)) {
+            if (rotateAllAxes == null)
+                rotateAllAxes = RotateOneAxis(
+                        engine, root, cam, listOf(box1, box2/*, box3*/)
+                        ,EditMoveOneAxis.Type.Y
+
+                )
+            rotateAllAxes!!.render(0f)
+        } else {
+            rotateAllAxes?.onStop()
+            rotateAllAxes = null
+        }
+        cam2.lookTo(box1.position)
         super.render()
-    }
-
-    var cc = 0
-
-    override fun render2(dt: Float) {
-        if (cc > 60) {
-            nn?.let {
-                it.parent = null
-                it.close()
-            }
-            nn = null
-            cc = 0
-        }
-        if (nn == null) {
-            nn = FrustumNode(engine, cam2)
-            nn!!.material.value = Default3DMaterial(engine)
-            nn!!.parent = root
-        }
-        cc++
-        super.render2(dt)
     }
 
     override fun dispose() {
@@ -128,7 +155,7 @@ object Main {
 //        f.contentPane.add(view.glcanvas)
         f.contentPane.add(view)
 
-        f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
+        f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.size = Dimension(800, 600)
 //        f.add(view3d)
 //        view.startRender()

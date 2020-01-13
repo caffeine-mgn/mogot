@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
-import pw.binom.obj
-import pw.binom.string
-import pw.binom.toMap
-import pw.binom.toObject
+import pw.binom.*
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -51,7 +48,7 @@ class Scene(val childs: List<Node>) {
         private fun readNode(node: ObjectNode): Node {
             val className = node["class"].string
             val properties = node["properties"]?.obj?.toMap() ?: emptyMap()
-            val childs = node["childs"]?.obj?.map {
+            val childs = node["childs"]?.array?.map {
                 readNode(it.obj)
             } ?: emptyList()
 

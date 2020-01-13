@@ -3,6 +3,7 @@ package mogot.scene
 import mogot.Engine
 import mogot.Node
 import mogot.Spatial
+import mogot.math.RotationVector
 
 object SpatialLoader : SceneLoader.NodeLoader {
     override val nodeClass: String
@@ -20,6 +21,12 @@ object SpatialLoader : SceneLoader.NodeLoader {
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f,
                 data["position.z"]?.toFloat() ?: 0f
+        )
+        val rot = RotationVector(spatial.quaternion)
+        rot.set(
+                data["rotation.x"]?.toFloat() ?: 0f,
+                data["rotation.y"]?.toFloat() ?: 0f,
+                data["rotation.z"]?.toFloat() ?: 0f
         )
     }
 }

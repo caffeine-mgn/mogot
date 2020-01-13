@@ -3,6 +3,7 @@
 package mogot.math
 
 import kotlin.jvm.JvmName
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 /*
@@ -58,7 +59,10 @@ interface Vector3fc {
     }
 
     fun normalize(dest: Vector3fm): Vector3fm {
-        val invLength: Float = 1.0f / length
+        val lengthSquared = lengthSquared
+        if (lengthSquared == 1f || lengthSquared == 0f)
+            return dest
+        val invLength: Float = 1.0f / sqrt(lengthSquared)
         dest.x = x * invLength
         dest.y = y * invLength
         dest.z = z * invLength
@@ -79,6 +83,8 @@ interface Vector3fc {
 
     companion object {
         val UP: Vector3fc = Vector3f(0f, 1f, 0f)
+        val ZERO: Vector3fc = Vector3f(0f, 0f, 0f)
+        val FORWARD: Vector3fc = Vector3f(0f, 0f, 1f)
     }
 }
 
@@ -128,6 +134,13 @@ fun Vector3fc.div(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
     return dest
 }
 
+fun Vector3fc.mul(vector: Vector3fc, dest: Vector3fm): Vector3fm {
+    dest.x = x * vector.x
+    dest.y = x * vector.y
+    dest.z = x * vector.z
+    return dest
+}
+
 fun Vector3fc.mul(matrix: Matrix4fc, dest: Vector3fm): Vector3fm {
     val rx = matrix.m00 * x + matrix.m10 * y + matrix.m20 * z + matrix.m30
     val ry = matrix.m01 * x + matrix.m11 * y + matrix.m21 * z + matrix.m31
@@ -163,6 +176,10 @@ inline fun <T : Vector3fm> T.add(x: Float, y: Float, z: Float) = set(
         this.y + y,
         this.z + z
 )
+
+operator fun Vector3fm.timesAssign(vector: Vector3fc) {
+    mul(vector, this)
+}
 
 operator fun Vector3fm.timesAssign(matrix: Matrix4fc) {
     mul(matrix, this)
@@ -206,8 +223,46 @@ class Vector3i(override var x: Int = 0, override var y: Int = 0, override var z:
 
 }
 
+fun Vector3fc.cross(vector: Vector3fc, dest: Vector3fm): Vector3fm = cross(vector.x, vector.y, vector.z, dest)
+
+fun Vector3fc.cross(x: Float, y: Float, z: Float, dest: Vector3fm): Vector3fm {
+    val rx: Float = this.y * z - this.z * y
+    val ry: Float = this.z * x - this.x * z
+    val rz: Float = this.x * y - this.y * x
+    dest.x = rx
+    dest.y = ry
+    dest.z = rz
+    return dest
+}
+
+fun Vector3fc.dot(other: Vector3fc): Float = dot(other.x, other.y, other.z)
+
+fun Vector3fc.dot(x: Float, y: Float, z: Float): Float {
+    return this.x * x + this.y * y + this.z * z
+}
+
 val VECTOR_UP: Vector3fc = Vector3f(0f, 1f, 0f)
 val VECTOR_LEFT: Vector3fc = Vector3f(-1f, 1f, 0f)
+
+fun orthogonalize(v: Vector3fc, dest: Vector3fm): Vector3fm {
+    val rx: Float
+    val ry: Float
+    val rz: Float
+    if (abs(v.x) > abs(v.z)) {
+        rx = -v.y
+        ry = v.x
+        rz = 0.0f
+    } else {
+        rx = 0.0f
+        ry = -v.z
+        rz = v.y
+    }
+    val invLen = 1.0f / sqrt(rx * rx + ry * ry + (rz * rz))
+    dest.x = rx * invLen
+    dest.y = ry * invLen
+    dest.z = rz * invLen
+    return dest
+}
 
 val Vector3fc.isNaN
     get() = x.isNaN() || y.isNaN() || z.isNaN()

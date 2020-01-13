@@ -51,7 +51,7 @@ private fun createStub(view: SceneEditorView, light: OmniLight) {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.omniManager.omniLightTexture.gl
         }
-        val b = FlatScreenBehaviour(view.editorCamera, light)
+        val b = FlatScreenBehaviour(view.engine, view.editorCamera, light)
         s.behaviour = b
         s.parent = view.editorRoot
         view.engine.omniManager.lights[light] = b
@@ -75,13 +75,13 @@ object OmniLightService : NodeService {
     }
 
     override fun selected(view: SceneEditorView, node: Node) {
-        val sprite = view.engine.omniManager.lights[node]!!.node
+        val sprite = view.engine.omniManager.lights[node]?.node ?: return
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
-        val sprite = view.engine.omniManager.lights[node]!!.node
+        val sprite = view.engine.omniManager.lights[node]?.node ?: return
         val material = sprite.material as SolidTextureMaterial
         material.diffuseColor.set(0f, 0f, 0f, 0f)
     }

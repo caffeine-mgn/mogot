@@ -13,6 +13,7 @@ class Engine constructor(val stage: Stage, fileSystem: FileSystem<Unit>) : Close
     val resources = Resources(this, fileSystem)
     val frameListeners = Stack<() -> Unit>()
     private val managers = HashMap<String, Closeable>()
+    val mathPool = MathPool()
     fun <T : Closeable> manager(name: String, factory: () -> T): T {
         return managers.getOrPut(name) { factory() } as T
     }
