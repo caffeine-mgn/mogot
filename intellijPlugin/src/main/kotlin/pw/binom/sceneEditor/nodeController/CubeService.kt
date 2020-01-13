@@ -47,6 +47,8 @@ object CubeService : NodeService {
         val node = CSGBox(view.engine)
         SpatialService.loadSpatial(view.engine, node, properties)
         MaterialNodeUtils.load(view, node, properties)
+        if (node.material.value == null)
+            node.material.value = view.default3DMaterial
         return node
     }
 
@@ -61,13 +63,13 @@ object CubeService : NodeService {
 
     override fun selected(view: SceneEditorView, node: Node) {
         node as MaterialNode
-        val m = node.material.value as MaterialInstance?
+        val m = node.material.value as? MaterialInstance?
         m?.selected = true
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
         node as MaterialNode
-        val m = node.material.value as MaterialInstance?
+        val m = node.material.value as? MaterialInstance?
         m?.selected = false
     }
 }

@@ -21,16 +21,16 @@ internal class SolidTextureMaterial(engine: Engine) : MaterialGLSL(engine) {
     override val shader: Shader = Shader(engine.gl,
             vertex = """#version 440 core
 
-layout(location = 0) in vec3 vertexPos;
-layout(location = 2) in vec2 vertexUV;
+layout(location = 0) in vec3 gles_vertex;
+layout(location = 2) in vec2 gles_uv;
 
-uniform mat4 projection;
-uniform mat4 model;
+uniform mat4 gles_projection;
+uniform mat4 gles_model;
 out mediump vec2 UV;
 
 void main() {
-    gl_Position = projection * model * vec4(vertexPos, 1.0f);
-    UV = vertexUV;
+    gl_Position = gles_projection * gles_model * vec4(gles_vertex, 1.0f);
+    UV = gles_uv;
 }""",
             fragment = """#version 440 core
 

@@ -120,11 +120,12 @@ class DDD : GLView(MockFileSystem()) {
     }
 
     override fun render() {
+        /*
         if (isKeyDown(32)) {
             if (rotateAllAxes == null)
                 rotateAllAxes = RotateOneAxis(
                         engine, root, cam, listOf(box1, box2/*, box3*/)
-                        ,EditMoveOneAxis.Type.Y
+                        ,Ф.Y
 
                 )
             rotateAllAxes!!.render(0f)
@@ -132,6 +133,7 @@ class DDD : GLView(MockFileSystem()) {
             rotateAllAxes?.onStop()
             rotateAllAxes = null
         }
+        */
         cam2.lookTo(box1.position)
         super.render()
     }

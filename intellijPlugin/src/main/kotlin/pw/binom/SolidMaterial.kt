@@ -22,11 +22,11 @@ internal class SolidMaterial(engine: Engine) : MaterialGLSL(engine) {
 
 layout(location = 0) in vec3 vertexPos;
 
-uniform mat4 projection;
-uniform mat4 model;
+uniform mat4 gles_projection;
+uniform mat4 gles_model;
 
 void main() {
-    gl_Position = projection * model * vec4(vertexPos, 1.0);
+    gl_Position = gles_projection * gles_model * vec4(vertexPos, 1.0);
 }""",
             fragment = """#version 440 core
 
