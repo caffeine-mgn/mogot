@@ -29,7 +29,7 @@ uniform mat4 model;
 out mediump vec2 UV;
 
 void main() {
-    gl_Position = projection * model * vec4(vertexPos, 1.0);
+    gl_Position = projection * model * vec4(vertexPos, 1.0f);
     UV = vertexUV;
 }""",
             fragment = """#version 440 core

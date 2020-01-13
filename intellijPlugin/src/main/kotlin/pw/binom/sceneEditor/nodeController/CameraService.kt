@@ -129,4 +129,6 @@ object CameraService : NodeService {
         }
     }
 
+    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+
 }

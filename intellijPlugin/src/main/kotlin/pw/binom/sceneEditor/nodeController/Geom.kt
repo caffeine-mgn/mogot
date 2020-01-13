@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.GeomNode
 import mogot.Node
 import mogot.Spatial
+import mogot.math.AABBm
 import pw.binom.ExternalFbx
 import pw.binom.FbxGeom
 import pw.binom.fbx.file.FbxModel2
@@ -72,6 +73,8 @@ object GeomService : NodeService {
 
     private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
+
+    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != GeomNode::class.java.name) return null

@@ -97,9 +97,13 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private val selectedNodes = ArrayList<Node>()
     val selected: List<Node>
         get() = selectedNodes
-    private var selector3D: Selector3D? = null
+    private var selectors = ArrayList<Selector3D>()
     fun select(node: Node?) {
         renderThread {
+            selectors.forEach {
+                it.parent = null
+                it.close()
+            }
             selectedNodes.forEach {
                 getService(it)?.unselected(this, it)
             }
@@ -107,7 +111,15 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             if (node != null) {
                 getService(node)?.selected(this, node)
                 selectedNodes += node
+                if (node is Spatial) {
+                    val s = Selector3D(engine, node)
+                    s.parent = editorRoot
+                    s.material.value = default3DMaterial
+                    selectors.add(s)
+                }
+
             }
+
             eventSelectChanged.dispatch()
         }
 //        if (node != null && node is OmniLight) {

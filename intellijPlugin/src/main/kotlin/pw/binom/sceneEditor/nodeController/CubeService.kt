@@ -4,10 +4,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
 import mogot.MaterialNode
 import mogot.Node
-import pw.binom.sceneEditor.MaterialInstance
-import pw.binom.sceneEditor.NodeCreator
-import pw.binom.sceneEditor.NodeService
-import pw.binom.sceneEditor.SceneEditorView
+import mogot.math.AABBm
+import pw.binom.io.Closeable
+import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
@@ -33,6 +32,13 @@ object CubeService : NodeService {
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {
         EmptyNodeService.nodeDeleted(view.engine, node)
+    }
+
+    override fun getAABB(node: Node, aabb: AABBm): Boolean {
+        node as CSGBox
+        aabb.position.set(0f)
+        aabb.sizes.set(node.width, node.height, node.depth)
+        return true
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {

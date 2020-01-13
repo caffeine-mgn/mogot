@@ -9,6 +9,9 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 
 object SpatialService : NodeService {
+
+    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+
     fun saveSpatial(engine: Engine, spatial: Spatial, output: MutableMap<String, String>) {
         EmptyNodeService.saveNode(engine, spatial, output)
         output["position.x"] = spatial.position.x.toString()
