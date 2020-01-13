@@ -15,7 +15,7 @@ class TextureObject(val gl:GL,val width:Int, val height:Int,val minFilter:Filter
         MSAAx16(16)
     }
     val glTexture:GLTexture = gl.createTexture()
-    val target = if(multisample == MSAALevels.Disable) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
+    val target = if(multisample != MSAALevels.Disable) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
     init {
         gl.enable(target)
         bind()

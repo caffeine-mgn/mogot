@@ -14,7 +14,7 @@ import java.awt.Dialog
 import javax.swing.JFrame
 
 class GameView : GLView(LocalFileSystem<Unit>(
-        File("F:\\dev\\github\\mogot\\game\\src\\assets"),
+        File("F:\\dev\\github\\mogot\\game"),
         FileSystemAccess.fullAccess()
 )) {
     public override var camera: Camera? = null

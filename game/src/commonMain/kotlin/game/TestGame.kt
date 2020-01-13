@@ -73,8 +73,8 @@ class TestGame(val engine: Engine) {
         s.material=mat
 
         engine.waitFrame {
-            val tex = engine.resources.createTexture2D("res/2.png")
-            mat.tex = tex
+            //val tex = engine.resources.createTexture2D("res/2.png")
+            //mat.tex = tex
         }
     }
 }
