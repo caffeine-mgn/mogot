@@ -154,14 +154,14 @@ class PostEffectPipeline(val engine: Engine) {
 
     fun use(renderContext: RenderContext, drawScene: () -> Unit) {
         val renderTargetTexture = requireNotNull(renderTargetTexture)
-        gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
+        //gl.enable(gl.DEPTH_TEST)
+        //gl.enable(gl.CULL_FACE)
         renderTargetTexture.begin()
         gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
         drawScene()
         renderTargetTexture.end()
-        gl.disable(gl.DEPTH_TEST)
-        gl.disable(gl.CULL_FACE)
+        //gl.disable(gl.DEPTH_TEST)
+        //gl.disable(gl.CULL_FACE)
 
         list.forEach { currentFrameEffect ->
             gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!,renderTargetTexture.getGlTexture())

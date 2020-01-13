@@ -242,20 +242,20 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
             engine.frameListeners.popFirst().invoke()
         }
         postEffectPipeline?.use(renderContext) {
-        if (root != null) {
-            gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-            gl.gl.glEnable(GL2.GL_CULL_FACE)
-            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-            if (camera != null)
-                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+            if (root != null) {
+                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
+                gl.gl.glEnable(GL2.GL_CULL_FACE)
+                update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+                if (camera != null)
+                    renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-            gl.gl.glDisable(GL2.GL_CULL_FACE)
+                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+                gl.gl.glDisable(GL2.GL_CULL_FACE)
 
-            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, tempMatrix, renderContext)
+                tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+                renderNode2D(root!!, tempMatrix, renderContext)
+            }
         }
-      }
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
