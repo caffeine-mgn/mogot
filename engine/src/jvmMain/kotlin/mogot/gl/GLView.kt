@@ -241,7 +241,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
-        postEffectPipeline?.use(renderContext) {
+        //postEffectPipeline?.use(renderContext) {
             if (root != null) {
                 gl.gl.glEnable(GL2.GL_DEPTH_TEST)
                 gl.gl.glEnable(GL2.GL_CULL_FACE)
@@ -255,7 +255,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
                 tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
                 renderNode2D(root!!, tempMatrix, renderContext)
             }
-        }
+        //}
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
