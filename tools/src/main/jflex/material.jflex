@@ -75,6 +75,8 @@ DOT = \.
 "true" { return TokenType.TRUE; }
 "false" { return TokenType.FALSE; }
 "int" { return TokenType.INT; }
+"if" { return TokenType.IF; }
+"else" { return TokenType.ELSE; }
 "vec4" { return TokenType.VEC4; }
 "vec2" { return TokenType.VEC2; }
 "void" { return TokenType.VOID; }

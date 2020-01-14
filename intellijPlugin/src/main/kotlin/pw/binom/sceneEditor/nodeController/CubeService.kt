@@ -2,10 +2,11 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
+import mogot.MaterialNode
 import mogot.Node
-import pw.binom.sceneEditor.NodeCreator
-import pw.binom.sceneEditor.NodeService
-import pw.binom.sceneEditor.SceneEditorView
+import mogot.math.AABBm
+import pw.binom.io.Closeable
+import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PositionPropertyFactory
@@ -33,12 +34,21 @@ object CubeService : NodeService {
         EmptyNodeService.nodeDeleted(view.engine, node)
     }
 
+    override fun getAABB(node: Node, aabb: AABBm): Boolean {
+        node as CSGBox
+        aabb.position.set(0f)
+        aabb.size.set(node.width, node.height, node.depth)
+        return true
+    }
+
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != CSGBox::class.java.name)
             return null
         val node = CSGBox(view.engine)
         SpatialService.loadSpatial(view.engine, node, properties)
         MaterialNodeUtils.load(view, node, properties)
+        if (node.material.value == null)
+            node.material.value = view.default3DMaterial
         return node
     }
 
@@ -52,8 +62,14 @@ object CubeService : NodeService {
     }
 
     override fun selected(view: SceneEditorView, node: Node) {
+        node as MaterialNode
+        val m = node.material.value as? MaterialInstance?
+        m?.selected = true
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
+        node as MaterialNode
+        val m = node.material.value as? MaterialInstance?
+        m?.selected = false
     }
 }

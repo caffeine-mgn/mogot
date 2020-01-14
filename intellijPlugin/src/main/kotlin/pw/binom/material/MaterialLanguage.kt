@@ -239,7 +239,7 @@ void main() {
             val parser = Parser(StringReader(document.text))
             val compiler = Compiler(parser)
             uniformEditor.update(compiler)
-            val gen = GLES300Generator(compiler)
+            val gen = GLES300Generator.mix(listOf(compiler))
             materialViewer.setShader(gen.vp, gen.fp)
             compiler.properties.asSequence()
                     .mapNotNull {

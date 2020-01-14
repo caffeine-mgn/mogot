@@ -4,7 +4,7 @@ import pw.binom.material.psi.Type
 
 class MethodDesc(val scope: Scope,
                  val parent: TypeDesc?,
-                 val name: String,
+                 var name: String,
                  val returnType: TypeDesc,
                  val args: List<Argument>,
                  val external: Boolean) : Scope {

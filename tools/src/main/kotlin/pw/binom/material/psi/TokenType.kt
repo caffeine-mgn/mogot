@@ -32,6 +32,8 @@ enum class TokenType {
     ASSIGN_MINUS,
     UNARY_MINUS,
     INC,
+    IF,
+    ELSE,
     DEC,
     IN,
     OP_LE,

@@ -295,6 +295,16 @@ class LexTest {
             }
         }
     }
+
+    @Test
+    fun ifStatement() {
+        Statement.read(makeStream("if (a>b) 10 else 11")).also {
+            it as IfStatement
+            it.condition as OperationExpression
+            (it.thenBlock as ExpStatement).exp as NumberExpression
+            (it.elseBlock as ExpStatement).exp as NumberExpression
+        }
+    }
 }
 
 fun <T : Any?> T?.notNull(): T {

@@ -91,6 +91,13 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
         return true
     }
 
+    fun uniform(name: String, value: Boolean): Boolean {
+        val num = gl.getUniformLocation(id, name) ?: return false
+        gl.uniform1b(num, value)
+        checkError()
+        return true
+    }
+
     fun uniform(name: String, value: Int): Boolean {
         val num = gl.getUniformLocation(id, name) ?: return false
         gl.uniform1i(num, value)

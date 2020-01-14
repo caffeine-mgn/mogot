@@ -23,9 +23,9 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
         engine.gl.checkError { "Before set material properties" }
         shader.use()
         engine.gl.checkError { "1" }
-        shader.uniform("projection", projection)
+        shader.uniform("gles_projection", projection)
         engine.gl.checkError { "2" }
-        shader.uniform("model", model)
+        shader.uniform("gles_model", model)
         engine.gl.checkError { "2" }
         shader.uniform("lights_len", renderContext.pointLights.size)
         engine.gl.checkError { "3" }

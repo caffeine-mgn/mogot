@@ -48,7 +48,9 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
                 normals = null,
                 uvs = null
         )
+//        geom = Geoms.buildCube3(engine.gl,1f,1f,1f)
         geom!!.mode = Geometry.RenderMode.LINES
+        println("Recreate Grid")
     }
 
     override fun close() {

@@ -7,7 +7,9 @@ import mogot.gl.GLView
 import mogot.math.Vector2i
 import mogot.math.Vector2f
 import mogot.math.Vector3f
+import mogot.math.*
 import mogot.math.Vector4f
+import mogot.math.AABB
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
@@ -97,17 +99,35 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private val selectedNodes = ArrayList<Node>()
     val selected: List<Node>
         get() = selectedNodes
-    private var selector3D: Selector3D? = null
+    private var selectors = ArrayList<Selector3D>()
     fun select(node: Node?) {
         renderThread {
+            selectors.forEach {
+                it.parent = null
+                it.close()
+            }
             selectedNodes.forEach {
                 getService(it)?.unselected(this, it)
             }
             selectedNodes.clear()
             if (node != null) {
-                getService(node)?.selected(this, node)
+                val service = getService(node)
+                service?.selected(this, node)
                 selectedNodes += node
+                if (service != null && node is Spatial) {
+                    val aabb = AABB()
+                    if (service.getAABB(node, aabb)) {
+                        val s = Selector3D(engine, node)
+                        s.parent = editorRoot
+                        s.material.value = default3DMaterial
+                        selectors.add(s)
+
+                        s.size.set(aabb.size.x * 1.1f, aabb.size.y * 1.1f, aabb.size.z * 1.1f)
+                    }
+                }
+
             }
+
             eventSelectChanged.dispatch()
         }
 //        if (node != null && node is OmniLight) {

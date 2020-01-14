@@ -60,6 +60,8 @@ class DCE(val compiler: Compiler) {
             useClass(it)
         }
 
+        expression.methodDesc.statementBlock?.let { visit(it) }
+
         useClass(expression.resultType.clazz)
 
         if (visitVP)
@@ -72,7 +74,7 @@ class DCE(val compiler: Compiler) {
         visit(expression.exp)
     }
 
-    private fun visit(expression: ExpParenthesisDest){
+    private fun visit(expression: ExpParenthesisDest) {
         visit(expression.exp)
     }
 
@@ -100,9 +102,9 @@ class DCE(val compiler: Compiler) {
         expression.from?.let { visit(it) }
         if (expression.field is GlobalFieldDesc) {
             if (visitVP)
-                fieldsVP += expression.field
+                fieldsVP += expression.field as GlobalFieldDesc
             else
-                fieldsFP += expression.field
+                fieldsFP += expression.field as GlobalFieldDesc
         } else {
             expression.from?.let { visit(it) }
         }
@@ -128,6 +130,12 @@ class DCE(val compiler: Compiler) {
         visit(statement.exp)
     }
 
+    private fun visit(statement: IfStatementDesc) {
+        visit(statement.condition)
+        visit(statement.thenBlock)
+        statement.elseBlock?.let { visit(it) }
+    }
+
     private fun visit(statement: StatementDesc) {
         when (statement) {
             is StatementBlockDesc -> visit(statement)
@@ -135,6 +143,7 @@ class DCE(val compiler: Compiler) {
             is AssignStatementDesc -> visit(statement)
             is WhileDesc -> visit(statement)
             is StatementExprDesc -> visit(statement)
+            is IfStatementDesc -> visit(statement)
             else -> TODO("->${statement::class.java.name}")
         }
     }
