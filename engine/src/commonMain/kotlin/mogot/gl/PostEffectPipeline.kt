@@ -71,7 +71,7 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
                                 uniform sampler2D screenTexture;
                                 void main()
                                 { 
-                                    FragColor = texture(screenTexture, TexCoords) + vec4(0.1f,0.1f,0.1f,1f);;
+                                    FragColor = texture(screenTexture, TexCoords);
                                 }""")
 
     override fun dispose() {
@@ -137,7 +137,6 @@ class FullScreenSprite(engine: Engine) {
                                 void main()
                                 { 
                                     FragColor = texture(screenTexture, TexCoords);
-                                    FragColor = vec4(1.0f,1.0f,1.0f,1.0f);
                                 }""")
 
         override fun dispose() {
@@ -200,10 +199,11 @@ class PostEffectPipeline(val engine: Engine) {
         gl.clear(gl.COLOR_BUFFER_BIT)
         mat.texture2D = renderTargetTexture.getGlTexture()
         sprite.material = mat
-//        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
+        gl.activeTexture(engine.gl.TEXTURE0)
+        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
 
         sprite.draw(renderContext)
-//        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
+        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
     }
 
 

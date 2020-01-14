@@ -26,7 +26,7 @@ class GameView : GLView(LocalFileSystem<Unit>(
         backgroundColor.set(0f, 0.5f, 0.7f, 1f)
         game = TestGame(engine)
         camera = game.camera
-        //postEffectPipeline!!.addEffect(SimplePostEffect(engine, getNoColorShader(engine.gl)))
+        postEffectPipeline!!.addEffect(SimplePostEffect(engine, getNoColorShader(engine.gl)))
         inited = true
     }
 
