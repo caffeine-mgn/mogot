@@ -13,6 +13,22 @@ import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
 
+private val EDITOR_SHADER = """
+    @property
+    bool selected
+    vec4 fragment(vec4 color){
+        float cof = 0.1f
+        if (selected)
+           return vec4(color.x + cof,color.y + cof,color.z,color.w+0.1f)
+        else
+            return color
+    } 
+    
+    vec4 vertex(){
+        return vec4(0f,0f,0f,0f)
+    }
+"""
+
 class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(engine) {
     private var _shader: Shader? = null
 
@@ -63,7 +79,8 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
 
     private fun checkValid() {
         if (_shader == null) {
-            val gen = GLES300Generator(compiler!!)
+            val c = Parser(StringReader(EDITOR_SHADER)).let { Compiler(it) }
+            val gen = GLES300Generator.mix(listOf(compiler, c))
             _shader = Shader(engine.gl, gen.vp, gen.fp)
         }
     }

@@ -5,12 +5,16 @@ import mogot.Node
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import mogot.Engine
+import mogot.math.AABBm
 import pw.binom.sceneEditor.properties.behaviourManager
 
 object EmptyNodeService : NodeService {
     fun nodeDeleted(engine: Engine, node: Node){
         engine.behaviourManager.delete(node)
     }
+
+    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+
     fun saveNode(engine: Engine, node: Node, output: MutableMap<String, String>) {
         val id = node.id
         if (id != null)

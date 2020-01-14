@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
+import mogot.math.AABBm
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
@@ -61,6 +62,8 @@ private fun createStub(view: SceneEditorView, light: OmniLight) {
 }
 
 object OmniLightService : NodeService {
+
+    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
     private val props = listOf(PositionPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props

@@ -10,6 +10,8 @@ import pw.binom.material.compiler.SingleType
 
 class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
 
+    var selected = false
+
     init {
         root.inc()
     }
@@ -140,6 +142,7 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         root.use(model, projection, renderContext)
+        root.shader.uniform("selected", selected)
         values.forEach { (name, value) ->
             when (value) {
                 is Int -> root.shader.uniform(name, value)

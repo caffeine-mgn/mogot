@@ -15,18 +15,25 @@ class DceTest {
         vec2 vertexUV
         
         vec3 normal
+        vec3 normal2
         
         @property
         sampler2D image            
         
+        vec4 fff(){
+            return vec4(normal2.x,normal2.y,normal2.z, 1f)
+        }
+        
         vec4 fragment(vec4 color2){
             vec4 tex = texture(image,vertexUV).rgba
-            return vec4(0f,0f,0f,0f)
+            return vec4(0f,fff().x,0f,0f)
         }
         """)).let { Compiler(it) }
 
         val dce = DCE(compiler)
-        assertNotNull(dce.fieldsFP.find { it.name == "image" })
-        assertNotNull(dce.fieldsFP.find { it.name == "vertexUV" })
+        dce.fieldsFP.find { it.name == "image" }.notNull()
+        dce.fieldsFP.find { it.name == "vertexUV" }.notNull()
+        dce.methodsFP.find { it.name == "fff" }.notNull()
+        dce.fieldsFP.find { it.name == "normal2" }.notNull()
     }
 }

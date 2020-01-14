@@ -29,6 +29,7 @@ expect class GL {
     fun useProgram(program: GLProgram?)
     fun getUniformLocation(program: GLProgram, name: String): GLUniformLocation?
     fun uniform1f(uniformLocation: GLUniformLocation, value: Float)
+    fun uniform1b(uniformLocation: GLUniformLocation, value: Boolean)
     fun uniform1i(uniformLocation: GLUniformLocation, value: Int)
     fun uniform3f(uniformLocation: GLUniformLocation, x: Float, y: Float, z: Float)
     fun uniform3i(uniformLocation: GLUniformLocation, x: Int, y: Int, z: Int)

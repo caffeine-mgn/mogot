@@ -35,7 +35,7 @@ class Parser(reader: Reader) {
 
         val next = stream.checkNext(true)
         if (next != null) {
-            throw ParserException("Unknown token \"${next.text}\"", next.position, next.text.length)
+            throw ParserException("Unknown token \"${next.text}\" line: ${next.line} column: ${next.column}", next.position, next.text.length)
         }
 
         val it = _global.listIterator()

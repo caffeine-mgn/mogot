@@ -2,7 +2,7 @@ package pw.binom.material.compiler
 
 import pw.binom.material.psi.Type
 
-class FieldAccessExpressionDesc(val field: FieldDesc, val from: ExpressionDesc?) : ExpressionDesc(), Scope {
+class FieldAccessExpressionDesc(var field: FieldDesc, val from: ExpressionDesc?) : ExpressionDesc(), Scope {
     override val resultType: TypeDesc
         get() = this.field.type
 

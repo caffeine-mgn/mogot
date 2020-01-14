@@ -237,6 +237,11 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.uniform1f(uniformLocation.js, value)
     }
 
+    actual fun uniform1b(uniformLocation: GLUniformLocation, value: Boolean) {
+        uniformLocation as JSGLUniformLocation
+        ctx.uniform1i(uniformLocation.js, if (value) 1 else 0)
+    }
+
     actual fun uniform1i(uniformLocation: GLUniformLocation, value: Int) {
         uniformLocation as JSGLUniformLocation
         ctx.uniform1i(uniformLocation.js, value)

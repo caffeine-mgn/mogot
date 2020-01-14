@@ -16,15 +16,15 @@ class FlatScreenBehaviour(val engine: Engine, val camera: Camera, val other: Spa
         p.set(0f, 0f, 0f)
         other.localToGlobal(p, p)
 
-        val p2 = tempVec
-        if (camera.worldToScreenPoint(p, p2)) {
+        val tempVec = engine.mathPool.vec2i.poll()
+        if (camera.worldToScreenPoint(p, tempVec)) {
             node.visible = true
-            node.position.set(p2.x.toFloat() - node.size.x / 2f, p2.y.toFloat() - node.size.y / 2f)
+            node.position.set(tempVec.x.toFloat() - node.size.x / 2f, tempVec.y.toFloat() - node.size.y / 2f)
         } else {
             node.visible = false
         }
+        println("visible=${node.visible}  ${tempVec.x} x ${tempVec.y}   size=${node.size.x}x${node.size.y}")
         engine.mathPool.vec3f.push(p)
+        engine.mathPool.vec2i.push(tempVec)
     }
-
-    private val tempVec = Vector2i()
 }

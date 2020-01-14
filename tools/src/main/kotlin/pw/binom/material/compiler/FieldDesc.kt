@@ -3,7 +3,7 @@ package pw.binom.material.compiler
 import pw.binom.material.psi.SourceExp
 import pw.binom.material.psi.Type
 
-abstract class FieldDesc(val name: String, val type: TypeDesc) : Scope {
+abstract class FieldDesc(var name: String, val type: TypeDesc) : Scope {
     override fun findMethod(name: String, args: List<TypeDesc>): MethodDesc? =
             type.findMethod(name, args)
 

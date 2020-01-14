@@ -15,7 +15,7 @@ class GLSL300ESTest {
             b++
             return color
         }    
-        """)).let { Compiler(it) }.let { GLES300Generator(it) }.let {
+        """)).let { Compiler(it) }.let { GLES300Generator.mix(listOf(it)) }.let {
             it.fp
             it.vp
         }
@@ -29,7 +29,7 @@ class GLSL300ESTest {
             int c = -b            
             return color
         }    
-        """)).let { Compiler(it) }.let { GLES300Generator(it) }.let {
+        """)).let { Compiler(it) }.let { GLES300Generator.mix(listOf(it)) }.let {
             it.fp
             it.vp
         }
@@ -41,7 +41,7 @@ class GLSL300ESTest {
         vec4 fragment(vec4 color){
             int gg=(2+2)
         }
-        """)).let { Compiler(it) }.let { GLES300Generator(it) }.let {
+        """)).let { Compiler(it) }.let { GLES300Generator.mix(listOf(it)) }.let {
             println(it.fp)
             it.vp
         }
@@ -56,7 +56,7 @@ class GLSL300ESTest {
         vec4 fragment(vec4 color){
             int gg=(2+2) + clump2()
         }
-        """)).let { Compiler(it) }.let { GLES300Generator(it) }.let {
+        """)).let { Compiler(it) }.let { GLES300Generator.mix(listOf(it)) }.let {
             println(it.fp)
             it.vp
         }
