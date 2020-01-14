@@ -28,8 +28,8 @@ layout(location = 0) in vec3 vertexPos;
 layout(location = 1) in vec3 normalList;
 layout(location = 2) in vec2 vertexUV;
 
-uniform mat4 projection;
-uniform mat4 model;
+uniform mat4 ${PROJECTION};
+uniform mat4 ${MODEL};
 
 //uniform mat4 gl_ModelViewMatrix;
 //uniform mat4 gl_ProjectionMatrix;
@@ -39,11 +39,11 @@ out mediump vec3 normal;
 out mediump vec3 vVertex;
 
 void main() {
-    mat3 normalMatrix = mat3(transpose(inverse(model)));
+    mat3 normalMatrix = mat3(transpose(inverse($MODEL)));
     normal = vec3(normalMatrix * normalList);
-    gl_Position = projection * model * vec4(vertexPos, 1.0);
+    gl_Position = $PROJECTION * $MODEL * vec4(vertexPos, 1.0);
     //norm=normalize(vec3(gl_NormalMatrix * normalList));
-    vVertex = vec3(model * vec4(vertexPos, 1.0));
+    vVertex = vec3($MODEL * vec4(vertexPos, 1.0));
     UV = vertexUV;
 }""",
             fragment = """#version 300 es
@@ -57,9 +57,8 @@ uniform lowp vec4 diffuseColor;
 in lowp vec2 UV;
 in vec3 normal;
 out vec4 color;
-uniform mat4 projection;
-uniform mat4 model;
-uniform mat4 model_projection;
+uniform mat4 $PROJECTION;
+uniform mat4 $MODEL;
 in vec3 vVertex;
 
 struct Light {
