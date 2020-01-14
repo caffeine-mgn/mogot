@@ -202,13 +202,15 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     fun startEditor(editor: EditAction) {
         this.editor?.onStop()
         this.editor = editor
-        startDraw()
+        startRender()
+        println("startEditor")
     }
 
     fun stopEditing() {
+        println("stopEditing")
         editor?.onStop()
         editor = null
-        stopDraw()
+        stopRender()
         repaint()
         save()
         editor1.save()
@@ -270,8 +272,8 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private var disposed = AtomicBoolean(false)
     private var render = 0
 
-    private var updaterThread: UpdaterThread? = null
-
+    //private var updaterThread: UpdaterThread? = null
+/*
     fun startDraw() {
         if (updaterThread == null) {
             updaterThread = UpdaterThread().also { it.start() }
@@ -286,7 +288,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             updaterThread = null
         }
     }
-
+*/
     private inner class UpdaterThread : Thread() {
         override fun run() {
             while (!isInterrupted) {
