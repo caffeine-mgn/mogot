@@ -16,12 +16,19 @@ import java.io.StringReader
 private val EDITOR_SHADER = """
     @property
     bool selected
+    
+    @property
+    bool hover
+    
     vec4 fragment(vec4 color){
         float cof = 0.1f
         if (selected)
            return vec4(color.x + cof,color.y + cof,color.z,color.w+0.1f)
         else
-            return color
+            if (hover)
+                return vec4(color.x + cof,color.y + cof,color.z,color.w+0.1f)
+            else
+                return color
     } 
     
     vec4 vertex(){

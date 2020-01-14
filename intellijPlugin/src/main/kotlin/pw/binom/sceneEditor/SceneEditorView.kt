@@ -32,7 +32,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile) : GLView(MockFileSystem()) {
+class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(MockFileSystem(), fps) {
 
     val editorRoot = Node()
     val sceneRoot = Node()
@@ -125,24 +125,10 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                         s.size.set(aabb.size.x * 1.1f, aabb.size.y * 1.1f, aabb.size.z * 1.1f)
                     }
                 }
-
             }
 
             eventSelectChanged.dispatch()
         }
-//        if (node != null && node is OmniLight) {
-//            selectedNodes.add(node)
-//            selector3D?.also {
-//                it.parent = null
-//                it.close()
-//            }
-//            println("Selector for $node")
-//            val selector = Selector3D(engine, node)
-//            selector.material = selectorMaterial
-//            selector.size.set(1f, 1f, 1f)
-//            selector.parent = editorRoot
-//            repaint()
-//        }
     }
 
     private var editor: EditAction? = null
@@ -161,12 +147,28 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         super.mouseDown(e)
     }
 
+    private fun getNode(x: Int, y: Int): Node? {
+        val ray = editorCamera.screenPointToRay(x, y, MutableRay())
+        val list = ArrayList<Pair<Node, Float>>()
+        sceneRoot.walk {
+            val service = getService(it) ?: return@walk true
+            val col = service.getCollider(it) ?: return@walk true
+            val vec = Vector3f()
+            if (!col.rayCast(ray, vec))
+                return@walk true
+            list += it to vec.sub(editorCamera.position).lengthSquared
+            true
+        }
+        return list.minBy { it.second }?.first
+    }
+
     override fun mouseUp(e: MouseEvent) {
         this.requestFocus()
         if (editor != null) {
             editor!!.mouseUp(e)
             return
         }
+        select(getNode(e.x, e.y))
         super.mouseDown(e)
     }
 
@@ -184,9 +186,26 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         super.keyDown(e)
     }
 
+    private var hover: Node? = null
     override fun render2(dt: Float) {
-        super.render2(dt)
+        if (editor == null) {
+            val node = getNode(mousePosition.x, mousePosition.y)
+            if (node != null) {
+                if (hover != node) {
+                    val service = getService(node)
+                    if (service != null) {
+                        hover?.let { getService(it)?.hover(it, false) }
+                        node.let { getService(it)?.hover(it, true) }
+                        hover = node
+                    }
+                }
+            } else {
+                hover?.let { getService(it)?.hover(it, false) }
+                hover = null
+            }
+        }
         editor?.render(dt)
+        super.render2(dt)
     }
 
     private val rendering = AtomicBoolean(false)
@@ -202,7 +221,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     fun startEditor(editor: EditAction) {
         this.editor?.onStop()
         this.editor = editor
-        startRender()
+//        startRender()
         println("startEditor")
     }
 
@@ -210,7 +229,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         println("stopEditing")
         editor?.onStop()
         editor = null
-        stopRender()
+//        stopRender()
         repaint()
         save()
         editor1.save()
@@ -289,20 +308,6 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         }
     }
 */
-    private inner class UpdaterThread : Thread() {
-        override fun run() {
-            while (!isInterrupted) {
-                if (!isFocusOwner)
-                    requestFocus()
-                repaint()
-                try {
-                    Thread.sleep(10)
-                } catch (e: InterruptedException) {
-                    break
-                }
-            }
-        }
-    }
 }
 
 
@@ -359,7 +364,7 @@ class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x
 
     fun resetChangeFlag(): Boolean {
         val b = changeFlag
-        changeFlag = true
+        changeFlag = false
         return b
     }
 }

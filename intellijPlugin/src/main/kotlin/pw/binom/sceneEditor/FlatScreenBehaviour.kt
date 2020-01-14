@@ -23,7 +23,6 @@ class FlatScreenBehaviour(val engine: Engine, val camera: Camera, val other: Spa
         } else {
             node.visible = false
         }
-        println("visible=${node.visible}  ${tempVec.x} x ${tempVec.y}   size=${node.size.x}x${node.size.y}")
         engine.mathPool.vec3f.push(p)
         engine.mathPool.vec2i.push(tempVec)
     }

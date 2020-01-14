@@ -2,6 +2,9 @@ package pw.binom.sceneEditor
 
 import mogot.*
 import mogot.math.Matrix4fc
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
+import pw.binom.*
 
 class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), MaterialNode {
     val size = Vector3fProperty()
@@ -16,12 +19,17 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
 
     override fun close() {
         geom = null
+        vertex.close()
+        index.close()
         super.close()
     }
 
-    private fun rebuildGeom() {
+    private val vertex = FloatDataBuffer.alloc(3 * 2 * 3 * 8)
+    private val index = IntDataBuffer.alloc(vertex.size) { it }
 
-        val vertex = FloatArray(3 * 2 * 3 * 8)
+    private fun rebuildGeom() {
+        println("Rebuild Selector3D")
+
         val lenX = size.x / 100f * 30f
         val lenY = size.y / 100f * 30f
         val lenZ = size.z / 100f * 30f
@@ -64,13 +72,16 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
         draw(-1f, 1f, -1f)
         draw(1f, -1f, 1f)
 
-        this.geom = Geom3D2(
-                gl = engine.gl,
-                vertex = vertex,
-                index = IntArray(vertex.size) { it },
-                normals = null,
-                uvs = null
-        )
+        if (geom == null)
+            geom = Geom3D2(
+                    gl = engine.gl,
+                    vertex = vertex,
+                    index = index,
+                    normals = null,
+                    uvs = null
+            )
+        else
+            geom!!.vertexBuffer.uploadArray(vertex)
         geom!!.mode = Geometry.RenderMode.LINES
     }
 

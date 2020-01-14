@@ -3,6 +3,8 @@ package mogot.gl
 import mogot.math.Matrix4fc
 import mogot.math.get
 import org.khronos.webgl.*
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
 
 /*
 private external class WebGLVAOExtension {
@@ -127,11 +129,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.deleteBuffer(buffer.js)
     }
 
-    actual fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int) {
-        val b = Float32Array(data.size)
-        b.set(data.unsafeCast<Array<Float>>())
-//        ctx.bufferData(target, size, usage)
-        ctx.bufferData(target, b, usage)
+    actual fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int) {
+        ctx.bufferData(target, data.buffer, usage)
     }
 
     actual fun clear(mask: Int) {
@@ -143,12 +142,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.bindBuffer(target, buffer?.js)
     }
 
-    actual fun bufferData(target: Int, size: Int, data: IntArray, usage: Int) {
-        val b = Int32Array(data.size)
-        b.set(data.unsafeCast<Array<Int>>())
-
-//        ctx.bufferData(target, size, usage)
-        ctx.bufferData(target, b, usage)
+    actual fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int) {
+        ctx.bufferData(target, data.buffer, usage)
     }
 
     actual fun createVertexArray(): GLVertexArray = JSVertexArray(ctx.createVertexArray())

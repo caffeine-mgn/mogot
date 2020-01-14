@@ -5,11 +5,13 @@ import mogot.Material
 import mogot.RenderContext
 import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
+import pw.binom.floatDataOf
+import pw.binom.intDataOf
 import pw.binom.io.Closeable
 
 open class ScreenRect(val gl: GL) : Closeable {
     private val vertexBuffer = BufferArray(gl = gl, static = true, draw = true).apply {
-        uploadArray(floatArrayOf(
+        uploadArray(floatDataOf(
                 -1f, 1f, -0.0f,
                 -1f, -1f, -0.0f,
                 1f, -1f, -0.0f,
@@ -17,7 +19,7 @@ open class ScreenRect(val gl: GL) : Closeable {
         ))
     }
     private val uvBuffer = BufferArray(gl = gl, static = true, draw = true).apply {
-        uploadArray(floatArrayOf(0f, 1f, 0f, 0f, 1f, 0f, 1f, 1f))
+        uploadArray(floatDataOf(0f, 1f, 0f, 0f, 1f, 0f, 1f, 1f))
     }
     private val vao = VertexArray(gl)
     private val vertexSize = 12 / 3
@@ -25,7 +27,7 @@ open class ScreenRect(val gl: GL) : Closeable {
 
     init {
         vao.bind {
-            indexBuffer.uploadArray(intArrayOf(0, 1, 3, 3, 1, 2))
+            indexBuffer.uploadArray(intDataOf(0, 1, 3, 3, 1, 2))
             indexBuffer.bind()
 
             vertexBuffer.bind()

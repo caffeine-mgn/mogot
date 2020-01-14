@@ -3,6 +3,7 @@ package pw.binom.sceneEditor
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import mogot.math.AABBm
+import mogot.collider.Collider
 import pw.binom.sceneEditor.properties.PropertyFactory
 
 interface NodeService {
@@ -13,5 +14,9 @@ interface NodeService {
     fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = emptyList()
     fun isEditor(node: Node): Boolean
     fun delete(view: SceneEditorView, node: Node)
-    fun getAABB(node: Node, aabb: AABBm):Boolean
+    fun getAABB(node: Node, aabb: AABBm): Boolean
+    fun getCollider(node: Node): Collider? = null
+    fun hover(node: Node, hover: Boolean) {
+        //NOP
+    }
 }

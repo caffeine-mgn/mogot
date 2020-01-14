@@ -25,14 +25,12 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
     private var x = 0f
     private var y = 0f
-    val e = Vector3f()
     private val temp = Vector3f()
 
     init {
         view.lockMouse = true
         view.cursorVisible = false
 
-        view.editorCamera.quaternion.getEulerAnglesXYZ(e)
 
         y = -view.editorCamera.quaternion.roll
         x = -view.editorCamera.quaternion.pitch
@@ -66,13 +64,11 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
         if (KEY_W in keyDown) {
             node.position.add(temp)
-//            node.position.add(node.rotation.forward * dt * moveSpeed)
         }
 
         if (KEY_S in keyDown) {
             temp.negated(temp)
             node.position.add(temp)
-//            node.position.add(-node.rotation.forward * dt * moveSpeed)
         }
 
 
@@ -105,7 +101,6 @@ class FpsCam(val view: SceneEditorView) : EditAction {
         x += (view.mousePosition.x - centerX) * 0.005f
         y += (view.mousePosition.y - centerY) * 0.005f
 
-        node.quaternion.identity()
         node.quaternion.setRotation(0f, -x, -y)
 //            node.quaternion.rotateXYZ(x,y,0f)
 //            node.rotation2.y += (Input.mousePosition.x - oldMousePosition.x) * dt / 10f

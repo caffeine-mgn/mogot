@@ -1,5 +1,6 @@
 package mogot.gl
 
+import pw.binom.FloatDataBuffer
 import pw.binom.io.Closeable
 
 class BufferArray(val gl: GL, val static: Boolean, val draw: Boolean) : Closeable {
@@ -13,9 +14,9 @@ class BufferArray(val gl: GL, val static: Boolean, val draw: Boolean) : Closeabl
 
     }
 
-    fun uploadArray(data: FloatArray, f: (() -> Unit)? = null) {
+    fun uploadArray(data: FloatDataBuffer, f: (() -> Unit)? = null) {
         bind {
-            gl.bufferData(gl.ARRAY_BUFFER, data.size.toInt() * 4, data, when {
+            gl.bufferData(gl.ARRAY_BUFFER, data.size * 4, data, when {
                 static && draw -> gl.STATIC_DRAW
                 !static && draw -> gl.DYNAMIC_DRAW
                 static && !draw -> gl.STATIC_READ
