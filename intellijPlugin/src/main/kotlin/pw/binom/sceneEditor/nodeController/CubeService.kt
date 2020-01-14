@@ -37,7 +37,7 @@ object CubeService : NodeService {
     override fun getAABB(node: Node, aabb: AABBm): Boolean {
         node as CSGBox
         aabb.position.set(0f)
-        aabb.sizes.set(node.width, node.height, node.depth)
+        aabb.size.set(node.width, node.height, node.depth)
         return true
     }
 

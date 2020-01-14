@@ -71,13 +71,13 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
                 normals = null,
                 uvs = null
         )
-        geom!!.mode = Geometry.RenderMode.TRIANGLES
+        geom!!.mode = Geometry.RenderMode.LINES
     }
 
     //override fun apply(matrix: Matrix4fc): Matrix4fc = node.matrix
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        val mat = material.value?:return
+        val mat = material.value ?: return
         if (geom == null || size.resetChangeFlag()) {
             rebuildGeom()
         }
