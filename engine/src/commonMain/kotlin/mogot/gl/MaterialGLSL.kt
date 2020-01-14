@@ -13,11 +13,11 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
     protected var closed = false
 
     fun projection(projection: Matrix4fc) {
-        shader.uniform("projection", projection)
+        shader.uniform(PROJECTION, projection)
     }
 
     fun model(model: Matrix4fc) {
-        shader.uniform("model", model)
+        shader.uniform(MODEL, model)
     }
 
     val TEMP_VECTOR3F = Vector3f()
