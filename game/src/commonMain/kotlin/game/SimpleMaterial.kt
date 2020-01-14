@@ -31,9 +31,6 @@ layout(location = 2) in vec2 vertexUV;
 uniform mat4 ${PROJECTION};
 uniform mat4 ${MODEL};
 
-//uniform mat4 gl_ModelViewMatrix;
-//uniform mat4 gl_ProjectionMatrix;
-//uniform mat3 gl_NormalMatrix;
 out mediump vec2 UV;
 out mediump vec3 normal;
 out mediump vec3 vVertex;
@@ -41,9 +38,8 @@ out mediump vec3 vVertex;
 void main() {
     mat3 normalMatrix = mat3(transpose(inverse($MODEL)));
     normal = vec3(normalMatrix * normalList);
-    gl_Position = $PROJECTION * $MODEL * vec4(vertexPos, 1.0);
-    //norm=normalize(vec3(gl_NormalMatrix * normalList));
-    vVertex = vec3($MODEL * vec4(vertexPos, 1.0));
+    gl_Position = $PROJECTION * $MODEL * vec4(vertexPos, 1.0f);
+    vVertex = vec3($MODEL * vec4(vertexPos, 1.0f));
     UV = vertexUV;
 }""",
             fragment = """#version 300 es
@@ -79,6 +75,7 @@ void main() {
 //    lowp vec4 cc = vec4(0.5,0.5,0.5,1);
     mediump vec4 cc = texture(tex, UV).rgba;// * diffuseColor;
     color = cc;
+    color = vec4(1.0f,1.0f,1.0f,1.0f);
     return;
       
     for (int i = 0; i<lights_len; i++){
@@ -110,7 +107,8 @@ void main() {
 //        }
     }
     color = cc;
-    //color=vec4(normalize(normal),1);
+    color=vec4(normalize(normal),1);
+    color = vec4(1.0f,1.0f,1.0f,1.0f);
 }
 """
     )

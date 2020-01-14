@@ -5,6 +5,7 @@ import mogot.Material
 import mogot.RenderContext
 import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
+import mogot.math.Matrix4fc
 import pw.binom.io.Closeable
 
 open class ScreenRect(val gl: GL) : Closeable {
@@ -52,32 +53,54 @@ open class ScreenRect(val gl: GL) : Closeable {
     }
 }
 
-class FullScreenSprite(engine: Engine) {
-    var defaultMaterial = object : MaterialGLSL(engine) {
-        override val shader: Shader
-            get() = Shader(engine.gl, """#version 450 core
-                                        layout (location = 0) in vec2 aPos;
+class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
+    override val shader: Shader
+        get() = Shader(engine.gl, """#version 450 core
+                                        layout (location = 0) in vec3 aPos;
                                         layout (location = 2) in vec2 aTexCoords;
                                         out vec2 TexCoords;
+                                        
                                         void main()
                                         {
                                             gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
                                             TexCoords = aTexCoords;
                                         }""",
-                    """#version 450 core
+                """#version 450 core
                                 out vec4 FragColor;
                                 in vec2 TexCoords;
                                 uniform sampler2D screenTexture;
                                 void main()
                                 { 
-                                    FragColor = texture(screenTexture, TexCoords);
+                                    FragColor = texture(screenTexture, TexCoords) + vec4(0.1f,0.1f,0.1f,1f);;
                                 }""")
 
-        override fun dispose() {
-            shader.close()
-            super.dispose()
+    override fun dispose() {
+        shader.close()
+        super.dispose()
+    }
+
+    var texture2D: GLTexture? = null
+
+    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        super.use(model, projection, renderContext)
+        if (texture2D != null) {
+            engine.gl.activeTexture(engine.gl.TEXTURE0)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D, texture2D!!)
+            shader.uniform("screenTexture", 0)
         }
     }
+
+    override fun unuse() {
+        if (texture2D != null) {
+            engine.gl.activeTexture(engine.gl.TEXTURE0)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D, null)
+        }
+        super.unuse()
+    }
+}
+
+class FullScreenSprite(engine: Engine) {
+    //    var defaultMaterial = FullScreenMaterial(engine)
     var material: Material? = object : MaterialGLSL(engine) {
         val defaulTshader: Shader
             get() = Shader(engine.gl, """#version 450 core
@@ -114,6 +137,7 @@ class FullScreenSprite(engine: Engine) {
                                 void main()
                                 { 
                                     FragColor = texture(screenTexture, TexCoords);
+                                    FragColor = vec4(1.0f,1.0f,1.0f,1.0f);
                                 }""")
 
         override fun dispose() {
@@ -124,7 +148,7 @@ class FullScreenSprite(engine: Engine) {
     private val rect = ScreenRect(engine.gl)
 
     fun draw(renderContext: RenderContext) {
-        val mat = material ?: return
+        val mat = material ?: TODO()
         mat.use(MATRIX4_ONE, Matrix4f().identity(), renderContext)
         rect.draw()
         mat.unuse()
@@ -141,7 +165,7 @@ class PostEffectPipeline(val engine: Engine) {
 
     var MSAALevel: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable
 
-    private var renderTargetTexture:RenderTargetTexture? = null
+    private var renderTargetTexture: RenderTargetTexture? = null
 
     fun close() {
 
@@ -152,6 +176,7 @@ class PostEffectPipeline(val engine: Engine) {
             list.add(effect)
     }
 
+    private val mat = FullScreenMaterial(engine)
     fun use(renderContext: RenderContext, drawScene: () -> Unit) {
         val renderTargetTexture = requireNotNull(renderTargetTexture)
         //gl.enable(gl.DEPTH_TEST)
@@ -164,7 +189,7 @@ class PostEffectPipeline(val engine: Engine) {
         //gl.disable(gl.CULL_FACE)
 
         list.forEach { currentFrameEffect ->
-            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!,renderTargetTexture.getGlTexture())
+            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
             renderTargetTexture.begin()
             gl.clear(gl.COLOR_BUFFER_BIT)
             sprite.material = currentFrameEffect
@@ -173,15 +198,17 @@ class PostEffectPipeline(val engine: Engine) {
         }
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)
-        sprite.material = sprite.defaultMaterial
-        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!,renderTargetTexture.getGlTexture())
+        mat.texture2D = renderTargetTexture.getGlTexture()
+        sprite.material = mat
+//        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
+
         sprite.draw(renderContext)
-        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
+//        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
     }
 
 
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
-        renderTargetTexture = RenderTargetTexture(engine.gl,resolutionWidth,resolutionHeight)
+        renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight)
     }
 
 }

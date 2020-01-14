@@ -52,8 +52,7 @@ object Main {
         f.setSize(800, 600)
         f.setLocationRelativeTo(null)
         f.title = "Demo"
-        f.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
-        f.modalExclusionType = Dialog.ModalExclusionType.NO_EXCLUDE
+        f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         val view = GameView()
         f.add(view)
         f.isVisible = true

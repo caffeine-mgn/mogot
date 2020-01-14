@@ -57,9 +57,7 @@ class TestGame(val engine: Engine) {
             material.value = mat
             position.set(5f, 3f, 5f)
         }
-        camera.position.x = 5f
-        camera.position.y = 5f
-        camera.position.z = 5f
+        camera.position.set(5f, 5f, 5f)
         val l = OmniLight()
         l.parent = camera
 
@@ -70,7 +68,7 @@ class TestGame(val engine: Engine) {
 
         root.addChild(s)
         s.size.set(100f, 100f)
-        s.material=mat
+        s.material = mat
 
         engine.waitFrame {
             //val tex = engine.resources.createTexture2D("res/2.png")
