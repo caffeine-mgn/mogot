@@ -21,6 +21,7 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
 
 private class EditorHolder(val view: SceneEditorView) : Closeable {
@@ -100,16 +101,45 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     val selected: List<Node>
         get() = selectedNodes
     private var selectors = ArrayList<Selector3D>()
-    fun select(node: Node?) {
+    fun select(nodeList: List<Node>) {
         renderThread {
-            selectors.forEach {
-                it.parent = null
-                it.close()
-            }
-            selectedNodes.forEach {
-                getService(it)?.unselected(this, it)
-            }
+
+            selectedNodes.asSequence()
+                    .filter { it !in nodeList }
+                    .forEach { node ->
+                        selectors.removeIf {
+                            if (it.node === node) {
+                                it.parent = null
+                                it.close()
+                                true
+                            } else
+                                false
+                        }
+                        getService(node)?.unselected(this, node)
+                    }
+
+            nodeList.asSequence()
+                    .filter { it !in selectedNodes }
+                    .forEach { node ->
+                        val service = getService(node)
+                        service?.selected(this, node)
+                        selectedNodes += node
+                        if (service != null && node is Spatial) {
+                            val aabb = AABB()
+                            if (service.getAABB(node, aabb)) {
+                                val s = Selector3D(engine, node)
+                                s.parent = editorRoot
+                                s.material.value = default3DMaterial
+                                selectors.add(s)
+
+                                s.size.set(aabb.size.x * 1.1f, aabb.size.y * 1.1f, aabb.size.z * 1.1f)
+                            }
+                        }
+                    }
+
             selectedNodes.clear()
+            selectedNodes.addAll(nodeList)
+            /*
             if (node != null) {
                 val service = getService(node)
                 service?.selected(this, node)
@@ -126,7 +156,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                     }
                 }
             }
-
+*/
             eventSelectChanged.dispatch()
         }
     }
@@ -168,7 +198,20 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             editor!!.mouseUp(e)
             return
         }
-        select(getNode(e.x, e.y))
+
+        val shift = isKeyDown(16)
+        val l = ArrayList<Node>()
+        if (shift)
+            l.addAll(selectedNodes)
+        val node = getNode(e.x, e.y)
+        if (node != null)
+            l.add(node)
+        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
+            val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
+            TreePath(bb.toTypedArray())
+        }.toTypedArray()
+        println("->${editor1.sceneStruct.tree.selectionModel.selectionPaths.toList()}")
+        //updateSceneTreeSelection()
         super.mouseDown(e)
     }
 
@@ -243,6 +286,15 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         super.keyUp(e)
     }
 
+    /**
+     * Refresh UI Scene Tree component
+     */
+    private fun updateSceneTreeSelection() {
+        editor1.sceneStruct.tree.selectionModel.selectionPaths = selected.map {
+            TreePath(it.fullPath().toTypedArray())
+        }.toTypedArray()
+    }
+
     override fun init() {
         super.init()
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
@@ -290,24 +342,6 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     private var disposed = AtomicBoolean(false)
     private var render = 0
-
-    //private var updaterThread: UpdaterThread? = null
-/*
-    fun startDraw() {
-        if (updaterThread == null) {
-            updaterThread = UpdaterThread().also { it.start() }
-        }
-        render++
-    }
-
-    fun stopDraw() {
-        render--
-        if (render <= 0) {
-            updaterThread?.interrupt()
-            updaterThread = null
-        }
-    }
-*/
 }
 
 

@@ -40,6 +40,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
     private val _layout = SpringLayout()
 
     init {
+        tree.expandsSelectedPaths = true
         this.layout = _layout
         val pp = ToolbarDecorator.createDecorator(tree)
                 .setAddAction {
@@ -83,7 +84,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
 //        scrollPane.background = Color.RED
 
         tree.addTreeSelectionListener {
-            view.select(it.path.lastPathComponent as Node?)
+            view.select(tree.selectionModel.selectionPaths.map { it.lastPathComponent as Node })
         }
     }
 }

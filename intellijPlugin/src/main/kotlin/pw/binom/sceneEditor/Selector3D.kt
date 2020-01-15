@@ -19,6 +19,7 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
 
     override fun close() {
         geom = null
+
         vertex.close()
         index.close()
         super.close()
