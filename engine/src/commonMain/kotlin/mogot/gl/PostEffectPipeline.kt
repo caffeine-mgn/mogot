@@ -184,8 +184,11 @@ class PostEffectPipeline(val engine: Engine) {
         gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
         drawScene()
         renderTargetTexture.end()
+
+       ///////
         //gl.disable(gl.DEPTH_TEST)
         //gl.disable(gl.CULL_FACE)
+        ///////
 
         list.forEach { currentFrameEffect ->
             gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
@@ -194,6 +197,7 @@ class PostEffectPipeline(val engine: Engine) {
             sprite.material = currentFrameEffect
             sprite.draw(renderContext)
             renderTargetTexture.end()
+            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
         }
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)

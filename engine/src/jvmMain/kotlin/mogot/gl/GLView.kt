@@ -14,6 +14,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 
 
+
 open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
     override val mouseDown = EventValueDispatcher<Int>()
@@ -228,7 +229,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
         gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
 
 
-        gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
+        //gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
         camera?.globalToLocalMatrix(tempMatrix.identity())
 
         renderContext.pointLights.clear()
