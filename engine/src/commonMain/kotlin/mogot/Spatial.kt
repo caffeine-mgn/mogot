@@ -26,27 +26,23 @@ open class Spatial : Node() {
     }
 
     fun globalToLocalMatrix(dest: Matrix4f): Matrix4f {
-        /*
-        dest.identity()
-        parent?.currentToRoot {
-            if (it.isSpatial) {
-                it as Spatial
-                dest.set(it.apply(dest))
-            }
-            true
-        }
-        */
         localToGlobalMatrix(dest)
         dest.invert(dest)
         return dest
-        dest.identity()
-        parentSpatial?.rootToCurrent {
-            if (it.isSpatial) {
-                it as Spatial
-                dest.mul(it.transform.invert(Matrix4f()))
-            }
-        }
-        dest.mul(transform.invert(Matrix4f()))
+        val p = parentSpatial
+        if (p == null)
+            dest.identity()
+        p?.globalToLocalMatrix(dest)
+//        parentSpatial?.rootToCurrent {
+//            if (it.isSpatial) {
+//                it as Spatial
+//                dest.mul(it.transform.invert(Matrix4f()))
+//            }
+//        }
+        dest.scale(-scale)
+        dest.rotate(-quaternion)
+        dest.translate(-position)
+//        dest.mul(transform.invert(Matrix4f()))
         return dest
         parentSpatial?.globalToLocalMatrix(dest)
 
@@ -133,12 +129,20 @@ open class Spatial : Node() {
     private val _transform = Matrix4f()
 
     fun setGlobalTransform(matrix: Matrix4fc) {
-        val m = globalToLocalMatrix(Matrix4f())
-        matrix.mul(m, m)
-        m.mul(transform, m)
+//        val mat = Matrix4f(matrix)
+//        parentSpatial?.rootToCurrent {
+//            if (it.isSpatial && it is Spatial)
+//                mat.mul(it.transform.invert(Matrix4f()), mat)
+//        }
+        val m = parentSpatial?.globalToLocalMatrix(Matrix4f()) ?: Matrix4f()
+        m.mul(matrix, m)
+//        m.mul(transform, m)
         m.getTranslation(position)
         m.getScale(scale)
         quaternion.setFromUnnormalized(m)
+//        position.negate()
+//        scale.negate()
+//        quaternion.invert()
     }
 
     val parentSpatial: Spatial?

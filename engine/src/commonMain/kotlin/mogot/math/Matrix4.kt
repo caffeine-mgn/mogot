@@ -292,23 +292,23 @@ private fun Matrix4fc.invertGeneric(dest: Matrix4f): Matrix4f {
     val nm31: Float = Math.fma(m00, j, Math.fma(-m01, h, m02 * g)) * det
     val nm32: Float = Math.fma(-m30, d, Math.fma(m31, b, -m32 * a)) * det
     val nm33: Float = Math.fma(m20, d, Math.fma(-m21, b, m22 * a)) * det
-    dest.m00 = (nm00)
-    dest.m01 = (nm01)
-    dest.m02 = (nm02)
-    dest.m03 = (nm03)
-    dest.m10 = (nm10)
-    dest.m11 = (nm11)
-    dest.m12 = (nm12)
-    dest.m13 = (nm13)
-    dest.m20 = (nm20)
-    dest.m21 = (nm21)
-    dest.m22 = (nm22)
-    dest.m23 = (nm23)
-    dest.m30 = (nm30)
-    dest.m31 = (nm31)
-    dest.m32 = (nm32)
-    dest.m33 = (nm33)
-    dest.properties = (0)
+    dest.m00 = nm00
+    dest.m01 = nm01
+    dest.m02 = nm02
+    dest.m03 = nm03
+    dest.m10 = nm10
+    dest.m11 = nm11
+    dest.m12 = nm12
+    dest.m13 = nm13
+    dest.m20 = nm20
+    dest.m21 = nm21
+    dest.m22 = nm22
+    dest.m23 = nm23
+    dest.m30 = nm30
+    dest.m31 = nm31
+    dest.m32 = nm32
+    dest.m33 = nm33
+    dest.properties = 0
     return dest
 }
 
@@ -1202,6 +1202,16 @@ fun cosFromSin(sin: Float, angle: Float): Float {
 }
 
 operator fun Matrix4fc.times(viewMatrix: Matrix4fc): Matrix4f = mul(viewMatrix, Matrix4f())
+
+fun Matrix4f.translationRotateScale(t: Vector3fc,
+                                    q: Quaternionfc,
+                                    s: Vector3fc) =
+        translationRotateScale(
+                t.x, t.y, t.z,
+                q.x, q.y, q.z, q.w,
+                s.x, s.y, s.z
+        )
+
 
 fun Matrix4f.translationRotateScale(tx: Float, ty: Float, tz: Float,
                                     qx: Float, qy: Float, qz: Float, qw: Float,

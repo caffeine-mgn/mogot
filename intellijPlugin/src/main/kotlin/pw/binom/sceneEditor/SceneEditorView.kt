@@ -210,7 +210,6 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
             TreePath(bb.toTypedArray())
         }.toTypedArray()
-        println("->${editor1.sceneStruct.tree.selectionModel.selectionPaths.toList()}")
         //updateSceneTreeSelection()
         super.mouseDown(e)
     }

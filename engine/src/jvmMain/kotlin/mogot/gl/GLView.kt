@@ -33,6 +33,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         toolkit.createCustomCursor(cursorImg, Point(0, 0), "blank cursor")
     }
 
+    init {
+        autoSwapBufferMode = false
+    }
+
     var updateOnEvent = false
 
     override var cursorVisible: Boolean
@@ -265,7 +269,6 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
             robot.mouseMove(point.x, point.y)
         }
 
-        swapBuffers()
         lastFrameTime = time
     }
 

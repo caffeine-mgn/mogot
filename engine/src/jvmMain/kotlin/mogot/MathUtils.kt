@@ -1,5 +1,5 @@
 package mogot
-
+/*
 import org.joml.*
 
 //private val matrixBuffer = BufferUtils.createFloatBuffer(16)
@@ -218,3 +218,4 @@ fun <T : Vector4fc> Array<T>.toFloatArray(): FloatArray {
     }
     return out
 }
+*/
