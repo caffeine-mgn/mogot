@@ -56,7 +56,9 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform"
     init {
         positionEditor.eventChange.on {
             if (changeEventEnabled) {
-                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach { it.position.set(positionEditor.value) }
+                nodes?.asSequence()
+                        ?.mapNotNull { it as? Spatial }
+                        ?.forEach { it.position.set(positionEditor.value) }
                 view.repaint()
             }
         }
@@ -85,14 +87,14 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform"
 
 val Vector3fc.asRadian
     get() = Vector3f(
-            Math.toRadians(x.toDouble()).toFloat(),
-            Math.toRadians(y.toDouble()).toFloat(),
-            Math.toRadians(z.toDouble()).toFloat()
+            toRadians(x),
+            toRadians(y),
+            toRadians(z)
     )
 
 val Vector3fc.asDegrees
     get() = Vector3f(
-            Math.toDegrees(x.toDouble()).toFloat(),
-            Math.toDegrees(y.toDouble()).toFloat(),
-            Math.toDegrees(z.toDouble()).toFloat()
+            toDegrees(x),
+            toDegrees(y),
+            toDegrees(z)
     )
