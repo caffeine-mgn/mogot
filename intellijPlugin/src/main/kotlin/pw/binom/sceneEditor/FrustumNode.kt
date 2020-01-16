@@ -3,9 +3,12 @@ package pw.binom.sceneEditor
 import mogot.*
 import mogot.math.*
 import mogot.gl.*
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
+import pw.binom.*
 
 class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
-    private var geom: Geom3D2? = null
+    private var geom by ResourceHolder<Geom3D2>()
 
     override fun apply(matrix: Matrix4fc): Matrix4fc {
         camera.localToGlobalMatrix(this._matrix)
@@ -24,158 +27,109 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         fieldOfView = camera.fieldOfView
         oldProjection.set(camera.projectionMatrix)
         val vec = Vector3f()
-        geom?.dec()
-        val vertex = FloatArray(24 * 3)
+        geom = null
+        val vertex = FloatDataBuffer.alloc(24 * 3)
+        val builder = vertex.builder()
         var c = 0
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
 //----------------//
         //--top-right edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
-
+        builder.push(vec)
 
         //--bottom-right edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         //--bottom-left edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         //--top-left edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
-
+        builder.push(vec)
 
         //--screen-right edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         //--screen-left edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYNZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         //--projection-right edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_PXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         //--left-right edge--//
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXPYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
         camera.projectionMatrix.frustumCorner(Matrix4fc.CORNER_NXNYPZ, vec)
-        vertex[c++] = vec.x
-        vertex[c++] = vec.y
-        vertex[c++] = vec.z
+        builder.push(vec)
 
 
-
-
+        val indexes = IntDataBuffer.alloc(vertex.size) { it }
         geom = Geom3D2(
                 gl = engine.gl,
                 vertex = vertex,
-                index = IntArray(vertex.size) { it },
+                index = indexes,
                 normals = null,
                 uvs = null
         )
+        vertex.close()
+        indexes.close()
         geom!!.mode = Geometry.RenderMode.LINES
-        geom!!.inc()
         println("Frustim Geom=${geom!!.hashCode()}")
     }
 
     override fun close() {
-        geom?.dec()
+        geom = null
         material.dispose()
         super.close()
     }
@@ -191,9 +145,9 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         }
         if (geom == null)
             update()
-        engine.gl.checkError{"Before Material"}
+        engine.gl.checkError { "Before Material" }
         mat.use(model, projection, renderContext)
-        engine.gl.checkError{"After Material"}
+        engine.gl.checkError { "After Material" }
         geom!!.draw()
         mat.unuse()
     }

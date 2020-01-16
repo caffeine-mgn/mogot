@@ -39,7 +39,7 @@ abstract class EditMove(view: SceneEditorView, selected: List<Spatial>) : Spatia
     }
 }
 
-private fun SceneEditorView.updatePropertyPosition() {
+fun SceneEditorView.updatePropertyPosition() {
     editor1.propertyTool.properties
             .mapNotNull { it as? PositionProperty }
             .forEach {
@@ -47,6 +47,7 @@ private fun SceneEditorView.updatePropertyPosition() {
             }
 }
 
+@Strictfp
 class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMove(view, selected) {
 
     private val axisLine = Line(view.engine)
@@ -147,7 +148,7 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: 
         //startValue = value
     }
 }
-
+@Strictfp
 class EditMoveAllAxie(view: SceneEditorView, selected: List<Spatial>) : EditMove(view, selected) {
     override fun keyDown(code: Int) {
         when (code) {

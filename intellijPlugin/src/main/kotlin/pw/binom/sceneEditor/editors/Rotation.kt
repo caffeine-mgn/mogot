@@ -1,7 +1,6 @@
 package pw.binom.sceneEditor.editors
 
 import mogot.Camera
-import mogot.Engine
 import mogot.Node
 import mogot.Spatial
 import mogot.math.*
@@ -79,6 +78,7 @@ abstract class SpatialEditor(view: SceneEditorView, val selected: List<Spatial>)
         initPositions.forEach { (node, matrix) ->
             node.setGlobalTransform(matrix)
         }
+        view.updatePropertyPosition()
     }
 
     override fun keyUp(code: Int) {
@@ -159,6 +159,7 @@ abstract class RotateEditor(view: SceneEditorView, val root: Node, val camera: C
     }
 }
 
+@Strictfp
 class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : RotateEditor(view, root, camera, selected) {
     private val grid = Line(engine).also {
         it.parent = root
@@ -174,37 +175,45 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
         }
     }
 
+    private val tempMatrix = Matrix4f()
+    private val globalRotation = Quaternionf()
+    private val newRotation = Quaternionf()
+    private val axisVec = Vector3f()
+    private val oldScale=Vector3f()
     override fun render(dt: Float) {
         super.render(dt)
-        val q = Quaternionf()
+        globalRotation.identity()
         val axis = when (axis) {
-            Axis.Z -> {
-                val rotateDirection = if (camera.position.z - avgPosition.z > 0f) 1f else -1f
-                q.mul(Vector3f(0f, 0f, rotateDirection), Vector3f())
-            }
             Axis.X -> {
                 val rotateDirection = if (camera.position.x - avgPosition.x > 0f) 1f else -1f
-                q.mul(Vector3f(rotateDirection, 0f, 0f), Vector3f())
+                globalRotation.mul(axisVec.set(rotateDirection, 0f, 0f))
             }
             Axis.Y -> {
                 val rotateDirection = if (camera.position.y - avgPosition.y > 0f) 1f else -1f
-                q.mul(Vector3f(0f, rotateDirection, 0f), Vector3f())
+                globalRotation.mul(axisVec.set(0f, rotateDirection, 0f))
+            }
+            Axis.Z -> {
+                val rotateDirection = if (camera.position.z - avgPosition.z > 0f) 1f else -1f
+                globalRotation.mul(axisVec.set(0f, 0f, rotateDirection))
             }
         }
-        q.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
+        globalRotation.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
 
         if (initPositions.size == 1)
             initPositions.forEach {
-                val m = Matrix4f().rotate(q)
+                val m = tempMatrix.identity().rotate(globalRotation)
                         .mul(it.value)
                         .setTranslation(it.value.getTranslation(Vector3f()))
                 it.key.setGlobalTransform(m)
             }
         else
-            initPositions.forEach {
-                val m = Matrix4f().rotate(q)
-                        .mul(it.value)
-                it.key.setGlobalTransform(m)
+            initPositions.forEach { (node, matrix) ->
+                val newPosition = globalRotation.mul(matrix.getTranslation(Vector3f()).sub(avgPosition)).add(avgPosition)
+                matrix.getScale(oldScale)
+                newRotation.identity().setFromUnnormalized(matrix).let { globalRotation.mul(it, it) }
+                val newMatrix = tempMatrix.identity()
+                        .translationRotateScale(newPosition, newRotation, oldScale)
+                node.setGlobalTransform(newMatrix)
             }
     }
 
@@ -217,29 +226,36 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
     }
 }
 
+@Strictfp
 class RotateAllAxes(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>) : RotateEditor(view, root, camera, selected) {
-
+    private val tempMatrix = Matrix4f()
+    private val globalRotation = Quaternionf()
+    private val newRotation = Quaternionf()
+    private val oldScale=Vector3f()
     override fun render(dt: Float) {
         super.render(dt)
         if (initPositions.isEmpty())
             TODO()
 
-        val q = Quaternionf()
-        val axis = camera.quaternion.mul(Vector3f(0f, 0f, 1f), Vector3f())
-        q.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
+        globalRotation.identity()
+        val axis = camera.quaternion.mul(Vector3fc.Z, Vector3f())
+        globalRotation.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
 
         if (initPositions.size == 1)
-            initPositions.forEach {
-                val m = Matrix4f().rotate(q)
-                        .mul(it.value)
-                        .setTranslation(it.value.getTranslation(Vector3f()))
-                it.key.setGlobalTransform(m)
+            initPositions.forEach { (node, matrix) ->
+                val m = tempMatrix.identity().rotate(globalRotation)
+                        .mul(matrix)
+                        .setTranslation(matrix.getTranslation(Vector3f()))
+                node.setGlobalTransform(m)
             }
         else
-            initPositions.forEach {
-                val m = Matrix4f().rotate(q)
-                m.mul(it.value, m)
-                it.key.setGlobalTransform(m)
+            initPositions.forEach { (node, matrix) ->
+                val newPosition = globalRotation.mul(matrix.getTranslation(Vector3f()).sub(avgPosition)).add(avgPosition)
+                matrix.getScale(oldScale)
+                newRotation.identity().setFromUnnormalized(matrix).let { globalRotation.mul(it, it) }
+                val newMatrix = tempMatrix.identity()
+                        .translationRotateScale(newPosition, newRotation, oldScale)
+                node.setGlobalTransform(newMatrix)
             }
     }
 

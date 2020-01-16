@@ -3,8 +3,10 @@ package mogot
 import mogot.gl.*
 import mogot.math.Vector2f
 import mogot.math.Vector3f
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
 
-class Geom2D(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: FloatArray?, uvs: FloatArray?) : Geometry, ResourceImpl() {
+class Geom2D(val gl: GL, val index: IntDataBuffer, val vertex: FloatDataBuffer, normals: FloatDataBuffer?, uvs: FloatDataBuffer?) : Geometry, ResourceImpl() {
 
     private var renderMode: Int = gl.TRIANGLES
 

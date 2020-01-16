@@ -34,7 +34,7 @@ class SpatialTest {
     }
 
     @Test
-    fun setGlobalTransform() {
+    fun setGlobalTransform1() {
         val s = Spatial()
         s.position.set(5f, 5f, 5f)
         val globalMat = s.localToGlobalMatrix(Matrix4f())
@@ -53,6 +53,62 @@ class SpatialTest {
             it.x.eq(2f)
             it.y.eq(2f)
             it.z.eq(2f)
+        }
+    }
+
+    @Test
+    fun setGlobalTransform() {
+        val root = Spatial()
+        val child = Spatial()
+        root.position.set(3f, 0f, 0f)
+        root.quaternion.identity()
+        root.quaternion.setRotation(0f, toRadians(90f), 0f)
+        child.parent = root
+        child.setGlobalTransform(Matrix4f().translate(4f, 0f, 0f).scale(1f, 1f, 1f))
+
+//        RotationVector(child.quaternion).also {
+//            it.x.eq(0f)
+//            it.y.eq(0f)
+//            it.z.eq(0f)
+//        }
+
+        child.position.also {
+            it.x.eq(0f, 0.01f)
+            it.y.eq(0f, 0.01f)
+            it.z.eq(1f, 0.01f)
+        }
+
+        child.localToGlobal(Vector3f(), Vector3f()).also {
+            it.x.eq(4f, 0.01f)
+            it.y.eq(0f, 0.01f)
+            it.z.eq(0f, 0.01f)
+        }
+//        child.globalToLocal(Vector3f(4f, 0f, 0f), Vector3f()).also {
+//            it.x.eq(0f, 0.01f)
+//            it.y.eq(0f, 0.01f)
+//            it.z.eq(0f, 0.01f)
+//        }
+    }
+
+    @Test
+    fun logalAndGlobal() {
+        val root = Spatial()
+        val child = Spatial()
+        root.position.set(3f, 0f, 0f)
+        root.quaternion.identity()
+        root.quaternion.setRotation(0f, toRadians(90f), 0f)
+        child.parent = root
+        child.position.set(0f, 0f, 1f)
+
+        child.localToGlobal(Vector3f(), Vector3f()).also {
+            it.x.eq(4f, 0.01f)
+            it.y.eq(0f, 0.01f)
+            it.z.eq(0f, 0.01f)
+        }
+        child.globalToLocal(Vector3f(4f, 0f, 0f), Vector3f()).also {
+            it.x.eq(0f, 0.01f)
+            it.y.eq(0f, 0.01f)
+            it.z.eq(0f, 0.01f)
         }
     }
 
@@ -144,6 +200,33 @@ class SpatialTest {
             it.x.eq(s.position.x + c.position.x)
             it.y.eq(s.position.y + c.position.y)
             it.z.eq(s.position.z + c.position.z)
+        }
+    }
+
+    @Test
+    fun test() {
+        val vv = Spatial()
+        vv.position.set(3f, 0f, 0f)
+        val q = Quaternionf()
+        q.setRotation(0f, toRadians(90f), 0f)
+        val mat = vv.localToGlobalMatrix(Matrix4f())
+        mat.getTranslation(Vector3f()).also {
+            it.x.eq(3f)
+            it.y.eq(0f)
+            it.z.eq(0f)
+        }
+        val rotMat = Matrix4f().rotate(q)
+        mat.translate(-2f,0f,0f)
+
+        mat.mul(rotMat, mat)
+        mat.translate(2f,0f,0f)
+        println("POS=${mat.getTranslation(Vector3f())}")
+
+//        mat.translate(2f,0f,0f)
+        mat.getTranslation(Vector3f()).also {
+            it.x.eq(2f)
+            it.y.eq(0f)
+            it.z.eq(-1f, 0.01f)
         }
     }
 }

@@ -5,12 +5,14 @@ import mogot.gl.BufferElementArray
 import mogot.gl.*
 import mogot.gl.VertexArray
 import mogot.math.Vector3f
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
 import pw.binom.io.Closeable
 
 /**
  * VBO хранит вертиксы, нормали и т.п.
  */
-class Geom3D2(val gl: GL, val index: IntArray, val vertex: FloatArray, normals: FloatArray?, uvs: FloatArray?) : Geometry, ResourceImpl() {
+class Geom3D2(val gl: GL, val index: IntDataBuffer, vertex: FloatDataBuffer, normals: FloatDataBuffer?, uvs: FloatDataBuffer?) : Geometry, ResourceImpl() {
 
     private var renderMode: Int = gl.TRIANGLES
 

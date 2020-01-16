@@ -2,6 +2,9 @@ package pw.binom.sceneEditor
 
 import mogot.*
 import mogot.math.Matrix4fc
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
+import pw.binom.intDataOf
 
 class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     /**
@@ -18,7 +21,7 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
     private fun update() {
         check(size > 0)
         check(size1 > 0f)
-        val vertex = FloatArray((size + 1) * 2 * 3 * 2)
+        val vertex = FloatDataBuffer.alloc((size + 1) * 2 * 3 * 2)
         val sizeHalf = (size / 2f) * size1
         val sizeFull = (size) * size1
         var c = 0
@@ -41,14 +44,16 @@ class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
             vertex[c++] = 0f
             vertex[c++] = y * size1 - sizeHalf
         }
+        val indexes = intDataOf(*(0 until vertex.size).map { it }.toIntArray())
         geom = Geom3D2(
                 gl = engine.gl,
                 vertex = vertex,
-                index = IntArray(vertex.size) { it },
+                index = indexes,
                 normals = null,
                 uvs = null
         )
-//        geom = Geoms.buildCube3(engine.gl,1f,1f,1f)
+        vertex.close()
+        indexes.close()
         geom!!.mode = Geometry.RenderMode.LINES
         println("Recreate Grid")
     }

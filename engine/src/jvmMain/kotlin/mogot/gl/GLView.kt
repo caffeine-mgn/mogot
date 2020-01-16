@@ -2,6 +2,7 @@ package mogot.gl
 
 import com.jogamp.opengl.*
 import com.jogamp.opengl.awt.GLJPanel
+import com.jogamp.opengl.util.Animator
 import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
@@ -14,7 +15,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 
 
-open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
+open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
     override val mouseDown = EventValueDispatcher<Int>()
     override val mouseUp = EventValueDispatcher<Int>()
@@ -30,6 +31,10 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
     private val hiddenCursor = run {
         val cursorImg = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
         toolkit.createCustomCursor(cursorImg, Point(0, 0), "blank cursor")
+    }
+
+    init {
+        autoSwapBufferMode = false
     }
 
     var updateOnEvent = false
@@ -72,7 +77,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
     }
 
     init {
-        animator = FPSAnimator(this, 60)
+        animator = if (fps == null) Animator(this) else FPSAnimator(this, fps, true)
     }
 
     protected open fun mouseDown(e: MouseEvent) {
@@ -264,7 +269,6 @@ open class GLView(val fileSystem: FileSystem<Unit>) : Stage, GLJPanel(GLCapabili
             robot.mouseMove(point.x, point.y)
         }
 
-        swapBuffers()
         lastFrameTime = time
     }
 

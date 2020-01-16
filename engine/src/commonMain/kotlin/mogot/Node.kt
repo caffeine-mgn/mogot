@@ -143,6 +143,13 @@ inline fun Node.currentToRoot(func: (Node) -> Boolean) {
     }
 }
 
+fun Node.fullPath(): List<Node> {
+    val list = ArrayList<Node>()
+    currentToRoot { list.add(it) }
+    list.reverse()
+    return list
+}
+
 fun Node.asUpSequence() = object : Sequence<Node> {
     override fun iterator(): Iterator<Node> = NodeParentIterator(parent)
 }

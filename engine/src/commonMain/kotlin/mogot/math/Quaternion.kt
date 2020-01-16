@@ -301,13 +301,13 @@ val Quaternionfc.forward: Vector3fc
 
 
 val Quaternionfc.roll: Float
-    get() = atan2(2.0f * (y * z + w * x), (w * w - x * x - y * y + z * z))
+    get() = atan2(2.0f * (y * z + w * x), (w * w - x * x - y * y + z * z))//atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z)
 
 val Quaternionfc.pitch: Float
-    get() = asin(-2.0f * (x * z - w * y))
+    get() = asin(-2.0f * (x * z - w * y))//atan2(2*x*w - 2*y*z, 1 - 2*x*x - 2*z*z)
 
 val Quaternionfc.yaw: Float
-    get() = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))
+    get() = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))//asin(2*x*y + 2*z*w)
 
 fun Quaternionfm.setRotation(yaw: Float, pitch: Float, roll: Float): Quaternionfm =
         setRotation(yaw, pitch, roll, this)
@@ -340,6 +340,8 @@ class RotationVector(val quaternion: Quaternionfm) : Vector3fm {
     }
 }
 
+fun Quaternionfm.mul(q: Quaternionfm) = mul(q, q)
+
 fun Quaternionfc.mul(q: Quaternionfc, dest: Quaternionfm): Quaternionfm {
     dest.set(w * q.x + x * q.w + y * q.z - z * q.y,
             w * q.y - x * q.z + y * q.w + z * q.x,
@@ -347,6 +349,8 @@ fun Quaternionfc.mul(q: Quaternionfc, dest: Quaternionfm): Quaternionfm {
             w * q.w - x * q.x - y * q.y - z * q.z)
     return dest
 }
+
+fun Quaternionfc.mul(vector: Vector3fm) = mul(vector, vector)
 
 fun Quaternionfc.mul(vector: Vector3fc, dest: Vector3fm): Vector3fm {
     val tempX: Float = w * w * vector.x + 2 * y * w * vector.z - 2 * z * w * vector.y + x * x * vector.x + 2 * y * x * vector.y + 2 * z * x * vector.z - z * z * vector.x - y * y * vector.x
@@ -372,6 +376,9 @@ fun Quaternionfc.setRotation(yaw: Float, pitch: Float, roll: Float, dest: Quater
     dest.z = (sy * cp * cr - cy * sp * sr)
     return dest
 }
+
+operator fun Quaternionfc.times(other: Quaternionfm) = mul(other, Quaternionf())
+
 
 fun Quaternionfm.setFromUnnormalized(mat: Matrix4fc): Quaternionfm {
     setFromUnnormalized(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22)
@@ -563,5 +570,23 @@ fun Quaternionfm.normalize(): Quaternionfm {
     y *= invNorm
     z *= invNorm
     w *= invNorm
+    return this
+}
+
+fun Quaternionfm.rotationZYX(angleZ: Float, angleY: Float, angleX: Float): Quaternionfm {
+    val sx = sin(angleX * 0.5f)
+    val cx = cosFromSin(sx, angleX * 0.5f)
+    val sy = sin(angleY * 0.5f)
+    val cy = cosFromSin(sy, angleY * 0.5f)
+    val sz = sin(angleZ * 0.5f)
+    val cz = cosFromSin(sz, angleZ * 0.5f)
+    val cycz = cy * cz
+    val sysz = sy * sz
+    val sycz = sy * cz
+    val cysz = cy * sz
+    w = cx * cycz + sx * sysz
+    x = sx * cycz - cx * sysz
+    y = cx * sycz + sx * cysz
+    z = cx * cysz - sx * sycz
     return this
 }

@@ -1,6 +1,5 @@
 package mogot
 
-import org.joml.*
 /*
 open class BaseNode3D : Node() {
     val position = Vector3f()
@@ -118,7 +117,7 @@ open class BaseNode3D : Node() {
 //    }
 //    return this
 //}
-*/
+/*
 fun Quaternionfc.rotateEuler(heading: Float, attitude: Float, bank: Float, dest: Quaternionf) {
     val c1 = Math.cos(heading.toDouble()).toFloat()
     val s1 = Math.sin(heading.toDouble()).toFloat()
@@ -133,3 +132,4 @@ fun Quaternionfc.rotateEuler(heading: Float, attitude: Float, bank: Float, dest:
     dest.z = (-s1 * s3 + c1 * s2 * c3 + s2) / w4
 
 }
+*/

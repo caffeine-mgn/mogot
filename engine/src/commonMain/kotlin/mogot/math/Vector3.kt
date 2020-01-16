@@ -82,9 +82,19 @@ interface Vector3fc {
 
 
     companion object {
-        val UP: Vector3fc = Vector3f(0f, 1f, 0f)
+        val X: Vector3fc = Vector3f(1f, 0f, 0f)
+        val Y: Vector3fc = Vector3f(0f, 1f, 0f)
+        val Z: Vector3fc = Vector3f(0f, 0f, 1f)
         val ZERO: Vector3fc = Vector3f(0f, 0f, 0f)
-        val FORWARD: Vector3fc = Vector3f(0f, 0f, 1f)
+
+        inline val UP
+            get() = Y
+
+        inline val FORWARD
+            get() = Z
+
+        inline val RIGHT
+            get() = X
     }
 }
 

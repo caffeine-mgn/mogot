@@ -4,8 +4,10 @@ import com.jogamp.opengl.GL2
 import com.jogamp.opengl.GL3
 import mogot.math.Matrix4fc
 import mogot.math.get
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
 import java.nio.Buffer
-import java.nio.FloatBuffer
+//import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
 actual class GL(val gl: GL2) {
@@ -21,26 +23,23 @@ actual class GL(val gl: GL2) {
         gl.glDeleteBuffers(1, v, 0)
     }
 
-    actual fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int) {
-        val buffer = FloatBuffer.allocate(data.size)
-        buffer.put(data)
-        buffer.flip2()
+    actual fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int) {
+//        val buffer = FloatBuffer.allocate(data.size)
+//        buffer.put(data)
+//        buffer.flip2()
         gl.glBufferData(
                 target,
                 size.toLong(),
-                buffer,
+                data.buffer,
                 usage
         )
     }
 
-    actual fun bufferData(target: Int, size: Int, data: IntArray, usage: Int) {
-        val buffer = IntBuffer.allocate(data.size)
-        buffer.put(data)
-        buffer.flip2()
+    actual fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int) {
         gl.glBufferData(
                 target,
                 size.toLong(),
-                buffer,
+                data.buffer,
                 usage
         )
     }
@@ -183,7 +182,7 @@ actual class GL(val gl: GL2) {
         gl.glUniform1f(uniformLocation.id, value)
     }
 
-    actual fun uniform1b(uniformLocation: GLUniformLocation, value: Boolean){
+    actual fun uniform1b(uniformLocation: GLUniformLocation, value: Boolean) {
         uniformLocation as JGLUniformLocation
         gl.glUniform1i(uniformLocation.id, if (value) 1 else 0)
     }
