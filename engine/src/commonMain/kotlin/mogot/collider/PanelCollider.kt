@@ -6,8 +6,6 @@ import mogot.math.*
 class PanelCollider(width: Float, height: Float) : Collider {
     private val TEMP_MATRIX = Matrix4f()
     override var node: Spatial? = null
-    private val LOCAL_POS = Vector3f()
-    private val LOCAL_Dir = Vector3f()
 
     private val p1 = Vector3f()
     private val p2 = Vector3f()
