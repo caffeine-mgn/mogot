@@ -138,7 +138,10 @@ open class Spatial : Node() {
 
     override fun apply(matrix: Matrix4fc): Matrix4fc {
         this._matrix.set(matrix)
-        this._matrix.translationRotateScale(position, quaternion, scale)
+                .translate(position)
+                .rotate(quaternion)
+                .scale(scale)
+        //this._matrix.translationRotateScale(position, quaternion, scale)
         return this._matrix
     }
 

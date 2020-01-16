@@ -4,6 +4,7 @@ import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.treeStructure.Tree
 import mogot.Node
+import mogot.*
 import mogot.OmniLight
 import mogot.asUpSequence
 import java.awt.Component
@@ -62,7 +63,9 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     model.delete(tree, node)
                     view.getService(node)?.delete(view, node)
                     node.parent = null
-                    node.close()
+                    view.engine.waitFrame{
+                        node.close()
+                    }
                 }
                 .createPanel()
 
