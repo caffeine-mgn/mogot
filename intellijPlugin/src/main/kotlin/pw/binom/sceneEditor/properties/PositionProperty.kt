@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.properties
 
 import com.intellij.ui.components.JBPanel
 import mogot.Node
+import mogot.*
 import mogot.Spatial
 import mogot.math.*
 import pw.binom.FlexLayout
@@ -26,14 +27,13 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform"
     private val scaleEditor = Vector3Value().appendTo(flex)
     private var changeEventEnabled = true
 
-    private var nodes: List<Node>? = null
+    private var nodes: List<Spatial>? = null
 
     fun update() {
-        val nodes = nodes ?: return
-        val spatials = nodes.asSequence().mapNotNull { it as? Spatial }
+        val nodes = nodes?.asSequence() ?: return
 
         changeEventEnabled = false
-        if (spatials.isEmpty) {
+        if (nodes.isEmpty) {
             positionEditor.isEnabled = false
             positionEditor.value.set(Float.NaN, Float.NaN, Float.NaN)
             rotationEditor.value.set(Float.NaN, Float.NaN, Float.NaN)
@@ -41,36 +41,57 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform"
             return
         } else {
             positionEditor.isEnabled = true
-            positionEditor.value.set(spatials.map { it.position }.common)
-            rotationEditor.value.set(spatials.map { RotationVector(it.quaternion).asDegrees }.common)
-            scaleEditor.value.set(spatials.map { it.scale }.common)
+            positionEditor.value.set(nodes.map { it.position }.common)
+            rotationEditor.value.set(nodes.map { RotationVector(it.quaternion).asDegrees }.common)
+            scaleEditor.value.set(nodes.map { it.scale }.common)
         }
         changeEventEnabled = true
     }
 
     override fun setNodes(nodes: List<Node>) {
-        this.nodes = nodes
+        this.nodes = nodes.asSequence().onlySpatial().toList()
         update()
     }
 
     init {
         positionEditor.eventChange.on {
             if (changeEventEnabled) {
-                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach { it.position.set(positionEditor.value) }
+                nodes?.asSequence()
+                        ?.mapNotNull { it as? Spatial }
+                        ?.forEach {
+                            it.position.set(
+                                    positionEditor.value.x.takeUnless { it.isNaN() } ?: it.position.x,
+                                    positionEditor.value.y.takeUnless { it.isNaN() } ?: it.position.y,
+                                    positionEditor.value.z.takeUnless { it.isNaN() } ?: it.position.z
+                            )
+                        }
                 view.repaint()
             }
         }
 
         rotationEditor.eventChange.on {
             if (changeEventEnabled) {
-                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach { RotationVector(it.quaternion).set(rotationEditor.value.asRadian) }
+                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach {
+                    val r = RotationVector(it.quaternion)
+                    r.set(
+                            rotationEditor.value.x.takeUnless { it.isNaN() }?.let { toRadians(it) } ?: r.x,
+                            rotationEditor.value.y.takeUnless { it.isNaN() }?.let { toRadians(it) } ?: r.y,
+                            rotationEditor.value.z.takeUnless { it.isNaN() }?.let { toRadians(it) } ?: r.z
+                    )
+                }
                 view.repaint()
             }
         }
 
         scaleEditor.eventChange.on {
             if (changeEventEnabled) {
-                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach { it.scale.set(scaleEditor.value) }
+                nodes?.asSequence()?.mapNotNull { it as? Spatial }?.forEach {
+                    it.scale.set(
+                            scaleEditor.value.x.takeUnless { it.isNaN() } ?: it.scale.x,
+                            scaleEditor.value.y.takeUnless { it.isNaN() } ?: it.scale.y,
+                            scaleEditor.value.z.takeUnless { it.isNaN() } ?: it.scale.z
+                    )
+                }
                 view.repaint()
             }
         }
@@ -85,14 +106,14 @@ class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform"
 
 val Vector3fc.asRadian
     get() = Vector3f(
-            Math.toRadians(x.toDouble()).toFloat(),
-            Math.toRadians(y.toDouble()).toFloat(),
-            Math.toRadians(z.toDouble()).toFloat()
+            toRadians(x),
+            toRadians(y),
+            toRadians(z)
     )
 
 val Vector3fc.asDegrees
     get() = Vector3f(
-            Math.toDegrees(x.toDouble()).toFloat(),
-            Math.toDegrees(y.toDouble()).toFloat(),
-            Math.toDegrees(z.toDouble()).toFloat()
+            toDegrees(x),
+            toDegrees(y),
+            toDegrees(z)
     )

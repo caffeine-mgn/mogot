@@ -2,14 +2,16 @@
 package mogot.gl
 
 import mogot.math.Matrix4fc
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
 import kotlin.jvm.JvmName
 
 expect class GL {
     fun clear(mask: Int)
     fun createBuffer(): GLBuffer
     fun deleteBuffer(buffer: GLBuffer)
-    fun bufferData(target: Int, size: Int, data: FloatArray, usage: Int)
-    fun bufferData(target: Int, size: Int, data: IntArray, usage: Int)
+    fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int)
+    fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int)
     fun bindBuffer(target: Int, buffer: GLBuffer?)
 
     fun createVertexArray(): GLVertexArray

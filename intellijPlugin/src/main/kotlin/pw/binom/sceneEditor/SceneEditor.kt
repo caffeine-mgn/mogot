@@ -108,7 +108,7 @@ class SceneEditor(val project: Project,
         if (_module == null) {
 
         } else {
-            _viewer = SceneEditorView(this, project, sourceFile)
+            _viewer = SceneEditorView(this, project, sourceFile, 20)
             sceneStruct = SceneStruct(_viewer!!)
             viewer.eventSelectChanged.on {
                 propertyTool.setNodes(viewer.selected)
@@ -154,6 +154,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun selectNotify() {
+        viewer.startRender()
         println("selectNotify")
         save()
         println("first!")
@@ -189,6 +190,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun deselectNotify() {
+        viewer.stopRender()
         println("deselectNotify")
         structToolWindow.setAvailable(false, null)
         propertyToolWindow.setAvailable(false, null)

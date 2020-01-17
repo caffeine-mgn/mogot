@@ -4,7 +4,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
 import mogot.MaterialNode
 import mogot.Node
+import mogot.collider.Collider
 import mogot.math.AABBm
+import mogot.collider.BoxCollider
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
@@ -32,6 +34,14 @@ object CubeService : NodeService {
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {
         EmptyNodeService.nodeDeleted(view.engine, node)
+    }
+
+    override fun getCollider(node: Node): Collider? {
+        node as CSGBox
+        val collider = BoxCollider()
+        collider.node = node
+        collider.size.set(node.width, node.height, node.depth)
+        return collider
     }
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean {
@@ -71,5 +81,11 @@ object CubeService : NodeService {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
         m?.selected = false
+    }
+
+    override fun hover(node: Node, hover: Boolean) {
+        node as MaterialNode
+        val m = node.material.value as? MaterialInstance?
+        m?.hover = hover
     }
 }

@@ -1,8 +1,13 @@
 package pw.binom.sceneEditor
 
 import mogot.math.*
+import pw.binom.io.Closeable
 import pw.binom.sceneEditor.editors.EditActionFactory
 import java.awt.event.MouseEvent
+import kotlin.math.absoluteValue
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.sign
 
 object FpsCamEditorFactory : EditActionFactory {
     override fun mouseDown(view: SceneEditorView, e: MouseEvent) {
@@ -18,26 +23,63 @@ const val KEY_A = 65
 const val KEY_E = 69
 const val KEY_Q = 81
 
+private class FpsManager : Closeable {
+    var x = 0f
+    var y = 0f
+    override fun close() {
+    }
+}
+
 class FpsCam(val view: SceneEditorView) : EditAction {
 
     val normalSpeed = 6f
     val fastSpeed = 12f
+    private val manager = view.engine.manager("FpsManager"){FpsManager()}
 
-    private var x = 0f
-    private var y = 0f
-    val e = Vector3f()
     private val temp = Vector3f()
 
+    //    private val q = Quaternionf()
     init {
         view.lockMouse = true
         view.cursorVisible = false
-
-        view.editorCamera.quaternion.getEulerAnglesXYZ(e)
-
-        y = -view.editorCamera.quaternion.roll
-        x = -view.editorCamera.quaternion.pitch
     }
 
+    /*
+        init {
+
+    //        q.set(view.editorCamera.quaternion)
+            val v = Vector3f()
+            v.set(0f, 0f, 1f)
+            //view.editorCamera.quaternion.getEulerAnglesXYZ(v)
+            view.editorCamera.quaternion.mul(v, v)
+            x = atan2(v.x, v.z)
+
+    //        v.set(1f, 0f, 0f)
+    //        view.editorCamera.quaternion.mul(v, v)
+            val vv = v.cross(Vector3fc.UP, Vector3f())
+            y = atan2(v.length, v.y)-PIf/2f
+
+            println("y=${toDegrees(y)}")
+            //y=v.y
+    /*
+            y = view.editorCamera.quaternion.roll
+            x = view.editorCamera.quaternion.pitch
+
+            x = -v.y
+            //y = -v.z
+            v.set(0f, 0f, 1f)
+            view.editorCamera.quaternion.mul(v, v)
+            x = atan2(v.x, v.z)
+            if (view.editorCamera.quaternion.yaw > PIf * 0.5f)
+                y = PIf - y
+            println("-->${view.editorCamera.quaternion.yaw}             ${view.editorCamera.quaternion.pitch}")
+
+    //        v.dot
+    //        view.editorCamera.quaternion.mul(v, v)
+    //        y = atan2(v.x, v.y)
+     */
+        }
+    */
     override fun mouseUp(e: MouseEvent) {
         if (e.button == 3) {
             view.stopEditing()
@@ -66,13 +108,11 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
         if (KEY_W in keyDown) {
             node.position.add(temp)
-//            node.position.add(node.rotation.forward * dt * moveSpeed)
         }
 
         if (KEY_S in keyDown) {
             temp.negated(temp)
             node.position.add(temp)
-//            node.position.add(-node.rotation.forward * dt * moveSpeed)
         }
 
 
@@ -102,11 +142,25 @@ class FpsCam(val view: SceneEditorView) : EditAction {
         val centerY = view.size.y / 2
 
 
-        x += (view.mousePosition.x - centerX) * 0.005f
-        y += (view.mousePosition.y - centerY) * 0.005f
+        manager.x += (centerX - view.mousePosition.x) * 0.005f
+        manager.y += (centerY - view.mousePosition.y) * 0.005f
 
-        node.quaternion.identity()
-        node.quaternion.setRotation(0f, -x, -y)
+        if (manager.y < -PIf / 2) manager.y = -PIf / 2
+        if (manager.y > PIf / 2) manager.y = PIf / 2
+
+        if (manager.x > PIf) manager.x = -PIf
+        if (manager.x < -PIf) manager.x = PIf
+
+
+        //println("$y")
+        //node.quaternion.identity()
+//        q.identity()
+//        q.rotateZYX(0f,x,y)
+//        node.quaternion.mul(q,node.quaternion)
+//        node.quaternion.rotateZYX(0f, x, y)
+//        println("-->${view.editorCamera.quaternion.yaw}             ${view.editorCamera.quaternion.pitch} $y")
+
+        node.quaternion.setRotation(0f, manager.x, manager.y)
 //            node.quaternion.rotateXYZ(x,y,0f)
 //            node.rotation2.y += (Input.mousePosition.x - oldMousePosition.x) * dt / 10f
 //            node.rotation2.x += (Input.mousePosition.y - oldMousePosition.y) * dt / 10f

@@ -7,6 +7,10 @@ import mogot.VisualInstance
 import mogot.*
 import mogot.math.Matrix4fc
 import mogot.math.Vector3f
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
+import pw.binom.alloc
+import pw.binom.intDataOf
 import pw.binom.sceneEditor.editors.Axis
 
 class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
@@ -16,6 +20,8 @@ class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
     val size = 100f
     private var needUpdate = true
     private val axisVec = Vector3f(1f, 0f, 0f)
+    private val vertex = FloatDataBuffer.alloc(3 * 2)
+    private val index = IntDataBuffer.alloc(vertex.size) { it }
     var axis = Axis.X
         set(value) {
             if (field == value)
@@ -31,8 +37,6 @@ class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
 
     private fun update() {
         check(size > 0f)
-        geom = null
-        val vertex = FloatArray(3 * 2)
         val sizeHalf = (size * 0.5f)
 
         var c = 0
@@ -45,19 +49,25 @@ class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
         vertex[c++] = -axisVec.y * sizeHalf
         vertex[c++] = -axisVec.z * sizeHalf
 
-        geom = Geom3D2(
-                gl = engine.gl,
-                vertex = vertex,
-                index = IntArray(vertex.size) { it },
-                normals = null,
-                uvs = null
-        )
+        if (geom == null)
+            geom = Geom3D2(
+                    gl = engine.gl,
+                    vertex = vertex,
+                    index = index,
+                    normals = null,
+                    uvs = null
+            )
+        else
+            geom!!.vertexBuffer.uploadArray(vertex)
+
         geom!!.mode = Geometry.RenderMode.LINES
         needUpdate = false
     }
 
     override fun close() {
         geom = null
+        vertex.close()
+        index.close()
         material.dispose()
         super.close()
     }

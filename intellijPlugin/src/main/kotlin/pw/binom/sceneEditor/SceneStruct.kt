@@ -4,6 +4,7 @@ import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.treeStructure.Tree
 import mogot.Node
+import mogot.*
 import mogot.OmniLight
 import mogot.asUpSequence
 import java.awt.Component
@@ -40,6 +41,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
     private val _layout = SpringLayout()
 
     init {
+        tree.expandsSelectedPaths = true
         this.layout = _layout
         val pp = ToolbarDecorator.createDecorator(tree)
                 .setAddAction {
@@ -61,7 +63,9 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     model.delete(tree, node)
                     view.getService(node)?.delete(view, node)
                     node.parent = null
-                    node.close()
+                    view.engine.waitFrame{
+                        node.close()
+                    }
                 }
                 .createPanel()
 
@@ -83,7 +87,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
 //        scrollPane.background = Color.RED
 
         tree.addTreeSelectionListener {
-            view.select(it.path.lastPathComponent as Node?)
+            view.select(tree.selectionModel.selectionPaths.map { it.lastPathComponent as Node })
         }
     }
 }

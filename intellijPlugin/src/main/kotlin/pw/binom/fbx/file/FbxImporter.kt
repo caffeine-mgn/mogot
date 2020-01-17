@@ -4,6 +4,9 @@ import mogot.*
 import mogot.gl.GL
 import mogot.math.Quaternionf
 import mogot.math.*
+import pw.binom.FloatDataBuffer
+import pw.binom.IntDataBuffer
+import pw.binom.floatDataOf
 import java.io.InputStream
 import java.util.logging.Logger
 
@@ -192,23 +195,23 @@ object FbxImporter {
         val uiIndex = geom.uiIndex
 
         val faceCount = faceCount(polygonVertex)
-        val i = IntArray(faceCount * 3)
-        val uvF = FloatArray(uiElements.size) { -1f }
-        val normalF = FloatArray(vertex.size) { 0f }
-        val normalI = IntArray(vertex.size) { 0 }
+        val i = IntDataBuffer.alloc(faceCount * 3)
+        val uvF = FloatDataBuffer.alloc(uiElements.size)
+        val normalF = FloatDataBuffer.alloc(vertex.size)
+//        val normalI = IntArray(vertex.size) { 0 }
 
         if (uiIndex.size != polygonVertex.size)
             throw IllegalArgumentException()
 
         fun calc(vertexIndex: Int, index: Int) {
             normalF[vertexIndex * 3 + 0] += normals[index * 3 + 0].toFloat()
-            normalI[vertexIndex * 3 + 0]++
+//            normalI[vertexIndex * 3 + 0]++
 
             normalF[vertexIndex * 3 + 1] += normals[index * 3 + 1].toFloat()
-            normalI[vertexIndex * 3 + 1]++
+//            normalI[vertexIndex * 3 + 1]++
 
             normalF[vertexIndex * 3 + 2] += normals[index * 3 + 2].toFloat()
-            normalI[vertexIndex * 3 + 2]++
+//            normalI[vertexIndex * 3 + 2]++
         }
 
         var c = 0
@@ -248,13 +251,19 @@ object FbxImporter {
 //                normalF[index] = fl / normalI[index].toFloat()
 //        }
 
-        return Geom3D2(
-                vertex = FloatArray(vertex.size) { vertex[it].toFloat() },
+        val vertexF = floatDataOf(vertex.map { it.toFloat() })
+        val geom = Geom3D2(
+                vertex = vertexF,
                 normals = normalF/*FloatArray(normals.size) { normals[it].toFloat() }*/,
                 uvs = uvF,
                 index = i,
                 gl = gl
         )
+        vertexF.close()
+        normalF.close()
+        uvF.close()
+        i.close()
+        return geom
     }
 
 //    fun import(geom: FbxGeometry): Geom3D {
