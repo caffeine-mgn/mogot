@@ -2,7 +2,7 @@ package mogot.gl
 
 class RenderTargetTexture(val gl: GL, width:Int,height:Int) {
     val frameBuffer = FrameBuffer(gl,
-            TextureObject(gl,width,height,TextureObject.MagFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,TextureObject.MSAALevels.Disable),
+            TextureObject(gl,width,height,TextureObject.MinFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,TextureObject.MSAALevels.Disable),
             RenderBuffer(gl,width,height,RenderBufferFormat.DEPTH24_STENCIL8))
     fun begin(){
         frameBuffer.enable()
