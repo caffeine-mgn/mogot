@@ -180,7 +180,7 @@ class PostEffectPipeline(val engine: Engine) {
 
 
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
-        renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight)
+        renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight,TextureObject.MSAALevels.MSAAx4)
     }
 
 }

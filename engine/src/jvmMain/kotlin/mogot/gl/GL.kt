@@ -329,6 +329,12 @@ actual class GL(val gl: GL2) {
         gl.glTexImage2DMultisample(target,samples,internalformat,width,height,fixedsamplelocations)
     }
 
+    actual fun getIntegerv(target: Int):Int{
+        val value = IntBuffer.allocate(1)
+        gl.glGetIntegerv(target,value)
+        return value[0]
+    }
+
     actual fun texParameteri(target: Int, pname: Int, param: Int) {
         gl.glTexParameteri(target, pname, param)
     }
@@ -373,6 +379,10 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_COLOR_ATTACHMENT0
     actual val FRAMEBUFFER: Int
         get() = GL2.GL_FRAMEBUFFER
+    actual val READ_FRAMEBUFFER: Int
+        get() = GL2.GL_READ_FRAMEBUFFER
+    actual val DRAW_FRAMEBUFFER: Int
+        get() = GL2.GL_DRAW_FRAMEBUFFER
     actual val TEXTURE_MAG_FILTER: Int
         get() = GL2.GL_TEXTURE_MAG_FILTER
     actual val LINEAR: Int
@@ -383,6 +393,11 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_UNSIGNED_BYTE
     actual val RGB: Int
         get() = GL2.GL_RGB
+    actual val MAX_TEXTURE_SIZE: Int
+       get() = GL2.GL_MAX_TEXTURE_SIZE
+
+    actual val MAX_SAMPLES: Int
+        get() = GL2.GL_MAX_SAMPLES
 
     actual fun deleteBuffers(texture: GLTexture) {
         val buffer = IntBuffer.allocate(1)
@@ -427,6 +442,9 @@ actual class GL(val gl: GL2) {
 
     actual fun texParameterf(target: Int, pname: Int, param: Float) {
         gl.glTexParameterf(target, pname, param)
+    }
+    actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
+        gl.glBlitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)
     }
 
     actual val CULL_FACE: Int

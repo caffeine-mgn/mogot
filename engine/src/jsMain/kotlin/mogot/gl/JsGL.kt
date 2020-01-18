@@ -111,6 +111,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.COLOR_ATTACHMENT0
     actual val FRAMEBUFFER: Int
         get() = WebGLRenderingContext.FRAMEBUFFER
+    actual val READ_FRAMEBUFFER: Int
+        get() = TODO("No in WebGLRenderingContext")
+    actual val DRAW_FRAMEBUFFER: Int
+        get() = TODO("No in WebGLRenderingContext")
     actual val TEXTURE_MAG_FILTER: Int
         get() = WebGLRenderingContext.TEXTURE_MAG_FILTER
     actual val LINEAR: Int
@@ -142,6 +146,11 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.NEAREST_MIPMAP_LINEAR
     actual val LINEAR_MIPMAP_LINEAR: Int
         get() = WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+    actual val MAX_SAMPLES: Int
+        get() = TODO("WebGLRenderingContext.MAX_SAMPLES")
+
+    actual val MAX_TEXTURE_SIZE: Int
+        get() = WebGLRenderingContext.MAX_TEXTURE_SIZE
 
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
@@ -386,6 +395,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun checkFramebufferStatus(target: Int): Int =
             ctx.checkFramebufferStatus(target)
 
+    actual fun getIntegerv(target: Int):Int{
+        return ctx.getParameter(target) as Int
+    }
+
     actual fun deleteBuffers(texture: GLTexture) {
         deleteTexture(texture)
     }
@@ -400,6 +413,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
 
     actual fun texParameterf(target: Int, pname: Int, param: Float) {
         ctx.texParameterf(target, pname, param)
+    }
+
+    actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
+        TODO("ctx.blitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)")
     }
 }
 

@@ -30,19 +30,28 @@ class FrameBuffer(val gl: GL,val texture: TextureObject? = null, val renderBuffe
             renderBuffer?.close()
         }
     }
-    fun bind(){
-        gl.bindFrameBuffer(gl.FRAMEBUFFER,fbo)
+    fun bind(read:Boolean = true, draw:Boolean = true){
+        if(read && draw)
+            gl.bindFrameBuffer(gl.FRAMEBUFFER,fbo)
+        else if(read){
+            gl.bindFrameBuffer(gl.READ_FRAMEBUFFER,fbo)
+        }else{
+            gl.bindFrameBuffer(gl.DRAW_FRAMEBUFFER,fbo)
+        }
     }
-    fun unbind(){
-        gl.bindFrameBuffer(gl.FRAMEBUFFER,null)
+    fun unbind(read:Boolean = true, draw:Boolean = true){
+        if(read && draw)
+            gl.bindFrameBuffer(gl.FRAMEBUFFER,null)
+        else if(read){
+            gl.bindFrameBuffer(gl.READ_FRAMEBUFFER,null)
+        }else{
+            gl.bindFrameBuffer(gl.DRAW_FRAMEBUFFER,null)
+        }
     }
 
     fun check(){
         if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!=gl.FRAMEBUFFER_COMPLETE){
             println("FrameBuffer not complected")
-            gl.checkError {
-                "Framebuffer error"
-            }
         }
     }
 
