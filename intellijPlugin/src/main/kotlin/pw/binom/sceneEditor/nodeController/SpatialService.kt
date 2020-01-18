@@ -18,6 +18,10 @@ object SpatialService : NodeService {
         output["position.y"] = spatial.position.y.toString()
         output["position.z"] = spatial.position.z.toString()
 
+        output["scale.x"] = spatial.scale.x.toString()
+        output["scale.y"] = spatial.scale.y.toString()
+        output["scale.z"] = spatial.scale.z.toString()
+
         val rot = RotationVector(spatial.quaternion)
         output["rotation.x"] = rot.x.toString()
         output["rotation.y"] = rot.y.toString()
@@ -30,6 +34,12 @@ object SpatialService : NodeService {
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f,
                 data["position.z"]?.toFloat() ?: 0f
+        )
+
+        spatial.scale.set(
+                data["scale.x"]?.toFloat() ?: 1f,
+                data["scale.y"]?.toFloat() ?: 1f,
+                data["scale.z"]?.toFloat() ?: 1f
         )
 
         val rot = RotationVector(spatial.quaternion)
