@@ -22,6 +22,11 @@ object SpatialLoader : SceneLoader.NodeLoader {
                 data["position.y"]?.toFloat() ?: 0f,
                 data["position.z"]?.toFloat() ?: 0f
         )
+        spatial.scale.set(
+                data["scale.x"]?.toFloat() ?: 1f,
+                data["scale.y"]?.toFloat() ?: 1f,
+                data["scale.z"]?.toFloat() ?: 1f
+        )
         val rot = RotationVector(spatial.quaternion)
         rot.set(
                 data["rotation.x"]?.toFloat() ?: 0f,
