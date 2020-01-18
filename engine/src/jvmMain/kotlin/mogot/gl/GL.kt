@@ -142,6 +142,14 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_MIRRORED_REPEAT
     actual val REPEAT: Int
         get() = GL2.GL_REPEAT
+    actual val NEAREST_MIPMAP_NEAREST: Int
+        get() =  GL2.GL_NEAREST_MIPMAP_NEAREST
+    actual val LINEAR_MIPMAP_NEAREST: Int
+        get() =  GL2.GL_LINEAR_MIPMAP_NEAREST
+    actual val NEAREST_MIPMAP_LINEAR: Int
+        get() =  GL2.GL_NEAREST_MIPMAP_LINEAR
+    actual val LINEAR_MIPMAP_LINEAR: Int
+        get() =  GL2.GL_LINEAR_MIPMAP_LINEAR
 
     actual fun deleteProgram(program: GLProgram) {
         program as JGLProgram

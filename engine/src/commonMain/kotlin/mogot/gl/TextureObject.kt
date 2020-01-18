@@ -2,10 +2,18 @@ package mogot.gl
 
 import pw.binom.io.Closeable
 
-class TextureObject(val gl:GL, val width:Int, val height:Int, val minFilter:FilterParameter = FilterParameter.Linear, magFilter:FilterParameter = FilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat  val multisample: MSAALevels = MSAALevels.Disable):Closeable {
-    enum class FilterParameter{
+class TextureObject(val gl:GL, val width:Int, val height:Int, val minFilter:MinFilterParameter = MinFilterParameter.Linear, magFilter:MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable):Closeable {
+    enum class MagFilterParameter{
         Nearest,
         Linear
+    }
+    enum class MinFilterParameter{
+        Nearest,
+        Linear,
+        NearestMipmapNearest,
+        LinearMipmapNearest,
+        NearestMipmapLinear,
+        LinearMipmapLinear
     }
     enum class TextureWrap{
         ClampToEdge,
@@ -25,12 +33,16 @@ class TextureObject(val gl:GL, val width:Int, val height:Int, val minFilter:Filt
         gl.enable(target)
         bind()
         gl.texParameteri(target,gl.TEXTURE_MIN_FILTER,when(minFilter){
-            FilterParameter.Nearest -> gl.NEAREST
-            FilterParameter.Linear -> gl.LINEAR
+            MinFilterParameter.Nearest -> gl.NEAREST
+            MinFilterParameter.Linear -> gl.LINEAR
+            MinFilterParameter.NearestMipmapNearest -> gl.NEAREST_MIPMAP_NEAREST
+            MinFilterParameter.LinearMipmapNearest -> gl.LINEAR_MIPMAP_NEAREST
+            MinFilterParameter.NearestMipmapLinear -> gl.NEAREST_MIPMAP_LINEAR
+            MinFilterParameter.LinearMipmapLinear -> gl.LINEAR_MIPMAP_LINEAR
         })
         gl.texParameteri(target,gl.TEXTURE_MAG_FILTER,when(magFilter){
-            FilterParameter.Nearest -> gl.NEAREST
-            FilterParameter.Linear -> gl.LINEAR
+            MagFilterParameter.Nearest -> gl.NEAREST
+            MagFilterParameter.Linear -> gl.LINEAR
         })
         gl.texParameteri(target,gl.TEXTURE_WRAP_S,when(textureWrapS){
             TextureWrap.ClampToEdge -> gl.CLAMP_TO_EDGE

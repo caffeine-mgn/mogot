@@ -116,6 +116,10 @@ expect class GL {
     val CLAMP_TO_EDGE: Int
     val MIRRORED_REPEAT: Int
     val REPEAT: Int
+    val NEAREST_MIPMAP_NEAREST: Int
+    val LINEAR_MIPMAP_NEAREST: Int
+    val NEAREST_MIPMAP_LINEAR: Int
+    val LINEAR_MIPMAP_LINEAR: Int
 }
 
 interface GLBuffer

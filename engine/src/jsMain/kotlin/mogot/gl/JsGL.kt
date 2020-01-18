@@ -134,6 +134,14 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.MIRRORED_REPEAT
     actual val REPEAT: Int
         get() = WebGLRenderingContext.REPEAT
+    actual val NEAREST_MIPMAP_NEAREST: Int
+        get() = WebGLRenderingContext.NEAREST_MIPMAP_NEAREST
+    actual val LINEAR_MIPMAP_NEAREST: Int
+        get() = WebGLRenderingContext.LINEAR_MIPMAP_NEAREST
+    actual val NEAREST_MIPMAP_LINEAR: Int
+        get() = WebGLRenderingContext.NEAREST_MIPMAP_LINEAR
+    actual val LINEAR_MIPMAP_LINEAR: Int
+        get() = WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
 
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
