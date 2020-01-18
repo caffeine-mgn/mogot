@@ -124,6 +124,17 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual val MULTISAMPLE: Int
         get() = js("WebGL2RenderingContext.MULTISAMPLE")
 
+    actual val TEXTURE_WRAP_S: Int
+        get() = WebGLRenderingContext.TEXTURE_WRAP_S
+    actual val TEXTURE_WRAP_T: Int
+        get() = WebGLRenderingContext.TEXTURE_WRAP_T
+    actual val CLAMP_TO_EDGE: Int
+        get() = WebGLRenderingContext.CLAMP_TO_EDGE
+    actual val MIRRORED_REPEAT: Int
+        get() = WebGLRenderingContext.MIRRORED_REPEAT
+    actual val REPEAT: Int
+        get() = WebGLRenderingContext.REPEAT
+
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
     actual fun deleteBuffer(buffer: GLBuffer) {

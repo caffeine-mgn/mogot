@@ -2,10 +2,15 @@ package mogot.gl
 
 import pw.binom.io.Closeable
 
-class TextureObject(val gl:GL,val width:Int, val height:Int,val minFilter:FilterParameter = FilterParameter.Linear, magFilter:FilterParameter = FilterParameter.Linear, val multisample: MSAALevels = MSAALevels.Disable):Closeable {
+class TextureObject(val gl:GL, val width:Int, val height:Int, val minFilter:FilterParameter = FilterParameter.Linear, magFilter:FilterParameter = FilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat  val multisample: MSAALevels = MSAALevels.Disable):Closeable {
     enum class FilterParameter{
         Nearest,
         Linear
+    }
+    enum class TextureWrap{
+        ClampToEdge,
+        MirroredRepeat,
+        Repeat
     }
     enum class MSAALevels(val level:Int){
         Disable(0),
@@ -19,6 +24,21 @@ class TextureObject(val gl:GL,val width:Int, val height:Int,val minFilter:Filter
     init {
         gl.enable(target)
         bind()
+        gl.texParameteri(target,gl.TEXTURE_MIN_FILTER,when(minFilter){
+            FilterParameter.Nearest -> gl.NEAREST
+            FilterParameter.Linear -> gl.LINEAR
+        })
+        gl.texParameteri(target,gl.TEXTURE_MAG_FILTER,when(magFilter){
+            FilterParameter.Nearest -> gl.NEAREST
+            FilterParameter.Linear -> gl.LINEAR
+        })
+        gl.texParameteri(target,gl.TEXTURE_WRAP_S,when(textureWrapS){
+            TextureWrap.ClampToEdge -> gl.CLAMP_TO_EDGE
+            TextureWrap.MirroredRepeat -> gl.MIRRORED_REPEAT
+            TextureWrap.Repeat -> gl.REPEAT
+        })
+
+
         if(multisample != MSAALevels.Disable) {
             gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, gl.RGB, width, height, false)
         }else{

@@ -3,6 +3,7 @@ package mogot.gl
 import mogot.Engine
 import mogot.Material
 import mogot.RenderContext
+import mogot.ResourceImpl
 import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
@@ -88,7 +89,9 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
         if (texture2D != null) {
             engine.gl.activeTexture(engine.gl.TEXTURE0)
             engine.gl.bindTexture(engine.gl.TEXTURE_2D, texture2D!!)
+            shader.use()
             shader.uniform("screenTexture", 0)
+
         }
     }
 
@@ -101,51 +104,9 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
     }
 }
 
-class FullScreenSprite(engine: Engine) {
+class FullScreenSprite(engine: Engine): ResourceImpl() {
     //    var defaultMaterial = FullScreenMaterial(engine)
-    var material: Material? = object : MaterialGLSL(engine) {
-        val defaulTshader: Shader
-            get() = Shader(engine.gl, """#version 450 core
-                                        layout (location = 0) in vec2 aPos;
-                                        layout (location = 2) in vec2 aTexCoords;
-                                        out vec2 TexCoords;
-                                        void main()
-                                        {
-                                            gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
-                                            TexCoords = aTexCoords;
-                                        }""",
-                    """#version 450 core
-                                out vec4 FragColor;
-                                in vec2 TexCoords;
-                                uniform sampler2D screenTexture;
-                                void main()
-                                { 
-                                    FragColor = texture(screenTexture, TexCoords);
-                                }""")
-        override val shader: Shader
-            get() = Shader(engine.gl, """#version 450 core
-                                        layout (location = 0) in vec2 aPos;
-                                        layout (location = 2) in vec2 aTexCoords;
-                                        out vec2 TexCoords;
-                                        void main()
-                                        {
-                                            gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
-                                            TexCoords = aTexCoords;
-                                        }""",
-                    """#version 450 core
-                                out vec4 FragColor;
-                                in vec2 TexCoords;
-                                uniform sampler2D screenTexture;
-                                void main()
-                                { 
-                                    FragColor = texture(screenTexture, TexCoords);
-                                }""")
-
-        override fun dispose() {
-            shader.close()
-            super.dispose()
-        }
-    }
+    var material: MaterialGLSL? = FullScreenMaterial(engine)
     private val rect = ScreenRect(engine.gl)
 
     fun draw(renderContext: RenderContext) {
@@ -153,6 +114,12 @@ class FullScreenSprite(engine: Engine) {
         mat.use(MATRIX4_ONE, Matrix4f().identity(), renderContext)
         rect.draw()
         mat.unuse()
+    }
+
+    override fun dispose() {
+        material?.dec()
+        material = null
+        super.dispose()
     }
 }
 
@@ -169,7 +136,7 @@ class PostEffectPipeline(val engine: Engine) {
     private var renderTargetTexture: RenderTargetTexture? = null
 
     fun close() {
-
+        //sprite.dec()
     }
 
     fun addEffect(effect: SimplePostEffect) {
@@ -207,7 +174,6 @@ class PostEffectPipeline(val engine: Engine) {
         sprite.material = mat
         gl.activeTexture(engine.gl.TEXTURE0)
         gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
-
         sprite.draw(renderContext)
         gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
     }

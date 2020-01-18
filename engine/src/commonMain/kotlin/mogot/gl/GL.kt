@@ -111,6 +111,11 @@ expect class GL {
     val TRIANGLE_STRIP: Int
     val TRIANGLE_FAN: Int
     val MULTISAMPLE: Int
+    val TEXTURE_WRAP_S: Int
+    val TEXTURE_WRAP_T: Int
+    val CLAMP_TO_EDGE: Int
+    val MIRRORED_REPEAT: Int
+    val REPEAT: Int
 }
 
 interface GLBuffer

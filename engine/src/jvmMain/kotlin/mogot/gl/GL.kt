@@ -132,6 +132,17 @@ actual class GL(val gl: GL2) {
     actual val MULTISAMPLE: Int
         get() = GL2.GL_MULTISAMPLE
 
+    actual val TEXTURE_WRAP_S: Int
+        get() = GL2.GL_TEXTURE_WRAP_S
+    actual val TEXTURE_WRAP_T: Int
+        get() = GL2.GL_TEXTURE_WRAP_T
+    actual val CLAMP_TO_EDGE: Int
+        get() = GL2.GL_CLAMP_TO_EDGE
+    actual val MIRRORED_REPEAT: Int
+        get() = GL2.GL_MIRRORED_REPEAT
+    actual val REPEAT: Int
+        get() = GL2.GL_REPEAT
+
     actual fun deleteProgram(program: GLProgram) {
         program as JGLProgram
         gl.glDeleteProgram(program.id)
