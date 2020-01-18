@@ -20,8 +20,14 @@ fun DataInputStream.readDoubleL() = java.lang.Double.longBitsToDouble(readLongL(
 fun DataInputStream.readFloatL() = java.lang.Float.intBitsToFloat(readIntL())
 
 fun DataInputStream.readUIntL() = readIntL().toUInt()
+fun DataInputStream.readULongL() = readLongL().toULong()
 fun DataInputStream.readIntL(): Int {
     return readInt().byteswap()
+}
+
+private fun ByteArray.zeroOnly(): Boolean {
+    forEach { if (it != 0.toByte()) return false }
+    return true
 }
 
 fun InputStream.readArray(size: Int): ByteArray {
@@ -46,10 +52,13 @@ fun DataInputStream.readUString4(): String {
 fun ByteArray.asString() = String(this)
 
 private val _HEAD_MAGIC = "Kaydara FBX Binary  ${0.toChar()}${26.toChar()}${0.toChar()}"
-private val _BLOCK_SENTINEL_LENGTH = 13
-private val _BLOCK_SENTINEL_DATA = (0 until _BLOCK_SENTINEL_LENGTH).map { (0).toChar() }.joinToString("")
 
 object FbxReader {
+
+    enum class Version {
+        V7_5,
+        V7_4
+    }
 
     fun read(stream: InputStream, visiter: FbxVisiter) {
         visiter.start()
@@ -59,11 +68,18 @@ object FbxReader {
 
         if (String(data.readArray(23)) != _HEAD_MAGIC)
             throw IOException("Invalid file format")
-        visiter.version(data.readUIntL())
+        val version = data.readUIntL()
+        visiter.version(version)
+        val ver = when (version) {
+            7400u -> Version.V7_4
+            7500u -> Version.V7_5
+            else -> throw NotImplementedError("Not supported fbx version $version")
+        }
+        println("Version: $version")
 
 
         while (true) {
-            if (!readElement(data, visiter) { cursorStream.fill })
+            if (!readElement(ver, data, visiter) { cursorStream.fill })
                 break
         }
 
@@ -117,37 +133,54 @@ object FbxReader {
                 'l' -> readArray(data, Long::class, true)//,   # array (long)
                 'b' -> readArray(data, Boolean::class, false)//,  # array (bool)
                 'c' -> readArray(data, UByte::class, false)//,  # array (ubyte)
-                else -> TODO("char=$char")
+                else -> TODO("char=$char  code=${char.toInt()}")
             }
 
-    private fun readElement(data: DataInputStream, visiter: ElementContener?, fill: () -> Long): Boolean {
-        val end_offset = data.readUIntL()
-        if (end_offset == 0u) {
+    private fun readElement(version: Version, data: DataInputStream, visiter: ElementContener?, fill: () -> Long): Boolean {
+        fun readProp(): ULong =
+                when (version) {
+                    Version.V7_4 -> data.readUIntL().toULong()
+                    Version.V7_5 -> data.readULongL()
+                }
+
+        val end_offset = readProp()
+        if (end_offset == 0uL) {
             return false
         }
 
-        val prop_count = data.readUIntL()
-        val prop_length = data.readUIntL()
+        val prop_count = readProp()
+        val prop_length = readProp()
+        val block_sentinel_length = when (version) {
+            Version.V7_4 -> 4 * 3 + 1
+            Version.V7_5 -> 8 * 3 + 1
+        }
 
         val elem_id = data.readUString1()
         val elVisit = visiter?.element(elem_id)
 
+        println("Element: id=$elem_id   prop_count=$prop_count  prop_length=$prop_length")
 
-        (0u until prop_count).forEach { i ->
+        (0uL until prop_count).forEach { i ->
             if (fill() > end_offset.toLong())
                 throw IOException("Out of data on ${fill()}")
-            val property = read_data_dict(data.readByte().toChar(), data)
+            println("$i/${prop_count - 1u}")
+            val type = data.readByte()
+            if (type == 0.toByte())
+                return@forEach
+            val property = read_data_dict(type.toChar(), data)
             elVisit?.property(property)
         }
 
         if (fill() < end_offset.toLong()) {
-            while (fill() < (end_offset - _BLOCK_SENTINEL_LENGTH.toUInt()).toLong()) {
-                readElement(data, elVisit, fill)
+            while (fill() < (end_offset - block_sentinel_length.toUInt()).toLong()) {
+                readElement(version, data, elVisit, fill)
             }
 
-            val dd = data.readArray(_BLOCK_SENTINEL_LENGTH)
-            if (dd.asString() != _BLOCK_SENTINEL_DATA)
+            val dd = data.readArray(block_sentinel_length)
+            if (!dd.zeroOnly())
                 throw IOException("failed to read nested block sentinel, expected all bytes to be 0 in $elem_id on ${fill()} end=${end_offset}")
+            else
+                println("end of node $elem_id")
         }
 
         if (fill() != end_offset.toLong()) {

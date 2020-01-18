@@ -41,6 +41,7 @@ object FbxImporter {
                 "Material" -> FbxMaterial(it)
                 "Texture" -> FbxTexture(it)
                 "Video" -> null
+                "CollectionExclusive" -> null
                 else -> TODO("Unknown element ${it.id}")
             }
         }.filterNotNull().associate { it.id to it }
@@ -98,6 +99,7 @@ object FbxImporter {
                 "Material" -> FbxMaterial(it)
                 "Texture" -> FbxTexture(it)
                 "Video" -> null
+                "CollectionExclusive" -> null
                 else -> TODO("Unknown element ${it.id}")
             }
         }.filterNotNull().associate { it.id to it }
