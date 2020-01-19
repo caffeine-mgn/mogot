@@ -5,11 +5,14 @@ import mogot.math.*
 
 
 class Camera : Spatial() {
-    var postEffectPipeline: PostEffectPipeline? = null
+    private var _postEffectPipeline by ResourceHolder<PostEffectPipeline>()
+    var postEffectPipeline: PostEffectPipeline?
         set(value) {
-            field = value
+            _postEffectPipeline = value
             resize(width,height)
         }
+    get() = _postEffectPipeline
+
     val projectionMatrix = Matrix4f()
 
     var width = 0
@@ -237,7 +240,6 @@ class Camera : Spatial() {
 
     override fun close() {
         super.close()
-        postEffectPipeline?.dec()
         postEffectPipeline = null
     }
 }

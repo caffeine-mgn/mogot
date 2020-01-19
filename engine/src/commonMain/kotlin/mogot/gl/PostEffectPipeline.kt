@@ -2,6 +2,7 @@ package mogot.gl
 
 import mogot.Engine
 import mogot.RenderContext
+import mogot.ResourceHolder
 import mogot.ResourceImpl
 import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
@@ -105,7 +106,7 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
 
 class FullScreenSprite(engine: Engine): ResourceImpl() {
     //    var defaultMaterial = FullScreenMaterial(engine)
-    var material: MaterialGLSL? = FullScreenMaterial(engine)
+    var material by ResourceHolder<MaterialGLSL>(FullScreenMaterial(engine))
     private val rect = ScreenRect(engine.gl)
 
     fun draw(renderContext: RenderContext) {
@@ -116,7 +117,6 @@ class FullScreenSprite(engine: Engine): ResourceImpl() {
     }
 
     override fun dispose() {
-        material?.dec()
         material = null
         super.dispose()
     }
@@ -127,14 +127,13 @@ class PostEffectPipeline(val engine: Engine): ResourceImpl() {
     private val gl
         get() = engine.gl
     val effects = mutableListOf<SimplePostEffect>()
-    private var sprite: FullScreenSprite? = null
+    private var sprite by ResourceHolder<FullScreenSprite>()
 
     var MSAALevel: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable
 
     private var renderTargetTexture: RenderTargetTexture? = null
 
     fun close() {
-        sprite?.dec()
         sprite = null
         renderTargetTexture?.close()
         renderTargetTexture = null
