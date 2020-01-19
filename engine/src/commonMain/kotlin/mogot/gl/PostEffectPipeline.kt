@@ -122,7 +122,7 @@ class FullScreenSprite(engine: Engine): ResourceImpl() {
     }
 }
 
-class PostEffectPipeline(val engine: Engine) {
+class PostEffectPipeline(val engine: Engine): ResourceImpl() {
     private var isClosed: Boolean = false
     private val gl
         get() = engine.gl
@@ -182,5 +182,10 @@ class PostEffectPipeline(val engine: Engine) {
         renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight,MSAALevel)
         sprite = FullScreenSprite(engine)
     }
+
+    override fun dispose() {
+        close()
+    }
+
 
 }

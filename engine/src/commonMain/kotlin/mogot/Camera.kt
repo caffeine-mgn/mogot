@@ -234,6 +234,12 @@ class Camera : Spatial() {
 //        dest.direction.normalize()
 //        return dest
     }
+
+    override fun close() {
+        super.close()
+        postEffectPipeline?.dec()
+        postEffectPipeline = null
+    }
 }
 
 val TEMP_VEC_2F = Vector2f()
