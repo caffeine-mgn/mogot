@@ -1,14 +1,12 @@
 package pw.binom.sceneEditor.editors
 
-import mogot.Spatial
-import mogot.collider.Panel3DCollider
+import mogot.Spatial2D
 import mogot.math.*
-import mogot.*
-import pw.binom.sceneEditor.Line
+import mogot.onlySpatial2D
+import mogot.use1
+import pw.binom.io.use
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.properties.Transform3DProperty
 import java.awt.event.KeyEvent
-import kotlin.math.*
 
 
 object EditMovementFactory2D : EditActionFactory {
@@ -145,14 +143,26 @@ class EditMovement2D(view: SceneEditorView, selected: List<Spatial2D>, val type:
         old.set(virtualMouse)
 
 
-        val moveDirection3f = Vector3f(moveDirection.x, moveDirection.y, 0f)
-        initPositions.forEach { t, u ->
-            val mat = Matrix4f()
-                    .translate(moveDirection3f)
-                    .mul(u)
-            t.setGlobalTransform(mat)
+        when (type) {
+            Axis.X -> moveDirection.y = 0f
+            Axis.Y -> moveDirection.x = 0f
         }
-        view.updatePropertyPosition()
+        engine.mathPool.vec3f.use1 { moveDirection3f ->
+            moveDirection3f.set(moveDirection.x, moveDirection.y, 0f)
+            initPositions.forEach { (node, nodeMatrix) ->
+                engine.mathPool.mat4f.use1 { mat->
+                    mat.identity()
+                            .translate(moveDirection3f)
+                            .mul(nodeMatrix)
+                    node.setGlobalTransform(mat)
+                }
+//                val mat = Matrix4f()
+//                        .translate(moveDirection3f)
+//                        .mul(nodeMatrix)
+//                node.setGlobalTransform(mat)
+            }
+            updatePropertyPosition()
+        }
     }
 
 }

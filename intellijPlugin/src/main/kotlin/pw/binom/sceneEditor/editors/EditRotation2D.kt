@@ -1,30 +1,28 @@
 package pw.binom.sceneEditor.editors
 
-import mogot.Camera
-import mogot.Node
-import mogot.Spatial
+import mogot.*
 import mogot.math.*
 import pw.binom.sceneEditor.*
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import kotlin.math.atan2
 
-object EditRotate3DFactory : EditActionFactory {
+object EditRotate2DFactory : EditActionFactory {
     override fun keyDown(view: SceneEditorView, e: KeyEvent) {
-        if (e.keyCode == Keys.R && view.mode == SceneEditorView.Mode.D3) {
-            val nodes = view.selected.mapNotNull { it as? Spatial }
+        if (e.keyCode == Keys.R && view.mode == SceneEditorView.Mode.D2) {
+            val nodes = view.selected.mapNotNull { it as? Spatial2D }
             if (nodes.isNotEmpty())
-                view.startEditor(EditRotateAllAxes3D(
+                view.startEditor(EditRotateAllAxes2D(
                         view = view,
                         root = view.editorRoot,
-                        camera = view.editorCamera,
+                        camera = view.editorCamera2D,
                         selected = nodes))
         }
     }
 }
 
-abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val camera: Camera, selected: List<Spatial>) : SpatialEditor(view, selected) {
-    val screenPos = camera.worldToScreenPoint(avgPosition) ?: TODO()
+abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, val camera: Camera2D, selected: List<Spatial2D>) : Spatial2DEditor(view, selected) {
+    val screenPos = camera.worldToScreen(avgPosition) ?: TODO()
 
     protected var totalRotation = 0f
 
@@ -65,7 +63,7 @@ abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val cam
         startAngle = angle
         startAngle2 = angle2
 
-        totalRotation += if (slow) r * 0.1f else r
+        totalRotation -= if (slow) r * 0.1f else r
     }
 
     override fun onStop() {
@@ -76,6 +74,7 @@ abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val cam
     }
 }
 
+/*
 @Strictfp
 class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : EditRotateEditor3D(view, root, camera, selected) {
     private val grid = Line(engine).also {
@@ -132,7 +131,6 @@ class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, sel
                         .translationRotateScale(newPosition, newRotation, oldScale)
                 node.setGlobalTransform(newMatrix)
             }
-        updatePropertyPosition()
     }
 
     override fun onStop() {
@@ -143,9 +141,9 @@ class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, sel
         }
     }
 }
-
+*/
 @Strictfp
-class EditRotateAllAxes3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>) : EditRotateEditor3D(view, root, camera, selected) {
+class EditRotateAllAxes2D(view: SceneEditorView, root: Node, camera: Camera2D, selected: List<Spatial2D>) : EditRotateEditor2D(view, root, camera, selected) {
     private val tempMatrix = Matrix4f()
     private val globalRotation = Quaternionf()
     private val newRotation = Quaternionf()
@@ -155,47 +153,49 @@ class EditRotateAllAxes3D(view: SceneEditorView, root: Node, camera: Camera, sel
         if (initPositions.isEmpty())
             TODO()
 
-        globalRotation.identity()
-        val axis = camera.quaternion.mul(Vector3fc.Z, Vector3f())
-        globalRotation.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
-
         if (initPositions.size == 1)
             initPositions.forEach { (node, matrix) ->
-                val m = tempMatrix.identity().rotate(globalRotation)
+                val m = tempMatrix.identity().rotateZ(totalRotation)
                         .mul(matrix)
                         .setTranslation(matrix.getTranslation(Vector3f()))
                 node.setGlobalTransform(m)
             }
-        else
+        else {
+            globalRotation.identity()
+//        val axis = camera.quaternion.mul(Vector3fc.Z, Vector3f())
+            globalRotation.rotateZYX(totalRotation, 0f, 0f)
             initPositions.forEach { (node, matrix) ->
-                val newPosition = globalRotation.mul(matrix.getTranslation(Vector3f()).sub(avgPosition)).add(avgPosition)
+                val avr3 = Vector3f(avgPosition.x, avgPosition.y, 0f)
+                val newPosition = globalRotation.mul(matrix.getTranslation(Vector3f()).sub(avr3)).add(avr3)
                 matrix.getScale(oldScale)
                 newRotation.identity().setFromUnnormalized(matrix).let { globalRotation.mul(it, it) }
                 val newMatrix = tempMatrix.identity()
                         .translationRotateScale(newPosition, newRotation, oldScale)
                 node.setGlobalTransform(newMatrix)
             }
+        }
         updatePropertyPosition()
     }
 
-    override fun keyUp(code: Int) {
-        when (code) {
-            Keys.X -> {
-                resetInitPosition()
-                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.X))
+    /*
+        override fun keyUp(code: Int) {
+            when (code) {
+                Keys.X -> {
+                    resetInitPosition()
+                    view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.X))
+                }
+                Keys.Y -> {
+                    resetInitPosition()
+                    view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Y))
+                }
+                Keys.Z -> {
+                    resetInitPosition()
+                    view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Z))
+                }
+                else -> super.keyUp(code)
             }
-            Keys.Y -> {
-                resetInitPosition()
-                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Y))
-            }
-            Keys.Z -> {
-                resetInitPosition()
-                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Z))
-            }
-            else -> super.keyUp(code)
         }
-    }
-
+    */
     override fun mouseUp(e: MouseEvent) {
         if (e.button == 1) {
             view.stopEditing()

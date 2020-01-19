@@ -1,11 +1,8 @@
 package mogot
 
-import mogot.math.Matrix4f
-import mogot.math.Vector2fm
-import mogot.math.Vector2ic
-import mogot.math.Vector2im
+import mogot.math.*
 
-class Camera2D(engine: Engine): Spatial2D(engine) {
+class Camera2D(engine: Engine) : Spatial2D(engine) {
 
     val projectionMatrix = Matrix4f()
 
@@ -18,6 +15,15 @@ class Camera2D(engine: Engine): Spatial2D(engine) {
         this.width = width
         this.height = height
         projectionMatrix.setOrtho2D(0f, width.toFloat(), height.toFloat(), 0f)
+    }
+
+    fun worldToScreen(point: Vector2fc, dest: Vector2im = Vector2i()) =
+            worldToScreen(point.x, point.y, dest)
+
+    fun worldToScreen(pointX: Float, pointY: Float, dest: Vector2im = Vector2i()): Vector2im {
+        dest.x = (pointX - position.x).toInt()
+        dest.y = (pointY - position.y).toInt()
+        return dest
     }
 
     fun screenToWorld(point: Vector2ic, dest: Vector2fm) =

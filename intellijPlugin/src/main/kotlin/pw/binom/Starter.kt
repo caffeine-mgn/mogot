@@ -14,6 +14,7 @@ class Starter : StartupActivity {
 //        })
 
         Services.reg(EditorView2DFactory)
+        Services.reg(EditRotate2DFactory)
         Services.reg(EditMovementFactory3D)
         Services.reg(EditRotate3DFactory)
         Services.reg(FpsCamEditorFactory)

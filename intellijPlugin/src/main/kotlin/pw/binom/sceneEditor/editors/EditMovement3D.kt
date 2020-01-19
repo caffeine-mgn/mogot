@@ -28,14 +28,6 @@ abstract class EditMovement3D(view: SceneEditorView, selected: List<Spatial>) : 
     }
 }
 
-fun SceneEditorView.updatePropertyPosition() {
-    editor1.propertyTool.properties
-            .mapNotNull { it as? Transform3DProperty }
-            .forEach {
-                it.update()
-            }
-}
-
 @Strictfp
 class EditMovementOneAxis3D(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMovement3D(view, selected) {
 
@@ -117,7 +109,7 @@ class EditMovementOneAxis3D(view: SceneEditorView, selected: List<Spatial>, val 
                     .mul(matrix)
             node.setGlobalTransform(m)
         }
-        view.updatePropertyPosition()
+        updatePropertyPosition()
     }
 }
 
@@ -164,7 +156,7 @@ class EditMovementAllAxie3D(view: SceneEditorView, selected: List<Spatial>) : Ed
                     .mul(u)
             t.setGlobalTransform(mat)
         }
-        view.updatePropertyPosition()
+        updatePropertyPosition()
     }
 
 }

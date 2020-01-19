@@ -4,6 +4,7 @@ import mogot.Spatial2D
 import mogot.math.Matrix4f
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.avg
+import pw.binom.sceneEditor.properties.Transform2DProperty
 import java.awt.event.MouseEvent
 
 abstract class Spatial2DEditor(view: SceneEditorView, val selected: List<Spatial2D>) : EditorWithVirtualMouse(view) {
@@ -16,7 +17,7 @@ abstract class Spatial2DEditor(view: SceneEditorView, val selected: List<Spatial
         initPositions.forEach { (node, matrix) ->
             node.setGlobalTransform(matrix)
         }
-        view.updatePropertyPosition()
+        updatePropertyPosition()
     }
 
     override fun keyUp(code: Int) {
@@ -41,5 +42,13 @@ abstract class Spatial2DEditor(view: SceneEditorView, val selected: List<Spatial
             resetInitPosition()
             view.stopEditing()
         }
+    }
+
+    fun updatePropertyPosition() {
+        view.editor1.propertyTool.properties
+                .mapNotNull { it as? Transform2DProperty }
+                .forEach {
+                    it.update()
+                }
     }
 }
