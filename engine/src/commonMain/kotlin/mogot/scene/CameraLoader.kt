@@ -14,6 +14,7 @@ object CameraLoader : SceneLoader.NodeLoader {
         props["near"]?.toFloatOrNull()?.let { node.near = it }
         props["far"]?.toFloatOrNull()?.let { node.far = it }
         props["fieldOfView"]?.toFloatOrNull()?.let { node.fieldOfView = it }
+        //TODO("Add posteffects loading")
         return node
     }
 

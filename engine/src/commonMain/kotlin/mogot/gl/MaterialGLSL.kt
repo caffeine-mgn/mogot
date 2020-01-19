@@ -5,15 +5,19 @@ import mogot.math.Matrix4fc
 import mogot.math.Vector3f
 
 abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
+    companion object{
+        const val PROJECTION="gles_projection"
+        const val MODEL="gles_model"
+    }
     abstract val shader: Shader
     protected var closed = false
 
     fun projection(projection: Matrix4fc) {
-        shader.uniform("projection", projection)
+        shader.uniform(PROJECTION, projection)
     }
 
     fun model(model: Matrix4fc) {
-        shader.uniform("model", model)
+        shader.uniform(MODEL, model)
     }
 
     val TEMP_VECTOR3F = Vector3f()
@@ -23,9 +27,9 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
         engine.gl.checkError { "Before set material properties" }
         shader.use()
         engine.gl.checkError { "1" }
-        shader.uniform("gles_projection", projection)
+        shader.uniform(PROJECTION, projection)
         engine.gl.checkError { "2" }
-        shader.uniform("gles_model", model)
+        shader.uniform(MODEL, model)
         engine.gl.checkError { "2" }
         shader.uniform("lights_len", renderContext.pointLights.size)
         engine.gl.checkError { "3" }

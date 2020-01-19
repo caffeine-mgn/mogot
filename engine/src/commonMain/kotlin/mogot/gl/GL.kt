@@ -50,13 +50,16 @@ expect class GL {
     fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?)
     fun createFrameBuffer(): GLFrameBuffer
     fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?)
+    fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean)
     fun texParameteri(target: Int, pname: Int, param: Int)
     fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
     fun createRenderBuffer(): GLRenderBuffer
     fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?)
     fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
+    fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int)
     fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer)
     fun checkFramebufferStatus(target: Int): Int
+    fun getIntegerv(target: Int):Int
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int)
     fun drawElements(mode: Int, count: Int, type: Int, offset: Int)
@@ -68,6 +71,7 @@ expect class GL {
     fun enable(feature: Int)
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
+    fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
 
     val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
     val NEAREST: Int
@@ -81,6 +85,8 @@ expect class GL {
     val RENDERBUFFER: Int
     val COLOR_ATTACHMENT0: Int
     val FRAMEBUFFER: Int
+    val READ_FRAMEBUFFER: Int
+    val DRAW_FRAMEBUFFER: Int
     val TEXTURE_MAG_FILTER: Int
     val LINEAR: Int
     val TEXTURE_MIN_FILTER: Int
@@ -101,6 +107,7 @@ expect class GL {
     val LINK_STATUS: Int
     val TEXTURE0: Int
     val TEXTURE_2D: Int
+    val TEXTURE_2D_MULTISAMPLE: Int
     val TEXTURE_MAX_LEVEL: Int
     val LINES: Int
     val LINE_STRIP: Int
@@ -108,6 +115,17 @@ expect class GL {
     val TRIANGLE_STRIP: Int
     val TRIANGLE_FAN: Int
     val MULTISAMPLE: Int
+    val TEXTURE_WRAP_S: Int
+    val TEXTURE_WRAP_T: Int
+    val CLAMP_TO_EDGE: Int
+    val MIRRORED_REPEAT: Int
+    val REPEAT: Int
+    val NEAREST_MIPMAP_NEAREST: Int
+    val LINEAR_MIPMAP_NEAREST: Int
+    val NEAREST_MIPMAP_LINEAR: Int
+    val LINEAR_MIPMAP_LINEAR: Int
+    val MAX_TEXTURE_SIZE: Int
+    val MAX_SAMPLES: Int
 }
 
 interface GLBuffer

@@ -21,7 +21,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     override val mouseUp = EventValueDispatcher<Int>()
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
-    var postEffectPipeline: PostEffectPipeline? = null
+
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -258,8 +258,9 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
-//        postEffectPipeline?.use(renderContext) {
         if (root != null) {
+            if(camera!=null)
+                camera?.begin()
             gl.gl.glEnable(GL2.GL_DEPTH_TEST)
             gl.gl.glEnable(GL2.GL_CULL_FACE)
             update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
@@ -268,7 +269,8 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
             gl.gl.glDisable(GL2.GL_DEPTH_TEST)
             gl.gl.glDisable(GL2.GL_CULL_FACE)
-
+            if(camera!=null)
+                camera?.end(renderContext)
 
             renderNode2D(root!!,
                     camera2D?.projectionMatrix
@@ -276,7 +278,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
                             cameraModel2DMatrix.identity().setOrtho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
                     , renderContext)
         }
-//        }
+
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
@@ -329,15 +331,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
     protected open fun init() {
         _engine = Engine(this, fileSystem)
-        if (postEffectPipeline == null) {
-            postEffectPipeline = PostEffectPipeline(engine)
-
-        }
-        postEffectPipeline?.init(width, height)
     }
 
     protected open fun dispose() {
-        postEffectPipeline?.close()
+
     }
 
     fun startRender() {

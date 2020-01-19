@@ -72,6 +72,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.TEXTURE0
     actual val TEXTURE_2D: Int
         get() = WebGLRenderingContext.TEXTURE_2D
+    actual val TEXTURE_2D_MULTISAMPLE: Int
+        get() = WebGLRenderingContext.TEXTURE_2D
     actual val TEXTURE_MAX_LEVEL: Int
         get() = js("WebGL2RenderingContext.TEXTURE_MAX_LEVEL")
     actual val LINES: Int
@@ -109,6 +111,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.COLOR_ATTACHMENT0
     actual val FRAMEBUFFER: Int
         get() = WebGLRenderingContext.FRAMEBUFFER
+    actual val READ_FRAMEBUFFER: Int
+        get() = TODO("No in WebGLRenderingContext")
+    actual val DRAW_FRAMEBUFFER: Int
+        get() = TODO("No in WebGLRenderingContext")
     actual val TEXTURE_MAG_FILTER: Int
         get() = WebGLRenderingContext.TEXTURE_MAG_FILTER
     actual val LINEAR: Int
@@ -121,6 +127,30 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.RGB
     actual val MULTISAMPLE: Int
         get() = js("WebGL2RenderingContext.MULTISAMPLE")
+
+    actual val TEXTURE_WRAP_S: Int
+        get() = WebGLRenderingContext.TEXTURE_WRAP_S
+    actual val TEXTURE_WRAP_T: Int
+        get() = WebGLRenderingContext.TEXTURE_WRAP_T
+    actual val CLAMP_TO_EDGE: Int
+        get() = WebGLRenderingContext.CLAMP_TO_EDGE
+    actual val MIRRORED_REPEAT: Int
+        get() = WebGLRenderingContext.MIRRORED_REPEAT
+    actual val REPEAT: Int
+        get() = WebGLRenderingContext.REPEAT
+    actual val NEAREST_MIPMAP_NEAREST: Int
+        get() = WebGLRenderingContext.NEAREST_MIPMAP_NEAREST
+    actual val LINEAR_MIPMAP_NEAREST: Int
+        get() = WebGLRenderingContext.LINEAR_MIPMAP_NEAREST
+    actual val NEAREST_MIPMAP_LINEAR: Int
+        get() = WebGLRenderingContext.NEAREST_MIPMAP_LINEAR
+    actual val LINEAR_MIPMAP_LINEAR: Int
+        get() = WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+    actual val MAX_SAMPLES: Int
+        get() = TODO("WebGLRenderingContext.MAX_SAMPLES")
+
+    actual val MAX_TEXTURE_SIZE: Int
+        get() = WebGLRenderingContext.MAX_TEXTURE_SIZE
 
     actual fun createBuffer(): GLBuffer = JSBuffer(ctx.createBuffer()!!)
 
@@ -365,6 +395,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun checkFramebufferStatus(target: Int): Int =
             ctx.checkFramebufferStatus(target)
 
+    actual fun getIntegerv(target: Int):Int{
+        return ctx.getParameter(target) as Int
+    }
+
     actual fun deleteBuffers(texture: GLTexture) {
         deleteTexture(texture)
     }
@@ -379,6 +413,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
 
     actual fun texParameterf(target: Int, pname: Int, param: Float) {
         ctx.texParameterf(target, pname, param)
+    }
+
+    actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
+        TODO("ctx.blitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)")
     }
 }
 
