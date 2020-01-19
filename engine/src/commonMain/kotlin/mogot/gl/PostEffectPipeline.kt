@@ -134,7 +134,6 @@ class PostEffectPipeline(val engine: Engine) {
     private var renderTargetTexture: RenderTargetTexture? = null
 
     fun close() {
-        if(isClosed) throw IllegalStateException("Object is closed")
         sprite?.dec()
         sprite = null
         renderTargetTexture?.close()

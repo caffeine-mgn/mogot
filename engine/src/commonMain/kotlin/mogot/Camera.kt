@@ -6,6 +6,10 @@ import mogot.math.*
 
 class Camera : Spatial() {
     var postEffectPipeline: PostEffectPipeline? = null
+        set(value) {
+            field = value
+            resize(width,height)
+        }
     val projectionMatrix = Matrix4f()
 
     var width = 0
