@@ -21,7 +21,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     override val mouseUp = EventValueDispatcher<Int>()
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
-    var postEffectPipeline: PostEffectPipeline? = null
+
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -246,21 +246,24 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
-        postEffectPipeline?.use(renderContext) {
-            if (root != null) {
-                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-                gl.gl.glEnable(GL2.GL_CULL_FACE)
-                update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-                if (camera != null)
-                    renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+        if (root != null) {
+            if(camera!=null)
+                camera?.begin()
+            gl.gl.glEnable(GL2.GL_DEPTH_TEST)
+            gl.gl.glEnable(GL2.GL_CULL_FACE)
+            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+            if (camera != null)
+                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
 
-                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-                gl.gl.glDisable(GL2.GL_CULL_FACE)
+            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+            gl.gl.glDisable(GL2.GL_CULL_FACE)
+            if(camera!=null)
+                camera?.end(renderContext)
+            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+            renderNode2D(root!!, tempMatrix, renderContext)
 
-                tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-                renderNode2D(root!!, tempMatrix, renderContext)
-            }
         }
+
         if (lockMouse) {
             val point = locationOnScreen
             point.x += size.x / 2
@@ -313,15 +316,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
     protected open fun init() {
         _engine = Engine(this, fileSystem)
-        if (postEffectPipeline == null) {
-            postEffectPipeline = PostEffectPipeline(engine)
-
-        }
-        postEffectPipeline?.init(width, height)
     }
 
     protected open fun dispose() {
-        postEffectPipeline?.close()
+
     }
 
     fun startRender() {

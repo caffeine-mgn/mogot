@@ -1,6 +1,9 @@
 package mogot.gl
 
-class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable) {
+import pw.binom.io.Closeable
+
+class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable):Closeable {
+    private var isClosed = false
     init {
         val max = gl.getIntegerv(gl.MAX_TEXTURE_SIZE)
         val maxSamples = gl.getIntegerv(gl.MAX_SAMPLES)
@@ -18,6 +21,8 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
             TextureObject(gl,width,height,TextureObject.MinFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,TextureObject.MSAALevels.Disable),
             if(msaa !=TextureObject.MSAALevels.Disable) null else RenderBuffer(gl,width,height,RenderBufferFormat.DEPTH24_STENCIL8,TextureObject.MSAALevels.Disable))
     fun begin(){
+        if(isClosed)
+            throw IllegalStateException("Object is closed")
         if(msaa!=TextureObject.MSAALevels.Disable) {
             msaaFrameBuffer?.let {
                 it.enable()
@@ -30,6 +35,8 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
     }
 
     fun end(){
+        if(isClosed)
+            throw IllegalStateException("Object is closed")
         if(msaa!=TextureObject.MSAALevels.Disable) {
             msaaFrameBuffer?.bind(draw = false,read = true)
             frameBuffer.bind(draw = true,read =false)
@@ -44,4 +51,10 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
 
     fun getGlTexture() = frameBuffer.texture?.glTexture
     fun getGlTextureTarget() = frameBuffer.texture?.target
+
+    override fun close() {
+        msaaFrameBuffer?.close()
+        frameBuffer.close()
+        isClosed = true
+    }
 }

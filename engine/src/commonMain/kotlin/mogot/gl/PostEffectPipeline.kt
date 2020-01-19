@@ -1,7 +1,6 @@
 package mogot.gl
 
 import mogot.Engine
-import mogot.Material
 import mogot.RenderContext
 import mogot.ResourceImpl
 import mogot.math.MATRIX4_ONE
@@ -124,63 +123,65 @@ class FullScreenSprite(engine: Engine): ResourceImpl() {
 }
 
 class PostEffectPipeline(val engine: Engine) {
+    private var isClosed: Boolean = false
     private val gl
         get() = engine.gl
-    private val list = mutableListOf<SimplePostEffect>()
-    private val sprite: FullScreenSprite = FullScreenSprite(engine)
-
-    var MSAAEnabled = false
+    val effects = mutableListOf<SimplePostEffect>()
+    private var sprite: FullScreenSprite? = null
 
     var MSAALevel: TextureObject.MSAALevels = TextureObject.MSAALevels.Disable
 
     private var renderTargetTexture: RenderTargetTexture? = null
 
     fun close() {
-        //sprite.dec()
+        if(isClosed) throw IllegalStateException("Object is closed")
+        sprite?.dec()
+        sprite = null
+        renderTargetTexture?.close()
+        renderTargetTexture = null
+        isClosed = true
     }
 
     fun addEffect(effect: SimplePostEffect) {
-        if (!list.contains(effect))
-            list.add(effect)
+        if (!effects.contains(effect))
+            effects.add(effect)
     }
 
     private val mat = FullScreenMaterial(engine)
-    fun use(renderContext: RenderContext, drawScene: () -> Unit) {
+
+    fun begin(){
+        if(isClosed) throw IllegalStateException("Object is closed")
         val renderTargetTexture = requireNotNull(renderTargetTexture)
-        //gl.enable(gl.DEPTH_TEST)
-        //gl.enable(gl.CULL_FACE)
         renderTargetTexture.begin()
         gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
-        drawScene()
-        renderTargetTexture.end()
+    }
 
-       ///////
-        //gl.disable(gl.DEPTH_TEST)
-        //gl.disable(gl.CULL_FACE)
-        ///////
-
-        list.forEach { currentFrameEffect ->
-            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
-            renderTargetTexture.begin()
+    fun end(renderContext: RenderContext){
+        if(isClosed) throw IllegalStateException("Object is closed")
+        renderTargetTexture?.end()
+        effects.forEach { currentFrameEffect ->
+            gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, renderTargetTexture!!.getGlTexture())
+            renderTargetTexture!!.begin()
             gl.clear(gl.COLOR_BUFFER_BIT)
-            sprite.material = currentFrameEffect
-            sprite.draw(renderContext)
-            renderTargetTexture.end()
-            gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
+            sprite?.material = currentFrameEffect
+            sprite?.draw(renderContext)
+            renderTargetTexture!!.end()
+            gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, null)
         }
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)
-        mat.texture2D = renderTargetTexture.getGlTexture()
-        sprite.material = mat
+        mat.texture2D = renderTargetTexture!!.getGlTexture()
+        sprite?.material = mat
         gl.activeTexture(engine.gl.TEXTURE0)
-        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, renderTargetTexture.getGlTexture())
-        sprite.draw(renderContext)
-        gl.bindTexture(renderTargetTexture.getGlTextureTarget()!!, null)
+        gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, renderTargetTexture!!.getGlTexture())
+        sprite?.draw(renderContext)
+        gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, null)
     }
 
-
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
-        renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight,TextureObject.MSAALevels.MSAAx4)
+        isClosed = false
+        renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight,MSAALevel)
+        sprite = FullScreenSprite(engine)
     }
 
 }

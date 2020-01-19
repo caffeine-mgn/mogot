@@ -1,10 +1,7 @@
 package game
 
 import mogot.Camera
-import mogot.gl.GLView
-import mogot.gl.SimplePostEffect
-import mogot.gl.getFXAAShader
-import mogot.gl.getNoColorShader
+import mogot.gl.*
 import mogot.waitFrame
 import pw.binom.io.FileSystemAccess
 import pw.binom.io.file.File
@@ -26,7 +23,8 @@ class GameView : GLView(LocalFileSystem<Unit>(
         backgroundColor.set(0f, 0.5f, 0.7f, 1f)
         game = TestGame(engine)
         camera = game.camera
-        //postEffectPipeline!!.addEffect(SimplePostEffect(engine, getNoColorShader(engine.gl)))
+        camera?.postEffectPipeline = PostEffectPipeline(engine)
+        //camera?.postEffectPipeline?.addEffect(SimplePostEffect(engine, getNoColorShader(engine.gl)))
         inited = true
     }
 
