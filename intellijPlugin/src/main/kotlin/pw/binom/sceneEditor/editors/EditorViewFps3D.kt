@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent
 
 object FpsCamEditorFactory : EditActionFactory {
     override fun mouseDown(view: SceneEditorView, e: MouseEvent) {
-        if (e.button == 3)
+        if (e.button == 3 && view.mode == SceneEditorView.Mode.D3)
             view.startEditor(FpsCam(view))
     }
 }
@@ -24,7 +24,7 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
     val normalSpeed = 6f
     val fastSpeed = 12f
-    private val manager = view.engine.manager("FpsManager"){ FpsManager() }
+    private val manager = view.engine.manager("FpsManager") { FpsManager() }
 
     private val temp = Vector3f()
 

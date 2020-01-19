@@ -40,7 +40,7 @@ abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val cam
     }
 
 
-    protected val center = Line2D(engine.gl).also {
+    protected val center = Line2D(engine).also {
         it.parent = root
         it.material = view.default3DMaterial
     }

@@ -2,7 +2,7 @@ package mogot
 
 import mogot.math.*
 
-open class Spatial2D : Node() {
+open class Spatial2D(val engine: Engine) : Node() {
     val position = Vector2fProperty()
     val scale = Vector2fProperty(1f, 1f)
     var rotation: Float = 0f
@@ -14,7 +14,6 @@ open class Spatial2D : Node() {
     private var rotationChanged = false
     protected var _matrix = Matrix4f()
     private val _transform = Matrix4f()
-    private val tmpMatrix = Matrix4f()
 
     val transform: Matrix4fc
         get() {
@@ -45,8 +44,10 @@ open class Spatial2D : Node() {
         }
 
     fun globalToLocal(point: Vector2fc, dest: Vector2fm): Vector2fm {
-        globalToLocalMatrix(tmpMatrix)
-        point.mulXY(tmpMatrix, dest)
+        val mat = engine.mathPool.mat4f.poll()
+        globalToLocalMatrix(mat)
+        point.mulXY(mat, dest)
+        engine.mathPool.mat4f.push(mat)
         return dest
     }
 
@@ -65,6 +66,22 @@ open class Spatial2D : Node() {
         localToGlobalMatrix(dest)
         dest.invert(dest)
         return dest
+    }
+
+    fun setGlobalTransform(matrix: Matrix4fc) {
+        val m = parentSpatial2D?.globalToLocalMatrix(Matrix4f()) ?: Matrix4f()
+        val tmp = engine.mathPool.vec3f.poll()
+        m.mul(matrix, m)
+        m.getTranslation(tmp)
+        position.set(tmp.x, tmp.y)
+        m.getScale(tmp)
+        scale.set(tmp.x, tmp.y)
+        val q = engine.mathPool.quatf.poll()
+        q.setFromUnnormalized(m)
+        q.getEulerAnglesXYZ(tmp)
+        rotation = tmp.z
+        engine.mathPool.quatf.push(q)
+        engine.mathPool.vec3f.push(tmp)
     }
 
     override fun apply(matrix: Matrix4fc): Matrix4fc {

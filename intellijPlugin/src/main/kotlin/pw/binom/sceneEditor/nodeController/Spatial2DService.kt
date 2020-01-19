@@ -42,7 +42,7 @@ object Spatial2DService : NodeService {
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != Spatial2D::class.java.name)
             return null
-        val node = Spatial2D()
+        val node = Spatial2D(view.engine)
         load(view.engine, node, properties)
         return node
     }

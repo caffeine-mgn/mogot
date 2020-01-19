@@ -2,6 +2,7 @@ package pw.binom
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
+import pw.binom.sceneEditor.editors.*
 import pw.binom.sceneEditor.nodeController.*
 
 class Starter : StartupActivity {
@@ -12,6 +13,11 @@ class Starter : StartupActivity {
 //            }
 //        })
 
+        Services.reg(EditorView2DFactory)
+        Services.reg(EditMovementFactory3D)
+        Services.reg(EditRotate3DFactory)
+        Services.reg(FpsCamEditorFactory)
+        Services.reg(EditMovementFactory2D)
         Services.reg(CubeNodeCreator)
         Services.reg(OmniNodeCreator)
         Services.reg(OmniLightService)

@@ -7,12 +7,12 @@ import pw.binom.sceneEditor.EditAction
 import pw.binom.sceneEditor.SceneEditorView
 
 abstract class EditorWithVirtualMouse(val view: SceneEditorView) : EditAction {
-    val engine
+    protected val engine
         get() = view.engine
 
-    var oldMousePosition = Vector2i(engine.stage.mousePosition)
-    var virtualMouse = Vector2i(engine.stage.mousePosition)
-    val mouseMoveResetUtil = MouseMoveResetUtil(view)
+    private var oldMousePosition = Vector2i(engine.stage.mousePosition)
+    protected var virtualMouse = Vector2i(engine.stage.mousePosition)
+    private val mouseMoveResetUtil = MouseMoveResetUtil(view)
 
     override fun render(dt: Float) {
         val newPos = mouseMoveResetUtil.check()

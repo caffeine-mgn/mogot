@@ -1,15 +1,15 @@
 package mogot
 
-import mogot.math.Matrix4f
-import mogot.math.Vector2i
-import mogot.math.Vector3f
+import mogot.math.*
 import pw.binom.io.Closeable
 
 /**
  * Object Pool for math classes
  */
 class MathPool : Closeable {
+    val quatf = QuaternionfPool()
     val vec2i = Vector2iPool()
+    val vec2f = Vector2fPool()
     val vec3f = Vector3fPool()
     val vec4f = Vector4fPool()
     val mat4f = Matrix4fPool()
@@ -19,6 +19,13 @@ class MathPool : Closeable {
         vec4f.close()
         mat4f.close()
     }
+}
+
+class QuaternionfPool : ObjectPool<Quaternionf>() {
+    override fun create() = Quaternionf()
+}
+class Vector2fPool : ObjectPool<Vector2f>() {
+    override fun create() = Vector2f()
 }
 
 class Vector2iPool : ObjectPool<Vector2i>() {

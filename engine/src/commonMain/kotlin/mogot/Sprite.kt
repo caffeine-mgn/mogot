@@ -4,7 +4,7 @@ import mogot.math.Matrix4fc
 import mogot.math.Vector2f
 import mogot.math.set
 
-class Sprite(val engine: Engine) : VisualInstance2D(), MaterialNode by MaterialNodeImpl() {
+class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by MaterialNodeImpl() {
     val size = Vector2f()
     private var geom by ResourceHolder<Rect2D>()
 

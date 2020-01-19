@@ -7,15 +7,13 @@ import mogot.gl.GLView
 import mogot.math.AABB
 import mogot.math.MutableRay
 import mogot.math.Vector3f
-import mogot.math.sub
+import mogot.math.*
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
-import pw.binom.sceneEditor.editors.EditMovementFactory3D
-import pw.binom.sceneEditor.editors.EditRotate3DFactory
-import pw.binom.sceneEditor.editors.FpsCamEditorFactory
+import pw.binom.sceneEditor.editors.EditActionFactory
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
@@ -54,7 +52,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     val editorRoot = Node()
     val sceneRoot = Node()
     val editorCamera = Camera()
-    val editorCamera2D = Camera2D()
+    lateinit var editorCamera2D: Camera2D
     val eventSelectChanged = EventDispatcher()
     private var closed = false
     private var inited = false
@@ -88,7 +86,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     }
 
     private lateinit var selectorMaterial: SolidMaterial
-    private val editorFactories = listOf(EditMovementFactory3D, EditRotate3DFactory, FpsCamEditorFactory)
+    private val editorFactories by Services.byClassSequence(EditActionFactory::class.java)
     private val _services by Services.byClassSequence(NodeService::class.java)
     private val links = WeakHashMap<Node, NodeService>()
 
@@ -107,10 +105,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
         editorCamera.parent = editorRoot
-        editorCamera2D.parent = editorRoot
         camera = editorCamera
-        camera2D = editorCamera2D
-
 
         editorCamera.position.set(3f, 3f, 3f)
         editorCamera.lookTo(Vector3f(0f, 0f, 0f))
@@ -213,10 +208,11 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     private fun getNode2D(x: Int, y: Int): Node? {
         var result: Node? = null
+        val pos = editorCamera2D.screenToWorld(x, y, Vector2f())
         sceneRoot.walk {
             val service = getService(it) ?: return@walk true
             val col = service.getCollider2D(it) ?: return@walk true
-            if (col.test(x.toFloat(), y.toFloat())) {
+            if (col.test(pos.x, pos.y)) {
                 result = it
                 return@walk false
             }
@@ -236,9 +232,9 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         val l = ArrayList<Node>()
         if (shift)
             l.addAll(selectedNodes)
-        val node = when (mode){
-            Mode.D3->getNode3D(e.x, e.y)
-            Mode.D2->getNode2D(e.x, e.y)
+        val node = when (mode) {
+            Mode.D3 -> getNode3D(e.x, e.y)
+            Mode.D2 -> getNode2D(e.x, e.y)
         }
         if (node != null)
             l.add(node)
@@ -341,6 +337,10 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     override fun init() {
         super.init()
+        editorCamera2D = Camera2D(engine)
+        editorCamera2D.parent = editorRoot
+        camera2D = editorCamera2D
+
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
         val grid = Grid(engine)
         grid.parent = root
