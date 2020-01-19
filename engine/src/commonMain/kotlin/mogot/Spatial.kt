@@ -153,7 +153,7 @@ open class Spatial : Node() {
 }
 
 val Node.isSpatial
-    get() = (type and SPATIAL_TYPE) > 0
+    get() = (type and SPATIAL_TYPE) != 0
 
 fun <T : Node> Sequence<T>.onlySpatial(): Sequence<Spatial> =
         filter { it.isSpatial }.map { it as Spatial }

@@ -3,10 +3,9 @@ package pw.binom.sceneEditor.editors
 import mogot.Spatial
 import mogot.collider.PanelCollider
 import mogot.math.*
-import pw.binom.sceneEditor.Grid
 import pw.binom.sceneEditor.Line
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.properties.PositionProperty
+import pw.binom.sceneEditor.properties.Transform3DProperty
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import kotlin.math.*
@@ -41,7 +40,7 @@ abstract class EditMove(view: SceneEditorView, selected: List<Spatial>) : Spatia
 
 fun SceneEditorView.updatePropertyPosition() {
     editor1.propertyTool.properties
-            .mapNotNull { it as? PositionProperty }
+            .mapNotNull { it as? Transform3DProperty }
             .forEach {
                 it.update()
             }

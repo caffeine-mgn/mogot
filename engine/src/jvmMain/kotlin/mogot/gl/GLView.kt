@@ -57,6 +57,11 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
             return tempSize
         }
     private val robot = Robot()
+    protected open var camera2D: Camera2D? = null
+        set(value) {
+            value?.resize(width, height)
+            field = value
+        }
     protected open var camera: Camera? = null
         set(value) {
             value?.resize(width, height)
@@ -186,6 +191,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     protected open fun setup(width: Int, height: Int) {
         gl.gl.glViewport(x, y, width, height)
         camera?.resize(width, height)
+        camera2D?.resize(width, height)
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
         gl.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
         gl.gl.glEnable(GL2.GL_BLEND)
@@ -193,7 +199,8 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         repaint()
     }
 
-    private val tempMatrix = Matrix4f()
+    private val cameraModel3DMatrix = Matrix4f()
+    private val cameraModel2DMatrix = Matrix4f()
     private var oldLockMouse = false
 
     protected open fun render2(dt: Float) {
@@ -234,7 +241,12 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
-        camera?.globalToLocalMatrix(tempMatrix.identity())
+        camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
+
+        camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
+                ?: cameraModel2DMatrix.identity()
+
+//        camera2D = null
 
         renderContext.pointLights.clear()
         root?.walk {
@@ -250,15 +262,19 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         if (root != null) {
             gl.gl.glEnable(GL2.GL_DEPTH_TEST)
             gl.gl.glEnable(GL2.GL_CULL_FACE)
-            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
+            update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
             if (camera != null)
-                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+                renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
 
             gl.gl.glDisable(GL2.GL_DEPTH_TEST)
             gl.gl.glDisable(GL2.GL_CULL_FACE)
 
-            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, tempMatrix, renderContext)
+
+            renderNode2D(root!!,
+                    camera2D?.projectionMatrix
+                            ?:
+                            cameraModel2DMatrix.identity().setOrtho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+                    , renderContext)
         }
 //        }
         if (lockMouse) {

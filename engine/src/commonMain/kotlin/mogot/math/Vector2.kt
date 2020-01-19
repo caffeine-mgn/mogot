@@ -13,18 +13,15 @@ interface Vector2ic {
 interface Vector2im : Vector2ic {
     override var x: Int
     override var y: Int
-}
-
-class Vector2i(override var x: Int = 0, override var y: Int = 0) : Vector2im {
-    constructor(other: Vector2ic) : this(other.x, other.y)
-
-    fun set(x: Int, y: Int): Vector2i {
+    fun set(x: Int, y: Int): Vector2im {
         this.x = x
         this.y = y
         return this
     }
+}
 
-    inline fun set(other: Vector2ic) = set(other.x, other.y)
+class Vector2i(override var x: Int = 0, override var y: Int = 0) : Vector2im {
+    constructor(other: Vector2ic) : this(other.x, other.y)
 }
 
 interface Vector2fc {
@@ -77,9 +74,29 @@ open class Vector2f(override var x: Float = 0f, override var y: Float = 0f) : Ve
 
     override fun toString(): String = "Vec2f($x $y)"
 
-    inline fun set(other: Vector2fc) = set(other.x, other.y)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Vector2f
+
+        if (x != other.x) return false
+        if (y != other.y) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
+
+
 }
 
+inline fun Vector2fm.set(other: Vector2fc) = set(other.x, other.y)
+inline fun Vector2im.set(other: Vector2ic) = set(other.x, other.y)
 fun Vector2fm.normalize(): Vector2fm = normalize(this)
 fun Vector2fc.normalized(): Vector2fm = normalize(Vector2f())
 
@@ -99,3 +116,28 @@ inline val Vector2fc.angle
     get() = atan2(y, x)
 
 inline fun Vector2fm.rotate(angle: Float) = rotate(angle, this)
+
+open class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = false
+        return b
+    }
+}

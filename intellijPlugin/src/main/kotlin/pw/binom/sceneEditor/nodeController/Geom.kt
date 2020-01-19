@@ -15,7 +15,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
-import pw.binom.sceneEditor.properties.PositionPropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
 
@@ -71,7 +71,7 @@ private fun makeFbxScene(view: SceneEditorView, fbx: ExternalFbx): Spatial {
 
 object GeomService : NodeService {
 
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
+    private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false

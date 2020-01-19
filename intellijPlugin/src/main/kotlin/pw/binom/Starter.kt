@@ -21,5 +21,7 @@ class Starter : StartupActivity {
         Services.reg(GeomService)
         Services.reg(CameraService)
         Services.reg(CameraNodeCreator)
+        Services.reg(Sprite2DCreator)
+        Services.reg(Sprite2DService)
     }
 }

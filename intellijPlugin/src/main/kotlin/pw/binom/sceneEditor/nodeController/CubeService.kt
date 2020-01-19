@@ -7,11 +7,10 @@ import mogot.Node
 import mogot.collider.Collider
 import mogot.math.AABBm
 import mogot.collider.BoxCollider
-import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
-import pw.binom.sceneEditor.properties.PositionPropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
@@ -29,7 +28,7 @@ object CubeNodeCreator : NodeCreator {
 }
 
 object CubeService : NodeService {
-    private val props = listOf(PositionPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
+    private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
     override fun delete(view: SceneEditorView, node: Node) {

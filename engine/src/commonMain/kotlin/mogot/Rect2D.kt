@@ -9,7 +9,7 @@ import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.io.Closeable
 
-open class Rect2D(val gl: GL, size: Vector2fc) : Closeable {
+open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
     private var _size = size
     val size
         get() = _size
@@ -69,9 +69,10 @@ open class Rect2D(val gl: GL, size: Vector2fc) : Closeable {
         }
     }
 
-    override fun close() {
+    override fun dispose() {
         vao.close()
         vertexBuffer.close()
         uvBuffer.close()
+        super.dispose()
     }
 }

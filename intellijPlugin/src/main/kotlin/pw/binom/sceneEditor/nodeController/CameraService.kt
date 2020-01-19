@@ -8,7 +8,7 @@ import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.CameraPropertyFactory
-import pw.binom.sceneEditor.properties.PositionPropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
@@ -47,9 +47,9 @@ object CameraNodeCreator : NodeCreator {
 
 private fun createStub(view: SceneEditorView, camera: Camera) {
     view.renderThread {
-        val s = Sprite(view.engine.gl)
+        val s = Sprite(view.engine)
         s.size.set(40f, 32f)
-        s.material = SolidTextureMaterial(view.engine).apply {
+        s.material.value = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.camerasManager.cameraLightTexture.gl
         }
@@ -65,7 +65,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
 }
 
 object CameraService : NodeService {
-    private val props = listOf(PositionPropertyFactory, CameraPropertyFactory, BehaviourPropertyFactory)
+    private val props = listOf(Transform3DPropertyFactory, CameraPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != Camera::class.java.name)
@@ -101,7 +101,7 @@ object CameraService : NodeService {
         frustums[camera] = f
 
         val sprite = view.engine.camerasManager.cameras[node]!!.node
-        val material = sprite.material as SolidTextureMaterial
+        val material = sprite.material.value as SolidTextureMaterial
         material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
     }
 
@@ -114,7 +114,7 @@ object CameraService : NodeService {
             }
         }
         val sprite = view.engine.camerasManager.cameras[node]!!.node
-        val material = sprite.material as SolidTextureMaterial
+        val material = sprite.material.value as SolidTextureMaterial
         material.diffuseColor.set(0f, 0f, 0f, 0f)
     }
 

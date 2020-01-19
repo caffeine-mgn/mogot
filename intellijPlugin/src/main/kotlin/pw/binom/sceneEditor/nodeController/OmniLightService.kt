@@ -7,7 +7,7 @@ import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
-import pw.binom.sceneEditor.properties.PositionPropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
@@ -46,9 +46,9 @@ private val Engine.omniManager: OmniManager
 
 private fun createStub(view: SceneEditorView, light: OmniLight) {
     view.renderThread {
-        val s = Sprite(view.engine.gl)
+        val s = Sprite(view.engine)
         s.size.set(120f / 4f, 160f / 4f)
-        s.material = SolidTextureMaterial(view.engine).apply {
+        s.material.value = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.omniManager.omniLightTexture.gl
         }
@@ -65,7 +65,7 @@ object OmniLightService : NodeService {
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
-    private val props = listOf(PositionPropertyFactory, BehaviourPropertyFactory)
+    private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is OmniLight
     override fun delete(view: SceneEditorView, node: Node) {
@@ -79,13 +79,13 @@ object OmniLightService : NodeService {
 
     override fun selected(view: SceneEditorView, node: Node) {
         val sprite = view.engine.omniManager.lights[node]?.node ?: return
-        val material = sprite.material as SolidTextureMaterial
+        val material = sprite.material.value as SolidTextureMaterial
         material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
     }
 
     override fun unselected(view: SceneEditorView, node: Node) {
         val sprite = view.engine.omniManager.lights[node]?.node ?: return
-        val material = sprite.material as SolidTextureMaterial
+        val material = sprite.material.value as SolidTextureMaterial
         material.diffuseColor.set(0f, 0f, 0f, 0f)
     }
 

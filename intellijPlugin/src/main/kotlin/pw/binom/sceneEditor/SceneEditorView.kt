@@ -38,6 +38,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     val editorRoot = Node()
     val sceneRoot = Node()
     val editorCamera = Camera()
+    val editorCamera2D = Camera2D()
     val eventSelectChanged = EventDispatcher()
     private var closed = false
     private var inited = false
@@ -90,7 +91,9 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
         editorCamera.parent = editorRoot
+        editorCamera2D.parent = editorRoot
         camera = editorCamera
+        camera2D = editorCamera2D
 
 
         editorCamera.position.set(3f, 3f, 3f)
@@ -343,7 +346,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private var render = 0
 }
 
-
+/*
 class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
     private var changeFlag = true
     override var x: Float
@@ -368,7 +371,7 @@ class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
         return b
     }
 }
-
+*/
 class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
     private var changeFlag = true
     override var x: Float

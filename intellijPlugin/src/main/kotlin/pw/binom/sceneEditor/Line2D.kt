@@ -2,10 +2,8 @@ package pw.binom.sceneEditor
 
 import mogot.gl.GL
 import mogot.*
-import mogot.math.Matrix4fc
-import mogot.math.Vector2f
+import mogot.math.*
 import pw.binom.FloatDataBuffer
-import pw.binom.floatDataOf
 import pw.binom.intDataOf
 
 class Line2D(val gl: GL) : VisualInstance2D() {
