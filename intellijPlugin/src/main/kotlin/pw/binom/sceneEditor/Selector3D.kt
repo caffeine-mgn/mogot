@@ -1,7 +1,7 @@
 package pw.binom.sceneEditor
 
 import mogot.*
-import mogot.math.Matrix4fc
+import mogot.math.*
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.*

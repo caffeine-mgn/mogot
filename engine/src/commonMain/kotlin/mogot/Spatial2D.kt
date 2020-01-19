@@ -44,9 +44,9 @@ open class Spatial2D : Node() {
             return null
         }
 
-    fun globalToLocal(point: Vector3fc, dest: Vector3fm): Vector3fm {
+    fun globalToLocal(point: Vector2fc, dest: Vector2fm): Vector2fm {
         globalToLocalMatrix(tmpMatrix)
-        point.mul(tmpMatrix, dest)
+        point.mulXY(tmpMatrix, dest)
         return dest
     }
 

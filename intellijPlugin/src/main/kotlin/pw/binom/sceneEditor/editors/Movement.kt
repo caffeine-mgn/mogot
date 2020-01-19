@@ -1,7 +1,7 @@
 package pw.binom.sceneEditor.editors
 
 import mogot.Spatial
-import mogot.collider.PanelCollider
+import mogot.collider.Panel3DCollider
 import mogot.math.*
 import pw.binom.sceneEditor.Line
 import pw.binom.sceneEditor.SceneEditorView
@@ -50,7 +50,7 @@ fun SceneEditorView.updatePropertyPosition() {
 class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMove(view, selected) {
 
     private val axisLine = Line(view.engine)
-    private val collader = PanelCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
+    private val collader = Panel3DCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
     private val ray = MutableRay()
     private val vec = Vector3f()
     private val startVec = Vector3f()

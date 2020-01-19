@@ -117,6 +117,14 @@ inline val Vector2fc.angle
 
 inline fun Vector2fm.rotate(angle: Float) = rotate(angle, this)
 
+fun Vector2fc.mulXY(matrix: Matrix4fc, dest: Vector2fm): Vector2fm {
+    val rx = matrix.m00 * x + matrix.m10 * y + matrix.m30
+    val ry = matrix.m01 * x + matrix.m11 * y + matrix.m31
+    dest.x = rx
+    dest.y = ry
+    return dest
+}
+
 open class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
     private var changeFlag = true
     override var x: Float

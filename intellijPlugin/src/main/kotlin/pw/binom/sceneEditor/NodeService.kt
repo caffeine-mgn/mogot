@@ -4,6 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import mogot.math.AABBm
 import mogot.collider.Collider
+import mogot.collider.Collider2D
 import pw.binom.sceneEditor.properties.PropertyFactory
 
 interface NodeService {
@@ -16,6 +17,7 @@ interface NodeService {
     fun delete(view: SceneEditorView, node: Node)
     fun getAABB(node: Node, aabb: AABBm): Boolean
     fun getCollider(node: Node): Collider? = null
+    fun getCollider2D(node: Node): Collider2D? = null
     fun hover(node: Node, hover: Boolean) {
         //NOP
     }

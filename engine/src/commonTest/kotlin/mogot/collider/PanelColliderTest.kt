@@ -17,7 +17,7 @@ class PanelColliderTest {
         cam.position.set(10f, 10f, 10f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
         val s = Spatial()
-        val collider = PanelCollider(100f, 100f)
+        val collider = Panel3DCollider(100f, 100f)
         collider.node = s
         val ray = MutableRay()
         cam.screenPointToRay(cam.width / 2, cam.height / 2, ray)
@@ -38,7 +38,7 @@ class PanelColliderTest {
         cam.lookTo(Vector3f(0f, 1f, 0f))
         val s = Spatial()
         s.position.set(0f, 1f, 0f)
-        val collider = PanelCollider(100f, 100f)
+        val collider = Panel3DCollider(100f, 100f)
         collider.node = s
         val ray = MutableRay()
         cam.screenPointToRay(cam.width / 2, cam.height / 2, ray)

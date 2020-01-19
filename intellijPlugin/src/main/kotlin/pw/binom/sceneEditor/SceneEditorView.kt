@@ -4,12 +4,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
-import mogot.math.Vector2i
-import mogot.math.Vector2f
-import mogot.math.Vector3f
-import mogot.math.*
-import mogot.math.Vector4f
 import mogot.math.AABB
+import mogot.math.MutableRay
+import mogot.math.Vector3f
+import mogot.math.sub
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
@@ -23,6 +21,17 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
+import kotlin.collections.List
+import kotlin.collections.asSequence
+import kotlin.collections.forEach
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.minBy
+import kotlin.collections.plus
+import kotlin.collections.plusAssign
+import kotlin.collections.reversed
+import kotlin.collections.set
+import kotlin.collections.toTypedArray
 
 private class EditorHolder(val view: SceneEditorView) : Closeable {
     override fun close() {
@@ -34,6 +43,12 @@ val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
 class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(MockFileSystem(), fps) {
+    enum class Mode {
+        D2,
+        D3
+    }
+
+    val mode = Mode.D2
 
     val editorRoot = Node()
     val sceneRoot = Node()
@@ -180,7 +195,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         super.mouseDown(e)
     }
 
-    private fun getNode(x: Int, y: Int): Node? {
+    private fun getNode3D(x: Int, y: Int): Node? {
         val ray = editorCamera.screenPointToRay(x, y, MutableRay())
         val list = ArrayList<Pair<Node, Float>>()
         sceneRoot.walk {
@@ -195,6 +210,20 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         return list.minBy { it.second }?.first
     }
 
+    private fun getNode2D(x: Int, y: Int): Node? {
+        var result: Node? = null
+        sceneRoot.walk {
+            val service = getService(it) ?: return@walk true
+            val col = service.getCollider2D(it) ?: return@walk true
+            if (col.test(x.toFloat(), y.toFloat())) {
+                result = it
+                return@walk false
+            }
+            true
+        }
+        return result
+    }
+
     override fun mouseUp(e: MouseEvent) {
         this.requestFocus()
         if (editor != null) {
@@ -206,7 +235,10 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         val l = ArrayList<Node>()
         if (shift)
             l.addAll(selectedNodes)
-        val node = getNode(e.x, e.y)
+        val node = when (mode){
+            Mode.D3->getNode3D(e.x, e.y)
+            Mode.D2->getNode2D(e.x, e.y)
+        }
         if (node != null)
             l.add(node)
         editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
@@ -234,7 +266,15 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private var hover: Node? = null
     override fun render2(dt: Float) {
         if (editor == null) {
-            val node = getNode(mousePosition.x, mousePosition.y)
+            val node = when (mode) {
+                Mode.D3 -> {
+                    getNode3D(mousePosition.x, mousePosition.y)
+                }
+                Mode.D2 -> {
+                    getNode2D(mousePosition.x, mousePosition.y)
+                }
+            }
+
             if (node != null) {
                 if (hover != node) {
                     val service = getService(node)
@@ -248,6 +288,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                 hover?.let { getService(it)?.hover(it, false) }
                 hover = null
             }
+
         }
         editor?.render(dt)
         super.render2(dt)
@@ -344,104 +385,4 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     private var disposed = AtomicBoolean(false)
     private var render = 0
-}
-
-/*
-class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
-    private var changeFlag = true
-    override var x: Float
-        get() = super.x
-        set(value) {
-            if (!changeFlag && value != super.x)
-                changeFlag = true
-            super.x = value
-        }
-
-    override var y: Float
-        get() = super.y
-        set(value) {
-            if (!changeFlag && value != super.y)
-                changeFlag = true
-            super.y = value
-        }
-
-    fun resetChangeFlag(): Boolean {
-        val b = changeFlag
-        changeFlag = true
-        return b
-    }
-}
-*/
-class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
-    private var changeFlag = true
-    override var x: Float
-        get() = super.x
-        set(value) {
-            if (!changeFlag && value != super.x)
-                changeFlag = true
-            super.x = value
-        }
-
-    override var y: Float
-        get() = super.y
-        set(value) {
-            if (!changeFlag && value != super.y)
-                changeFlag = true
-            super.y = value
-        }
-
-    override var z: Float
-        get() = super.z
-        set(value) {
-            if (!changeFlag && value != super.z)
-                changeFlag = true
-            super.z = value
-        }
-
-    fun resetChangeFlag(): Boolean {
-        val b = changeFlag
-        changeFlag = false
-        return b
-    }
-}
-
-class Vector4fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f) : Vector4f(x, y, z, w) {
-    private var changeFlag = true
-    override var x: Float
-        get() = super.x
-        set(value) {
-            if (!changeFlag && value != super.x)
-                changeFlag = true
-            super.x = value
-        }
-
-    override var y: Float
-        get() = super.y
-        set(value) {
-            if (!changeFlag && value != super.y)
-                changeFlag = true
-            super.y = value
-        }
-
-    override var z: Float
-        get() = super.z
-        set(value) {
-            if (!changeFlag && value != super.z)
-                changeFlag = true
-            super.z = value
-        }
-
-    override var w: Float
-        get() = super.z
-        set(value) {
-            if (!changeFlag && value != super.z)
-                changeFlag = true
-            super.z = value
-        }
-
-    fun resetChangeFlag(): Boolean {
-        val b = changeFlag
-        changeFlag = true
-        return b
-    }
 }

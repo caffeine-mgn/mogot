@@ -6,8 +6,7 @@ import mogot.Texture2D
 import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
-import mogot.math.Matrix4fc
-import mogot.math.Vector4f
+import mogot.math.*
 
 internal class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
     private val gl

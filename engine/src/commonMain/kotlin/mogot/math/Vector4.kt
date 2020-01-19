@@ -62,3 +62,44 @@ open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, over
 
 val Vector4fc.isNaN
     get() = x.isNaN() || y.isNaN() || z.isNaN() || w.isNaN()
+
+class Vector4fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f) : Vector4f(x, y, z, w) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    override var z: Float
+        get() = super.z
+        set(value) {
+            if (!changeFlag && value != super.z)
+                changeFlag = true
+            super.z = value
+        }
+
+    override var w: Float
+        get() = super.z
+        set(value) {
+            if (!changeFlag && value != super.z)
+                changeFlag = true
+            super.z = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = true
+        return b
+    }
+}

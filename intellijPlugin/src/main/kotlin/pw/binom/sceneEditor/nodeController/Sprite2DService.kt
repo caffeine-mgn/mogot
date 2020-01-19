@@ -2,7 +2,8 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
-import mogot.math.AABBm
+import mogot.collider.*
+import mogot.math.*
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
@@ -69,6 +70,19 @@ object Sprite2DService : NodeService {
     override fun delete(view: SceneEditorView, node: Node) {
     }
 
+    override fun hover(node: Node, hover: Boolean) {
+        node as MaterialNode
+        val m = node.material.value as? MaterialInstance?
+        m?.hover = hover
+    }
+
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
+    override fun getCollider2D(node: Node): Collider2D? {
+        node as Sprite
+        val c = Panel2DCollider()
+        c.node = node
+        c.size.set(node.size)
+        return c
+    }
 }

@@ -2,6 +2,22 @@ package mogot.math
 
 object Intersectionf {
 
+    /**
+     * Test whether the given point `(pX, pY)` lies inside the axis-aligned rectangle with the minimum corner `(minX, minY)`
+     * and maximum corner `(maxX, maxY)`.
+     *
+     * @param pX the x coordinate of the point
+     * @param pY the y coordinate of the point
+     * @param minX the x coordinate of the minimum corner of the axis-aligned rectangle
+     * @param minY the y coordinate of the minimum corner of the axis-aligned rectangle
+     * @param maxX the x coordinate of the maximum corner of the axis-aligned rectangle
+     * @param maxY the y coordinate of the maximum corner of the axis-aligned rectangle
+     * @return `true` iff the point lies inside the axis-aligned rectangle; `false` otherwise
+     */
+    fun testPointAar(pX: Float, pY: Float, minX: Float, minY: Float, maxX: Float, maxY: Float): Boolean {
+        return pX >= minX && pY >= minY && pX <= maxX && pY <= maxY
+    }
+
     fun intersectRayAab(originX: Float, originY: Float, originZ: Float, dirX: Float, dirY: Float, dirZ: Float,
                         minX: Float, minY: Float, minZ: Float, maxX: Float, maxY: Float, maxZ: Float, result: Vector2fm): Boolean {
         val invDirX = 1.0f / dirX

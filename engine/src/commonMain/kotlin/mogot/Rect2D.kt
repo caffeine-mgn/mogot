@@ -16,11 +16,11 @@ open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
 
     fun setSize(size: Vector2fc) {
         this._size = size
-        vertexBuffer.uploadArray(FloatDataBuffer.alloc(8).also{
-            it[0] = 0f;it[1] = 0f
-            it[2] = size.x;it[3] = 0f
-            it[4] = size.x;it[5] = size.y
-            it[6] = 0f;it[7] = size.y
+        vertexBuffer.uploadArray(FloatDataBuffer.alloc(8).also {
+            it[0] = -size.x * 0.5f; it[1] = -size.y * 0.5f
+            it[2] = size.x * 0.5f; it[3] = -size.y * 0.5f
+            it[4] = size.x * 0.5f; it[5] = size.y * 0.5f
+            it[6] = -size.x * 0.5f; it[7] = size.y * 0.5f
         })
     }
 
@@ -42,12 +42,12 @@ open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
         setSize(size)
         vao.bind {
             val indexData = IntDataBuffer.alloc(6).also {
-                it[0]=0
-                it[1]=1
-                it[2]=2
-                it[3]=2
-                it[4]=3
-                it[5]=0
+                it[0] = 0
+                it[1] = 1
+                it[2] = 2
+                it[3] = 2
+                it[4] = 3
+                it[5] = 0
             }
             indexBuffer.uploadArray(indexData)
             indexBuffer.bind()

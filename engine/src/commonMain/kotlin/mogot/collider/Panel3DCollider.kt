@@ -3,7 +3,7 @@ package mogot.collider
 import mogot.Spatial
 import mogot.math.*
 
-class PanelCollider(width: Float, height: Float) : Collider {
+class Panel3DCollider(width: Float, height: Float) : Collider {
     private val TEMP_MATRIX = Matrix4f()
     override var node: Spatial? = null
 
