@@ -9,12 +9,12 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import kotlin.math.atan2
 
-object RotateAllAxesFactory : EditActionFactory {
+object EditRotate3DFactory : EditActionFactory {
     override fun keyDown(view: SceneEditorView, e: KeyEvent) {
-        if (e.keyCode == 82) {
+        if (e.keyCode == Keys.R && view.mode == SceneEditorView.Mode.D3) {
             val nodes = view.selected.mapNotNull { it as? Spatial }
             if (nodes.isNotEmpty())
-                view.startEditor(RotateAllAxes(
+                view.startEditor(EditRotateAllAxes3D(
                         view = view,
                         root = view.editorRoot,
                         camera = view.editorCamera,
@@ -23,90 +23,7 @@ object RotateAllAxesFactory : EditActionFactory {
     }
 }
 
-abstract class EditorWithVirtualMouse(val view: SceneEditorView) : EditAction {
-    val engine
-        get() = view.engine
-
-    var oldMousePosition = Vector2i(engine.stage.mousePosition)
-    var virtualMouse = Vector2i(engine.stage.mousePosition)
-    val mouseMoveResetUtil = MouseMoveResetUtil(view)
-
-    override fun render(dt: Float) {
-        val newPos = mouseMoveResetUtil.check()
-        if (newPos == null) {
-            virtualMouse.add(
-                    engine.stage.mousePosition.x - oldMousePosition.x,
-                    engine.stage.mousePosition.y - oldMousePosition.y
-            )
-            oldMousePosition.set(
-                    engine.stage.mousePosition.x,
-                    engine.stage.mousePosition.y
-            )
-        } else {
-            oldMousePosition.set(newPos)
-        }
-    }
-
-    override fun keyDown(code: Int) {
-        if (code == Keys.SHIFT)
-            slow = true
-        else
-            super.keyDown(code)
-    }
-
-    override fun keyUp(code: Int) {
-        if (code == Keys.SHIFT)
-            slow = false
-        else
-            super.keyUp(code)
-    }
-
-    var slow = false
-        private set
-    //get() = engine.stage.isKeyDown(Keys.SHIFT)
-
-    abstract fun resetInitPosition()
-}
-
-abstract class SpatialEditor(view: SceneEditorView, val selected: List<Spatial>) : EditorWithVirtualMouse(view) {
-    val initPositions = selected.asSequence().map {
-        it to it.localToGlobalMatrix(Matrix4f())
-    }.toMap()
-    val avgPosition = selected.asSequence().map { it.position }.avg()
-
-    override fun resetInitPosition() {
-        initPositions.forEach { (node, matrix) ->
-            node.setGlobalTransform(matrix)
-        }
-        view.updatePropertyPosition()
-    }
-
-    override fun keyUp(code: Int) {
-        when (code) {
-            Keys.ESCAPE -> {
-                resetInitPosition()
-                view.stopEditing()
-            }
-            Keys.ENTER -> {
-                view.stopEditing()
-            }
-            else -> super.keyUp(code)
-        }
-    }
-
-    override fun mouseUp(e: MouseEvent) {
-        if (e.button == 1) {
-            view.stopEditing()
-        }
-
-        if (e.button == 3) {
-            resetInitPosition()
-            view.stopEditing()
-        }
-    }
-}
-
-abstract class RotateEditor(view: SceneEditorView, val root: Node, val camera: Camera, selected: List<Spatial>) : SpatialEditor(view, selected) {
+abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val camera: Camera, selected: List<Spatial>) : SpatialEditor(view, selected) {
     val screenPos = camera.worldToScreenPoint(avgPosition) ?: TODO()
 
     protected var totalRotation = 0f
@@ -160,7 +77,7 @@ abstract class RotateEditor(view: SceneEditorView, val root: Node, val camera: C
 }
 
 @Strictfp
-class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : RotateEditor(view, root, camera, selected) {
+class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : EditRotateEditor3D(view, root, camera, selected) {
     private val grid = Line(engine).also {
         it.parent = root
         it.material.value = view.default3DMaterial
@@ -179,7 +96,7 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
     private val globalRotation = Quaternionf()
     private val newRotation = Quaternionf()
     private val axisVec = Vector3f()
-    private val oldScale=Vector3f()
+    private val oldScale = Vector3f()
     override fun render(dt: Float) {
         super.render(dt)
         globalRotation.identity()
@@ -227,11 +144,11 @@ class RotateOneAxis(view: SceneEditorView, root: Node, camera: Camera, selected:
 }
 
 @Strictfp
-class RotateAllAxes(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>) : RotateEditor(view, root, camera, selected) {
+class EditRotateAllAxes3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>) : EditRotateEditor3D(view, root, camera, selected) {
     private val tempMatrix = Matrix4f()
     private val globalRotation = Quaternionf()
     private val newRotation = Quaternionf()
-    private val oldScale=Vector3f()
+    private val oldScale = Vector3f()
     override fun render(dt: Float) {
         super.render(dt)
         if (initPositions.isEmpty())
@@ -263,15 +180,15 @@ class RotateAllAxes(view: SceneEditorView, root: Node, camera: Camera, selected:
         when (code) {
             Keys.X -> {
                 resetInitPosition()
-                view.startEditor(RotateOneAxis(view, root, camera, selected, Axis.X))
+                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.X))
             }
             Keys.Y -> {
                 resetInitPosition()
-                view.startEditor(RotateOneAxis(view, root, camera, selected, Axis.Y))
+                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Y))
             }
             Keys.Z -> {
                 resetInitPosition()
-                view.startEditor(RotateOneAxis(view, root, camera, selected, Axis.Z))
+                view.startEditor(EditRotateOneAxis3D(view, root, camera, selected, Axis.Z))
             }
             else -> super.keyUp(code)
         }

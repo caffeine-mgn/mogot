@@ -5,9 +5,6 @@ import mogot.gl.GLView
 import mogot.math.*
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.*
-import pw.binom.sceneEditor.editors.EditMoveOneAxis
-import pw.binom.sceneEditor.editors.RotateAllAxes
-import pw.binom.sceneEditor.editors.RotateOneAxis
 import java.awt.Dimension
 import javax.swing.JFrame
 import kotlin.math.sin

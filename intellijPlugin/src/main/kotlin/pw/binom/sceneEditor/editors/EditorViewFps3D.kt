@@ -1,13 +1,10 @@
-package pw.binom.sceneEditor
+package pw.binom.sceneEditor.editors
 
 import mogot.math.*
 import pw.binom.io.Closeable
-import pw.binom.sceneEditor.editors.EditActionFactory
+import pw.binom.sceneEditor.EditAction
+import pw.binom.sceneEditor.SceneEditorView
 import java.awt.event.MouseEvent
-import kotlin.math.absoluteValue
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.sign
 
 object FpsCamEditorFactory : EditActionFactory {
     override fun mouseDown(view: SceneEditorView, e: MouseEvent) {
@@ -15,13 +12,6 @@ object FpsCamEditorFactory : EditActionFactory {
             view.startEditor(FpsCam(view))
     }
 }
-
-const val KEY_W = 87
-const val KEY_S = 83
-const val KEY_D = 68
-const val KEY_A = 65
-const val KEY_E = 69
-const val KEY_Q = 81
 
 private class FpsManager : Closeable {
     var x = 0f
@@ -34,7 +24,7 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
     val normalSpeed = 6f
     val fastSpeed = 12f
-    private val manager = view.engine.manager("FpsManager"){FpsManager()}
+    private val manager = view.engine.manager("FpsManager"){ FpsManager() }
 
     private val temp = Vector3f()
 
@@ -106,11 +96,11 @@ class FpsCam(val view: SceneEditorView) : EditAction {
         temp.set(0f, 0f, -(delta * moveSpeed))
         node.quaternion.mul(temp, temp)
 
-        if (KEY_W in keyDown) {
+        if (Keys.W in keyDown) {
             node.position.add(temp)
         }
 
-        if (KEY_S in keyDown) {
+        if (Keys.S in keyDown) {
             temp.negated(temp)
             node.position.add(temp)
         }
@@ -118,11 +108,11 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
         temp.set(delta * moveSpeed, 0f, 0f)
         node.quaternion.mul(temp, temp)
-        if (KEY_D in keyDown) {
+        if (Keys.D in keyDown) {
             node.position.add(temp)
         }
 
-        if (KEY_A in keyDown) {
+        if (Keys.A in keyDown) {
             temp.negated(temp)
             node.position.add(temp)
         }
@@ -130,11 +120,11 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 
         temp.set(0f, moveSpeed * delta, 0f)
         node.quaternion.mul(temp, temp)
-        if (KEY_E in keyDown) {
+        if (Keys.E in keyDown) {
             node.position.add(temp)
         }
 
-        if (KEY_Q in keyDown) {
+        if (Keys.Q in keyDown) {
             temp.negated(temp)
             node.position.add(temp)
         }

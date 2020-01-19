@@ -3,38 +3,28 @@ package pw.binom.sceneEditor.editors
 import mogot.Spatial
 import mogot.collider.Panel3DCollider
 import mogot.math.*
+import mogot.*
 import pw.binom.sceneEditor.Line
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.Transform3DProperty
 import java.awt.event.KeyEvent
-import java.awt.event.MouseEvent
 import kotlin.math.*
 
 
-interface EditActionFactory {
-    fun mouseDown(view: SceneEditorView, e: MouseEvent) {}
-    fun keyDown(view: SceneEditorView, e: KeyEvent) {}
-}
-
-object EditMoveFactory : EditActionFactory {
+object EditMovementFactory3D : EditActionFactory {
     override fun keyDown(view: SceneEditorView, e: KeyEvent) {
-        if (e.keyCode == 71) {
-            view.startEditor(EditMoveAllAxie(view, view.selected.mapNotNull { it as? Spatial }))
+        if (e.keyCode == Keys.G && view.mode == SceneEditorView.Mode.D3) {
+            view.startEditor(EditMovementAllAxie3D(view, view.selected.asSequence().onlySpatial().toList()))
         }
     }
 }
 
-abstract class EditMove(view: SceneEditorView, selected: List<Spatial>) : SpatialEditor(view, selected) {
+abstract class EditMovement3D(view: SceneEditorView, selected: List<Spatial>) : SpatialEditor(view, selected) {
 
     protected open fun stopEdit() {
         view.stopEditing()
         view.lockMouse = false
         view.cursorVisible = true
-    }
-
-    init {
-//        view.lockMouse = true
-//        view.cursorVisible = false
     }
 }
 
@@ -47,7 +37,7 @@ fun SceneEditorView.updatePropertyPosition() {
 }
 
 @Strictfp
-class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMove(view, selected) {
+class EditMovementOneAxis3D(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMovement3D(view, selected) {
 
     private val axisLine = Line(view.engine)
     private val collader = Panel3DCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
@@ -127,41 +117,25 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: 
                     .mul(matrix)
             node.setGlobalTransform(m)
         }
-        /*
-        val pos = Vector3f()
-        val cof = if (slow) 0.1f else 1f
-
-        selected.forEach {
-            pos.set(it.position)
-            it.parentSpatial?.localToGlobal(pos, pos)
-            when (type) {
-                Axis.X -> pos.x += (value - startValue) * cof
-                Axis.Y -> pos.y += (startValue - value) * cof
-                Axis.Z -> pos.z += (value - startValue) * cof
-            }
-            it.parentSpatial?.globalToLocal(pos, pos)
-            it.position.set(pos)
-        }
-        */
         view.updatePropertyPosition()
-        //startValue = value
     }
 }
+
 @Strictfp
-class EditMoveAllAxie(view: SceneEditorView, selected: List<Spatial>) : EditMove(view, selected) {
+class EditMovementAllAxie3D(view: SceneEditorView, selected: List<Spatial>) : EditMovement3D(view, selected) {
     override fun keyDown(code: Int) {
         when (code) {
             Keys.X -> {
                 resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.X))
+                view.startEditor(EditMovementOneAxis3D(view, selected, Axis.X))
             }
             Keys.Y -> {
                 resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.Y))
+                view.startEditor(EditMovementOneAxis3D(view, selected, Axis.Y))
             }
             Keys.Z -> {
                 resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.Z))
+                view.startEditor(EditMovementOneAxis3D(view, selected, Axis.Z))
             }
             else -> super.keyDown(code)
         }
