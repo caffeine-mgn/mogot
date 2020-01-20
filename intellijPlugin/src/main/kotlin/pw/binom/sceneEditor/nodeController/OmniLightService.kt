@@ -46,7 +46,7 @@ private val Engine.omniManager: OmniManager
 
 private fun createStub(view: SceneEditorView, light: OmniLight) {
     view.renderThread {
-        val s = Sprite(view.engine)
+        val s = SpriteFor3D(view)
         s.size.set(120f / 4f, 160f / 4f)
         s.material.value = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)

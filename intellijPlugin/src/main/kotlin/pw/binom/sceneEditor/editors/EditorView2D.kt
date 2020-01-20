@@ -1,6 +1,7 @@
 package pw.binom.sceneEditor.editors
 
-import mogot.math.*
+import mogot.math.Vector2i
+import mogot.math.set
 import pw.binom.sceneEditor.SceneEditorView
 import java.awt.event.MouseEvent
 
@@ -17,8 +18,8 @@ class EditorView2D(view: SceneEditorView) : EditorWithVirtualMouse(view) {
         val dx = virtualMouse.x - oldMousePos.x
         val dy = virtualMouse.y - oldMousePos.y
         oldMousePos.set(virtualMouse)
-        view.editorCamera2D.position.x -= dx * 0.5f
-        view.editorCamera2D.position.y -= dy * 0.5f
+        view.editorCamera2D.position.x -= dx
+        view.editorCamera2D.position.y -= dy
         super.render(dt)
     }
 

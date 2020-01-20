@@ -14,5 +14,6 @@ object Keys {
     const val A = 65
     const val E = 69
     const val Q = 81
+    const val M = 77
     const val SHIFT = 16
 }

@@ -24,13 +24,11 @@ object SceneFileLoader {
             return out
         }
 
-        view.renderThread {
-            val scene = file.inputStream.use {
-                Scene.load(it)
-            }
-            scene.childs.forEach {
-                loadNode(it)?.parent = view.sceneRoot
-            }
+        val scene = file.inputStream.use {
+            Scene.load(it)
+        }
+        scene.childs.forEach {
+            loadNode(it)?.parent = view.sceneRoot
         }
     }
 

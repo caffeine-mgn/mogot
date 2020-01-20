@@ -4,7 +4,6 @@ import mogot.Spatial2D
 import mogot.math.*
 import mogot.onlySpatial2D
 import mogot.use1
-import pw.binom.io.use
 import pw.binom.sceneEditor.SceneEditorView
 import java.awt.event.KeyEvent
 
@@ -150,7 +149,7 @@ class EditMovement2D(view: SceneEditorView, selected: List<Spatial2D>, val type:
         engine.mathPool.vec3f.use1 { moveDirection3f ->
             moveDirection3f.set(moveDirection.x, moveDirection.y, 0f)
             initPositions.forEach { (node, nodeMatrix) ->
-                engine.mathPool.mat4f.use1 { mat->
+                engine.mathPool.mat4f.use1 { mat ->
                     mat.identity()
                             .translate(moveDirection3f)
                             .mul(nodeMatrix)

@@ -4,9 +4,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
-import mogot.math.AABB
-import mogot.math.MutableRay
-import mogot.math.Vector3f
 import mogot.math.*
 import pw.binom.MockFileSystem
 import pw.binom.Services
@@ -14,23 +11,14 @@ import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.editors.EditActionFactory
+import pw.binom.sceneEditor.editors.Keys
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
-import kotlin.collections.List
-import kotlin.collections.asSequence
-import kotlin.collections.forEach
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.minBy
-import kotlin.collections.plus
-import kotlin.collections.plusAssign
-import kotlin.collections.reversed
 import kotlin.collections.set
-import kotlin.collections.toTypedArray
 
 private class EditorHolder(val view: SceneEditorView) : Closeable {
     override fun close() {
@@ -47,7 +35,39 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         D3
     }
 
-    val mode = Mode.D2
+    public override var render3D: Boolean
+        get() = super.render3D
+        set(value) {
+            super.render3D = value
+        }
+    var mode = Mode.D2
+        set(value) {
+            field = value
+            when (value) {
+                Mode.D2 -> {
+                    camera2D = editorCamera2D
+                    render3D = false
+                    sceneRoot.walk {
+                        if (it.isVisualInstance2D) {
+                            it as VisualInstance2D
+                            it.visible = true
+                        }
+                        true
+                    }
+                }
+                Mode.D3 -> {
+                    camera2D = null
+                    render3D = true
+                    sceneRoot.walk {
+                        if (it.isVisualInstance2D) {
+                            it as VisualInstance2D
+                            it.visible = false
+                        }
+                        true
+                    }
+                }
+            }
+        }
 
     val editorRoot = Node()
     val sceneRoot = Node()
@@ -252,10 +272,16 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             return
         }
         editorFactories.forEach {
-
             it.keyDown(this, e);
             if (editor != null)
                 return
+        }
+        if (e.keyCode == Keys.M) {
+            mode = when (mode) {
+                Mode.D2 -> Mode.D3
+                Mode.D3 -> Mode.D2
+            }
+            return
         }
         super.keyDown(e)
     }
@@ -352,6 +378,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
 
         SceneFileLoader.load(this, file)
+        mode = Mode.D3
 //        createStabs(sceneRoot)
         inited = true
     }

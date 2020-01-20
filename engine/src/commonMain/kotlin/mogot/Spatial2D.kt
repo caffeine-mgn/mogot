@@ -94,8 +94,11 @@ open class Spatial2D(val engine: Engine) : Node() {
     }
 }
 
+
+private const val spatial2dType = SPATIAL2D_TYPE or VISUAL_INSTANCE2D_TYPE
+
 val Node.isSpatial2D
-    get() = (type and SPATIAL2D_TYPE) != 0
+    get() = (type and spatial2dType) != 0
 
 fun <T : Node> Sequence<T>.onlySpatial2D(): Sequence<Spatial2D> =
         filter { it.isSpatial2D }.map { it as Spatial2D }
