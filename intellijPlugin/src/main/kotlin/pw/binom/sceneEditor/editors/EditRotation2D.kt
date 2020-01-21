@@ -22,7 +22,7 @@ object EditRotate2DFactory : EditActionFactory {
 }
 
 abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, val camera: Camera2D, selected: List<Spatial2D>) : Spatial2DEditor(view, selected) {
-    val screenPos = camera.worldToScreen(avgPosition) ?: TODO()
+    val screenPos = camera.worldToScreen(avgPosition)
 
     protected var totalRotation = 0f
 

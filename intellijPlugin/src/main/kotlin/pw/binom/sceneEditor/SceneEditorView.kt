@@ -131,6 +131,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 
         editorCamera.position.set(3f, 3f, 3f)
         editorCamera.lookTo(Vector3f(0f, 0f, 0f))
+
+        addMouseWheelListener {
+            if (mode == Mode.D2) {
+                val v = editorCamera2D.zoom - it.wheelRotation / 10f
+                if (v > 0f && v < 5f) {
+                    editorCamera2D.zoom = v
+                }
+            }
+        }
     }
 
     private val selectedNodes = ArrayList<Node>()

@@ -76,7 +76,7 @@ interface Matrix4fc {
         const val CORNER_PXPYPZ = 7
     }
 
-    fun getTranslation(dest: Vector3fm): Vector3fm {
+    fun getTranslation(dest: Vector3fm = Vector3f()): Vector3fm {
         dest.x = m30
         dest.y = m31
         dest.z = m32

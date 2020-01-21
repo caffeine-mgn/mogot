@@ -43,11 +43,18 @@ open class Spatial2D(val engine: Engine) : Node() {
             return null
         }
 
-    fun globalToLocal(point: Vector2fc, dest: Vector2fm): Vector2fm {
+    fun globalToLocal(point: Vector2fc, dest: Vector2fm = Vector2f()): Vector2fm {
         val mat = engine.mathPool.mat4f.poll()
         globalToLocalMatrix(mat)
         point.mulXY(mat, dest)
         engine.mathPool.mat4f.push(mat)
+        return dest
+    }
+
+    fun localToGlobal(point: Vector2fc, dest: Vector2fm = Vector2f()): Vector2fm {
+        val mat = engine.mathPool.mat4f.poll()
+        localToGlobalMatrix(mat)
+        point.mulXY(mat, dest)
         return dest
     }
 

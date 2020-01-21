@@ -18,8 +18,8 @@ class EditorView2D(view: SceneEditorView) : EditorWithVirtualMouse(view) {
         val dx = virtualMouse.x - oldMousePos.x
         val dy = virtualMouse.y - oldMousePos.y
         oldMousePos.set(virtualMouse)
-        view.editorCamera2D.position.x -= dx
-        view.editorCamera2D.position.y -= dy
+        view.editorCamera2D.position.x -= dx / view.editorCamera2D.zoom
+        view.editorCamera2D.position.y -= dy / view.editorCamera2D.zoom
         if (dx != 0 || dy != 0)
             view.updateGuids()
         super.render(dt)
