@@ -56,6 +56,9 @@ interface Vector4fm : Vector4fc {
 
 open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 0f) : Vector4fm {
 
+    constructor(other: Vector4fc) : this(other.x, other.y, other.z, other.w)
+    constructor(value: Float) : this(value, value, value, value)
+
     override fun toString(): String =
             "Vec4f($x $y $y $w)"
 }

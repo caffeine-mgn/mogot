@@ -4,9 +4,11 @@ import com.intellij.ide.util.TreeFileChooserFactory
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.MaterialNode
 import mogot.Node
+import mogot.math.Vector4f
 import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.glsl.psi.GLSLFile
+import pw.binom.sceneEditor.MInstance
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.loadMaterial
@@ -35,7 +37,7 @@ class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material")
 
     var MaterialNode.materialFile: VirtualFile?
         get() {
-            if (this.material.value == null || this.material.value == view.default3DMaterial)
+            if (this.material.value == null || this.material.value is MInstance)
                 return null
             if (this.material.value is MaterialInstance) {
                 return (this.material as MaterialInstance).root.file
@@ -44,7 +46,7 @@ class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material")
         }
         set(value) {
             if (value == null)
-                this.material.value = view.default3DMaterial
+                this.material.value = view.default3DMaterial.instance(Vector4f(1f))
             else
                 this.material.value = view.engine.resources.loadMaterial(value)
         }

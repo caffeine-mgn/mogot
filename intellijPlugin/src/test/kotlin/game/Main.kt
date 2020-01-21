@@ -2,13 +2,24 @@ package game.game
 
 import mogot.*
 import mogot.gl.GLView
-import mogot.math.*
+import mogot.math.MATRIX4_ONE
+import mogot.math.Matrix4f
+import mogot.math.Vector2f
+import mogot.math.Vector3f
 import pw.binom.MockFileSystem
-import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.Default3DMaterial
+import pw.binom.sceneEditor.Grid3D
+import pw.binom.sceneEditor.GuideLine
+import pw.binom.sceneEditor.SimpleMaterial
+import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Dimension
+import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionListener
 import javax.swing.JFrame
-import kotlin.math.sin
+import javax.swing.JPanel
 import kotlin.math.cos
+import kotlin.math.sin
 
 class FullScreenSprite(engine: Engine) {
     var material: Material? = null
@@ -63,17 +74,17 @@ class DDD : GLView(MockFileSystem()) {
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
-        val gg = Grid(engine)
-        gg.material.value=Default3DMaterial(engine)
-        gg.parent=root
+        val gg = Grid3D(engine)
+        gg.material.value = Default3DMaterial(engine)
+        gg.parent = root
         inited = true
         cam.parent = root
         cam.position.set(5f, 5f, 5f)
         //cam.lookTo(Vector3f(6f, 6f, 6f))
         cam.behaviour = FpsCamB(engine)
         val box = CSGBox(engine)
-        box.material.value=SimpleMaterial(engine)
-        box.parent=root
+        box.material.value = SimpleMaterial(engine)
+        box.parent = root
         cam.lookTo(Vector3f(0f, 0f, 0f))
     }
 
@@ -94,7 +105,35 @@ object Main {
 //            FbxViewer(it.readBytes())
 //        }
 //        f.contentPane.add(view.glcanvas)
-        f.contentPane.add(view)
+        val gTop = GuideLine(GuideLine.Place.TOP)
+        val gLeft = GuideLine(GuideLine.Place.LEFT)
+        f.contentPane.add(gTop, BorderLayout.NORTH)
+        f.contentPane.add(gLeft, BorderLayout.WEST)
+        val p = JPanel().also { it.background = Color.GRAY }
+        var mx = 0
+        var my = 0
+
+        p.addMouseMotionListener(object : MouseMotionListener {
+            override fun mouseMoved(e: MouseEvent) {
+                mx = e.x
+                my = e.y
+            }
+
+            override fun mouseDragged(e: MouseEvent) {
+                val dx = e.x - mx
+                val dy = e.y - my
+                mx = e.x
+                my = e.y
+                gTop.position += dx / gTop.scale
+                gLeft.position += dy / gLeft.scale
+            }
+        })
+        p.addMouseWheelListener {
+            gTop.scale -= it.wheelRotation / 5f
+            gLeft.scale -= it.wheelRotation / 5f
+            println("g.scale=${gTop.scale}")
+        }
+        f.contentPane.add(p, BorderLayout.CENTER)
 
         f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.size = Dimension(800, 600)

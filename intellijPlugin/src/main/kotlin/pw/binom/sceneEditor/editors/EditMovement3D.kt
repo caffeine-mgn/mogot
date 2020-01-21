@@ -43,7 +43,7 @@ class EditMovementOneAxis3D(view: SceneEditorView, selected: List<Spatial>, val 
     init {
         axisLine.parent = view.editorRoot
         axisLine.position.set(avgPosition)
-        axisLine.material.value = view.default3DMaterial
+        axisLine.material.value = view.default3DMaterial.instance(Vector4f(1f))
         collader.node = axisLine
     }
 

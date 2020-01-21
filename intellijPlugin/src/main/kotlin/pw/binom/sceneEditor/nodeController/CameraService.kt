@@ -97,7 +97,7 @@ object CameraService : NodeService {
         val camera = node as Camera
         val f = FrustumNode(view.engine, camera)
         f.parent = view.editorRoot
-        f.material.value = view.default3DMaterial
+        f.material.value = view.default3DMaterial.instance(Vector4f(1f))
         frustums[camera] = f
 
         val sprite = view.engine.camerasManager.cameras[node]!!.node

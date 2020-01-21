@@ -40,7 +40,7 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, val cam
 
     protected val center = Line2D(engine).also {
         it.parent = root
-        it.material = view.default3DMaterial
+        it.material = view.default3DMaterial.instance(Vector4f(1f))
     }
 
     override fun render(dt: Float) {

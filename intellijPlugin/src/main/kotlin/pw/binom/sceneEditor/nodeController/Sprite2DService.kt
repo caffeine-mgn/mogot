@@ -38,7 +38,7 @@ object Sprite2DService : NodeService {
                 properties["size.y"]?.toFloat() ?: 0f
         )
         if (node.material.value == null)
-            node.material.value = view.default3DMaterial
+            node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         return node
     }
 

@@ -29,7 +29,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -40,6 +40,12 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         set(value) {
             super.render3D = value
         }
+
+    fun updateGuids() {
+        viewPlane.guideTop.position = editorCamera2D.position.x
+        viewPlane.guideLeft.position = editorCamera2D.position.y
+    }
+
     var mode = Mode.D2
         set(value) {
             field = value
@@ -54,6 +60,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                         }
                         true
                     }
+                    viewPlane.guideVisible = true
                 }
                 Mode.D3 -> {
                     camera2D = null
@@ -65,10 +72,12 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                         }
                         true
                     }
+                    viewPlane.guideVisible = false
                 }
             }
         }
 
+    lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
     val editorCamera = Camera()
@@ -80,13 +89,6 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     private lateinit var _default3DMaterial: Default3DMaterial
     val default3DMaterial: Default3DMaterial
         get() = _default3DMaterial
-
-    override fun setup(width: Int, height: Int) {
-        engine.manager("Editor") { EditorHolder(this) }
-        super.setup(width, height)
-        _default3DMaterial = Default3DMaterial(engine)
-        _default3DMaterial.inc()
-    }
 
     override fun destroy() {
         _default3DMaterial.dec()
@@ -163,7 +165,7 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
                             if (service.getAABB(node, aabb)) {
                                 val s = Selector3D(engine, node)
                                 s.parent = editorRoot
-                                s.material.value = default3DMaterial
+                                s.material.value = default3DMaterial.instance(Vector4f(1f))
                                 selectors.add(s)
 
                                 s.size.set(aabb.size.x * 1.1f, aabb.size.y * 1.1f, aabb.size.z * 1.1f)
@@ -283,6 +285,11 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
             }
             return
         }
+
+        if (e.keyCode == Keys.X) {
+            viewPlane.guideVisible = !viewPlane.guideVisible
+            return
+        }
         super.keyDown(e)
     }
 
@@ -331,11 +338,9 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
         this.editor?.onStop()
         this.editor = editor
 //        startRender()
-        println("startEditor")
     }
 
     fun stopEditing() {
-        println("stopEditing")
         editor?.onStop()
         editor = null
 //        stopRender()
@@ -363,12 +368,21 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
 
     override fun init() {
         super.init()
+        engine.manager("Editor") { EditorHolder(this) }
+        _default3DMaterial = Default3DMaterial(engine)
+        _default3DMaterial.inc()
+
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot
         camera2D = editorCamera2D
 
+        grid2d = Grid2D(this)
+        grid2d.parent = root
+
+
+
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
-        val grid = Grid(engine)
+        val grid = Grid3D(engine)
         grid.parent = root
         val mat = SolidMaterial(engine)
         grid.material.value = mat
@@ -406,7 +420,6 @@ class SceneEditorView(val editor1: SceneEditor, val project: Project, val file: 
     */
 
     override fun dispose() {
-        println("SceneEditorView.dispose")
         closed = true
         super.dispose()
     }

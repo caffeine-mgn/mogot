@@ -6,7 +6,7 @@ import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.intDataOf
 
-class Grid(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
+class Grid3D(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     /**
      * кол-во квадратов
      */

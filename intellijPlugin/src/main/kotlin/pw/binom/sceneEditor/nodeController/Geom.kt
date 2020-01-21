@@ -6,6 +6,7 @@ import mogot.GeomNode
 import mogot.Node
 import mogot.Spatial
 import mogot.math.AABBm
+import mogot.math.Vector4f
 import pw.binom.ExternalFbx
 import pw.binom.FbxGeom
 import pw.binom.fbx.file.FbxModel2
@@ -51,7 +52,7 @@ private fun makeFbxScene(view: SceneEditorView, fbx: ExternalFbx): Spatial {
             val node = GeomNode()
             node.geom.value = fbx.getGeom(model.geometry!!.name)
             node.parent = parent
-            node.material.value = view.default3DMaterial
+            node.material.value = view.default3DMaterial.instance(Vector4f(1f))
             node
         } else {
             TODO()
@@ -79,13 +80,13 @@ object GeomService : NodeService {
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != GeomNode::class.java.name) return null
         val node = GeomNode()
-        node.material.value = view.default3DMaterial
+        node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         SpatialService.loadSpatial(view.engine, node, properties)
         val virtualFile = properties["file"]?.let { view.editor1.findFileByRelativePath(it) }
         virtualFile ?: return null
         val fbx = view.engine.resources.loadFbx(virtualFile)
         node.geom.value = properties["geom"]?.let { fbx.getGeom(it) } ?: return null
-        node.material.value = view.default3DMaterial
+        node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         MaterialNodeUtils.load(view, node, properties)
         return node
     }

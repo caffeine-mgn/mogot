@@ -38,7 +38,7 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
             enabkeChangeDispatcher = true
         }
         val nodes = nodes.asSequence()
-                .map { it to editor.viewer.getService(it) }
+                .map { it to editor.viewer.view.getService(it) }
                 .filter {
                     it.second != null
                 }
@@ -51,10 +51,10 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
         }
         _properties.clear()
         nodes.asSequence()
-                .flatMap { it.second.getProperties(editor.viewer, it.first).asSequence() }
+                .flatMap { it.second.getProperties(editor.viewer.view, it.first).asSequence() }
                 .distinct()
                 .filter { property ->
-                    nodes.all { property in it.second.getProperties(editor.viewer, it.first) }
+                    nodes.all { property in it.second.getProperties(editor.viewer.view, it.first) }
                 }
                 .map { editor.getProperty(it) }
                 .forEach {

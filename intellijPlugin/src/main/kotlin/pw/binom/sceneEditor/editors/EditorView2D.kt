@@ -20,6 +20,8 @@ class EditorView2D(view: SceneEditorView) : EditorWithVirtualMouse(view) {
         oldMousePos.set(virtualMouse)
         view.editorCamera2D.position.x -= dx
         view.editorCamera2D.position.y -= dy
+        if (dx != 0 || dy != 0)
+            view.updateGuids()
         super.render(dt)
     }
 

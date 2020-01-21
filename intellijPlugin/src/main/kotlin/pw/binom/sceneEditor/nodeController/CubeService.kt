@@ -7,6 +7,7 @@ import mogot.Node
 import mogot.collider.Collider
 import mogot.math.AABBm
 import mogot.collider.BoxCollider
+import mogot.math.Vector4f
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
@@ -22,7 +23,7 @@ object CubeNodeCreator : NodeCreator {
 
     override fun create(view: SceneEditorView): Node {
         val node = CSGBox(view.engine)
-        node.material.value = view.default3DMaterial
+        node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         return node
     }
 }
@@ -57,7 +58,7 @@ object CubeService : NodeService {
         SpatialService.loadSpatial(view.engine, node, properties)
         MaterialNodeUtils.load(view, node, properties)
         if (node.material.value == null)
-            node.material.value = view.default3DMaterial
+            node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         return node
     }
 

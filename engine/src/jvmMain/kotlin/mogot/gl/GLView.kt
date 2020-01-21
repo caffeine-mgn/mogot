@@ -192,7 +192,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun setup(width: Int, height: Int) {
-        gl.gl.glViewport(x, y, width, height)
+        gl.gl.glViewport(0, 0, width, height)
         camera?.resize(width, height)
         camera2D?.resize(width, height)
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)

@@ -42,7 +42,7 @@ abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val cam
 
     protected val center = Line2D(engine).also {
         it.parent = root
-        it.material = view.default3DMaterial
+        it.material = view.default3DMaterial.instance(Vector4f(1f))
     }
 
     override fun render(dt: Float) {
@@ -80,7 +80,7 @@ abstract class EditRotateEditor3D(view: SceneEditorView, val root: Node, val cam
 class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : EditRotateEditor3D(view, root, camera, selected) {
     private val grid = Line(engine).also {
         it.parent = root
-        it.material.value = view.default3DMaterial
+        it.material.value = view.default3DMaterial.instance(Vector4f(1f))
         it.position.set(avgPosition)
 
         if (axis == Axis.Y) {
