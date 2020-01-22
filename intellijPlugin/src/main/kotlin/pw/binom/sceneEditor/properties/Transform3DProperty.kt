@@ -15,11 +15,11 @@ import javax.swing.JComponent
 
 typealias Panel = JBPanel<JBPanel<*>>
 
-object PositionPropertyFactory : PropertyFactory {
-    override fun create(view: SceneEditorView): Property = PositionProperty(view)
+object Transform3DPropertyFactory : PropertyFactory {
+    override fun create(view: SceneEditorView): Property = Transform3DProperty(view)
 }
 
-class PositionProperty(val view: SceneEditorView) : Property, Spoler("Transform") {
+class Transform3DProperty(val view: SceneEditorView) : Property, Spoler("Transform") {
 
     private val flex = FlexLayout(stage, FlexLayout.Direction.COLUMN)
     private val positionEditor = Vector3Value().appendTo(flex)

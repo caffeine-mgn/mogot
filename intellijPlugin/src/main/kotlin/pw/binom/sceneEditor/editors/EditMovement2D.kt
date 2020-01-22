@@ -1,57 +1,36 @@
 package pw.binom.sceneEditor.editors
 
-import mogot.Spatial
-import mogot.collider.PanelCollider
+import mogot.Spatial2D
 import mogot.math.*
-import pw.binom.sceneEditor.Grid
-import pw.binom.sceneEditor.Line
+import mogot.onlySpatial2D
+import mogot.use1
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.properties.PositionProperty
 import java.awt.event.KeyEvent
-import java.awt.event.MouseEvent
-import kotlin.math.*
 
 
-interface EditActionFactory {
-    fun mouseDown(view: SceneEditorView, e: MouseEvent) {}
-    fun keyDown(view: SceneEditorView, e: KeyEvent) {}
-}
-
-object EditMoveFactory : EditActionFactory {
+object EditMovementFactory2D : EditActionFactory {
     override fun keyDown(view: SceneEditorView, e: KeyEvent) {
-        if (e.keyCode == 71) {
-            view.startEditor(EditMoveAllAxie(view, view.selected.mapNotNull { it as? Spatial }))
+        if (e.keyCode == Keys.G && view.mode == SceneEditorView.Mode.D2) {
+            view.startEditor(EditMovement2D(view, view.selected.asSequence().onlySpatial2D().toList(), null))
         }
     }
 }
 
-abstract class EditMove(view: SceneEditorView, selected: List<Spatial>) : SpatialEditor(view, selected) {
+abstract class AbstractEditMovement2D(view: SceneEditorView, selected: List<Spatial2D>) : Spatial2DEditor(view, selected) {
 
     protected open fun stopEdit() {
         view.stopEditing()
         view.lockMouse = false
         view.cursorVisible = true
     }
-
-    init {
-//        view.lockMouse = true
-//        view.cursorVisible = false
-    }
 }
 
-fun SceneEditorView.updatePropertyPosition() {
-    editor1.propertyTool.properties
-            .mapNotNull { it as? PositionProperty }
-            .forEach {
-                it.update()
-            }
-}
-
+/*
 @Strictfp
-class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMove(view, selected) {
+class EditMovementOneAxis2D(view: SceneEditorView, selected: List<Spatial>, val type: Axis) : EditMovement3D(view, selected) {
 
     private val axisLine = Line(view.engine)
-    private val collader = PanelCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
+    private val collader = Panel3DCollider(view.editorCamera.far * 2f, view.editorCamera.far * 2f)
     private val ray = MutableRay()
     private val vec = Vector3f()
     private val startVec = Vector3f()
@@ -128,41 +107,21 @@ class EditMoveOneAxis(view: SceneEditorView, selected: List<Spatial>, val type: 
                     .mul(matrix)
             node.setGlobalTransform(m)
         }
-        /*
-        val pos = Vector3f()
-        val cof = if (slow) 0.1f else 1f
-
-        selected.forEach {
-            pos.set(it.position)
-            it.parentSpatial?.localToGlobal(pos, pos)
-            when (type) {
-                Axis.X -> pos.x += (value - startValue) * cof
-                Axis.Y -> pos.y += (startValue - value) * cof
-                Axis.Z -> pos.z += (value - startValue) * cof
-            }
-            it.parentSpatial?.globalToLocal(pos, pos)
-            it.position.set(pos)
-        }
-        */
         view.updatePropertyPosition()
-        //startValue = value
     }
 }
+*/
 @Strictfp
-class EditMoveAllAxie(view: SceneEditorView, selected: List<Spatial>) : EditMove(view, selected) {
+class EditMovement2D(view: SceneEditorView, selected: List<Spatial2D>, val type: Axis?) : AbstractEditMovement2D(view, selected) {
     override fun keyDown(code: Int) {
         when (code) {
             Keys.X -> {
                 resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.X))
+                view.startEditor(EditMovement2D(view, selected, Axis.X))
             }
             Keys.Y -> {
                 resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.Y))
-            }
-            Keys.Z -> {
-                resetInitPosition()
-                view.startEditor(EditMoveOneAxis(view, selected, Axis.Z))
+                view.startEditor(EditMovement2D(view, selected, Axis.Y))
             }
             else -> super.keyDown(code)
         }
@@ -175,23 +134,34 @@ class EditMoveAllAxie(view: SceneEditorView, selected: List<Spatial>) : EditMove
     override fun render(dt: Float) {
         super.render(dt)
 
-        val speedCof = if (slow) 0.005f else 0.025f
+        val speedCof = if (slow) 0.5f else 1f
         moveDirection.add(
                 (virtualMouse.x - old.x) * speedCof,
-                (old.y - virtualMouse.y) * speedCof
+                (virtualMouse.y - old.y) * speedCof
         )
         old.set(virtualMouse)
 
 
-        val moveDirection3f = Vector3f(moveDirection.x, moveDirection.y, 0f)
-        view.editorCamera.quaternion.mul(moveDirection3f, moveDirection3f)
-        initPositions.forEach { t, u ->
-            val mat = Matrix4f()
-                    .translate(moveDirection3f)
-                    .mul(u)
-            t.setGlobalTransform(mat)
+        when (type) {
+            Axis.X -> moveDirection.y = 0f
+            Axis.Y -> moveDirection.x = 0f
         }
-        view.updatePropertyPosition()
+        engine.mathPool.vec3f.use1 { moveDirection3f ->
+            moveDirection3f.set(moveDirection.x, moveDirection.y, 0f)
+            initPositions.forEach { (node, nodeMatrix) ->
+                engine.mathPool.mat4f.use1 { mat ->
+                    mat.identity()
+                            .translate(moveDirection3f)
+                            .mul(nodeMatrix)
+                    node.setGlobalTransform(mat)
+                }
+//                val mat = Matrix4f()
+//                        .translate(moveDirection3f)
+//                        .mul(nodeMatrix)
+//                node.setGlobalTransform(mat)
+            }
+            updatePropertyPosition()
+        }
     }
 
 }

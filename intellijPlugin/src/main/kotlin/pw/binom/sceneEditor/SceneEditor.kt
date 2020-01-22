@@ -37,7 +37,7 @@ class SceneEditor(val project: Project,
 
     private val properties = HashMap<PropertyFactory, Property>()
 
-    fun getProperty(factory: PropertyFactory): Property = properties.getOrPut(factory) { factory.create(viewer) }
+    fun getProperty(factory: PropertyFactory): Property = properties.getOrPut(factory) { factory.create(viewer.view) }
     private val _module
         get() = ModuleUtil.findModuleForFile(sourceFile, project)
 
@@ -97,7 +97,7 @@ class SceneEditor(val project: Project,
     }
 
     private val userData = HashMap<Key<*>, Any?>()
-    private var _viewer: SceneEditorView? = null
+    private var _viewer: ViewPlane? = null
     val viewer
         get() = _viewer!!
     lateinit var sceneStruct: SceneStruct
@@ -108,10 +108,10 @@ class SceneEditor(val project: Project,
         if (_module == null) {
 
         } else {
-            _viewer = SceneEditorView(this, project, sourceFile, 20)
-            sceneStruct = SceneStruct(_viewer!!)
-            viewer.eventSelectChanged.on {
-                propertyTool.setNodes(viewer.selected)
+            _viewer = ViewPlane(this, project, sourceFile, 20)
+            sceneStruct = SceneStruct(_viewer!!.view)
+            viewer.view.eventSelectChanged.on {
+                propertyTool.setNodes(viewer.view.selected)
             }
         }
     }
@@ -154,7 +154,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun selectNotify() {
-        viewer.startRender()
+        viewer.view.startRender()
         println("selectNotify")
         save()
         println("first!")
@@ -190,7 +190,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun deselectNotify() {
-        viewer.stopRender()
+        viewer.view.stopRender()
         println("deselectNotify")
         structToolWindow.setAvailable(false, null)
         propertyToolWindow.setAvailable(false, null)
@@ -207,7 +207,7 @@ class SceneEditor(val project: Project,
 
     //private val document = FileDocumentManager.getInstance().getDocument(sourceFile)!!
     override fun dispose() {
-        _viewer?.destroy()
+        _viewer?.view?.destroy()
     }
 
     val ref = object : DocumentReference {

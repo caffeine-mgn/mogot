@@ -19,7 +19,7 @@ class FlatScreenBehaviour(val engine: Engine, val camera: Camera, val other: Spa
         val tempVec = engine.mathPool.vec2i.poll()
         if (camera.worldToScreenPoint(p, tempVec)) {
             node.visible = true
-            node.position.set(tempVec.x.toFloat() - node.size.x / 2f, tempVec.y.toFloat() - node.size.y / 2f)
+            node.position.set(tempVec.x.toFloat(), tempVec.y.toFloat())
         } else {
             node.visible = false
         }

@@ -22,6 +22,9 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     private val mouseButtonsDown = HashSet<Int>()
     private val keyDown = HashSet<Int>()
 
+    protected open var render3D = true
+    protected open var render2D = true
+
     override fun isMouseDown(button: Int): Boolean = button in mouseButtonsDown
     override fun isKeyDown(code: Int): Boolean = code in keyDown
 
@@ -57,6 +60,11 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
             return tempSize
         }
     private val robot = Robot()
+    protected open var camera2D: Camera2D? = null
+        set(value) {
+            value?.resize(width, height)
+            field = value
+        }
     protected open var camera: Camera? = null
         set(value) {
             value?.resize(width, height)
@@ -184,8 +192,9 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun setup(width: Int, height: Int) {
-        gl.gl.glViewport(x, y, width, height)
+        gl.gl.glViewport(0, 0, width, height)
         camera?.resize(width, height)
+        camera2D?.resize(width, height)
         gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
         gl.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
         gl.gl.glEnable(GL2.GL_BLEND)
@@ -193,7 +202,8 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         repaint()
     }
 
-    private val tempMatrix = Matrix4f()
+    private val cameraModel3DMatrix = Matrix4f()
+    private val cameraModel2DMatrix = Matrix4f()
     private var oldLockMouse = false
 
     protected open fun render2(dt: Float) {
@@ -234,7 +244,12 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
 
         gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
-        camera?.globalToLocalMatrix(tempMatrix.identity())
+        camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
+
+        camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
+                ?: cameraModel2DMatrix.identity()
+
+//        camera2D = null
 
         renderContext.pointLights.clear()
         root?.walk {
@@ -246,22 +261,33 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popFirst().invoke()
         }
+
         if (root != null) {
-            if(camera!=null)
-                camera?.begin()
-            gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-            gl.gl.glEnable(GL2.GL_CULL_FACE)
-            update(dt, root!!, camModel = tempMatrix, ortoModel = MATRIX4_ONE)
-            if (camera != null)
-                renderNode3D(root!!, tempMatrix, camera!!.projectionMatrix, renderContext)
+            update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
+            if (render3D) {
+                if (camera != null)
+                    camera?.begin()
+                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
+                gl.gl.glEnable(GL2.GL_CULL_FACE)
 
-            gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-            gl.gl.glDisable(GL2.GL_CULL_FACE)
-            if(camera!=null)
-                camera?.end(renderContext)
-            tempMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, tempMatrix, renderContext)
+                if (camera != null)
+                    renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
 
+                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+                gl.gl.glDisable(GL2.GL_CULL_FACE)
+                if (camera != null)
+                    camera?.end(renderContext)
+            }
+            if (render2D) {
+                if (!render3D) {
+                    gl.gl.glDisable(GL2.GL_DEPTH_TEST)
+                    gl.gl.glDisable(GL2.GL_CULL_FACE)
+                }
+                renderNode2D(root!!,
+                        camera2D?.projectionMatrix
+                                ?: cameraModel2DMatrix.identity().setOrtho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
+                        , renderContext)
+            }
         }
 
         if (lockMouse) {
@@ -293,7 +319,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
     private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         var pos = model
-        if (node is VisualInstance) {
+        if (node.isVisualInstance) {
+            node as VisualInstance
+            if (!node.visible)
+                return
             pos = node.matrix
             node.render(node.matrix, projection, renderContext)
         }
@@ -304,7 +333,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
-        if (node is VisualInstance2D) {
+        if (node.isVisualInstance2D) {
+            node as VisualInstance2D
+            if (!node.visible)
+                return
             node.render(node.matrix, projection, renderContext)
         }
 

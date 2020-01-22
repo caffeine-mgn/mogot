@@ -56,9 +56,53 @@ interface Vector4fm : Vector4fc {
 
 open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 0f) : Vector4fm {
 
+    constructor(other: Vector4fc) : this(other.x, other.y, other.z, other.w)
+    constructor(value: Float) : this(value, value, value, value)
+
     override fun toString(): String =
             "Vec4f($x $y $y $w)"
 }
 
 val Vector4fc.isNaN
     get() = x.isNaN() || y.isNaN() || z.isNaN() || w.isNaN()
+
+class Vector4fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f, w: Float = 0f) : Vector4f(x, y, z, w) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    override var z: Float
+        get() = super.z
+        set(value) {
+            if (!changeFlag && value != super.z)
+                changeFlag = true
+            super.z = value
+        }
+
+    override var w: Float
+        get() = super.z
+        set(value) {
+            if (!changeFlag && value != super.z)
+                changeFlag = true
+            super.z = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = true
+        return b
+    }
+}

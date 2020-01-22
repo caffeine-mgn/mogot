@@ -7,8 +7,12 @@ import mogot.math.*
 import mogot.Spatial
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.properties.*
 
 object SpatialService : NodeService {
+
+    private val props = listOf(Transform3DPropertyFactory,  BehaviourPropertyFactory)
+    override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 

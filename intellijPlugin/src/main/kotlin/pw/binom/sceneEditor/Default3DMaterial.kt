@@ -1,14 +1,45 @@
 package pw.binom.sceneEditor
 
 import mogot.Engine
+import mogot.Material
+import mogot.RenderContext
+import mogot.ResourceImpl
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
+import mogot.math.Matrix4fc
+import mogot.math.Vector4f
+import mogot.math.Vector4fc
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
 
+class MInstance(val root: MaterialGLSL, color: Vector4fc) : Material, ResourceImpl() {
+    val color = Vector4f(color)
+
+    init {
+        root.inc()
+    }
+
+    override fun dispose() {
+        root.dec()
+        super.dispose()
+    }
+
+    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        root.use(model, projection, renderContext)
+        root.shader.uniform("color", color)
+    }
+
+    override fun unuse() {
+        root.unuse()
+    }
+
+}
+
 class Default3DMaterial(engine: Engine) : MaterialGLSL(engine) {
+
+    fun instance(color: Vector4fc) = MInstance(this, color)
 
     override val shader: Shader = run {
         val text = """
@@ -20,6 +51,9 @@ vec3 normalList
 
 @projection
 mat4 projection
+
+@property
+vec4 color
 
 @model
 mat4 model
@@ -33,7 +67,7 @@ vec4 vertex(){
 }
 
 vec4 fragment(vec4 color2){
-    return vec4(1f,1f,1f,1f)
+    return color
 }
 
         """

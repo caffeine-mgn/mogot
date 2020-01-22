@@ -2,13 +2,11 @@ package pw.binom.sceneEditor
 
 import mogot.gl.GL
 import mogot.*
-import mogot.math.Matrix4fc
-import mogot.math.Vector2f
+import mogot.math.*
 import pw.binom.FloatDataBuffer
-import pw.binom.floatDataOf
 import pw.binom.intDataOf
 
-class Line2D(val gl: GL) : VisualInstance2D() {
+class Line2D(engine: Engine) : VisualInstance2D(engine) {
     val size = Vector2f()
     private var geom by ResourceHolder<Geom2D>()
     var material by ResourceHolder<Material>()
@@ -27,7 +25,7 @@ class Line2D(val gl: GL) : VisualInstance2D() {
         val mat = material ?: return
         if (geom == null) {
             lineTo.resetChangeFlag()
-            geom = Geom2D(gl, intDataOf(0, 1), data, null, null)
+            geom = Geom2D(engine.gl, intDataOf(0, 1), data, null, null)
             geom!!.mode = Geometry.RenderMode.LINES
         }
         if (lineTo.resetChangeFlag()) {

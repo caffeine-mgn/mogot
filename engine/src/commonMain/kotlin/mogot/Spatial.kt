@@ -152,8 +152,10 @@ open class Spatial : Node() {
     }
 }
 
+private const val spatial3dType = SPATIAL_TYPE or VISUAL_INSTANCE3D_TYPE
+
 val Node.isSpatial
-    get() = (type and SPATIAL_TYPE) > 0
+    get() = (type and spatial3dType) != 0
 
 fun <T : Node> Sequence<T>.onlySpatial(): Sequence<Spatial> =
         filter { it.isSpatial }.map { it as Spatial }

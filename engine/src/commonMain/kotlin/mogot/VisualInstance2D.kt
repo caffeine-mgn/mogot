@@ -1,10 +1,10 @@
 package mogot
 
 val Node.isVisualInstance2D
-    get() = (type and 0x8) > 0
+    get() = (type and VISUAL_INSTANCE2D_TYPE) != 0
 
-open class VisualInstance2D : Spatial2D() {
+abstract class VisualInstance2D(engine: Engine): Spatial2D(engine) {
     var visible = true
     override val type: Int
-        get() = 0x8 or super.type
+        get() = VISUAL_INSTANCE2D_TYPE
 }

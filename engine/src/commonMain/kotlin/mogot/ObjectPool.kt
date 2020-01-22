@@ -25,3 +25,36 @@ abstract class ObjectPool<T : Any> : Closeable {
         closed = true
     }
 }
+
+inline fun <T : Any, R> ObjectPool<T>.use1(func: (T) -> R): R {
+    val v = poll()
+    return try {
+        func(v)
+    } finally {
+        push(v)
+    }
+}
+
+inline fun <T : Any, R> ObjectPool<T>.use2(func: (T, T) -> R): R {
+    val v1 = poll()
+    val v2 = poll()
+    return try {
+        func(v1, v2)
+    } finally {
+        push(v1)
+        push(v2)
+    }
+}
+
+inline fun <T : Any, R> ObjectPool<T>.use3(func: (T, T, T) -> R): R {
+    val v1 = poll()
+    val v2 = poll()
+    val v3 = poll()
+    return try {
+        func(v1, v2, v3)
+    } finally {
+        push(v1)
+        push(v2)
+        push(v3)
+    }
+}

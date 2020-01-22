@@ -276,3 +276,36 @@ fun orthogonalize(v: Vector3fc, dest: Vector3fm): Vector3fm {
 
 val Vector3fc.isNaN
     get() = x.isNaN() || y.isNaN() || z.isNaN()
+
+class Vector3fProperty(x: Float = 0f, y: Float = 0f, z: Float = 0f) : Vector3f(x, y, z) {
+    private var changeFlag = true
+    override var x: Float
+        get() = super.x
+        set(value) {
+            if (!changeFlag && value != super.x)
+                changeFlag = true
+            super.x = value
+        }
+
+    override var y: Float
+        get() = super.y
+        set(value) {
+            if (!changeFlag && value != super.y)
+                changeFlag = true
+            super.y = value
+        }
+
+    override var z: Float
+        get() = super.z
+        set(value) {
+            if (!changeFlag && value != super.z)
+                changeFlag = true
+            super.z = value
+        }
+
+    fun resetChangeFlag(): Boolean {
+        val b = changeFlag
+        changeFlag = false
+        return b
+    }
+}
