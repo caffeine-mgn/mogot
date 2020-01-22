@@ -137,6 +137,8 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                 val v = editorCamera2D.zoom - it.wheelRotation / 10f
                 if (v > 0f && v < 5f) {
                     editorCamera2D.zoom = v
+                    viewPlane.guideLeft.zoom = v
+                    viewPlane.guideTop.zoom = v
                 }
             }
         }

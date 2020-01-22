@@ -1,7 +1,9 @@
 package pw.binom.sceneEditor
 
 import mogot.*
-import mogot.math.*
+import mogot.math.Matrix4fc
+import mogot.math.Vector4f
+import mogot.math.setTranslation
 import pw.binom.FloatDataBuffer
 import pw.binom.intDataOf
 import kotlin.math.floor
@@ -73,7 +75,6 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
         if (view.mode != SceneEditorView.Mode.D2)
             return
         checkGeoms()
-        val vec = Vector2f()
 
         val left = -width * 0.5f / camera2D.zoom + camera2D.position.x
         val right = width * 0.5f / camera2D.zoom + camera2D.position.x

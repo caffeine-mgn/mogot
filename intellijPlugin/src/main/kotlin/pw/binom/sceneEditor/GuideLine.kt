@@ -2,7 +2,6 @@ package pw.binom.sceneEditor
 
 import java.awt.*
 import javax.swing.JPanel
-import kotlin.math.PI
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -21,14 +20,21 @@ class GuideLine(val place: Place) : JPanel() {
 
     private inline val pos2
         get() = -position
-    var scale = 1f
+    var zoom = 1f
         set(value) {
             if (value <= 0f)
-                throw IllegalArgumentException("Scale can't be equal or less that 0")
+                throw IllegalArgumentException("Scale can't be equal or less than 0")
+            if (value.isNaN())
+                throw IllegalArgumentException("Scale can't be NaN")
+            if (value.isInfinite())
+                throw IllegalArgumentException("Scale can't be Infinite()")
             field = value
             println("fullLine=$fullLine")
             repaint()
         }
+    val scale
+        get() = 1 / zoom
+
 
     private val fullLine
         get() = when (scale) {
@@ -42,8 +48,16 @@ class GuideLine(val place: Place) : JPanel() {
     private val bigLine get() = fullLine * 0.5f
     private val smallLine get() = bigLine * 0.25f
 
-    private fun toLocal(x: Float) = ((pos2 + x) * scale + length / 2f).roundToInt()
-    private fun toGlobal(x: Int) = (x - length / 2) / scale - pos2
+    companion object {
+        fun toLocal(length: Int, zoom: Float, position: Float, x: Float):Int =
+                ((x - position) * zoom + length * 0.5f).roundToInt()
+
+        fun toGlobal(length: Int, zoom: Float, position: Float, x: Int) =
+                (x - length * 0.5f) / zoom + position
+    }
+
+    private fun toLocal(x: Float) = toLocal(length, zoom, position, x)
+    private fun toGlobal(x: Int) = toGlobal(length, zoom, position, x)
 
     var lineHight = 15
     private val length
@@ -61,6 +75,8 @@ class GuideLine(val place: Place) : JPanel() {
 
     override fun paint(g: Graphics) {
         super.paint(g)
+        if (place != Place.TOP)
+            return
         g as Graphics2D
         val orig = g.transform
         preferredSize = when (place) {
@@ -82,7 +98,21 @@ class GuideLine(val place: Place) : JPanel() {
                 Place.LEFT -> g.drawLine((size.width - size.width * height).roundToInt(), pos, size.width, pos)
             }
         }
+        g.drawRect(toLocal(left), 0, lineHight, lineHight)
+        g.drawRect(toLocal(right) - lineHight, 0, lineHight, lineHight)
 
+        println("left=$left length=$length position=$position zoom=$zoom")
+        run {
+            val H = 50f
+            var x = floor(left / H) * H
+            //println("$left -> $right every $H")
+            while (x < right) {
+                val xx = toLocal(x)
+                drawLine(xx, 1f)
+                x += H
+            }
+        }
+/*
         var x = floor(left / fullLine) * fullLine
         while (x < right) {
             val xx = toLocal(x)
@@ -112,5 +142,6 @@ class GuideLine(val place: Place) : JPanel() {
             drawLine(xx, 0.3f)
             x += smallLine
         }
+        */
     }
 }

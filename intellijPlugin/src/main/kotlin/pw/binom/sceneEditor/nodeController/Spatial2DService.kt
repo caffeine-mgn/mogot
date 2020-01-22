@@ -18,6 +18,7 @@ object Spatial2DService : NodeService {
             props
 
     fun save(engine: Engine, node: Spatial2D, data: MutableMap<String, String>) {
+        EmptyNodeService.saveNode(engine, node, data)
         data["position.x"] = node.position.x.toString()
         data["position.y"] = node.position.y.toString()
 
@@ -28,6 +29,7 @@ object Spatial2DService : NodeService {
     }
 
     fun load(engine: Engine, node: Spatial2D, data: Map<String, String>) {
+        EmptyNodeService.loadNode(engine, node, data)
         node.position.set(
                 data["position.x"]?.toFloat() ?: 0f,
                 data["position.y"]?.toFloat() ?: 0f

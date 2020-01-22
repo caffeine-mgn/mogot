@@ -129,8 +129,8 @@ object Main {
             }
         })
         p.addMouseWheelListener {
-            gTop.scale -= it.wheelRotation / 5f
-            gLeft.scale -= it.wheelRotation / 5f
+//            gTop.scale -= it.wheelRotation / 5f
+//            gLeft.scale -= it.wheelRotation / 5f
             println("g.scale=${gTop.scale}")
         }
         f.contentPane.add(p, BorderLayout.CENTER)
