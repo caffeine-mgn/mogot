@@ -29,27 +29,32 @@ class GuideLine(val place: Place) : JPanel() {
             if (value.isInfinite())
                 throw IllegalArgumentException("Scale can't be Infinite()")
             field = value
-            println("fullLine=$fullLine")
             repaint()
         }
     val scale
         get() = 1 / zoom
 
 
-    private val fullLine
-        get() = when (scale) {
-            in (2f..3f) -> 50f
-            in (1.5f..2f) -> 100f
-            in (1f..1.5f) -> 500f
-            in (0.5f..1f) -> 250f
-            in (0f..0.5f) -> 125f
-            else -> 5000f
+    private val fullLine: Float
+        get() {
+//            return floor(250 / zoom / zoom / 5f) * 5f
+            return 50f//floor(100f * (6-zoom)/10f)
         }
-    private val bigLine get() = fullLine * 0.5f
-    private val smallLine get() = bigLine * 0.25f
+    //    private val fullLine
+//        get() = when (zoom) {
+//            in (3f..5f) -> 10f
+//            in (2f..3f) -> 50f
+//            in (1.5f..2f) -> 100f
+//            in (1f..1.5f) -> 500f
+//            in (0.5f..1f) -> 1000f
+//            in (0f..0.5f) -> 2000f
+//            else -> 5000f
+//        }
+//    private val bigLine get() = fullLine * 0.5f
+//    private val smallLine get() = bigLine * 0.25f
 
     companion object {
-        fun toLocal(length: Int, zoom: Float, position: Float, x: Float):Int =
+        fun toLocal(length: Int, zoom: Float, position: Float, x: Float): Int =
                 ((x - position) * zoom + length * 0.5f).roundToInt()
 
         fun toGlobal(length: Int, zoom: Float, position: Float, x: Int) =
@@ -75,8 +80,6 @@ class GuideLine(val place: Place) : JPanel() {
 
     override fun paint(g: Graphics) {
         super.paint(g)
-        if (place != Place.TOP)
-            return
         g as Graphics2D
         val orig = g.transform
         preferredSize = when (place) {
@@ -98,14 +101,10 @@ class GuideLine(val place: Place) : JPanel() {
                 Place.LEFT -> g.drawLine((size.width - size.width * height).roundToInt(), pos, size.width, pos)
             }
         }
-        g.drawRect(toLocal(left), 0, lineHight, lineHight)
-        g.drawRect(toLocal(right) - lineHight, 0, lineHight, lineHight)
 
-        println("left=$left length=$length position=$position zoom=$zoom")
         run {
-            val H = 50f
+            val H = fullLine
             var x = floor(left / H) * H
-            //println("$left -> $right every $H")
             while (x < right) {
                 val xx = toLocal(x)
                 drawLine(xx, 1f)

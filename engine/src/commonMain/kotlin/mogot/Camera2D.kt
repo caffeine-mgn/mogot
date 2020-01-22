@@ -23,7 +23,6 @@ class Camera2D(engine: Engine) : Spatial2D(engine) {
                 throw IllegalArgumentException("Zoom can't be Infinite")
             field = value
             resize(width, height)
-            println("zoom=$value zoomScale=$zoomScale")
         }
 
     private inline val zoomScale
