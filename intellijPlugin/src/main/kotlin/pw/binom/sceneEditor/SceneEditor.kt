@@ -23,9 +23,15 @@ import java.beans.PropertyChangeListener
 import javax.swing.JButton
 import javax.swing.JComponent
 
+private var privateCurrentEditor: SceneEditor? = null
 
 class SceneEditor(val project: Project,
                   private val sourceFile: VirtualFile) : FileEditor, DocumentReferenceProvider {
+
+    companion object {
+        val currentSceneEditor
+            get() = privateCurrentEditor
+    }
 
     private val SCENE_TOOL_WINDOW = "Scene"
     private val PROPERTIES_TOOL_WINDOW = "Properties"
@@ -154,6 +160,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun selectNotify() {
+        privateCurrentEditor = this
         viewer.view.startRender()
         println("selectNotify")
         save()
@@ -190,6 +197,7 @@ class SceneEditor(val project: Project,
     }
 
     override fun deselectNotify() {
+        privateCurrentEditor = null
         viewer.view.stopRender()
         println("deselectNotify")
         structToolWindow.setAvailable(false, null)

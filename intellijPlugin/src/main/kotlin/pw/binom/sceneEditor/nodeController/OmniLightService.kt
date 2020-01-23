@@ -1,16 +1,25 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
-import mogot.*
+import mogot.Engine
+import mogot.Node
+import mogot.OmniLight
 import mogot.math.AABBm
+import mogot.math.set
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
-import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
+import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.get
+import kotlin.collections.listOf
+import kotlin.collections.set
 
 object OmniNodeCreator : NodeCreator {
     override val name: String
@@ -68,6 +77,15 @@ object OmniLightService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is OmniLight
+    override fun clone(node: Node): Node? {
+        if (node !is OmniLight) return null
+        val out = OmniLight()
+        out.specular = node.specular
+        out.diffuse.set(node.diffuse)
+        SpatialService.cloneSpatial(node, out)
+        return out
+    }
+
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is OmniLight) return
         EmptyNodeService.nodeDeleted(view.engine, node)

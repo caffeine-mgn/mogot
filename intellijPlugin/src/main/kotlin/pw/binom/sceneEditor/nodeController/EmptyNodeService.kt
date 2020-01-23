@@ -9,11 +9,15 @@ import mogot.math.AABBm
 import pw.binom.sceneEditor.properties.behaviourManager
 
 object EmptyNodeService : NodeService {
-    fun nodeDeleted(engine: Engine, node: Node){
+    fun nodeDeleted(engine: Engine, node: Node) {
         engine.behaviourManager.delete(node)
     }
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+
+    fun cloneNode(from: Node, to: Node) {
+        to.id = from.id
+    }
 
     fun saveNode(engine: Engine, node: Node, output: MutableMap<String, String>) {
         val id = node.id
@@ -61,6 +65,11 @@ object EmptyNodeService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Node::class.java
+    override fun clone(node: Node): Node? {
+        val out = Node()
+        cloneNode(node, out)
+        return out
+    }
 
     override fun delete(view: SceneEditorView, node: Node) {
         nodeDeleted(view.engine, node)

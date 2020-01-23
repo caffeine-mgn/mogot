@@ -77,6 +77,15 @@ object GeomService : NodeService {
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
+    override fun clone(node: Node): Node? {
+        if (node !is GeomNode) return null
+        val out = GeomNode()
+        out.geom.value = node.geom.value
+        SpatialService.cloneSpatial(node, out)
+        MaterialNodeUtils.clone(node, out)
+        return out
+    }
+
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != GeomNode::class.java.name) return null
         val node = GeomNode()

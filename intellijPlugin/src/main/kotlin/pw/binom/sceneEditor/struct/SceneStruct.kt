@@ -4,22 +4,15 @@ import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.treeStructure.Tree
 import mogot.Node
-import mogot.*
-import mogot.OmniLight
-import mogot.asUpSequence
+import mogot.waitFrame
 import pw.binom.sceneEditor.CreateNodeDialog
 import pw.binom.sceneEditor.SceneEditorView
-import java.awt.Component
-import javax.swing.*
-import javax.swing.event.TreeModelEvent
-import javax.swing.event.TreeModelListener
-import javax.swing.tree.TreeCellRenderer
-import javax.swing.tree.TreeModel
-import javax.swing.tree.TreePath
+import javax.swing.DropMode
+import javax.swing.SpringLayout
 
 class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
     val tree = Tree()
-    private val model = SceneTreeModel(view)
+    val model = SceneTreeModel(view)
 
 
     private val _layout = SpringLayout()
@@ -46,13 +39,20 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     }
                 }
                 .setRemoveAction {
-                    val node = tree.lastSelectedPathComponent as Node?
-                    node ?: return@setRemoveAction
-                    model.delete(tree, node)
-                    view.getService(node)?.delete(view, node)
-                    node.parent = null
+                    val nodes = tree.selectionPaths
+                            ?.map { it.lastPathComponent as Node }
+                            ?.filter { it.parent != null }
+                            ?.takeIf { it.isNotEmpty() }
+                    nodes ?: return@setRemoveAction
+                    nodes.forEach {
+                        model.delete(tree, it)
+                        view.getService(it)?.delete(view, it)
+                        it.parent = null
+                    }
                     view.engine.waitFrame {
-                        node.close()
+                        nodes.forEach {
+                            it.close()
+                        }
                     }
                 }
                 .createPanel()
