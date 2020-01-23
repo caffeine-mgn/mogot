@@ -163,6 +163,14 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.bufferData(target, data.buffer, usage)
     }
 
+    actual fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean){
+        TODO("")
+    }
+
+    actual fun renderbufferStorageMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int){
+        TODO("")
+    }
+
     actual fun clear(mask: Int) {
         ctx.clear(mask)
     }
