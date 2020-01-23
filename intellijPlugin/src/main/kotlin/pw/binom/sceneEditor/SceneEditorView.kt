@@ -1,5 +1,10 @@
 package pw.binom.sceneEditor
 
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.ex.ActionUtil
+import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
@@ -10,6 +15,7 @@ import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
+import pw.binom.sceneEditor.action.DuplicateNode
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -272,7 +278,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         }
         if (node != null)
             l.add(node)
-        editor1.sceneStruct.tree.selectionModel.selectionPaths=l.map {
+        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
             it.makeTreePath()
         }.toTypedArray()
 //        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {

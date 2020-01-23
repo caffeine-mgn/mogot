@@ -1,15 +1,25 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
-import mogot.*
-import mogot.collider.*
-import mogot.math.*
+import mogot.MaterialNode
+import mogot.Node
+import mogot.Sprite
+import mogot.collider.Collider2D
+import mogot.collider.Panel2DCollider
+import mogot.math.AABBm
+import mogot.math.Vector4f
+import mogot.math.set
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.*
 import javax.swing.Icon
+import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.listOf
+import kotlin.collections.set
 
 object Sprite2DCreator : NodeCreator {
     override val name: String
@@ -66,6 +76,14 @@ object Sprite2DService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Sprite::class.java
+    override fun clone(node: Node): Node? {
+        if (node !is Sprite) return null
+        val out = Sprite(node.engine)
+        out.size.set(node.size)
+        Spatial2DService.cloneSpatial2D(node, out)
+        MaterialNodeUtils.clone(node, out)
+        return out
+    }
 
     override fun delete(view: SceneEditorView, node: Node) {
     }

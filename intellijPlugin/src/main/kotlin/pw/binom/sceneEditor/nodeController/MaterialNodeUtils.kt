@@ -5,6 +5,14 @@ import mogot.math.*
 import pw.binom.sceneEditor.*
 
 object MaterialNodeUtils {
+
+    fun clone(from: MaterialNode, to: MaterialNode) {
+        to.material.value = when (val mat = from.material.value) {
+            is MaterialInstance -> mat.root.instance()
+            else -> mat
+        }
+    }
+
     fun save(view: SceneEditorView, node: MaterialNode, props: MutableMap<String, String>) {
         val material = node.material.value as? MaterialInstance ?: return
         props["material.file"] = view.editor1.getRelativePath(material.root.file)

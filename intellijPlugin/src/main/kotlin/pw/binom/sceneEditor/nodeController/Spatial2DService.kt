@@ -4,7 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import mogot.Spatial2D
 import mogot.Engine
-import mogot.math.AABBm
+import mogot.math.*
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
@@ -16,6 +16,13 @@ object Spatial2DService : NodeService {
     private val props = listOf(Transform2DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             props
+
+    fun cloneSpatial2D(from: Spatial2D, to: Spatial2D) {
+        EmptyNodeService.cloneNode(from, to)
+        to.position.set(from.position)
+        to.rotation = from.rotation
+        to.scale.set(from.scale)
+    }
 
     fun save(engine: Engine, node: Spatial2D, data: MutableMap<String, String>) {
         EmptyNodeService.saveNode(engine, node, data)
@@ -64,6 +71,12 @@ object Spatial2DService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Spatial2D::class.java
+    override fun clone(node: Node): Node? {
+        if (node !is Spatial2D) return null
+        val out = Spatial2D(node.engine)
+        cloneSpatial2D(node, out)
+        return out
+    }
 
     override fun delete(view: SceneEditorView, node: Node) {
     }

@@ -11,7 +11,7 @@ import pw.binom.sceneEditor.properties.*
 
 object SpatialService : NodeService {
 
-    private val props = listOf(Transform3DPropertyFactory,  BehaviourPropertyFactory)
+    private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
@@ -30,6 +30,13 @@ object SpatialService : NodeService {
         output["rotation.x"] = rot.x.toString()
         output["rotation.y"] = rot.y.toString()
         output["rotation.z"] = rot.z.toString()
+    }
+
+    fun cloneSpatial(from: Spatial, to: Spatial) {
+        EmptyNodeService.cloneNode(from, to)
+        to.position.set(from.position)
+        to.scale.set(from.scale)
+        to.quaternion.set(from.quaternion)
     }
 
     fun loadSpatial(engine: Engine, spatial: Spatial, data: Map<String, String>) {
@@ -77,6 +84,12 @@ object SpatialService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java === Spatial::class.java
+    override fun clone(node: Node): Node? {
+        if (node !is Spatial) return null
+        val out = Spatial()
+        cloneSpatial(node, out)
+        return out
+    }
 
     override fun delete(view: SceneEditorView, node: Node) {
         EmptyNodeService.nodeDeleted(view.engine, node)

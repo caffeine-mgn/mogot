@@ -10,18 +10,30 @@
 
     <idea-version since-build="191"/>
 
+    <actions>
+        <group id="EditMogotGroup">
+            <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
+                    text="Duplicate Node" description="Duplicate selected Node">
+                <keyboard-shortcut first-keystroke="control D" keymap="$default"/>
+            </action>
+            <add-to-group group-id="EditMenu" anchor="last"/>
+        </group>
+    </actions>
+
     <extensions defaultExtensionNs="com.intellij">
         <facetType implementation="pw.binom.facet.AssetsFacetType"/>
         <postStartupActivity implementation="pw.binom.Starter"/>
 
         <projectListeners>
-            <listener class="pw.binom.module.ModuleChangeListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener" />
+            <listener class="pw.binom.module.ModuleChangeListener"
+                      topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
 
         <!-- SceneEditor -->
         <fileType name="Scene file" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>
         <fileEditorProvider implementation="pw.binom.sceneEditor.SceneFileEditorProvider"/>
+
 
         <!--
         <group id="MogorPlugin.SceneMenu" text="Scene" description="Scene Menu">

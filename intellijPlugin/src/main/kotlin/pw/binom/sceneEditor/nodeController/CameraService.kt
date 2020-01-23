@@ -119,6 +119,17 @@ object CameraService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Camera::class.java
+    override fun clone(node: Node): Node? {
+        if (node !is Camera) return null
+        val out = Camera()
+        out.resize(node.width, node.height)
+        out.near = node.near
+        out.far = node.far
+        out.fieldOfView = node.fieldOfView
+        out.id = node.id
+        SpatialService.cloneSpatial(node, out)
+        return out
+    }
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is Camera) return
