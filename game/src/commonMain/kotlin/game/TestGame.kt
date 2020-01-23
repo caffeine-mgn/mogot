@@ -64,11 +64,11 @@ class TestGame(val engine: Engine) {
         camera.lookTo(Vector3f(0f, 0f, 0f))
         camera.behaviour = FpsCam(engine)
 
-        val s = Sprite(engine.gl)
+        val s = Sprite(engine)
 
         root.addChild(s)
         s.size.set(100f, 100f)
-        s.material = mat
+        s.material.value = mat
 
         engine.waitFrame {
             //val tex = engine.resources.createTexture2D("res/2.png")

@@ -305,15 +305,18 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
     private fun update(dt: Float, node: Node, camModel: Matrix4fc, ortoModel: Matrix4fc) {
         node.update(dt)
-        val pos = when (node) {
-            is Spatial -> node.apply(camModel)
-            is Spatial2D -> node.apply(ortoModel)
-            else -> camModel
-        }
+        var mat3d = camModel
+        var mat2d = ortoModel
+
+        if (node.isSpatial)
+            mat3d = node.apply(mat3d)
+
+        if (node.isSpatial2D)
+            mat2d = node.apply(mat2d)
 
 
         node.childs.forEach {
-            update(dt, it, camModel = pos, ortoModel = ortoModel)
+            update(dt, it, camModel = mat3d, ortoModel = mat2d)
         }
     }
 

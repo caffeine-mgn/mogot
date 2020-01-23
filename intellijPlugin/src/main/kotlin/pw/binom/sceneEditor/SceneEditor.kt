@@ -18,10 +18,10 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import pw.binom.sceneEditor.properties.Property
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.sceneEditor.struct.SceneStruct
 import java.beans.PropertyChangeListener
 import javax.swing.JButton
 import javax.swing.JComponent
-import javax.swing.JPanel
 
 
 class SceneEditor(val project: Project,

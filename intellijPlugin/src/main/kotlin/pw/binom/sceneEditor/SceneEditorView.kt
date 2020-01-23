@@ -12,6 +12,7 @@ import pw.binom.Stack
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
+import pw.binom.sceneEditor.struct.makeTreePath
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
@@ -271,10 +272,13 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         }
         if (node != null)
             l.add(node)
-        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
-            val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
-            TreePath(bb.toTypedArray())
+        editor1.sceneStruct.tree.selectionModel.selectionPaths=l.map {
+            it.makeTreePath()
         }.toTypedArray()
+//        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
+//            val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
+//            TreePath(bb.toTypedArray())
+//        }.toTypedArray()
         //updateSceneTreeSelection()
         super.mouseDown(e)
     }
