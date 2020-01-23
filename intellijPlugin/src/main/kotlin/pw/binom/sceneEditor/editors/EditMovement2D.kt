@@ -136,8 +136,8 @@ class EditMovement2D(view: SceneEditorView, selected: List<Spatial2D>, val type:
 
         val speedCof = if (slow) 0.5f else 1f
         moveDirection.add(
-                (virtualMouse.x - old.x) * speedCof,
-                (virtualMouse.y - old.y) * speedCof
+                (virtualMouse.x - old.x) * speedCof / view.editorCamera2D.zoom,
+                (virtualMouse.y - old.y) * speedCof / view.editorCamera2D.zoom
         )
         old.set(virtualMouse)
 

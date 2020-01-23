@@ -47,6 +47,19 @@ open class Node : Closeable {
         _childs.add(node)
     }
 
+    fun setChildIndex(child: Node, index: Int) {
+        if (index < 0)
+            throw IllegalArgumentException("Index can't be less than 0")
+        if (index >= childs.size)
+            throw IllegalArgumentException("Index can't be grate or equals than total child count (${childs.size})")
+        if (child.parent !== this)
+            throw IllegalArgumentException("Child must have this node as parent")
+        val index1 = childs.indexOfFirst { it === child }
+        check(index >= 0) { "Can't find Child node in Child List" }
+        _childs.removeAt(index1)
+        _childs.add(index, child)
+    }
+
     internal open fun update(delta: Float) {
         behaviour?.onUpdate(delta)
         childs.forEach {
@@ -128,6 +141,17 @@ fun Node.currentToChilds(func: (Node) -> Boolean) {
 fun Node.rootToCurrent(func: (Node) -> Unit) {
     parent?.rootToCurrent(func)
     func(this)
+}
+
+inline fun Node.isChild(node: Node) = node.isParent(this)
+
+fun Node.isParent(node: Node): Boolean {
+    parent?.currentToRoot {
+        if (it == node)
+            return true
+        true
+    }
+    return false
 }
 
 /**
