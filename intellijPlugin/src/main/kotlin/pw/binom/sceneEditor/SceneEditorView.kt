@@ -1,10 +1,5 @@
 package pw.binom.sceneEditor
 
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.actionSystem.ex.ActionUtil
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
@@ -15,7 +10,6 @@ import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
 import pw.binom.io.Closeable
-import pw.binom.sceneEditor.action.DuplicateNode
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -243,7 +237,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             list += it to vec.sub(editorCamera.position).lengthSquared
             true
         }
-        return list.minBy { it.second }?.first
+        var result = list.minBy { it.second }?.first
+        result?.currentToRoot {
+            if (getService(it)?.isInternalChilds(it) == true) {
+                result = it
+                return@currentToRoot false
+            }
+            return@currentToRoot true
+        }
+        return result
     }
 
     private fun getNode2D(x: Int, y: Int): Node? {
@@ -257,6 +259,13 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                 return@walk false
             }
             true
+        }
+        result?.currentToRoot {
+            if (getService(it)?.isInternalChilds(it) == true) {
+                result = it
+                return@currentToRoot false
+            }
+            return@currentToRoot true
         }
         return result
     }
@@ -317,7 +326,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     private var hover: Node? = null
     override fun render2(dt: Float) {
         if (editor == null) {
-            val node = when (mode) {
+            var node = when (mode) {
                 Mode.D3 -> {
                     getNode3D(mousePosition.x, mousePosition.y)
                 }
@@ -328,10 +337,10 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 
             if (node != null) {
                 if (hover != node) {
-                    val service = getService(node)
+                    val service = getService(node!!)
                     if (service != null) {
                         hover?.let { getService(it)?.hover(it, false) }
-                        node.let { getService(it)?.hover(it, true) }
+                        node!!.let { getService(it)?.hover(it, true) }
                         hover = node
                     }
                 }
