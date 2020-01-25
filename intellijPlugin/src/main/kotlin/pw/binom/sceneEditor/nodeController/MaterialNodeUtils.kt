@@ -8,7 +8,13 @@ object MaterialNodeUtils {
 
     fun clone(from: MaterialNode, to: MaterialNode) {
         to.material.value = when (val mat = from.material.value) {
-            is MaterialInstance -> mat.root.instance()
+            is MaterialInstance -> {
+                val new = mat.root.instance()
+                mat.uniforms.forEach {
+                    new.set(it, mat.get(it))
+                }
+                new
+            }
             else -> mat
         }
     }
