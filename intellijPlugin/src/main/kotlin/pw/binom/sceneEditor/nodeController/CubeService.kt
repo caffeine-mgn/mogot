@@ -4,15 +4,18 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
 import mogot.MaterialNode
 import mogot.Node
+import mogot.collider.BoxCollider
 import mogot.collider.Collider
 import mogot.math.AABBm
-import mogot.collider.BoxCollider
 import mogot.math.Vector4f
-import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.MaterialInstance
+import pw.binom.sceneEditor.NodeCreator
+import pw.binom.sceneEditor.NodeService
+import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
-import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
 
@@ -32,6 +35,17 @@ object CubeService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
+    override fun clone(node: Node): Node? {
+        if (node !is CSGBox) return null
+        val out = CSGBox(node.engine)
+        out.width = node.width
+        out.height = node.height
+        out.depth = node.depth
+        SpatialService.cloneSpatial(node, out)
+        MaterialNodeUtils.clone(node, out)
+        return out
+    }
+
     override fun delete(view: SceneEditorView, node: Node) {
         EmptyNodeService.nodeDeleted(view.engine, node)
     }

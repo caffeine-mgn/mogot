@@ -43,11 +43,6 @@ class TreeTransferHandler : TransferHandler() {
         return true
     }
 
-    override fun exportDone(source: JComponent?, data: Transferable?, action: Int) {
-        println("exportDone!")
-        super.exportDone(source, data, action)
-    }
-
     override fun createTransferable(c: JComponent): Transferable? {
         val tree = c as JTree
         val paths = tree.selectionPaths
@@ -55,10 +50,6 @@ class TreeTransferHandler : TransferHandler() {
             val nodes = paths.map { it.lastPathComponent as Node }
             val nodeForMove = nodes.filter { node ->
                 !nodes.any { it.isChild(node) } && node.parent != null
-            }
-            println("Node For Move:")
-            nodeForMove.forEach {
-                println("${it::class.java.name} - ${it.id}")
             }
             if (nodeForMove.isEmpty())
                 return null

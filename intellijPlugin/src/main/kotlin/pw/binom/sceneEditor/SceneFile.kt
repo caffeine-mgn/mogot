@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorPolicy
 import com.intellij.openapi.fileEditor.FileEditorProvider
 import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFile
@@ -32,7 +33,7 @@ object SceneFileType : FileType {
     override fun getDescription(): String = "Scene File"
 }
 
-class SceneFileEditorProvider : FileEditorProvider {
+class SceneFileEditorProvider : FileEditorProvider, DumbAware {
     override fun getEditorTypeId(): String = "SceneEditor"
 
     override fun accept(project: Project, file: VirtualFile): Boolean {
