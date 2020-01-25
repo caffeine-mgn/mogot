@@ -13,6 +13,7 @@ import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import javax.swing.Icon
 import kotlin.collections.set
 import mogot.scene.*
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 
 object InjectSceneCreator : NodeCreator {
     override val name: String
@@ -32,7 +33,9 @@ object InjectSceneCreator : NodeCreator {
                 }
         chooser.showDialog()
         val file = chooser.selectedFile?.virtualFile ?: return null
-        return loadInjectedScene(view, chooser.selectedFile!!)
+        val result = loadInjectedScene(view, chooser.selectedFile!!)
+        result.id = file.nameWithoutExtension
+        return result
     }
 }
 
@@ -42,8 +45,8 @@ object InjectSceneNodeService : NodeService {
 
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             when (node) {
-                is InjectedScene2D -> listOf(Transform2DPropertyFactory)
-                is InjectedScene3D -> listOf(Transform3DPropertyFactory)
+                is InjectedScene2D -> listOf(Transform2DPropertyFactory, BehaviourPropertyFactory)
+                is InjectedScene3D -> listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
                 else -> emptyList()
             }
 
@@ -53,7 +56,8 @@ object InjectSceneNodeService : NodeService {
         if (clazz != InjectSceneLoader.nodeClass) {
             return null
         }
-        val sceneFile = properties[InjectSceneLoader.FILE_PROPERTY] ?: run { println("properties file not found");return null }
+        val sceneFile = properties[InjectSceneLoader.FILE_PROPERTY]
+                ?: run { println("properties file not found");return null }
         val virtualSceneFile = view.editor1.findFileByRelativePath(sceneFile)
                 ?: run { println("Can't find relative file");return null }
         val psiSceneFile = PsiManager.getInstance(view.project).findFile(virtualSceneFile)
