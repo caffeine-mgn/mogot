@@ -1,12 +1,13 @@
 <idea-plugin>
-    <id>org.jetbrains</id>
-    <name>Hello Action Project</name>
+    <id>pw.binom.mogot</id>
+    <name>Mogot Engine</name>
     <version>0.0.1</version>
     <vendor email="dummy" url="dummy">dummy</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.gradle</depends>
 
     <idea-version since-build="191"/>
 
@@ -18,6 +19,15 @@
             </action>
             <add-to-group group-id="EditMenu" anchor="last"/>
         </group>
+        <action id="pw.binom.sceneEditor.action.CreateSceneFileAction" class="pw.binom.sceneEditor.action.CreateSceneFileAction"
+                text="Scene" description="Create new Scene file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
+
+        <action id="pw.binom.material.actions.CreateMaterialFileAction" class="pw.binom.material.actions.CreateMaterialFileAction"
+                text="Material" description="Create new Material file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -30,7 +40,7 @@
         </projectListeners>
 
         <!-- SceneEditor -->
-        <fileType name="Scene file" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
+        <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>
         <fileEditorProvider implementation="pw.binom.sceneEditor.SceneFileEditorProvider"/>
 
@@ -45,7 +55,7 @@
         <!--                                        -->
 
 
-        <fileType name="Fbx file" implementationClass="pw.binom.FlxFileType" fieldName="INSTANCE"
+        <fileType name="FBX" implementationClass="pw.binom.FlxFileType" fieldName="INSTANCE"
                   language="FBX" extensions="fbx"/>
         <fileEditorProvider implementation="pw.binom.FbxFileEditorProvider"/>
 
@@ -59,7 +69,7 @@
         <!-- Material -->
         <externalAnnotator language="Material"
                            implementationClass="pw.binom.material.ErrorAnnotator"></externalAnnotator>
-        <fileType name="Material file" implementationClass="pw.binom.material.MaterialFileType" fieldName="INSTANCE"
+        <fileType name="MAT" implementationClass="pw.binom.material.MaterialFileType" fieldName="INSTANCE"
                   language="Material" extensions="mat"/>
         <lang.commenter language="Material" implementationClass="pw.binom.glsl.GLSLCommenter"/>
         <fileEditorProvider implementation="pw.binom.material.MaterialFileEditorProvider"/>

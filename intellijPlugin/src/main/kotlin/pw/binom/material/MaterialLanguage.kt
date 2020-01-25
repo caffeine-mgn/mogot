@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.fileTypes.LanguageFileType
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.Key
@@ -54,7 +55,7 @@ object MaterialFileType : LanguageFileType(MaterialLanguage) {
 class ShaderTokenType(debugName: String) : IElementType(debugName, MaterialLanguage)
 abstract class ShaderElementType(debugName: String) : IElementType(debugName, MaterialLanguage)
 
-class MaterialFileEditorProvider : FileEditorProvider {
+class MaterialFileEditorProvider : FileEditorProvider, DumbAware {
     override fun getEditorTypeId(): String = "MaterialEditor"
 
     override fun accept(project: Project, file: VirtualFile): Boolean {
