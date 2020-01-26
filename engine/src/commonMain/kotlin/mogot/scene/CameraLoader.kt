@@ -8,9 +8,9 @@ object CameraLoader : SceneLoader.NodeLoader {
     override val nodeClass: String
         get() = "mogot.Camera"
 
-    override suspend fun load(engine: Engine, behavioursLoader: BehavioursLoader, props: Map<String, String>): Node {
+    override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
         val node = Camera()
-        SpatialLoader.load(engine, node, behavioursLoader, props)
+        SpatialLoader.load(engine, node, loaderContext, props)
         props["near"]?.toFloatOrNull()?.let { node.near = it }
         props["far"]?.toFloatOrNull()?.let { node.far = it }
         props["fieldOfView"]?.toFloatOrNull()?.let { node.fieldOfView = it }

@@ -16,6 +16,11 @@ object SceneCompiler {
         }
         val out = output.outputStream().wrap()
         out.write(SceneLoader.SCENE_MAGIC_BYTES)
+        val type: Byte = if (stream.type == Scene.Type.D3)
+            1
+        else
+            0
+        out.write(type)
         out.use { output ->
             writeChilds(input.path, output, stream.childs, behavioursGenerator)
             output.flush()

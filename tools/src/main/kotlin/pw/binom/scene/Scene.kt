@@ -8,7 +8,12 @@ import pw.binom.*
 import java.io.InputStream
 import java.io.OutputStream
 
-class Scene(val childs: List<Node>) {
+class Scene(val childs: List<Node>, val type: Type) {
+    enum class Type {
+        D2,
+        D3
+    }
+
     class Node(val className: String, val properties: Map<String, String>, val childs: List<Node>)
 
     fun save(stream: OutputStream) {
@@ -17,6 +22,10 @@ class Scene(val childs: List<Node>) {
             val array = JsonNodeFactory.instance.arrayNode()
             array.addAll(childs.map { it.toObject() })
             root.set<JsonNode>("scene", array)
+            root.set<JsonNode>("type", JsonNodeFactory.instance.textNode(when (type) {
+                Type.D2 -> "2d"
+                Type.D3 -> "3d"
+            }))
         }
         val mapper = ObjectMapper()
         mapper.writeValue(stream, root)
@@ -40,9 +49,14 @@ class Scene(val childs: List<Node>) {
         fun load(stream: InputStream): Scene {
             val mapper = ObjectMapper()
             val root = mapper.readTree(stream)
+            val type = when (val type = root.obj["type"]?.textValue()?.trim()) {
+                "3d", null -> Type.D3
+                "2d" -> Type.D2
+                else -> throw IllegalArgumentException("Unknown scene type \"$type\"")
+            }
             return Scene(root.obj["scene"]?.map {
                 readNode(it.obj)
-            } ?: emptyList())
+            } ?: emptyList(), type)
         }
 
         private fun readNode(node: ObjectNode): Node {

@@ -8,6 +8,8 @@ import pw.binom.FlexLayout
 import pw.binom.Services
 import pw.binom.appendTo
 import java.awt.Component
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import javax.swing.*
 import javax.swing.event.ListDataListener
 
@@ -57,6 +59,26 @@ class CreateNodeDialog(view: SceneEditorView, project: Project) : DialogWrapper(
             selected = if (index >= 0) model.getElementAt(index) else null
         }
 
+        list.addMouseListener(object : MouseListener {
+            override fun mouseReleased(e: MouseEvent?) {
+            }
+
+            override fun mouseEntered(e: MouseEvent?) {
+            }
+
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount >= 2) {
+                    close(OK_EXIT_CODE, true)
+                }
+            }
+
+            override fun mouseExited(e: MouseEvent?) {
+            }
+
+            override fun mousePressed(e: MouseEvent?) {
+            }
+
+        })
         setSize(300, 300)
 
         refreshOkBtn()

@@ -13,6 +13,8 @@ class Starter : StartupActivity {
 //            }
 //        })
 
+        Services.reg(InjectSceneCreator)
+        Services.reg(InjectSceneNodeService)
         Services.reg(EditorView2DFactory)
         Services.reg(EditRotate2DFactory)
         Services.reg(EditMovementFactory3D)

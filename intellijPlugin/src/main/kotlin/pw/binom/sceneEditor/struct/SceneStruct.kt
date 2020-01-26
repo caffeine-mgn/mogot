@@ -35,6 +35,7 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                             val node = creator.create(view) ?: return@renderThread
                             node.parent = parent
                             model.created(tree, node)
+                            view.mode = view.mode
                         }
                     }
                 }
