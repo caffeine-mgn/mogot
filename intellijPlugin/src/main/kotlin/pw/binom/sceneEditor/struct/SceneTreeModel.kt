@@ -13,9 +13,19 @@ import javax.swing.tree.TreePath
 class SceneTreeModel(val view: SceneEditorView) : TreeModel {
     override fun getRoot(): Any = view.sceneRoot
 
-    override fun isLeaf(node: Any?): Boolean = (node as Node?)?.childs?.isEmpty() ?: false
+    override fun isLeaf(node: Any?): Boolean {
+        node as Node
+        if (view.getService(node)?.isInternalChilds(node) == true)
+            return true
+        return node.childs.isEmpty()
+    }
 
-    override fun getChildCount(parent: Any?): Int = (parent as Node?)?.childs?.size ?: 0
+    override fun getChildCount(parent: Any?): Int {
+        parent as Node
+        if (view.getService(parent)?.isInternalChilds(parent) == true)
+            return 0
+        return parent.childs.size
+    }
 
     override fun removeTreeModelListener(l: TreeModelListener?) {
         l ?: return

@@ -9,6 +9,7 @@ import pw.binom.Services
 import pw.binom.sceneEditor.properties.PropertyFactory
 
 interface NodeService {
+    fun getClassName(node: Node): String = node::class.java.name
     fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node?
     fun save(view: SceneEditorView, node: Node): Map<String, String>?
     fun selected(view: SceneEditorView, node: Node)
@@ -20,6 +21,7 @@ interface NodeService {
     fun getAABB(node: Node, aabb: AABBm): Boolean
     fun getCollider(node: Node): Collider? = null
     fun getCollider2D(node: Node): Collider2D? = null
+    fun isInternalChilds(node: Node): Boolean = false
     fun hover(node: Node, hover: Boolean) {
         //NOP
     }

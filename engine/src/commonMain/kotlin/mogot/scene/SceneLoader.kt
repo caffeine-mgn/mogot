@@ -1,28 +1,27 @@
 package mogot.scene
 
-import mogot.Engine
-import mogot.Node
-import mogot.Resources
-import mogot.Spatial
+import mogot.*
 import pw.binom.io.*
 
 object SceneLoader {
     val SCENE_MAGIC_BYTES = byteArrayOf(44, 83, 56, 33)
-    suspend fun loadScene(engine: Engine, stream: AsyncInputStream, loaders: List<NodeLoader>, behavioursLoader: BehavioursLoader): Node {
+    suspend fun loadScene(engine: Engine, stream: AsyncInputStream, loaderContext: LoaderContext): Node {
         val magic = ByteArray(SCENE_MAGIC_BYTES.size)
         stream.readFully(magic)
         SCENE_MAGIC_BYTES.forEachIndexed { index, byte ->
             if (magic[index] != byte)
                 throw IllegalArgumentException("Can't load scene from. Input data is not Scene")
         }
-        val root = Spatial()
-        val loadersMap = loaders.associate { it.nodeClass to it }
-
-        loadChilds(root, engine, stream, loadersMap, behavioursLoader)
+        val d3 = stream.read() > 0
+        val root = if (d3)
+            Spatial()
+        else
+            Spatial2D(engine)
+        loadChilds(root, engine, stream, loaderContext)
         return root
     }
 
-    private suspend fun loadChilds(root: Node, engine: Engine, stream: AsyncInputStream, loaders: Map<String, NodeLoader>, behavioursLoader: BehavioursLoader) {
+    private suspend fun loadChilds(root: Node, engine: Engine, stream: AsyncInputStream, loaderContext: LoaderContext) {
         val childCount = stream.readInt()
         (0 until childCount).forEach {
             val clazz = stream.readUTF8String()
@@ -30,22 +29,22 @@ object SceneLoader {
             val props = (0 until propCount).associate {
                 stream.readUTF8String() to stream.readUTF8String()
             }
-            val loader = loaders[clazz] ?: throw IllegalArgumentException("Can't find Scene Loader for class $clazz")
-            val node = loader.load(engine, behavioursLoader, props)
+            val loader = loaderContext.nodeLoader(clazz)
+            val node = loader.load(engine, loaderContext, props)
             node.parent = root
-            loadChilds(node, engine, stream, loaders, behavioursLoader)
+            loadChilds(node, engine, stream, loaderContext)
         }
     }
 
     interface NodeLoader {
         val nodeClass: String
-        suspend fun load(engine: Engine, behavioursLoader: BehavioursLoader, props: Map<String, String>): Node
+        suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node
     }
 }
 
 suspend fun Resources.loadScene(path: String, loaders: List<SceneLoader.NodeLoader>, behavioursLoader: BehavioursLoader): Node {
     val stream = fileSystem.get(Unit, "$path.bin")?.read() ?: throw FileSystem.FileNotFoundException(path)
     return stream.use {
-        SceneLoader.loadScene(engine, it, loaders, behavioursLoader)
+        SceneLoader.loadScene(engine, it, LoaderContext(engine, loaders, behavioursLoader))
     }
 }
