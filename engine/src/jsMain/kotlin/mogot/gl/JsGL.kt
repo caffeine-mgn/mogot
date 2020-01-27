@@ -28,6 +28,7 @@ abstract external class WebGL2RenderingContext : WebGLRenderingContext {
     fun deleteVertexArray(array: WebGLVertexArray)
     fun bindVertexArray(array: WebGLVertexArray?)
     fun isVertexArray(array: WebGLVertexArray): Boolean
+    fun renderbufferStorageMultisample(target:Int, samples:Int, internalFormat:Int, width:Int, height:Int)
 }
 
 actual class GL(val ctx: WebGL2RenderingContext) {
@@ -374,6 +375,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         //ctx.texImage2D(target,level,internalformat,width,height,border,format,type,pixels)
     }
 
+    actual fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean){
+        TODO()
+    }
+
     actual fun texParameteri(target: Int, pname: Int, param: Int) {
         ctx.texParameteri(target, pname, param)
     }
@@ -393,6 +398,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
 
     actual fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) {
         ctx.renderbufferStorage(target, internalformat, width, height)
+    }
+
+    actual fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int){
+        ctx.renderbufferStorageMultisample(target,samples,internalformat,width,height)
     }
 
     actual fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer) {
