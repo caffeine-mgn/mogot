@@ -6,6 +6,7 @@ import com.jogamp.opengl.util.Animator
 import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
+import mogot.scene.DirectLightShadowsRender
 import pw.binom.io.FileSystem
 import java.awt.Cursor
 import java.awt.Dimension
@@ -35,6 +36,8 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         val cursorImg = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
         toolkit.createCustomCursor(cursorImg, Point(0, 0), "blank cursor")
     }
+
+    var directLightShadowsRender: DirectLightShadowsRender? = null
 
     init {
         autoSwapBufferMode = false
@@ -80,7 +83,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         get() = renderContext.sceneColor
 
     protected object renderContext : RenderContext {
-        override val pointLights = ArrayList<PointLight>()
+        override val lights = ArrayList<Light>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     }
 
@@ -192,6 +195,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun setup(width: Int, height: Int) {
+        if (directLightShadowsRender != null) {
+            directLightShadowsRender?.close()
+            directLightShadowsRender = DirectLightShadowsRender(gl, width, height, width, height)
+        }
         gl.gl.glViewport(0, 0, width, height)
         camera?.resize(width, height)
         camera2D?.resize(width, height)
@@ -251,10 +258,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
 //        camera2D = null
 
-        renderContext.pointLights.clear()
+        renderContext.lights.clear()
         root?.walk {
-            if (it is PointLight)
-                renderContext.pointLights += it
+            if (it is Light)
+                renderContext.lights += it
             true
         }
 
@@ -270,8 +277,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
                 gl.gl.glEnable(GL2.GL_DEPTH_TEST)
                 gl.gl.glEnable(GL2.GL_CULL_FACE)
 
-                if (camera != null)
+                if (camera != null) {
+                    directLightShadowsRender?.render(camera!!.position,root!!, renderContext)
                     renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
+                }
 
                 gl.gl.glDisable(GL2.GL_DEPTH_TEST)
                 gl.gl.glDisable(GL2.GL_CULL_FACE)
@@ -334,6 +343,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
             renderNode3D(it, pos, projection, renderContext)
         }
     }
+
 
     private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
         if (node.isVisualInstance2D) {

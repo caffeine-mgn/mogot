@@ -58,7 +58,7 @@ class TestGame(val engine: Engine) {
             position.set(5f, 3f, 5f)
         }
         camera.position.set(5f, 5f, 5f)
-        val l = OmniLight()
+        val l = DirectLight()
         l.parent = camera
 
         camera.lookTo(Vector3f(0f, 0f, 0f))

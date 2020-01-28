@@ -31,9 +31,9 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
         engine.gl.checkError { "2" }
         shader.uniform(MODEL, model)
         engine.gl.checkError { "2" }
-        shader.uniform("lights_len", renderContext.pointLights.size)
+        shader.uniform("lights_len", renderContext.lights.size)
         engine.gl.checkError { "3" }
-        renderContext.pointLights.forEachIndexed { index, light ->
+        renderContext.lights.forEachIndexed { index, light ->
             light.matrix.getTranslation(TEMP_VECTOR3F)
             shader.uniform("lights[$index].position", TEMP_VECTOR3F)
             shader.uniform("lights[$index].diffuse", light.diffuse)

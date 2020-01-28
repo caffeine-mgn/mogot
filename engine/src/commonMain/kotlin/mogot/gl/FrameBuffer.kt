@@ -9,7 +9,11 @@ class FrameBuffer(val gl: GL,val texture: TextureObject? = null, val renderBuffe
         fbo = gl.createFrameBuffer()
         bind()
         if(texture!=null) {
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture.target, texture.glTexture, 0)
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, if(texture.format == TextureObject.Format.RGB) gl.COLOR_ATTACHMENT0 else if(texture.format == TextureObject.Format.DEPTH_COMPONENT) gl.DEPTH_ATTACHMENT else TODO(), texture.target, texture.glTexture, 0)
+            if(texture.format==TextureObject.Format.DEPTH_COMPONENT){
+                gl.drawBuffer(gl.NONE)
+                gl.readBuffer(gl.NONE)
+            }
             gl.checkError {
                 "Framebuffer texture error"
             }

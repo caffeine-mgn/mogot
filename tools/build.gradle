@@ -6,6 +6,9 @@ apply plugin: 'org.jetbrains.intellij'
 
 apply plugin: "org.xbib.gradle.plugin.jflex"
 
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
 sourceSets {
     main {
         java {

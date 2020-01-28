@@ -2,10 +2,15 @@ package mogot.gl
 
 import pw.binom.io.Closeable
 
-class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable) : Closeable {
+class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB) : Closeable {
     enum class MagFilterParameter {
         Nearest,
         Linear
+    }
+
+    enum class Format{
+        RGB,
+        DEPTH_COMPONENT
     }
 
     enum class MinFilterParameter {
@@ -78,9 +83,15 @@ class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: 
 
 
         if (multisample != MSAALevels.Disable) {
-            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, gl.RGB, width, height, true)
+            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, when(format){
+                Format.RGB -> gl.RGB
+                Format.DEPTH_COMPONENT -> gl.DEPTH_COMPONEN
+            }, width, height, true)
         } else {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+            gl.texImage2D(gl.TEXTURE_2D, 0, when(format){
+                Format.RGB -> gl.RGB
+                Format.DEPTH_COMPONENT -> gl.DEPTH_COMPONEN
+            }, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
         }
         gl.checkError {
             "Can't create texture"

@@ -9,7 +9,7 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 
-internal class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
+/*internal */class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
     override fun dispose() {
         shader.close()
         super.dispose()

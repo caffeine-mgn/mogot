@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.gl.DepthShader
 import mogot.math.Matrix4fc
 
 
@@ -10,6 +11,16 @@ class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         material.value?.use(model, projection, renderContext)
         geom.value?.draw()
         material.value?.unuse()
+    }
+
+    override fun renderWithShader(model: Matrix4fc,view:Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader) {
+        if(shadow) {
+            shader.use()
+            shader.uniform("projection", projection)
+            shader.uniform("view", view)
+            shader.uniform("model", model)
+            geom.value?.draw()
+        }
     }
 
     override fun free() {

@@ -18,7 +18,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         get() = renderContext.sceneColor
 
     private object renderContext : RenderContext {
-        override val pointLights = ArrayList<PointLight>()
+        override val lights = ArrayList<Light>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     }
 
@@ -44,10 +44,10 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         gl.ctx.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.ctx.enable(WebGLRenderingContext.CULL_FACE)
         camera?.globalToLocalMatrix(viewMatrix.identity())
-        renderContext.pointLights.clear()
+        renderContext.lights.clear()
         root?.walk {
-            if (it is PointLight)
-                renderContext.pointLights += it
+            if (it is Light)
+                renderContext.lights += it
             true
         }
 

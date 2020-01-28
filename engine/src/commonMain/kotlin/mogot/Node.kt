@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.gl.DepthShader
 import mogot.math.Matrix4fc
 import pw.binom.io.Closeable
 
@@ -92,6 +93,10 @@ open class Node : Closeable {
     open fun apply(matrix: Matrix4fc): Matrix4fc = matrix
     open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         //NOP
+    }
+
+    open fun renderWithShader(model: Matrix4fc,view: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader){
+
     }
 
     protected open fun onStart() {
