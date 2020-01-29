@@ -17,7 +17,7 @@ open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by Ma
         }
 
         if (size != oldSize) {
-            geom!!.setSize(size)
+            geom!!.size.set(size)
             oldSize.set(size)
         }
         super.render(model, projection, renderContext)

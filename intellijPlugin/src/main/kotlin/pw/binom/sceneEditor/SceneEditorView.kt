@@ -364,6 +364,9 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         super.render()
     }
 
+    override val update2DPhysics: Boolean
+        get() = false
+
     fun startEditor(editor: EditAction) {
         this.editor?.onStop()
         this.editor = editor

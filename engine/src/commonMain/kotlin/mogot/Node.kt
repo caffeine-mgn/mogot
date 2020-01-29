@@ -34,7 +34,7 @@ open class Node : Closeable {
         }
     }
 
-    var parent: Node?
+    open var parent: Node?
         get() = _parent
         set(value) {
             _parent?.removeChild(this)

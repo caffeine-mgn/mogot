@@ -54,6 +54,8 @@ interface Vector4fm : Vector4fc {
     }
 }
 
+inline fun Vector4fm.set(other: Vector4fc) = set(other.x, other.y, other.z, other.w)
+
 open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 0f) : Vector4fm {
 
     constructor(other: Vector4fc) : this(other.x, other.y, other.z, other.w)

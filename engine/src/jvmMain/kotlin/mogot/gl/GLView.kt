@@ -207,7 +207,13 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     private var oldLockMouse = false
 
     protected open fun render2(dt: Float) {
-
+        if (!update2DPhysics)
+            return
+        try {
+            engine.physicsManager2D.step(dt)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     private var added = false
@@ -225,6 +231,8 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         }
         super.destroy()
     }
+
+    protected open val update2DPhysics = true
 
 
     override fun removeNotify() {

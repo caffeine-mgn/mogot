@@ -97,6 +97,7 @@ open class Vector2f(override var x: Float = 0f, override var y: Float = 0f) : Ve
 }
 
 inline fun Vector2fm.set(other: Vector2fc) = set(other.x, other.y)
+inline fun Vector2fm.set(value: Float) = set(value, value)
 inline fun Vector2im.set(other: Vector2ic) = set(other.x, other.y)
 fun Vector2fm.normalize(): Vector2fm = normalize(this)
 fun Vector2fc.normalized(): Vector2fm = normalize(Vector2f())

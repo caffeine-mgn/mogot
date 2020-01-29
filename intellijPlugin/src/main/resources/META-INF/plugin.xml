@@ -32,13 +32,15 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <facetType implementation="pw.binom.facet.AssetsFacetType"/>
-        <postStartupActivity implementation="pw.binom.Starter"/>
+<!--        <postStartupActivity implementation="pw.binom.Starter"/>-->
+        <!--<appStarter implementation="pw.binom.Starter" />-->
+        <!--<preloadingActivity implementation="pw.binom.Starter"/>-->
 
         <projectListeners>
             <listener class="pw.binom.module.ModuleChangeListener"
                       topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
-
+<ApplicationLoadListener implementation="pw.binom.Starter"></ApplicationLoadListener>
         <!-- SceneEditor -->
         <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>

@@ -3,9 +3,13 @@ package mogot
 import mogot.math.*
 
 open class Spatial2D(val engine: Engine) : Node() {
-    val position = Vector2fProperty()
-    val scale = Vector2fProperty(1f, 1f)
-    var rotation: Float = 0f
+    private val p = Vector2fProperty()
+    private val s = Vector2fProperty(1f, 1f)
+    open val position: Vector2fm
+        get() = p
+    open val scale: Vector2fm
+        get() = s
+    open var rotation: Float = 0f
         set(value) {
             if (!rotationChanged && field != value)
                 rotationChanged = true
@@ -17,7 +21,7 @@ open class Spatial2D(val engine: Engine) : Node() {
 
     val transform: Matrix4fc
         get() {
-            if (rotationChanged || position.resetChangeFlag() || scale.resetChangeFlag()) {
+            if (rotationChanged || p.resetChangeFlag() || s.resetChangeFlag()) {
                 _transform.identity().translate(position.x, position.y, 0f)
                         .rotateZ(rotation)
                         .scale(scale.x, scale.y, 1f)
