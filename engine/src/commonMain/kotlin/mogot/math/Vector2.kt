@@ -24,6 +24,14 @@ class Vector2i(override var x: Int = 0, override var y: Int = 0) : Vector2im {
     constructor(other: Vector2ic) : this(other.x, other.y)
 }
 
+fun Vector2fc.distanceSquaredTo(x: Float, y: Float): Float {
+    val x = this.x - x
+    val y = this.y - y
+    return x * x + y * y
+}
+
+fun Vector2fc.distanceSquaredTo(point: Vector2fc) = distanceSquaredTo(point.x, point.y)
+
 interface Vector2fc {
     val x: Float
     val y: Float
@@ -61,6 +69,21 @@ fun Vector2fc.add(x: Float, y: Float, dest: Vector2fm): Vector2fm {
 
 fun Vector2fm.add(x: Float, y: Float) = add(x, y, this)
 fun Vector2fm.add(other: Vector2fc) = add(other.x, other.y, this)
+
+/**
+ * dot product
+ */
+inline fun Vector2fm.dot(x: Float, y: Float) = this.x * x + this.y * y
+
+inline fun Vector2fm.dot(other: Vector2fc) = dot(other.x, other.y)
+
+/**
+ * Returns determinant
+ */
+inline fun Vector2fm.det(x: Float, y: Float) = this.x * y - this.y * x
+
+inline fun Vector2fm.det(other: Vector2fc) = det(other.x, other.y)
+
 
 fun Vector2ic.add(x: Int, y: Int, dest: Vector2im): Vector2im {
     dest.x = this.x + x
@@ -151,3 +174,23 @@ open class Vector2fProperty(x: Float = 0f, y: Float = 0f) : Vector2f(x, y) {
         return b
     }
 }
+
+/**
+ * Returns angle in radians between three vertex.
+ */
+fun vertexAngle(startX: Float, startY: Float, middleX: Float, middleY: Float, endX: Float, endY: Float): Float {
+    val x1 = startX - middleX
+    val y1 = startY - middleY
+    val x2 = endX - middleX
+    val y2 = endY - middleY
+
+    val dot = x1 * x2 + y1 * y2      // dot product between [x1, y1] and [x2, y2]
+    val det = x1 * y2 - y1 * x2      // determinant
+    return atan2(det, dot)  // atan2(y, x) or atan2(sin, cos)
+}
+
+inline fun vertexAngle(start: Vector2fc, middle: Vector2fc, end: Vector2fc) = vertexAngle(
+        start.x, start.y,
+        middle.x, middle.y,
+        end.x, end.y
+)

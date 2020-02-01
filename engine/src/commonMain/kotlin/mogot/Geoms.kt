@@ -2,12 +2,46 @@ package mogot
 
 import mogot.gl.GL
 import mogot.math.Math
+import mogot.math.PIf
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.floatDataOf
 import pw.binom.intDataOf
+import kotlin.math.cos
+import kotlin.math.sin
 
 object Geoms {
+
+    fun circle(gl: GL, r: Float, segmentsCount: Int): Geom2D {
+        val index = IntDataBuffer.alloc(segmentsCount * 3)
+        val vertex = FloatDataBuffer.alloc((segmentsCount + 1) * 2)
+        vertex[0] = 0f
+        vertex[1] = 0f
+        var i = 0
+        var v = 1
+        while (i < segmentsCount - 1) {
+            index[i * 3 + 0] = 0
+            index[i * 3 + 1] = v++
+            index[i * 3 + 2] = v
+            i++
+        }
+        index[i * 3 + 0] = 0
+        index[i * 3 + 1] = v
+        index[i * 3 + 2] = 1
+        val cof = 2.0f * PIf / segmentsCount.toFloat()
+        (0 until segmentsCount).forEach {
+            val theta = it * cof//2.0f * PIf * it / segmentsCount.toFloat()//get the current angle
+
+            val x = r * cos(theta)//calculate the x component
+            val y = r * sin(theta)//calculate the y component
+            vertex[it * 2 + 2 + 0] = x
+            vertex[it * 2 + 2 + 1] = y
+        }
+        val geom = Geom2D(gl, index, vertex, null, null)
+        index.close()
+        vertex.close()
+        return geom
+    }
 
     fun panel(gl: GL, x: Float, z: Float): Geom3D2 {
         val vertex = floatDataOf(

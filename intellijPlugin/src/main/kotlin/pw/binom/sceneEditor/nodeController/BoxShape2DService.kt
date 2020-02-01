@@ -58,16 +58,10 @@ object BoxShape2DService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node,selected:Boolean) {
         if (node !is BoxShape2D) return
         val mat = node.material.value as MInstance
-        mat.color.set(hoverColor)
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        if (node !is BoxShape2D) return
-        val mat = node.material.value as MInstance
-        mat.color.set(outColor)
+        mat.color.set(if (selected) hoverColor else outColor)
     }
 
     override fun hover(node: Node, hover: Boolean) {
@@ -78,7 +72,7 @@ object BoxShape2DService : NodeService {
 
     override fun isEditor(node: Node): Boolean = node::class.java === BoxShape2D::class.java
 
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is BoxShape2D) return null
         val mat = node.material.value as MInstance
         val out = BoxShape2D(node.engine)
@@ -88,17 +82,11 @@ object BoxShape2DService : NodeService {
         return out
     }
 
-    override fun getCollider2D(node: Node): Collider2D? {
+    override fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? {
         node as BoxShape2D
         val c = Panel2DCollider()
         c.node = node
         c.size.set(node.size)
         return c
     }
-
-    override fun delete(view: SceneEditorView, node: Node) {
-
-    }
-
-    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 }

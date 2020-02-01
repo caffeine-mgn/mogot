@@ -40,7 +40,7 @@ class DuplicateNode : AnAction() {
         val createdNodes = ArrayList<Node>()
         nodes.forEach { node ->
             val service = services.find { it.isEditor(node) } ?: return@forEach
-            val clone = service.deepClone(node) ?: return@forEach
+            val clone = service.deepClone(editor.viewer.view, node) ?: return@forEach
             clone.parent = node.parent
             createdNodes += clone
             editor.sceneStruct.model.created(editor.sceneStruct.tree, clone)

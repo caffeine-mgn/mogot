@@ -19,6 +19,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.set
 
 private class EditorHolder(val view: SceneEditorView) : Closeable {
@@ -35,6 +36,25 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         D2,
         D3
     }
+
+    interface RenderCallback {
+        val node: Node
+        val model: Matrix4fc
+        val projection: Matrix4fc
+        val renderContext: RenderContext
+        val view: SceneEditorView
+    }
+
+    private inner class RenderCallbackImpl : RenderCallback {
+        override lateinit var node: Node
+        override lateinit var model: Matrix4fc
+        override lateinit var projection: Matrix4fc
+        override lateinit var renderContext: RenderContext
+        override val view: SceneEditorView
+            get() = this@SceneEditorView
+    }
+
+    private val renderCallback = RenderCallbackImpl()
 
     public override var render3D: Boolean
         get() = super.render3D
@@ -148,6 +168,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     private val selectedNodes = ArrayList<Node>()
     val selected: List<Node>
         get() = selectedNodes
+    val nodesMeta = HashMap<Node, Any>()
     private var selectors = ArrayList<Selector3D>()
     fun select(nodeList: List<Node>) {
         renderThread {
@@ -163,14 +184,14 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                             } else
                                 false
                         }
-                        getService(node)?.unselected(this, node)
+                        getService(node)?.selected(this, node, false)
                     }
 
             nodeList.asSequence()
                     .filter { it !in selectedNodes }
                     .forEach { node ->
                         val service = getService(node)
-                        service?.selected(this, node)
+                        service?.selected(this, node, true)
                         selectedNodes += node
                         if (service != null && node is Spatial) {
                             val aabb = AABB()
@@ -253,7 +274,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         val pos = editorCamera2D.screenToWorld(x, y, Vector2f())
         sceneRoot.walk {
             val service = getService(it) ?: return@walk true
-            val col = service.getCollider2D(it) ?: return@walk true
+            val col = service.getCollider2D(this, it) ?: return@walk true
             if (col.test(pos.x, pos.y)) {
                 result = it
                 return@walk false
@@ -380,6 +401,34 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         repaint()
         save()
         editor1.save()
+    }
+
+    private val node2DRenderCallback = HashMap<Spatial2D, (RenderCallback) -> Unit>()
+
+    fun setRenderCallback(node: Spatial2D, callback: (RenderCallback) -> Unit) {
+        if (node2DRenderCallback.containsKey(node))
+            throw IllegalStateException("Node ${node.id ?: node::class.java.simpleName} already has some callback")
+        node2DRenderCallback[node] = callback
+    }
+
+    fun clearRenderCallback(node: Spatial2D) {
+        node2DRenderCallback.remove(node)
+    }
+
+    override fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+        super.renderNode2D(node, projection, renderContext)
+        if (node.isSpatial2D()) {
+            val func = node2DRenderCallback[node]
+            if (func != null) {
+                renderCallback.also {
+                    it.model = node.matrix
+                    it.projection = projection
+                    it.renderContext = renderContext
+                    it.node = node
+                }
+                func(renderCallback)
+            }
+        }
     }
 
     override fun keyUp(e: KeyEvent) {

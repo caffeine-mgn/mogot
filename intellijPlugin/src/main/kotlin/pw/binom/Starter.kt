@@ -17,6 +17,8 @@ class Starter : ApplicationLoadListener {
     }
 
     fun reg() {
+        Services.reg(PolygonShape2DCreator)
+        Services.reg(PolygonShape2DService)
         Services.reg(Body2DCreator)
         Services.reg(Body2DService)
         Services.reg(BoxShape2DCreator)

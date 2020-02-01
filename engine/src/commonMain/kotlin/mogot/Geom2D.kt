@@ -13,12 +13,14 @@ class Geom2D(val gl: GL, val index: IntDataBuffer, val vertex: FloatDataBuffer, 
     override var mode
         get() = when (renderMode) {
             gl.LINES -> Geometry.RenderMode.LINES
+            gl.LINE_STRIP -> Geometry.RenderMode.LINES_STRIP
             gl.TRIANGLES -> Geometry.RenderMode.TRIANGLES
             else -> throw RuntimeException()
         }
         set(value) {
             renderMode = when (value) {
                 Geometry.RenderMode.LINES -> gl.LINES
+                Geometry.RenderMode.LINES_STRIP -> gl.LINE_STRIP
                 Geometry.RenderMode.TRIANGLES -> gl.TRIANGLES
             }
         }

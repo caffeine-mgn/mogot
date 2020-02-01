@@ -13,8 +13,6 @@ object EmptyNodeService : NodeService {
         engine.behaviourManager.delete(node)
     }
 
-    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
-
     fun cloneNode(from: Node, to: Node) {
         to.id = from.id
     }
@@ -58,20 +56,10 @@ object EmptyNodeService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java == Node::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         val out = Node()
         cloneNode(node, out)
         return out
-    }
-
-    override fun delete(view: SceneEditorView, node: Node) {
-        nodeDeleted(view.engine, node)
     }
 }

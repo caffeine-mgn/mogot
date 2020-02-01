@@ -77,7 +77,7 @@ object GeomService : NodeService {
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is GeomNode) return null
         val out = GeomNode()
         out.geom.value = node.geom.value
@@ -113,16 +113,5 @@ object GeomService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java === GeomNode::class.java
-
-    override fun delete(view: SceneEditorView, node: Node) {
-        EmptyNodeService.nodeDeleted(view.engine, node)
-    }
-
 }

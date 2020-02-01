@@ -1,6 +1,8 @@
 package mogot.physics.d2.shapes
 
-import mogot.*
+import mogot.Engine
+import mogot.Node
+import mogot.VisualInstance2D
 import mogot.physics.box2d.collision.shapes.Shape
 import mogot.physics.box2d.dynamics.Fixture
 import mogot.physics.d2.PhysicsBody2D
@@ -20,13 +22,12 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
     val body
         get() = parent as? PhysicsBody2D
 
-    protected abstract fun makeShape():Shape
+    protected abstract fun makeShape(): Shape
 
-    private fun removeFromBody(body: PhysicsBody2D) {
+    protected open fun removeFromBody(body: PhysicsBody2D) {
         fixture?.setUserData(null)
         fixture?.let { body.boxBody.destroyFixture(it) }
         fixture = null
-        println("remove from body")
     }
 
     private fun addToBody(body: PhysicsBody2D) {
@@ -34,7 +35,6 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
         fixture!!.setDensity(density)
         fixture!!.setFriction(friction)
         fixture!!.setUserData(this)
-        println("add to body ${body.bodyType}")
     }
 
     override var parent: Node?

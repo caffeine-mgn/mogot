@@ -63,20 +63,14 @@ object Sprite2DService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node,selected: Boolean) {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
-        m?.selected = true
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        node as MaterialNode
-        val m = node.material.value as? MaterialInstance?
-        m?.selected = false
+        m?.selected = selected
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Sprite::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is Sprite) return null
         val out = Sprite(node.engine)
         out.size.set(node.size)
@@ -85,18 +79,13 @@ object Sprite2DService : NodeService {
         return out
     }
 
-    override fun delete(view: SceneEditorView, node: Node) {
-    }
-
     override fun hover(node: Node, hover: Boolean) {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
         m?.hover = hover
     }
 
-    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
-
-    override fun getCollider2D(node: Node): Collider2D? {
+    override fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? {
         node as Sprite
         val c = Panel2DCollider()
         c.node = node

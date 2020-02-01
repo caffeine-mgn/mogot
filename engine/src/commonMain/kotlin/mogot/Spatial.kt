@@ -1,6 +1,8 @@
 package mogot
 
 import mogot.math.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 open class Spatial : Node() {
 
@@ -110,7 +112,7 @@ open class Spatial : Node() {
         get() {
             val parent = parent ?: return null
             parent.currentToRoot {
-                if (it.isSpatial)
+                if (it.isSpatial())
                     return it as Spatial
                 true
             }
@@ -155,8 +157,13 @@ open class Spatial : Node() {
 
 private const val spatial3dType = SPATIAL_TYPE or VISUAL_INSTANCE3D_TYPE
 
-val Node.isSpatial
-    get() = (type and spatial3dType) != 0
+@UseExperimental(ExperimentalContracts::class)
+fun Node.isSpatial(): Boolean {
+    contract {
+        returns(true) implies (this@isSpatial is Spatial)
+    }
+    return (type and spatial3dType) != 0
+}
 
 fun <T : Node> Sequence<T>.onlySpatial(): Sequence<Spatial> =
-        filter { it.isSpatial }.map { it as Spatial }
+        filter { it.isSpatial() }.map { it as Spatial }

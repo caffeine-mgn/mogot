@@ -35,7 +35,7 @@ object CubeService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is CSGBox) return null
         val out = CSGBox(node.engine)
         out.width = node.width
@@ -44,10 +44,6 @@ object CubeService : NodeService {
         SpatialService.cloneSpatial(node, out)
         MaterialNodeUtils.clone(node, out)
         return out
-    }
-
-    override fun delete(view: SceneEditorView, node: Node) {
-        EmptyNodeService.nodeDeleted(view.engine, node)
     }
 
     override fun getCollider(node: Node): Collider? {
@@ -85,16 +81,10 @@ object CubeService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
-        m?.selected = true
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        node as MaterialNode
-        val m = node.material.value as? MaterialInstance?
-        m?.selected = false
+        m?.selected = selected
     }
 
     override fun hover(node: Node, hover: Boolean) {

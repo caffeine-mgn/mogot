@@ -316,10 +316,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         var mat3d = camModel
         var mat2d = ortoModel
 
-        if (node.isSpatial)
+        if (node.isSpatial())
             mat3d = node.apply(mat3d)
 
-        if (node.isSpatial2D)
+        if (node.isSpatial2D())
             mat2d = node.apply(mat2d)
 
 
@@ -343,7 +343,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         }
     }
 
-    private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+    protected open fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
         if (node.isVisualInstance2D) {
             node as VisualInstance2D
             if (!node.visible)
