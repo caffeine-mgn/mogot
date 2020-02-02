@@ -12,6 +12,30 @@ import kotlin.math.sin
 
 object Geoms {
 
+    fun circuitCircle(gl: GL, r: Float, segmentsCount: Int): Geom2D {
+        val index = IntDataBuffer.alloc(segmentsCount + 1)
+        val vertex = FloatDataBuffer.alloc(segmentsCount * 2)
+        (0 until segmentsCount).forEach {
+            index[it] = it
+        }
+        index[segmentsCount] = 0
+
+        val cof = 2.0f * PIf / segmentsCount.toFloat()
+        (0 until segmentsCount).forEach {
+            val theta = it * cof//2.0f * PIf * it / segmentsCount.toFloat()//get the current angle
+
+            val x = r * cos(theta)//calculate the x component
+            val y = r * sin(theta)//calculate the y component
+            vertex[it * 2 + 0] = x
+            vertex[it * 2 + 1] = y
+        }
+        val geom = Geom2D(gl, index, vertex, null, null)
+        geom.mode = Geometry.RenderMode.LINES_STRIP
+        index.close()
+        vertex.close()
+        return geom
+    }
+
     fun circle(gl: GL, r: Float, segmentsCount: Int): Geom2D {
         val index = IntDataBuffer.alloc(segmentsCount * 3)
         val vertex = FloatDataBuffer.alloc((segmentsCount + 1) * 2)

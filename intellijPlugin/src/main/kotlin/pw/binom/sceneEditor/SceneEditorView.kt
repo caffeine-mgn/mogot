@@ -75,8 +75,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     camera2D = editorCamera2D
                     render3D = false
                     sceneRoot.walk {
-                        if (it.isVisualInstance2D) {
-                            it as VisualInstance2D
+                        if (it.isVisualInstance2D()) {
                             it.visible = true
                         }
                         true
@@ -87,8 +86,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     camera2D = null
                     render3D = true
                     sceneRoot.walk {
-                        if (it.isVisualInstance2D) {
-                            it as VisualInstance2D
+                        if (it.isVisualInstance2D()) {
                             it.visible = false
                         }
                         true

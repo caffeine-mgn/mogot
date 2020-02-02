@@ -344,8 +344,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
-        if (node.isVisualInstance2D) {
-            node as VisualInstance2D
+        if (node.isVisualInstance2D()) {
             if (!node.visible)
                 return
             node.render(node.matrix, projection, renderContext)

@@ -1574,3 +1574,48 @@ fun Matrix4f.setTranslation(x: Float, y: Float, z: Float): Matrix4f {
     properties = properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY).inv()
     return this
 }
+
+/**
+ * Set only the upper left 3x3 submatrix of this matrix to a rotation of `angleX` radians about the X axis, followed by a rotation
+ * of `angleY` radians about the Y axis and followed by a rotation of `angleZ` radians about the Z axis.
+ *
+ *
+ * When used with a right-handed coordinate system, the produced rotation will rotate a vector
+ * counter-clockwise around the rotation axis, when viewing along the negative axis direction towards the origin.
+ * When used with a left-handed coordinate system, the rotation is clockwise.
+ *
+ * @param angleX
+ * the angle to rotate about X
+ * @param angleY
+ * the angle to rotate about Y
+ * @param angleZ
+ * the angle to rotate about Z
+ * @return this
+ */
+fun Matrix4f.setRotationXYZ(angleX: Float, angleY: Float, angleZ: Float): Matrix4f {
+    val sinX = sin(angleX)
+    val cosX = cosFromSin(sinX, angleX)
+    val sinY = sin(angleY)
+    val cosY = cosFromSin(sinY, angleY)
+    val sinZ = sin(angleZ)
+    val cosZ = cosFromSin(sinZ, angleZ)
+    val m_sinX = -sinX
+    val m_sinY = -sinY
+    val m_sinZ = -sinZ
+    // rotateX
+    // rotateY
+    val nm01 = m_sinX * m_sinY
+    val nm02 = cosX * m_sinY
+    this.m20 = (sinY)
+    this.m21 = (m_sinX * cosY)
+    this.m22 = (cosX * cosY)
+    // rotateZ
+    this.m00 = cosY * cosZ
+    this.m01 = nm01 * cosZ + cosX * sinZ
+    this.m02 = nm02 * cosZ + sinX * sinZ
+    this.m10 = cosY * m_sinZ
+    this.m11 = nm01 * m_sinZ + cosX * cosZ
+    this.m12 = nm02 * m_sinZ + sinX * cosZ
+    properties = properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY or PROPERTY_TRANSLATION).inv()
+    return this
+}

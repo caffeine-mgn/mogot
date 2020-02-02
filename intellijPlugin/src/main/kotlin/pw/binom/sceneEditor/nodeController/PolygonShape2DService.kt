@@ -7,10 +7,7 @@ import mogot.math.*
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
-import pw.binom.sceneEditor.NodeCreator
-import pw.binom.sceneEditor.NodeService
-import pw.binom.sceneEditor.PolygonEditor
-import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.sceneEditor.*
 import javax.swing.Icon
 import kotlin.collections.set
 
@@ -22,18 +19,26 @@ object PolygonShape2DCreator : NodeCreator {
 
     override fun create(view: SceneEditorView): Node? {
         val node = PolygonShape2D(view.engine)
-        val viewNode = PolygonShape2DViwer(node)
-        view.nodesMeta[node] = viewNode
-        view.setRenderCallback(node, viewNode::render)
-        viewNode.material.value = view.default3DMaterial.instance(Vector4f(0f, 1f, 0f, 0.5f))
+
+        view.nodesMeta[node] = createMeta(view, node)
         return node
     }
+}
 
+private fun createMeta(view: SceneEditorView, node: PolygonShape2D): PolygonShape2DMeta {
+    val viewNode = PolygonShape2DViwer(node)
+    val center = CenterNode2D(node, view)
+    center.parent = view.editorRoot
+    center.visible = false
+    viewNode.material.value = view.default3DMaterial.instance(Vector4f(0f, 1f, 0f, 0.5f))
+    view.setRenderCallback(node, viewNode::render)
+    return PolygonShape2DMeta(viewNode, Polygon2DCollider(node, viewNode.vertexs), center)
 }
 
 private class PolygonShape2DMeta(
         val shape: PolygonShape2DViwer,
-        val polygon2DCollider: Polygon2DCollider
+        val polygon2DCollider: Polygon2DCollider,
+        val centerNode2D: CenterNode2D
 ) {
     var polygonEditor: PolygonShapeEditor? = null
 }
@@ -52,11 +57,12 @@ object PolygonShape2DService : NodeService {
         val node = PolygonShape2D(view.engine)
         Spatial2DService.load(view.engine, node, properties)
         node.setVertex(vertex)
-        val viewNode = PolygonShape2DViwer(node)
-        val meta = PolygonShape2DMeta(viewNode, Polygon2DCollider(node, viewNode.vertexs))
-        view.nodesMeta[node] = meta
-        view.setRenderCallback(node, viewNode::render)
-        viewNode.material.value = view.default3DMaterial.instance(Vector4f(0f, 1f, 0f, 0.5f))
+
+
+
+        view.nodesMeta[node] = createMeta(view, node)
+
+
         return node
     }
 
@@ -71,6 +77,7 @@ object PolygonShape2DService : NodeService {
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node as PolygonShape2D
         val meta = view.nodesMeta[node] as PolygonShape2DMeta
+        meta.centerNode2D.visible = selected
         if (selected) {
             val editor = PolygonShapeEditor(node, view)
             editor.parent = view.editorRoot
@@ -89,10 +96,7 @@ object PolygonShape2DService : NodeService {
         if (node !is PolygonShape2D) return null
         val out = PolygonShape2D(node.engine)
         out.setVertex(node.getVertex())
-        val viewNode = PolygonShape2DViwer(out)
-        val meta = PolygonShape2DMeta(viewNode, Polygon2DCollider(node, viewNode.vertexs))
-        view.nodesMeta[out] = meta
-        view.setRenderCallback(out, viewNode::render)
+        view.nodesMeta[out] = createMeta(view, node)
         return out
     }
 
@@ -104,8 +108,10 @@ object PolygonShape2DService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is PolygonShape2D) return
+        val meta = view.nodesMeta.remove(node) as PolygonShape2DMeta
+        meta.centerNode2D.let { it.parent = null; it.close() }
+        meta.polygonEditor?.let { it.parent = null; it.close() }
         view.clearRenderCallback(node)
-        view.nodesMeta.remove(node)
         super.delete(view, node)
     }
 }
