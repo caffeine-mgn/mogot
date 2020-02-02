@@ -5,7 +5,6 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import mogot.Engine
 import mogot.Texture2D
 import mogot.gl.Shader
-import pw.binom.material.MaterialViewer
 import java.awt.BorderLayout
 import java.io.File
 import javax.swing.event.DocumentEvent
@@ -43,7 +42,7 @@ class ImageEditor(uniformEditor: UniformEditor, uniform: UniformEditor.Uniform) 
                 texture = tex
             } else {
                 if (texture != null)
-                    gl.bindTexture(gl.TEXTURE_2D, texture!!.gl)
+                    gl.bindTexture(gl.TEXTURE_2D, texture!!.textureObject)
             }
         } else {
             texture?.dec()

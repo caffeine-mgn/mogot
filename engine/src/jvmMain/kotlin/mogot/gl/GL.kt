@@ -4,6 +4,7 @@ import com.jogamp.opengl.GL2
 import com.jogamp.opengl.GL3
 import mogot.math.Matrix4fc
 import mogot.math.get
+import pw.binom.ByteDataBuffer
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import java.nio.Buffer
@@ -320,8 +321,8 @@ actual class GL(val gl: GL2) {
         return JGLFrameBuffer(fbo[0])
     }
 
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
-        if (pixels != null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!)
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteDataBuffer?) {
+        if (pixels != null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!.buffer)
         else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
 

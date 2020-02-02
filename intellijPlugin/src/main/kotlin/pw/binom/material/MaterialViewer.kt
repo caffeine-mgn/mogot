@@ -130,7 +130,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                     is Vector4fc -> shader.uniform(name, value)
                     is ExternalTexture -> {
                         gl.activeTexture(gl.TEXTURE0 + value.id)
-                        gl.bindTexture(gl.TEXTURE_2D, value.gl.gl)
+                        gl.bindTexture(gl.TEXTURE_2D, value.gl.textureObject)
                         shader.uniform(name, value.id)
                     }
                     else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")

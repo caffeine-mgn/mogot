@@ -1,11 +1,9 @@
 package pw.binom
 
-import com.jogamp.opengl.GL2
 import mogot.Engine
 import mogot.gl.MaterialGLSL
 import mogot.RenderContext
 import mogot.Texture2D
-import mogot.gl.GL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
@@ -51,7 +49,7 @@ void main() {
             shader.use()
             if (tex != null) {
                 engine.gl.activeTexture(engine.gl.TEXTURE0)
-                engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.gl)
+                engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.textureObject)
                 shader.uniform("tex", 0)
             } else {
                 engine.gl.activeTexture(engine.gl.TEXTURE0)
@@ -62,7 +60,7 @@ void main() {
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
         if (tex != null) {
-            engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.gl)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.textureObject)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

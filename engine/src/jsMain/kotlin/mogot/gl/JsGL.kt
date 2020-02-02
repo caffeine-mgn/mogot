@@ -3,6 +3,7 @@ package mogot.gl
 import mogot.math.Matrix4fc
 import mogot.math.get
 import org.khronos.webgl.*
+import pw.binom.ByteDataBuffer
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 
@@ -130,6 +131,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.UNSIGNED_BYTE
     actual val RGB: Int
         get() = WebGLRenderingContext.RGB
+    actual val RGBA: Int
+        get() = WebGLRenderingContext.RGBA
     actual val MULTISAMPLE: Int
         get() = js("WebGL2RenderingContext.MULTISAMPLE")
 
@@ -377,7 +380,7 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun createFrameBuffer(): GLFrameBuffer =
             JSGLFrameBuffer(ctx.createFramebuffer()!!)
 
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteDataBuffer?) {
         TODO()
         //ctx.texImage2D(target,level,internalformat,width,height,border,format,type,pixels)
     }

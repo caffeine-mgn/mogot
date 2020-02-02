@@ -1,15 +1,20 @@
 package mogot.gl
 
+import mogot.SourceImage
+import pw.binom.ByteDataBuffer
 import pw.binom.io.Closeable
 
-class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB) : Closeable {
+/**
+ * @param data must be closed manually!!!
+ */
+class TextureObject(val gl: GL, val image:SourceImage, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB, val mipMaps: Int = 0) : Closeable {
     enum class MagFilterParameter {
         Nearest,
         Linear
     }
-
     enum class Format{
         RGB,
+        RGBA,
         DEPTH_COMPONENT
     }
 
@@ -79,19 +84,28 @@ class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: 
             gl.checkError {
                 "Can't set texture params"
             }
+            if((minFilter!=MinFilterParameter.Nearest)&&(minFilter!=MinFilterParameter.Linear)) {
+                gl.texParameteri(target, gl.TEXTURE_MAX_LEVEL, mipMaps)
+                //TODO("glGenerateMipmap(GL_TEXTURE_2D);")
+                gl.checkError {
+                    "Can't set texture params"
+                }
+            }
         }
 
 
         if (multisample != MSAALevels.Disable) {
             gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, when(format){
                 Format.RGB -> gl.RGB
+                Format.RGBA -> gl.RGBA
                 Format.DEPTH_COMPONENT -> gl.DEPTH_COMPONEN
-            }, width, height, true)
+            }, image.width, image.height, true)
         } else {
             gl.texImage2D(gl.TEXTURE_2D, 0, when(format){
                 Format.RGB -> gl.RGB
+                Format.RGBA -> gl.RGBA
                 Format.DEPTH_COMPONENT -> gl.DEPTH_COMPONEN
-            }, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+            }, image.width, image.height, 0, gl.RGB, gl.UNSIGNED_BYTE, image.data)
         }
         gl.checkError {
             "Can't create texture"
@@ -109,7 +123,6 @@ class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: 
 
     override fun close() {
         gl.disable(target)
-
     }
 
     fun enable() {

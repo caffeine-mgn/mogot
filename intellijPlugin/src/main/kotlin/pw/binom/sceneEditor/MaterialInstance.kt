@@ -4,7 +4,6 @@ import mogot.Material
 import mogot.RenderContext
 import mogot.ResourceImpl
 import mogot.math.*
-import pw.binom.material.MaterialViewer
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.compiler.SingleType
 
@@ -154,7 +153,7 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
                 is Vector4fc -> root.shader.uniform(name, value)
                 is ExternalTexture -> {
                     root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-                    root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, value.gl.gl)
+                    root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, value.gl.textureObject)
                     root.shader.uniform(name, 0)
                 }
                 else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")

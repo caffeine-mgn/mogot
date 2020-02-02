@@ -3,7 +3,6 @@ package pw.binom.sceneEditor
 import mogot.Engine
 import mogot.RenderContext
 import mogot.Texture2D
-import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.*
@@ -56,7 +55,7 @@ void main() {
             shader.use()
             if (tex != null) {
                 gl.activeTexture(gl.TEXTURE0)
-                gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+                gl.bindTexture(gl.TEXTURE_2D, tex!!.textureObject)
                 shader.uniform("tex", 0)
             } else {
                 gl.activeTexture(gl.TEXTURE0)
@@ -67,7 +66,7 @@ void main() {
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
         if (tex != null) {
-            gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
+            gl.bindTexture(gl.TEXTURE_2D, tex!!.textureObject)
         }
         if (diffuseColor.resetChangeFlag()) {
             shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
