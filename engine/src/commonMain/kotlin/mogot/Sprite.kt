@@ -6,13 +6,22 @@ import pw.binom.IntDataBuffer
 open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by MaterialNodeImpl() {
 
     companion object {
+
+        fun calcPolygonTriangulation(vertex: List<Vector2fc>): List<Int> {
+            val array = DoubleArray(vertex.size * 2)
+            vertex.forEachIndexed { index, vector2fc ->
+                array[index * 2 + 0] = vector2fc.x.toDouble()
+                array[index * 2 + 1] = vector2fc.y.toDouble()
+            }
+            return Earcut.earcut(array, null, 2)
+        }
+
         fun calcPolygonTriangulationIndexSize(vertex: List<Vector2fc>): Int {
             check(vertex.size >= 3)
             return (vertex.size - 3) * 3 + 3
         }
 
         fun calcPolygonTriangulation(vertex: List<Vector2fc>, dest: IntDataBuffer) {
-
             fun Array<*>.index(index: Int): Int {
                 check(size > 0)
                 if (index == 0)

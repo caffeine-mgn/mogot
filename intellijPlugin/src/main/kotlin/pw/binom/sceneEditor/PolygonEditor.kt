@@ -38,8 +38,15 @@ class PolygonMoveEditor(val polygonEditor: PolygonEditor, val vertex: Vector2f) 
         val dx = virtualMouse.x - oldMousePos.x
         val dy = virtualMouse.y - oldMousePos.y
         if (dx != 0 || dy != 0) {
-            vertex.x += dx
-            vertex.y += dy
+            val v = engine.mathPool.vec2f.poll()
+            v.set(vertex)
+            polygonEditor.localToGlobal(v, v)
+            if (dx != 0)
+                v.x += dx / polygonEditor.view.editorCamera2D.zoom
+            if (dy != 0)
+                v.y += dy / polygonEditor.view.editorCamera2D.zoom
+            polygonEditor.globalToLocal(v, v)
+            vertex.set(v)
             polygonEditor.updateGeom()
             oldMousePos.set(virtualMouse)
         }
@@ -120,6 +127,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
         override fun mousePressed(e: MouseEvent) {
             val mousePos = engine.mathPool.vec2f.poll()
             view.editorCamera2D.screenToWorld(view.mousePosition, mousePos)
+            globalToLocal(mousePos, mousePos)
             val selectedVertex = vertexs.minBy { it.distanceSquaredTo(mousePos) }?.takeIf { it.distanceSquaredTo(mousePos) < 5f * 5f }
             engine.mathPool.vec2f.push(mousePos)
 
@@ -163,6 +171,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
         }
         val mousePos = engine.mathPool.vec2f.poll()
         view.editorCamera2D.screenToWorld(view.mousePosition, mousePos)
+        globalToLocal(mousePos, mousePos)
         val selectedVertex = vertexs.minBy { it.distanceSquaredTo(mousePos) }?.takeIf { it.distanceSquaredTo(mousePos) < 5f * 5f }
         engine.mathPool.vec2f.push(mousePos)
 

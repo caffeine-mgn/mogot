@@ -60,7 +60,7 @@ open class Node : Closeable {
         _childs.add(index, child)
     }
 
-    internal open fun update(delta: Float) {
+    open fun update(delta: Float) {
         behaviour?.onUpdate(delta)
         childs.forEach {
             it.update(delta)

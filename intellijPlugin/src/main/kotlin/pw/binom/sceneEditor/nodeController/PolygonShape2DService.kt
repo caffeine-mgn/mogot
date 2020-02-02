@@ -3,9 +3,7 @@ package pw.binom.sceneEditor.nodeController
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.collider.*
-import mogot.math.Matrix4fc
-import mogot.math.Vector2f
-import mogot.math.Vector4f
+import mogot.math.*
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
@@ -135,16 +133,18 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
     }
 
     private fun rebuildIndexes(): IntDataBuffer {
-        val size = Sprite.calcPolygonTriangulationIndexSize(vertexs)
-        if (indexBuffer != null && indexBuffer!!.size != size) {
+        val indexes = Sprite.calcPolygonTriangulation(vertexs)
+        if (indexBuffer != null && indexBuffer!!.size != indexes.size) {
             indexBuffer?.close()
             indexBuffer = null
         }
         if (indexBuffer == null) {
-            indexBuffer = IntDataBuffer.alloc(size)
+            indexBuffer = IntDataBuffer.alloc(indexes.size)
         }
         val intBuffer = indexBuffer!!
-        Sprite.calcPolygonTriangulation(vertexs, intBuffer)
+        indexes.forEachIndexed { index, i ->
+            intBuffer[index] = i
+        }
         return intBuffer
     }
 
@@ -207,5 +207,10 @@ private class PolygonShapeEditor(val node: PolygonShape2D, view: SceneEditorView
 
     override fun saveVertex() {
         node.setVertex(vertexs)
+    }
+
+    override fun update(delta: Float) {
+        this.rotation = node.rotation
+        this.position.set(node.position)
     }
 }
