@@ -98,7 +98,7 @@ open class Node : Closeable {
         //NOP
     }
 
-    open fun renderWithShader(model: Matrix4fc,view: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader){
+    open fun renderToShadowMap(model: Matrix4fc, view: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader){
 
     }
 

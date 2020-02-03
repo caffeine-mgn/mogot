@@ -13,7 +13,7 @@ class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         material.value?.unuse()
     }
 
-    override fun renderWithShader(model: Matrix4fc,view:Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader) {
+    override fun renderToShadowMap(model: Matrix4fc, view:Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader) {
         if(shadow) {
             shader.use()
             shader.uniform("projection", projection)

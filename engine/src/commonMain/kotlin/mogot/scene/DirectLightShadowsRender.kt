@@ -73,7 +73,7 @@ class DirectLightShadowsRender(val gl: GL, val shadowWidth:Int, val shadowHeight
             if(!node.shadow)
                 return
             pos = node.matrix
-            node.renderWithShader(node.matrix,view, projection, renderContext, shader)
+            node.renderToShadowMap(node.matrix,view, projection, renderContext, shader)
         }
 
         node.childs.forEach {
