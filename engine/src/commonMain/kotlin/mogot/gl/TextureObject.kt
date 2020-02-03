@@ -1,13 +1,12 @@
 package mogot.gl
 
 import mogot.SourceImage
-import pw.binom.ByteDataBuffer
 import pw.binom.io.Closeable
 
 /**
  * @param data must be closed manually!!!
  */
-class TextureObject(val gl: GL, val image:SourceImage, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB, val mipMaps: Int = 0) : Closeable {
+class TextureObject(val gl: GL, image:SourceImage, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB, val mipMaps: Int = 0) : Closeable {
     enum class MagFilterParameter {
         Nearest,
         Linear
@@ -42,6 +41,8 @@ class TextureObject(val gl: GL, val image:SourceImage, val minFilter: MinFilterP
 
     val glTexture: GLTexture = gl.createTexture()
     val target = if (multisample != MSAALevels.Disable) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
+
+    constructor(gl: GL, width:Int, height:Int, minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, textureWrapS: TextureWrap = TextureWrap.Repeat, textureWrapT: TextureWrap = TextureWrap.Repeat, multisample: MSAALevels = MSAALevels.Disable, format: Format = Format.RGB, mipMaps: Int = 0):this(gl,SourceImage(if(format==Format.RGBA) SourceImage.Type.RGBA else SourceImage.Type.RGB,width,height,null))
 
     init {
         gl.enable(gl.TEXTURE_2D)
