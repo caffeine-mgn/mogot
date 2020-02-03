@@ -3,9 +3,6 @@ package mogot.gl
 import mogot.SourceImage
 import pw.binom.io.Closeable
 
-/**
- * @param data must be closed manually!!!
- */
 class TextureObject(val gl: GL, image:SourceImage, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB, val mipMaps: Int = 0) : Closeable {
     enum class MagFilterParameter {
         Nearest,
