@@ -398,6 +398,8 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_UNSIGNED_BYTE
     actual val RGB: Int
         get() = GL2.GL_RGB
+    actual val RGBA: Int
+        get() = GL2.GL_RGB
     actual val MAX_TEXTURE_SIZE: Int
        get() = GL2.GL_MAX_TEXTURE_SIZE
 
