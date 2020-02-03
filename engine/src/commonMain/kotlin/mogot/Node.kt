@@ -6,6 +6,7 @@ import pw.binom.io.Closeable
 
 
 open class Node : Closeable {
+    var enabled = true
     open val type
         get() = 0
     var id: String? = null
@@ -62,9 +63,11 @@ open class Node : Closeable {
     }
 
     internal open fun update(delta: Float) {
-        behaviour?.onUpdate(delta)
-        childs.forEach {
-            it.update(delta)
+        if(enabled) {
+            behaviour?.onUpdate(delta)
+            childs.forEach {
+                it.update(delta)
+            }
         }
     }
 
