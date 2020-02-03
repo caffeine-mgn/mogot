@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.gl.DepthShader
 import mogot.math.Matrix4fc
 
 
@@ -27,6 +28,18 @@ open class CSGBox(val engine: Engine) : CSGPrimitive(), MaterialNode by Material
         material.value?.use(model, projection, renderContext)
         geom!!.draw()
         material.value?.unuse()
+    }
+
+    override fun renderToShadowMap(model: Matrix4fc, view: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader) {
+        super.renderToShadowMap(model, view, projection, renderContext, shader)
+        if(shadow) {
+            val geom = geomNode3D2
+            shader.use()
+            shader.uniform("projection", projection)
+            shader.uniform("view", view)
+            shader.uniform("model", model)
+            geom!!.draw()
+        }
     }
 
     override fun close() {
