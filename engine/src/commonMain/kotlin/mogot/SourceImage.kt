@@ -11,4 +11,5 @@ class SourceImage(val type: Type, val width: Int, val height: Int, val data: Byt
     override fun dispose() {
         data?.close()
     }
+
 }

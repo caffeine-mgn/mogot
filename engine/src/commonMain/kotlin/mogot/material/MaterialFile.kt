@@ -73,7 +73,7 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
                         needUpdateTextureIndex = false
                     }
                     gl.activeTexture(gl.TEXTURE0 + v.id2)
-                    gl.bindTexture(gl.TEXTURE_2D, v.textureObject)
+                    gl.bindTexture(gl.TEXTURE_2D, v.glTexture)
                     material.shader.uniform(k, v.id2)
                 }
             }

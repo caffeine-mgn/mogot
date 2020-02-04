@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.gl.GLTexture
 import mogot.gl.TextureObject
 
 class Texture2D(var textureObject: TextureObject) : ResourceImpl() {
@@ -16,7 +17,8 @@ class Texture2D(var textureObject: TextureObject) : ResourceImpl() {
             3
     ))
 
-    fun glTexture() = textureObject.glTexture
+    val glTexture:GLTexture
+        get() = textureObject.glTexture
     override fun dispose() {
         textureObject.close()
         super.dispose()
