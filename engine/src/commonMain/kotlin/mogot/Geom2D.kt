@@ -25,14 +25,20 @@ class Geom2D(val gl: GL, val index: IntDataBuffer, val vertex: FloatDataBuffer, 
             }
         }
 
-    val indexBuffer = BufferElementArray(gl, static = true, draw = true)
+    fun uploadIndex(index: IntDataBuffer) {
+        indexBuffer.uploadArray(index)
+        size = index.size
+    }
+
+    private val indexBuffer = BufferElementArray(gl, static = true, draw = true)
     val vertexBuffer = BufferArray(gl, static = true, draw = true)
     val normalBuffer = if (normals == null) null else BufferArray(gl, static = true, draw = true).also { it.uploadArray(normals) }
     //    val uvBuffer = if (uvs == null) null else BufferArray(static = true, draw = true).also { it.uploadArray(uvs) }
     var uvBuffer: BufferArray? = null
     val vao = VertexArray(gl)
 
-    val size = index.size
+    var size = index.size
+        private set
     val boxMin = Vector2f()
     val boxMax = Vector2f()
     private var closed = false

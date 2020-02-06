@@ -27,19 +27,20 @@ class DuplicateNode : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor ?: return
-        val nodes = editor.viewer.view.selected
+        val view = editor.viewer.view
+        val nodes = view.selected
                 .filter { it.parent != null }
                 .let { nodes ->
                     nodes.filter { node ->
                         !nodes.any { it.isChild(node) } && node.parent != null
                     }
                 }
+
         if (nodes.isEmpty())
             return
-        val services by Services.byClassSequence(NodeService::class.java)
         val createdNodes = ArrayList<Node>()
         nodes.forEach { node ->
-            val service = services.find { it.isEditor(node) } ?: return@forEach
+            val service = view.getService(node) ?: return@forEach
             val clone = service.deepClone(editor.viewer.view, node) ?: return@forEach
             clone.parent = node.parent
             createdNodes += clone

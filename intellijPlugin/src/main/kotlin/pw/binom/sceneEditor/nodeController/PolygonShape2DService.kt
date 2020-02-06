@@ -4,7 +4,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.collider.Collider2D
 import mogot.collider.Polygon2DCollider
-import mogot.math.*
+import mogot.math.Matrix4fc
+import mogot.math.Vector2f
+import mogot.math.Vector4f
+import mogot.math.getAxisAngleRotation
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
@@ -98,8 +101,9 @@ object PolygonShape2DService : NodeService {
     override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is PolygonShape2D) return null
         val out = PolygonShape2D(node.engine)
+        Spatial2DService.cloneSpatial2D(node, out)
         out.setVertex(node.getVertex())
-        view.nodesMeta[out] = createMeta(view, node)
+        view.nodesMeta[out] = createMeta(view, out)
         return out
     }
 
@@ -111,11 +115,13 @@ object PolygonShape2DService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is PolygonShape2D) return
-        val meta = view.nodesMeta.remove(node) as PolygonShape2DMeta
-        meta.centerNode2D.free()
-        meta.polygonEditor?.free()
-        meta.shape.free()
         view.clearRenderCallback(node)
+        view.engine.waitFrame {
+            val meta = view.nodesMeta.remove(node) as PolygonShape2DMeta
+            meta.centerNode2D.free()
+            meta.polygonEditor?.free()
+            meta.shape.free()
+        }
         super.delete(view, node)
     }
 }
@@ -127,7 +133,7 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
     private var vertexBuffer: FloatDataBuffer? = null
 
     private fun rebuildVertex(): FloatDataBuffer {
-        if (vertexBuffer != null && vertexBuffer!!.size != vertexs.size * 2) {
+        if (true || (vertexBuffer != null && vertexBuffer!!.size != vertexs.size * 2)) {
             vertexBuffer?.close()
             vertexBuffer = null
         }
@@ -147,6 +153,9 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
         if (indexBuffer != null && indexBuffer!!.size != indexes.size) {
             indexBuffer?.close()
             indexBuffer = null
+            println("recreate index")
+        } else {
+            println("reset index")
         }
         if (indexBuffer == null) {
             indexBuffer = IntDataBuffer.alloc(indexes.size)
@@ -163,15 +172,15 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
             geom = Geom2D(engine.gl, rebuildIndexes(), rebuildVertex(), null, null)
         } else {
             geom!!.vertexBuffer.uploadArray(rebuildVertex())
-            geom!!.indexBuffer.uploadArray(rebuildIndexes())
+            geom!!.uploadIndex(rebuildIndexes())
         }
     }
 
     private var needCheckGeom = false
 
     fun updatePositions() {
-        needCheckGeom = true
         node.setVertex(vertexs)
+        needCheckGeom = true
     }
 
     override fun close() {
@@ -189,6 +198,7 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
     fun render(callback: SceneEditorView.RenderCallback) {
         render(callback.model, callback.projection, callback.renderContext)
     }
+
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         val mat = material.value ?: return

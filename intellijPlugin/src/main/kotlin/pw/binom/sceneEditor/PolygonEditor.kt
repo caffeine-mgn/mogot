@@ -122,7 +122,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
             geom!!.mode = Geometry.RenderMode.LINES_STRIP
         } else {
             geom!!.vertexBuffer.uploadArray(rebuildVertex())
-            geom!!.indexBuffer.uploadArray(rebuildIndexes())
+            geom!!.uploadIndex(rebuildIndexes())
         }
     }
 
