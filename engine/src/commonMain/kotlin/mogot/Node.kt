@@ -22,12 +22,17 @@ open class Node : Closeable {
             value?.onStart()
         }
 
-    internal open fun free() {
-        childs.forEach {
-            it.free()
-        }
+    /**
+     * Sets [parent]=null and then calls [close]
+     */
+    fun free() {
+        parent = null
+        close()
     }
 
+    /**
+     * Calls for all childs method [close]
+     */
     override fun close() {
         childs.forEach {
             it.close()
@@ -187,4 +192,9 @@ private class NodeParentIterator(var node: Node?) : Iterator<Node> {
         node = r.parent
         return r
     }
+}
+
+fun <T : Node> T.parent(parent: Node): T {
+    this.parent = parent
+    return this
 }

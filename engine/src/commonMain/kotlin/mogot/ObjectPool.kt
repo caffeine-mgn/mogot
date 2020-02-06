@@ -1,6 +1,9 @@
 package mogot
 
 import pw.binom.io.Closeable
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 abstract class ObjectPool<T : Any> : Closeable {
     private val stack = ArrayList<T>()
@@ -26,7 +29,11 @@ abstract class ObjectPool<T : Any> : Closeable {
     }
 }
 
+@UseExperimental(ExperimentalContracts::class)
 inline fun <T : Any, R> ObjectPool<T>.use1(func: (T) -> R): R {
+    contract {
+        callsInPlace(func, InvocationKind.EXACTLY_ONCE)
+    }
     val v = poll()
     return try {
         func(v)
@@ -35,7 +42,11 @@ inline fun <T : Any, R> ObjectPool<T>.use1(func: (T) -> R): R {
     }
 }
 
+@UseExperimental(ExperimentalContracts::class)
 inline fun <T : Any, R> ObjectPool<T>.use2(func: (T, T) -> R): R {
+    contract {
+        callsInPlace(func, InvocationKind.EXACTLY_ONCE)
+    }
     val v1 = poll()
     val v2 = poll()
     return try {
@@ -46,7 +57,11 @@ inline fun <T : Any, R> ObjectPool<T>.use2(func: (T, T) -> R): R {
     }
 }
 
+@UseExperimental(ExperimentalContracts::class)
 inline fun <T : Any, R> ObjectPool<T>.use3(func: (T, T, T) -> R): R {
+    contract {
+        callsInPlace(func, InvocationKind.EXACTLY_ONCE)
+    }
     val v1 = poll()
     val v2 = poll()
     val v3 = poll()

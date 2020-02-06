@@ -9,7 +9,7 @@ import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
-import pw.binom.io.Closeable
+import pw.binom.io.*
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -228,7 +228,29 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         }
     }
 
-    private var editor: EditAction? = null
+    var editor: EditAction? = null
+        private set
+
+    private val mouseDownListeners = ArrayList<(MouseEvent) -> Boolean>()
+    private val mouseUpListeners = ArrayList<(MouseEvent) -> Boolean>()
+
+    fun addMouseDownListener(listener: (MouseEvent) -> Boolean): Closeable {
+        mouseDownListeners += listener
+        return object : Closeable {
+            override fun close() {
+                mouseDownListeners -= listener
+            }
+        }
+    }
+
+    fun addUpListener(listener: (MouseEvent) -> Boolean): Closeable {
+        mouseUpListeners += listener
+        return object : Closeable {
+            override fun close() {
+                mouseUpListeners -= listener
+            }
+        }
+    }
 
     override fun mouseDown(e: MouseEvent) {
         this.requestFocus()
@@ -237,10 +259,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             return
         }
         editorFactories.forEach {
-            it.mouseDown(this, e);
+            it.mouseDown(this, e)
             if (editor != null)
                 return
         }
+        if (mouseDownListeners.isNotEmpty())
+            mouseDownListeners.toTypedArray().forEach {
+                if (!it(e))
+                    return
+            }
         super.mouseDown(e)
     }
 
@@ -296,6 +323,11 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             return
         }
 
+        mouseUpListeners.forEach {
+            if (!it(e))
+                return
+        }
+
         val shift = isKeyDown(16)
         val l = ArrayList<Node>()
         if (shift)
@@ -309,11 +341,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
             it.makeTreePath()
         }.toTypedArray()
-//        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
-//            val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
-//            TreePath(bb.toTypedArray())
-//        }.toTypedArray()
-        //updateSceneTreeSelection()
         super.mouseDown(e)
     }
 

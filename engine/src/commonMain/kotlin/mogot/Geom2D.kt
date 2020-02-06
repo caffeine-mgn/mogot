@@ -105,17 +105,10 @@ class Geom2D(val gl: GL, val index: IntDataBuffer, val vertex: FloatDataBuffer, 
             gl.disableVertexAttribArray(0)
         }
         vao.close()
-        gl.checkError { "1" }
         indexBuffer.close()
-        gl.checkError { "1" }
         vertexBuffer.close()
-        gl.checkError { "2" }
         normalBuffer?.close()
-        gl.checkError { "3" }
         uvBuffer?.close()
-        gl.checkError { "4" }
-
-        gl.checkError { "dispose error" }
         super.dispose()
         closed = true
     }

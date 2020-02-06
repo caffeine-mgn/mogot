@@ -87,8 +87,6 @@ open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by Ma
 
     private val oldSize = Vector2f(size)
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        if (!visible)
-            return
         if (geom == null) {
             geom = Rect2D(engine.gl, size)
         }

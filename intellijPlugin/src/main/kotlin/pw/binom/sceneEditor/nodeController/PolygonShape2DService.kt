@@ -2,7 +2,8 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
-import mogot.collider.*
+import mogot.collider.Collider2D
+import mogot.collider.Polygon2DCollider
 import mogot.math.*
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
@@ -66,6 +67,11 @@ object PolygonShape2DService : NodeService {
         return node
     }
 
+    fun getEditor(view: SceneEditorView, node: PolygonShape2D): PolygonEditor? {
+        val meta = view.nodesMeta[node] as PolygonShape2DMeta
+        return meta.polygonEditor
+    }
+
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
         if (node !is PolygonShape2D) return null
         val out = HashMap<String, String>()
@@ -76,17 +82,14 @@ object PolygonShape2DService : NodeService {
 
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node as PolygonShape2D
-        val meta = view.nodesMeta[node] as PolygonShape2DMeta
+        val meta = view.nodesMeta[node] as PolygonShape2DMeta? ?: return
         meta.centerNode2D.visible = selected
         if (selected) {
             val editor = PolygonShapeEditor(node, view)
             editor.parent = view.editorRoot
             meta.polygonEditor = editor
         } else {
-            meta.polygonEditor?.let {
-                it.parent = null
-                it.close()
-            }
+            meta.polygonEditor?.free()
         }
     }
 
@@ -109,8 +112,9 @@ object PolygonShape2DService : NodeService {
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is PolygonShape2D) return
         val meta = view.nodesMeta.remove(node) as PolygonShape2DMeta
-        meta.centerNode2D.let { it.parent = null; it.close() }
-        meta.polygonEditor?.let { it.parent = null; it.close() }
+        meta.centerNode2D.free()
+        meta.polygonEditor?.free()
+        meta.shape.free()
         view.clearRenderCallback(node)
         super.delete(view, node)
     }
@@ -171,12 +175,14 @@ class PolygonShape2DViwer(val node: PolygonShape2D) : VisualInstance2D(node.engi
     }
 
     override fun close() {
-        geom = null
-        indexBuffer?.close()
-        vertexBuffer?.close()
-        vertexBuffer = null
-        indexBuffer = null
-        material.dispose()
+        engine.waitFrame {
+            geom = null
+            indexBuffer?.close()
+            vertexBuffer?.close()
+            vertexBuffer = null
+            indexBuffer = null
+            material.dispose()
+        }
         super.close()
     }
 
@@ -216,7 +222,21 @@ private class PolygonShapeEditor(val node: PolygonShape2D, view: SceneEditorView
     }
 
     override fun update(delta: Float) {
-        this.rotation = node.rotation
-        this.position.set(node.position)
+        val mat = engine.mathPool.mat4f.poll()
+        val vec = engine.mathPool.vec3f.poll()
+        val vec4 = engine.mathPool.vec4f.poll()
+        position.set(0f, 0f)
+        node.localToGlobal(position, position)
+        node.globalToLocalMatrix(mat)
+        mat.getTranslation(vec)
+        mat.getAxisAngleRotation(vec4)
+        rotation = -vec4.z * vec4.w
+
+        engine.mathPool.vec4f.push(vec4)
+        engine.mathPool.vec3f.push(vec)
+        engine.mathPool.mat4f.push(mat)
+//        this.rotation = node.rotation
+//        this.position.set(node.position)
+        super.update(delta)
     }
 }

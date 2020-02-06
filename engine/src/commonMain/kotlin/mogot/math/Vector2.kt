@@ -68,6 +68,7 @@ fun Vector2fc.add(x: Float, y: Float, dest: Vector2fm): Vector2fm {
 }
 
 fun Vector2fm.add(x: Float, y: Float) = add(x, y, this)
+fun Vector2fm.mul(value: Float) = set(x * value, y * value)
 fun Vector2fm.add(other: Vector2fc) = add(other.x, other.y, this)
 
 /**

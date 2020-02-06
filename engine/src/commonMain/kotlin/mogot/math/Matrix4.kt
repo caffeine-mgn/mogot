@@ -1619,3 +1619,58 @@ fun Matrix4f.setRotationXYZ(angleX: Float, angleY: Float, angleZ: Float): Matrix
     properties = properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY or PROPERTY_TRANSLATION).inv()
     return this
 }
+
+fun Matrix4fc.getAxisAngleRotation(dest:Vector4fm): Vector4fm {
+    val m = this
+    var nm00= m.m00
+    var nm01= m.m01
+    var nm02 = m.m02
+    var nm10 = m.m10
+    var nm11 = m.m11
+    var nm12 = m.m12
+    var nm20 = m.m20
+    var nm21 = m.m21
+    var nm22 = m.m22
+    val lenX = 1.0f / sqrt(m.m00 * m.m00 + m.m01 * m.m01 + (m.m02 * m.m02))
+    val lenY = 1.0f / sqrt(m.m10 * m.m10 + m.m11 * m.m11 + (m.m12 * m.m12))
+    val lenZ = 1.0f / sqrt(m.m20 * m.m20 + m.m21 * m.m21 + (m.m22 * m.m22))
+    nm00 *= lenX
+    nm01 *= lenX
+    nm02 *= lenX
+    nm10 *= lenY
+    nm11 *= lenY
+    nm12 *= lenY
+    nm20 *= lenZ
+    nm21 *= lenZ
+    nm22 *= lenZ
+    val epsilon = 1E-4
+    if (abs(nm10 - nm01) < epsilon && abs(nm20 - nm02) < epsilon && abs(nm21 - nm12) < epsilon) {
+        dest.w = PIf
+        val xx = (nm00 + 1) / 2
+        val yy = (nm11 + 1) / 2
+        val zz = (nm22 + 1) / 2
+        val xy = (nm10 + nm01) / 4
+        val xz = (nm20 + nm02) / 4
+        val yz = (nm21 + nm12) / 4
+        if (xx > yy && xx > zz) {
+            dest.x = sqrt(xx)
+            dest.y = (xy / dest.x)
+            dest.z = (xz / dest.x)
+        } else if (yy > zz) {
+            dest.y = sqrt(yy)
+            dest.x = (xy / dest.y)
+            dest.z = (yz / dest.y)
+        } else {
+            dest.z = sqrt(zz)
+            dest.x = (xz / dest.z)
+            dest.y = (yz / dest.z)
+        }
+        return dest
+    }
+    val s = sqrt((nm12 - nm21) * (nm12 - nm21) + (nm20 - nm02) * (nm20 - nm02) + (nm01 - nm10) * (nm01 - nm10))
+    dest.w = safeAcos((nm00 + nm11 + nm22 - 1) / 2)
+    dest.x = ((nm12 - nm21) / s)
+    dest.y = ((nm20 - nm02) / s)
+    dest.z = ((nm01 - nm10) / s)
+    return dest
+}
