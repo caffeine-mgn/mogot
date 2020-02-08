@@ -51,7 +51,7 @@ class DirectLightShadowsRender(val gl: GL, val shadowWidth:Int, val shadowHeight
         val lightProjection = Matrix4f().identity().ortho3D(-10f,10f,-10f,10f,nearPlane,farPlane)
         val lightView = Matrix4f().identity().translate(light.position).rotate(Quaternionf().identity().lookAt(light.direction, Vector3fc.UP))
 
-        gl.viewPort(0,0,shadowWidth,screenHeight)
+        gl.viewPort(0,0,screenWidth,screenHeight)
         depthBuffer?.bind()
         gl.clear(gl.DEPTH_BUFFER_BIT)
         renderNode3DShadowDepth(root,light.matrix,lightView,lightProjection,renderContext,depthShader!!)
