@@ -84,6 +84,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
     protected object renderContext : RenderContext {
         override val lights = ArrayList<Light>()
+        override val shadowMaps: MutableList<Texture2D> = mutableListOf()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     }
 
@@ -278,7 +279,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
                 gl.gl.glEnable(GL2.GL_CULL_FACE)
 
                 if (camera != null) {
-                    directLightShadowsRender?.render(camera!!.position,root!!, renderContext)
+                    (renderContext.shadowMaps as MutableList<Texture2D>).clear()
+                    directLightShadowsRender?.let { directLightShadowsRender ->
+                        directLightShadowsRender.render(camera!!.position,root!!, renderContext)
+                    }
                     renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
                 }
 

@@ -27,21 +27,25 @@ class DirectLightShadowsRender(val gl: GL, val shadowWidth:Int, val shadowHeight
         super.close()
     }
 
-    val shadowTextures = mutableListOf<TextureObject>().apply {
+    val shadowMapsBuffer = mutableListOf<Texture2D>().apply {
         for(i in 1..maxLights){
-            add(TextureObject(gl, shadowWidth, shadowHeight, depthBuffer?.texture?.minFilter!!, depthBuffer?.texture?.magFilter!!, depthBuffer?.texture?.textureWrapS!!,depthBuffer?.texture?.textureWrapT!!,TextureObject.MSAALevels.Disable,TextureObject.Format.DEPTH_COMPONENT))
+            add(Texture2D(TextureObject(gl, shadowWidth, shadowHeight, depthBuffer?.texture?.minFilter!!, depthBuffer?.texture?.magFilter!!, depthBuffer?.texture?.textureWrapS!!,depthBuffer?.texture?.textureWrapT!!,TextureObject.MSAALevels.Disable,TextureObject.Format.DEPTH_COMPONENT)))
         }
     }
 
+    private val renderResult = mutableListOf<Texture2D>()
     fun render(cameraPosition: Vector3fm,root: Node, renderContext: RenderContext){
         val directsLight = renderContext.lights.filter { it.isDirectLight }
         val sorted = directsLight.sortedBy { (it.position-cameraPosition).lengthSquared }
+        renderResult.clear()
         for(i in 0 until (if(directsLight.size>maxLights) maxLights else directsLight.size)){
-            renderDepth(sorted[i] as DirectLight,root,renderContext,i)
+            renderResult.add(renderDepth(sorted[i] as DirectLight,root,renderContext,i))
         }
+        renderContext.shadowMaps.clear()
+        renderContext.shadowMaps.addAll(renderResult)
     }
 
-    private fun renderDepth(light: DirectLight, root: Node, renderContext: RenderContext, lightIndex:Int){
+    private fun renderDepth(light: DirectLight, root: Node, renderContext: RenderContext, lightIndex:Int):Texture2D{
         requireNotNull(depthBuffer)
         requireNotNull(depthShader)
         val lightProjection = Matrix4f().identity().ortho3D(-10f,10f,-10f,10f,nearPlane,farPlane)
@@ -52,7 +56,8 @@ class DirectLightShadowsRender(val gl: GL, val shadowWidth:Int, val shadowHeight
         gl.clear(gl.DEPTH_BUFFER_BIT)
         renderNode3DShadowDepth(root,light.matrix,lightView,lightProjection,renderContext,depthShader!!)
         depthBuffer?.unbind()
-        copyToTexture(shadowTextures[lightIndex])
+        copyToTexture(shadowMapsBuffer[lightIndex].textureObject)
+        return shadowMapsBuffer[lightIndex]
     }
 
     private fun copyToTexture(textureObject: TextureObject){
