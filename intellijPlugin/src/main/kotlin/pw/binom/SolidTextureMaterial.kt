@@ -49,7 +49,7 @@ void main() {
             shader.use()
             if (tex != null) {
                 engine.gl.activeTexture(engine.gl.TEXTURE0)
-                engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.textureObject)
+                engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.glTexture)
                 shader.uniform("tex", 0)
             } else {
                 engine.gl.activeTexture(engine.gl.TEXTURE0)
@@ -60,7 +60,7 @@ void main() {
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         super.use(model, projection, renderContext)
         if (tex != null) {
-            engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.textureObject)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D, tex!!.glTexture)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

@@ -153,7 +153,7 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
                 is Vector4fc -> root.shader.uniform(name, value)
                 is ExternalTexture -> {
                     root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-                    root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, value.gl.textureObject)
+                    root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, value.gl.glTexture)
                     root.shader.uniform(name, 0)
                 }
                 else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")

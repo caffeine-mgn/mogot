@@ -196,9 +196,11 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun setup(width: Int, height: Int) {
-        if (directLightShadowsRender != null) {
+        directLightShadowsRender = if (directLightShadowsRender != null) {
             directLightShadowsRender?.close()
-            directLightShadowsRender = DirectLightShadowsRender(gl, width, height, width, height)
+            DirectLightShadowsRender(gl, width, height, width, height)
+        }else{
+            DirectLightShadowsRender(gl, width, height, width, height)
         }
         gl.gl.glViewport(0, 0, width, height)
         camera?.resize(width, height)
@@ -260,6 +262,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 //        camera2D = null
 
         renderContext.lights.clear()
+        renderContext.shadowMaps.clear()
         root?.walk {
             if (it is Light)
                 renderContext.lights += it
@@ -280,9 +283,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
                 if (camera != null) {
                     (renderContext.shadowMaps as MutableList<Texture2D>).clear()
-                    directLightShadowsRender?.let { directLightShadowsRender ->
-                        directLightShadowsRender.render(camera!!.position,root!!, renderContext)
-                    }
+                    directLightShadowsRender?.render(camera!!.position,root!!, renderContext)
                     renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
                 }
 

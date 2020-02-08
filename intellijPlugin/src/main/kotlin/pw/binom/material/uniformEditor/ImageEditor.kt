@@ -42,7 +42,7 @@ class ImageEditor(uniformEditor: UniformEditor, uniform: UniformEditor.Uniform) 
                 texture = tex
             } else {
                 if (texture != null)
-                    gl.bindTexture(gl.TEXTURE_2D, texture!!.textureObject)
+                    gl.bindTexture(gl.TEXTURE_2D, texture!!.glTexture)
             }
         } else {
             texture?.dec()

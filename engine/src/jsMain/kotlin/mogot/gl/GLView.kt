@@ -19,6 +19,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
 
     private object renderContext : RenderContext {
         override val lights = ArrayList<Light>()
+        override val shadowMaps: MutableList<Texture2D> = mutableListOf()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     }
 

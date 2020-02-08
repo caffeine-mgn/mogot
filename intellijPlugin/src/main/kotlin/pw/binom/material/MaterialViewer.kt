@@ -130,7 +130,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
                     is Vector4fc -> shader.uniform(name, value)
                     is ExternalTexture -> {
                         gl.activeTexture(gl.TEXTURE0 + value.id)
-                        gl.bindTexture(gl.TEXTURE_2D, value.gl.textureObject)
+                        gl.bindTexture(gl.TEXTURE_2D, value.gl.glTexture)
                         shader.uniform(name, value.id)
                     }
                     else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")
@@ -198,7 +198,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         }
         root!!.addChild(node)
 
-        val l = OmniLight()
+        val l = PointLight()
         val node1 = GeomNode().apply {
             geom.value = Geoms.solidSphere(gl, 1f, 30, 30)
             material.value = SimpleMaterial(engine)

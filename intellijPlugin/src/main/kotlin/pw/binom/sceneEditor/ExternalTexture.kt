@@ -3,6 +3,7 @@ package pw.binom.sceneEditor
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.flip2
+import pw.binom.ByteDataBuffer
 import pw.binom.io.Closeable
 import pw.binom.io.wrap
 import java.io.FileNotFoundException
@@ -27,7 +28,11 @@ abstract class ExternalTexture(val engine: Engine) : ResourceImpl() {
             else
                 SourceImage.Type.RGB
             buf.flip2()
-            SourceImage(colorType, png.width, png.height, buf)
+            val b = ByteDataBuffer.alloc(buf.remaining())
+            for( i in 0 until buf.remaining()){
+                b[i] = buf[i]
+            }
+            SourceImage(colorType, png.width, png.height, b)
         }
         return Texture2D(engine, image)
     }

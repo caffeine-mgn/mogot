@@ -39,6 +39,11 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
             shader.uniform("lights[$index].diffuse", light.diffuse)
             shader.uniform("lights[$index].specular", light.specular)
         }
+        renderContext.shadowMaps.forEachIndexed { index, texture2D ->
+            engine.gl.enable(engine.gl.TEXTURE0+index+5)
+            engine.gl.bindTexture(engine.gl.TEXTURE_2D,texture2D.glTexture)
+            shader.uniform("shadowMaps[$index]",index+5)
+        }
         engine.gl.checkError { "After set material properties" }
     }
 
