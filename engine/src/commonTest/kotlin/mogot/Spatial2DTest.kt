@@ -2,6 +2,7 @@ package mogot
 
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
+import kotlin.math.atan2
 import kotlin.test.Test
 
 class Spatial2DTest {

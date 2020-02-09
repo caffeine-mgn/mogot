@@ -12,9 +12,10 @@ class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         material.value?.unuse()
     }
 
-    override fun free() {
+    override fun close() {
         super.free()
         geom.dispose()
         material.dispose()
+        super.close()
     }
 }

@@ -21,8 +21,8 @@ object EditRotate2DFactory : EditActionFactory {
     }
 }
 
-abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, val camera: Camera2D, selected: List<Spatial2D>) : Spatial2DEditor(view, selected) {
-    val screenPos = camera.worldToScreen(avgPosition)
+abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, selected: List<Spatial2D>) : Spatial2DEditor(view, selected) {
+    val screenPos = view.editorCamera2D.worldToScreen(avgPosition)
 
     protected var totalRotation = 0f
 
@@ -45,11 +45,15 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, val cam
 
     override fun render(dt: Float) {
         super.render(dt)
-        center.position.set(screenPos.x.toFloat(), screenPos.y.toFloat())
-        center.lineTo.set(
-                virtualMouse.x.toFloat() - screenPos.x,
-                virtualMouse.y.toFloat() - screenPos.y
-        )
+        center.position.set(avgPosition)
+        val tmp = view.engine.mathPool.vec2f.poll()
+        view.editorCamera2D.screenToWorld(virtualMouse, tmp)
+        center.lineTo.set(tmp.sub(avgPosition))
+        view.engine.mathPool.vec2f.push(tmp)
+//        center.lineTo.set(
+//                virtualMouse.x.toFloat() - screenPos.x,
+//                virtualMouse.y.toFloat() - screenPos.y
+//        )
 
         val angle = angle1()//atan2(virtualMouse.y.toFloat() - screenPos.y, virtualMouse.x.toFloat() - screenPos.x)
         val angle2 = angle2()//atan2(virtualMouse.x.toFloat() - screenPos.x, -virtualMouse.y.toFloat() - screenPos.y)
@@ -143,7 +147,7 @@ class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, sel
 }
 */
 @Strictfp
-class EditRotateAllAxes2D(view: SceneEditorView, root: Node, camera: Camera2D, selected: List<Spatial2D>) : EditRotateEditor2D(view, root, camera, selected) {
+class EditRotateAllAxes2D(view: SceneEditorView, root: Node, camera: Camera2D, selected: List<Spatial2D>) : EditRotateEditor2D(view, root, selected) {
     private val tempMatrix = Matrix4f()
     private val globalRotation = Quaternionf()
     private val newRotation = Quaternionf()

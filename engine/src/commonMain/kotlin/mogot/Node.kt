@@ -22,19 +22,24 @@ open class Node : Closeable {
             value?.onStart()
         }
 
-    internal open fun free() {
-        childs.forEach {
-            it.free()
-        }
+    /**
+     * Sets [parent]=null and then calls [close]
+     */
+    fun free() {
+        parent = null
+        close()
     }
 
+    /**
+     * Calls for all childs method [close]
+     */
     override fun close() {
         childs.forEach {
             it.close()
         }
     }
 
-    var parent: Node?
+    open var parent: Node?
         get() = _parent
         set(value) {
             _parent?.removeChild(this)
@@ -60,7 +65,7 @@ open class Node : Closeable {
         _childs.add(index, child)
     }
 
-    internal open fun update(delta: Float) {
+    open fun update(delta: Float) {
         behaviour?.onUpdate(delta)
         childs.forEach {
             it.update(delta)
@@ -187,4 +192,9 @@ private class NodeParentIterator(var node: Node?) : Iterator<Node> {
         node = r.parent
         return r
     }
+}
+
+fun <T : Node> T.parent(parent: Node): T {
+    this.parent = parent
+    return this
 }

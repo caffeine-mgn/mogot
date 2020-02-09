@@ -75,12 +75,13 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
         if (view.mode != SceneEditorView.Mode.D2)
             return
         checkGeoms()
-
+        engine.gl.gl.glLineWidth(1f)
         val left = -width * 0.5f / camera2D.zoom + camera2D.position.x
         val right = width * 0.5f / camera2D.zoom + camera2D.position.x
         val top = -height * 0.5f / camera2D.zoom + camera2D.position.y
         val bottom = height * 0.5f / camera2D.zoom + camera2D.position.y
         val mat = engine.mathPool.mat4f.poll()
+        mat.identity()
         val H = 50f
         run {
             var x = floor(left / H) * H

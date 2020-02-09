@@ -4,6 +4,7 @@ import mogot.math.Vector3f
 import mogot.math.Vector3fc
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
+import org.jbox2d.dynamics.BodyType
 
 fun <T> Sequence<T>.equalsAll(): Boolean {
     val first = firstOrNull() ?: return true
@@ -32,6 +33,21 @@ val Sequence<Float>.common: Float
         while (it.hasNext()) {
             val p = it.next()
             vec = if (!vec.isNaN() && p == vec) vec else Float.NaN
+        }
+        return vec
+    }
+
+val Sequence<BodyType>.common: BodyType?
+    get() {
+        if (isEmpty)
+            return null
+
+        val it = iterator()
+        val vec = it.next()
+        while (it.hasNext()) {
+            val p = it.next()
+            if (p != vec)
+                return null
         }
         return vec
     }

@@ -36,8 +36,8 @@ class Vector3fPool : ObjectPool<Vector3f>() {
     override fun create() = Vector3f()
 }
 
-class Vector4fPool : ObjectPool<Vector3f>() {
-    override fun create() = Vector3f()
+class Vector4fPool : ObjectPool<Vector4f>() {
+    override fun create() = Vector4f()
 }
 
 class Matrix4fPool : ObjectPool<Matrix4f>() {

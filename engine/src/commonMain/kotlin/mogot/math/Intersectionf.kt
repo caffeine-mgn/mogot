@@ -18,6 +18,55 @@ object Intersectionf {
         return pX >= minX && pY >= minY && pX <= maxX && pY <= maxY
     }
 
+    /**
+     * Find the point on the given line segment which is closest to the specified point `(pX, pY)`, and store the result in `result`.
+     *
+     * @param aX the x coordinate of the first end point of the line segment
+     * @param aY the y coordinate of the first end point of the line segment
+     * @param bX the x coordinate of the second end point of the line segment
+     * @param bY the y coordinate of the second end point of the line segment
+     * @param pX the x coordinate of the point
+     * @param pY the y coordinate of the point
+     * @param result will hold the result
+     * @return result
+     */
+    fun findClosestPointOnLineSegment(aX: Float, aY: Float, bX: Float, bY: Float, pX: Float, pY: Float, result: Vector2fm): Vector2fm {
+        val abX = bX - aX
+        val abY = bY - aY
+        var t = ((pX - aX) * abX + (pY - aY) * abY) / (abX * abX + abY * abY)
+        t = minOf(maxOf(t, 0f), 1f)
+        result.x = aX + t * abX
+        result.y = aY + t * abY
+        return result
+    }
+
+    /**
+     * Find the point on the given line segment which is closest to the specified point `(pX, pY, pZ)`, and store the result in `result`.
+     *
+     * @param aX the x coordinate of the first end point of the line segment
+     * @param aY the y coordinate of the first end point of the line segment
+     * @param aZ the z coordinate of the first end point of the line segment
+     * @param bX the x coordinate of the second end point of the line segment
+     * @param bY the y coordinate of the second end point of the line segment
+     * @param bZ the z coordinate of the second end point of the line segment
+     * @param pX the x coordinate of the point
+     * @param pY the y coordinate of the point
+     * @param pZ the z coordinate of the point
+     * @param result will hold the result
+     * @return result
+     */
+    fun findClosestPointOnLineSegment(aX: Float, aY: Float, aZ: Float, bX: Float, bY: Float, bZ: Float, pX: Float, pY: Float, pZ: Float, result: Vector3fm): Vector3fm {
+        val abX = bX - aX
+        val abY = bY - aY
+        val abZ = bZ - aZ
+        var t = ((pX - aX) * abX + (pY - aY) * abY + (pZ - aZ) * abZ) / (abX * abX + abY * abY + abZ * abZ)
+        t = minOf(maxOf(t, 0f), 1f)
+        result.x = aX + t * abX
+        result.y = aY + t * abY
+        result.z = aZ + t * abZ
+        return result
+    }
+
     fun intersectRayAab(originX: Float, originY: Float, originZ: Float, dirX: Float, dirY: Float, dirZ: Float,
                         minX: Float, minY: Float, minZ: Float, maxX: Float, maxY: Float, maxZ: Float, result: Vector2fm): Boolean {
         val invDirX = 1.0f / dirX

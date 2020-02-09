@@ -4,16 +4,15 @@ import mogot.gl.BufferArray
 import mogot.gl.BufferElementArray
 import mogot.gl.GL
 import mogot.gl.VertexArray
+import mogot.math.Vector2fProperty
 import mogot.math.Vector2fc
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.io.Closeable
 
-open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
-    private var _size = size
-    val size
-        get() = _size
-
+open class Rect2D(val gl: GL, size: Vector2fc?) : ResourceImpl() {
+    val size = Vector2fProperty(size?.x ?: 0f, size?.y ?: 0f)
+/*
     fun setSize(size: Vector2fc) {
         this._size = size
         vertexBuffer.uploadArray(FloatDataBuffer.alloc(8).also {
@@ -22,7 +21,7 @@ open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
             it[4] = size.x * 0.5f; it[5] = size.y * 0.5f
             it[6] = -size.x * 0.5f; it[7] = size.y * 0.5f
         })
-    }
+    }*/
 
     private val vertexBuffer = BufferArray(gl = gl, static = true, draw = true)
     private val uvBuffer = BufferArray(gl = gl, static = true, draw = true).apply {
@@ -39,7 +38,6 @@ open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
     private val indexBuffer = BufferElementArray(gl, static = true, draw = true)
 
     init {
-        setSize(size)
         vao.bind {
             val indexData = IntDataBuffer.alloc(6).also {
                 it[0] = 0
@@ -64,6 +62,16 @@ open class Rect2D(val gl: GL, size: Vector2fc) : ResourceImpl() {
     }
 
     fun draw() {
+        if (size.resetChangeFlag()) {
+            val buf = FloatDataBuffer.alloc(8)
+            vertexBuffer.uploadArray(buf.also {
+                it[0] = -size.x * 0.5f; it[1] = -size.y * 0.5f
+                it[2] = size.x * 0.5f; it[3] = -size.y * 0.5f
+                it[4] = size.x * 0.5f; it[5] = size.y * 0.5f
+                it[6] = -size.x * 0.5f; it[7] = size.y * 0.5f
+            })
+            buf.close()
+        }
         vao.bind {
             gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
         }

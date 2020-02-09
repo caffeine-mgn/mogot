@@ -20,13 +20,11 @@ object InjectSceneLoader : SceneLoader.NodeLoader {
             SceneLoader.loadScene(engine, it, loaderContext)
         }
 
-        if (node.isSpatial) {
-            node as Spatial
+        if (node.isSpatial()) {
             SpatialLoader.load(engine, node, loaderContext, props)
         }
 
-        if (node.isSpatial2D) {
-            node as Spatial2D
+        if (node.isSpatial2D()) {
             Spatial2DLoader.load(engine, node, loaderContext, props)
         }
         return node

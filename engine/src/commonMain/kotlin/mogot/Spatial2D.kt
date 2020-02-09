@@ -1,11 +1,17 @@
 package mogot
 
 import mogot.math.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 open class Spatial2D(val engine: Engine) : Node() {
-    val position = Vector2fProperty()
-    val scale = Vector2fProperty(1f, 1f)
-    var rotation: Float = 0f
+    private val p = Vector2fProperty()
+    private val s = Vector2fProperty(1f, 1f)
+    open val position: Vector2fm
+        get() = p
+    open val scale: Vector2fm
+        get() = s
+    open var rotation: Float = 0f
         set(value) {
             if (!rotationChanged && field != value)
                 rotationChanged = true
@@ -17,7 +23,7 @@ open class Spatial2D(val engine: Engine) : Node() {
 
     val transform: Matrix4fc
         get() {
-            if (rotationChanged || position.resetChangeFlag() || scale.resetChangeFlag()) {
+            if (rotationChanged || p.resetChangeFlag() || s.resetChangeFlag()) {
                 _transform.identity().translate(position.x, position.y, 0f)
                         .rotateZ(rotation)
                         .scale(scale.x, scale.y, 1f)
@@ -36,8 +42,8 @@ open class Spatial2D(val engine: Engine) : Node() {
         get() {
             val parent = parent ?: return null
             parent.currentToRoot {
-                if (it.isSpatial2D)
-                    return it as Spatial2D
+                if (it.isSpatial2D())
+                    return it
                 true
             }
             return null
@@ -104,8 +110,14 @@ open class Spatial2D(val engine: Engine) : Node() {
 
 private const val spatial2dType = SPATIAL2D_TYPE or VISUAL_INSTANCE2D_TYPE
 
-val Node.isSpatial2D
-    get() = (type and spatial2dType) != 0
+
+@UseExperimental(ExperimentalContracts::class)
+fun Node.isSpatial2D(): Boolean {
+    contract {
+        returns(true) implies (this@isSpatial2D is Spatial2D)
+    }
+    return (type and spatial2dType) != 0
+}
 
 fun <T : Node> Sequence<T>.onlySpatial2D(): Sequence<Spatial2D> =
-        filter { it.isSpatial2D }.map { it as Spatial2D }
+        filter { it.isSpatial2D() }.map { it as Spatial2D }
