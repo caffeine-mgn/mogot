@@ -2,7 +2,7 @@ package mogot.gl
 
 class DepthShader(gl: GL) : Shader(gl,
         """
-        #version 330 es
+        #version 300 es
         layout (location = 0) in vec3 aPos;
 
         uniform mat4 projection;
@@ -15,7 +15,7 @@ class DepthShader(gl: GL) : Shader(gl,
         }
         """.trimIndent(),
         """
-        #version 330 es
+        #version 300 es
         void main()
         {
         // gl_FragDepth = gl_FragCoord.z;
