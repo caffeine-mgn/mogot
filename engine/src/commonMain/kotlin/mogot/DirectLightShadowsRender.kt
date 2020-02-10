@@ -1,6 +1,5 @@
-package mogot.scene
+package mogot
 
-import mogot.*
 import mogot.gl.DepthShader
 import mogot.gl.FrameBuffer
 import mogot.gl.GL
@@ -29,7 +28,7 @@ class DirectLightShadowsRender(val gl: GL, val shadowWidth:Int, val shadowHeight
 
     val shadowMapsBuffer = mutableListOf<Texture2D>().apply {
         for(i in 1..maxLights){
-            add(Texture2D(TextureObject(gl, shadowWidth, shadowHeight, depthBuffer?.texture?.minFilter!!, depthBuffer?.texture?.magFilter!!, depthBuffer?.texture?.textureWrapS!!,depthBuffer?.texture?.textureWrapT!!,TextureObject.MSAALevels.Disable,TextureObject.Format.DEPTH_COMPONENT)))
+            add(Texture2D(TextureObject(gl, shadowWidth, shadowHeight, depthBuffer?.texture?.minFilter!!, depthBuffer?.texture?.magFilter!!, depthBuffer?.texture?.textureWrapS!!, depthBuffer?.texture?.textureWrapT!!, TextureObject.MSAALevels.Disable, TextureObject.Format.DEPTH_COMPONENT)))
         }
     }
 

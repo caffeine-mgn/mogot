@@ -6,7 +6,6 @@ import com.jogamp.opengl.util.Animator
 import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
-import mogot.scene.DirectLightShadowsRender
 import pw.binom.io.FileSystem
 import java.awt.Cursor
 import java.awt.Dimension

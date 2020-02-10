@@ -11,7 +11,7 @@ actual external class PolygonShape : Shape {
 }
 
 actual fun PolygonShape.getPoints(): List<Vector2fc> {
-    this.asDynamic().unsafeCast<Array<Vec2>>().map { Vector2f(it.x, it.y) }
+    return this.asDynamic().unsafeCast<Array<Vec2>>().map { Vector2f(it.x, it.y) }
 }
 
 actual fun PolygonShape.setPoints(list: List<Vector2fc>) {
