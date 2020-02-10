@@ -83,21 +83,11 @@ object InjectSceneNodeService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node.childs.forEach {
             it.walk {
                 val service = view.getService(it)
-                service?.selected(view, it)
-                true
-            }
-        }
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        node.childs.forEach {
-            it.walk {
-                val service = view.getService(it)
-                service?.unselected(view, it)
+                service?.selected(view, it, selected)
                 true
             }
         }
@@ -107,7 +97,7 @@ object InjectSceneNodeService : NodeService {
             node::class.java.name == InjectedScene2D::class.java.name
                     || node::class.java.name == InjectedScene3D::class.java.name
 
-    override fun clone(node: Node): Node? =
+    override fun clone(view: SceneEditorView, node: Node): Node? =
             when (node) {
                 is InjectedScene2D -> {
                     val out = InjectedScene2D(node.view, node.sceneFile)
@@ -137,7 +127,7 @@ object InjectSceneNodeService : NodeService {
         node.childs.forEach {
             deepDelete(it)
         }
-        EmptyNodeService.nodeDeleted(view.engine, node)
+        super.delete(view, node)
     }
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean {

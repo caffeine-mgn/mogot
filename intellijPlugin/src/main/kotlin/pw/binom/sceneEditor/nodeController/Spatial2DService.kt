@@ -64,22 +64,11 @@ object Spatial2DService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java == Spatial2D::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is Spatial2D) return null
         val out = Spatial2D(node.engine)
         cloneSpatial2D(node, out)
         return out
     }
-
-    override fun delete(view: SceneEditorView, node: Node) {
-    }
-
-    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
 }

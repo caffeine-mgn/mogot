@@ -77,7 +77,7 @@ object OmniLightService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is PointLight
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is PointLight) return null
         val out = PointLight()
         out.specular = node.specular
@@ -88,25 +88,21 @@ object OmniLightService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is PointLight) return
-        EmptyNodeService.nodeDeleted(view.engine, node)
+        super.delete(view, node)
         view.engine.omniManager.lights.remove(node)?.node?.let {
             it.parent = null
             it.close()
         }
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         val sprite = view.engine.omniManager.lights[node]?.node ?: return
         val material = sprite.material.value as SolidTextureMaterial
-        material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
+        if (selected)
+            material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
+        else
+            material.diffuseColor.set(0f, 0f, 0f, 0f)
     }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        val sprite = view.engine.omniManager.lights[node]?.node ?: return
-        val material = sprite.material.value as SolidTextureMaterial
-        material.diffuseColor.set(0f, 0f, 0f, 0f)
-    }
-
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != PointLight::class.java.name)

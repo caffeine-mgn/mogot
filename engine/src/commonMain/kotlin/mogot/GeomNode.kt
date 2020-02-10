@@ -23,9 +23,9 @@ class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         }
     }
 
-    override fun free() {
-        super.free()
+    override fun close() {
         geom.dispose()
         material.dispose()
+        super.close()
     }
 }

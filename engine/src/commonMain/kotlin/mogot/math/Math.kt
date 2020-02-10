@@ -1,6 +1,7 @@
 package mogot.math
 
-import kotlin.jvm.JvmName
+import kotlin.math.PI
+import kotlin.math.acos
 
 expect object Math {
     val PI: Double
@@ -12,6 +13,14 @@ expect object Math {
     fun fma(a: Float, b: Float, c: Float): Float
 }
 
+
+fun safeAcos(v: Double): Double {
+    return if (v < -1.0) PI else if (v > +1.0) 0.0 else acos(v)
+}
+
+fun safeAcos(v: Float): Float {
+    return if (v < -1.0f) PIf else if (v > +1.0) 0.0f else acos(v)
+}
 
 private const val DEGREES_TO_RADIANS = 0.017453292519943295
 private const val DEGREES_TO_RADIANSf = 0.017453292519943295f

@@ -12,19 +12,31 @@
     <idea-version since-build="191"/>
 
     <actions>
-        <group id="EditMogotGroup">
+        <group id="EditMogotGroup" popup="false">
             <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
                     text="Duplicate Node" description="Duplicate selected Node">
                 <keyboard-shortcut first-keystroke="control D" keymap="$default"/>
             </action>
+            <action id="pw.binom.sceneEditor.action.AddPolygonAction"
+                    class="pw.binom.sceneEditor.action.AddPolygonAction"
+                    text="Add Polygon Point" description="Add new Point into Polygon">
+                <mouse-shortcut keystroke="control button1" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.RemovePolygonAction"
+                    class="pw.binom.sceneEditor.action.RemovePolygonAction"
+                    text="Remove Polygon Point" description="Remove Point from Polygon">
+                <mouse-shortcut keystroke="control button1" keymap="$default"/>
+            </action>
             <add-to-group group-id="EditMenu" anchor="last"/>
         </group>
-        <action id="pw.binom.sceneEditor.action.CreateSceneFileAction" class="pw.binom.sceneEditor.action.CreateSceneFileAction"
+        <action id="pw.binom.sceneEditor.action.CreateSceneFileAction"
+                class="pw.binom.sceneEditor.action.CreateSceneFileAction"
                 text="Scene" description="Create new Scene file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
 
-        <action id="pw.binom.material.actions.CreateMaterialFileAction" class="pw.binom.material.actions.CreateMaterialFileAction"
+        <action id="pw.binom.material.actions.CreateMaterialFileAction"
+                class="pw.binom.material.actions.CreateMaterialFileAction"
                 text="Material" description="Create new Material file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
@@ -32,13 +44,15 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <facetType implementation="pw.binom.facet.AssetsFacetType"/>
-        <postStartupActivity implementation="pw.binom.Starter"/>
+        <!--        <postStartupActivity implementation="pw.binom.Starter"/>-->
+        <!--<appStarter implementation="pw.binom.Starter" />-->
+        <!--<preloadingActivity implementation="pw.binom.Starter"/>-->
 
         <projectListeners>
             <listener class="pw.binom.module.ModuleChangeListener"
                       topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
-
+        <ApplicationLoadListener implementation="pw.binom.Starter"></ApplicationLoadListener>
         <!-- SceneEditor -->
         <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>

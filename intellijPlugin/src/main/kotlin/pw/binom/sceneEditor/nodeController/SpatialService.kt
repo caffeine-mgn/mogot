@@ -77,22 +77,11 @@ object SpatialService : NodeService {
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node) {
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java === Spatial::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is Spatial) return null
         val out = Spatial()
         cloneSpatial(node, out)
         return out
     }
-
-    override fun delete(view: SceneEditorView, node: Node) {
-        EmptyNodeService.nodeDeleted(view.engine, node)
-    }
-
 }

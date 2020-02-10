@@ -93,33 +93,32 @@ object CameraService : NodeService {
 
     private val frustums = HashMap<Camera, FrustumNode>()
 
-    override fun selected(view: SceneEditorView, node: Node) {
+    override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         val camera = node as Camera
-        val f = FrustumNode(view.engine, camera)
-        f.parent = view.editorRoot
-        f.material.value = view.default3DMaterial.instance(Vector4f(1f))
-        frustums[camera] = f
-
-        val sprite = view.engine.camerasManager.cameras[node]!!.node
-        val material = sprite.material.value as SolidTextureMaterial
-        material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
-    }
-
-    override fun unselected(view: SceneEditorView, node: Node) {
-        node as Camera
-        frustums.remove(node)?.apply {
-            parent = null
-            view.engine.waitFrame {
-                close()
+        if (selected) {
+            val f = FrustumNode(view.engine, camera)
+            f.parent = view.editorRoot
+            f.material.value = view.default3DMaterial.instance(Vector4f(1f))
+            frustums[camera] = f
+        } else {
+            frustums.remove(node)?.apply {
+                parent = null
+                view.engine.waitFrame {
+                    close()
+                }
             }
         }
+
         val sprite = view.engine.camerasManager.cameras[node]!!.node
         val material = sprite.material.value as SolidTextureMaterial
-        material.diffuseColor.set(0f, 0f, 0f, 0f)
+        if (selected)
+            material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
+        else
+            material.diffuseColor.set(0f, 0f, 0f, 0f)
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == Camera::class.java
-    override fun clone(node: Node): Node? {
+    override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is Camera) return null
         val out = Camera()
         out.resize(node.width, node.height)
@@ -133,13 +132,10 @@ object CameraService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is Camera) return
-        EmptyNodeService.nodeDeleted(view.engine, node)
+        super.delete(view, node)
         view.engine.camerasManager.cameras.remove(node)?.node?.let {
             it.parent = null
             it.close()
         }
     }
-
-    override fun getAABB(node: Node, aabb: AABBm): Boolean = false
-
 }

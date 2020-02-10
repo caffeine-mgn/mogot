@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.physics.d2.Manager2D
 import pw.binom.Stack
 import pw.binom.io.Closeable
 import pw.binom.io.FileSystem
@@ -12,6 +13,7 @@ class Engine constructor(val stage: Stage, fileSystem: FileSystem<Unit>) : Close
         get() = stage.gl
     val resources = Resources(this, fileSystem)
     val frameListeners = Stack<() -> Unit>()
+    val physicsManager2D = Manager2D()
     private val managers = HashMap<String, Closeable>()
     val mathPool = MathPool()
     fun <T : Closeable> manager(name: String, factory: () -> T): T {

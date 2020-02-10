@@ -9,7 +9,7 @@ import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
-import pw.binom.io.Closeable
+import pw.binom.io.*
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -19,6 +19,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.set
 
 private class EditorHolder(val view: SceneEditorView) : Closeable {
@@ -35,6 +36,25 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         D2,
         D3
     }
+
+    interface RenderCallback {
+        val node: Node
+        val model: Matrix4fc
+        val projection: Matrix4fc
+        val renderContext: RenderContext
+        val view: SceneEditorView
+    }
+
+    private inner class RenderCallbackImpl : RenderCallback {
+        override lateinit var node: Node
+        override lateinit var model: Matrix4fc
+        override lateinit var projection: Matrix4fc
+        override lateinit var renderContext: RenderContext
+        override val view: SceneEditorView
+            get() = this@SceneEditorView
+    }
+
+    private val renderCallback = RenderCallbackImpl()
 
     public override var render3D: Boolean
         get() = super.render3D
@@ -55,8 +75,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     camera2D = editorCamera2D
                     render3D = false
                     sceneRoot.walk {
-                        if (it.isVisualInstance2D) {
-                            it as VisualInstance2D
+                        if (it.isVisualInstance2D()) {
                             it.visible = true
                         }
                         true
@@ -67,8 +86,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     camera2D = null
                     render3D = true
                     sceneRoot.walk {
-                        if (it.isVisualInstance2D) {
-                            it as VisualInstance2D
+                        if (it.isVisualInstance2D()) {
                             it.visible = false
                         }
                         true
@@ -148,6 +166,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     private val selectedNodes = ArrayList<Node>()
     val selected: List<Node>
         get() = selectedNodes
+    val nodesMeta = HashMap<Node, Any>()
     private var selectors = ArrayList<Selector3D>()
     fun select(nodeList: List<Node>) {
         renderThread {
@@ -163,14 +182,14 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                             } else
                                 false
                         }
-                        getService(node)?.unselected(this, node)
+                        getService(node)?.selected(this, node, false)
                     }
 
             nodeList.asSequence()
                     .filter { it !in selectedNodes }
                     .forEach { node ->
                         val service = getService(node)
-                        service?.selected(this, node)
+                        service?.selected(this, node, true)
                         selectedNodes += node
                         if (service != null && node is Spatial) {
                             val aabb = AABB()
@@ -209,7 +228,29 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         }
     }
 
-    private var editor: EditAction? = null
+    var editor: EditAction? = null
+        private set
+
+    private val mouseDownListeners = ArrayList<(MouseEvent) -> Boolean>()
+    private val mouseUpListeners = ArrayList<(MouseEvent) -> Boolean>()
+
+    fun addMouseDownListener(listener: (MouseEvent) -> Boolean): Closeable {
+        mouseDownListeners += listener
+        return object : Closeable {
+            override fun close() {
+                mouseDownListeners -= listener
+            }
+        }
+    }
+
+    fun addUpListener(listener: (MouseEvent) -> Boolean): Closeable {
+        mouseUpListeners += listener
+        return object : Closeable {
+            override fun close() {
+                mouseUpListeners -= listener
+            }
+        }
+    }
 
     override fun mouseDown(e: MouseEvent) {
         this.requestFocus()
@@ -218,10 +259,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             return
         }
         editorFactories.forEach {
-            it.mouseDown(this, e);
+            it.mouseDown(this, e)
             if (editor != null)
                 return
         }
+        if (mouseDownListeners.isNotEmpty())
+            mouseDownListeners.toTypedArray().forEach {
+                if (!it(e))
+                    return
+            }
         super.mouseDown(e)
     }
 
@@ -253,7 +299,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         val pos = editorCamera2D.screenToWorld(x, y, Vector2f())
         sceneRoot.walk {
             val service = getService(it) ?: return@walk true
-            val col = service.getCollider2D(it) ?: return@walk true
+            val col = service.getCollider2D(this, it) ?: return@walk true
             if (col.test(pos.x, pos.y)) {
                 result = it
                 return@walk false
@@ -277,6 +323,11 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             return
         }
 
+        mouseUpListeners.forEach {
+            if (!it(e))
+                return
+        }
+
         val shift = isKeyDown(16)
         val l = ArrayList<Node>()
         if (shift)
@@ -290,11 +341,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
             it.makeTreePath()
         }.toTypedArray()
-//        editor1.sceneStruct.tree.selectionModel.selectionPaths = l.map {
-//            val bb = it.asUpSequence().filter { it != root }.toList().reversed() + it
-//            TreePath(bb.toTypedArray())
-//        }.toTypedArray()
-        //updateSceneTreeSelection()
         super.mouseDown(e)
     }
 
@@ -364,6 +410,9 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         super.render()
     }
 
+    override val update2DPhysics: Boolean
+        get() = false
+
     fun startEditor(editor: EditAction) {
         this.editor?.onStop()
         this.editor = editor
@@ -377,6 +426,34 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         repaint()
         save()
         editor1.save()
+    }
+
+    private val node2DRenderCallback = HashMap<Spatial2D, (RenderCallback) -> Unit>()
+
+    fun setRenderCallback(node: Spatial2D, callback: (RenderCallback) -> Unit) {
+        if (node2DRenderCallback.containsKey(node))
+            throw IllegalStateException("Node ${node.id ?: node::class.java.simpleName} already has some callback")
+        node2DRenderCallback[node] = callback
+    }
+
+    fun clearRenderCallback(node: Spatial2D) {
+        node2DRenderCallback.remove(node)
+    }
+
+    override fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+        super.renderNode2D(node, projection, renderContext)
+        if (node.isSpatial2D()) {
+            val func = node2DRenderCallback[node]
+            if (func != null) {
+                renderCallback.also {
+                    it.model = node.matrix
+                    it.projection = projection
+                    it.renderContext = renderContext
+                    it.node = node
+                }
+                func(renderCallback)
+            }
+        }
     }
 
     override fun keyUp(e: KeyEvent) {

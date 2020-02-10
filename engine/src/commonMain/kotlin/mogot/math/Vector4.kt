@@ -54,7 +54,28 @@ interface Vector4fm : Vector4fc {
     }
 }
 
+inline fun Vector4fm.set(other: Vector4fc) = set(other.x, other.y, other.z, other.w)
+
 open class Vector4f(override var x: Float = 0f, override var y: Float = 0f, override var z: Float = 0f, override var w: Float = 0f) : Vector4fm {
+
+    companion object {
+        fun fromColor(a: Int, r: Int, g: Int, b: Int): Vector4f {
+            check(r in 0..255)
+            check(g in 0..255)
+            check(b in 0..255)
+            check(a in 0..255)
+            fun Int.div() = if (this == 0) 0f else this / 255f
+            return Vector4f(r.div(), g.div(), b.div(), a.div())
+        }
+
+        fun fromColor(color: Int): Vector4f {
+            val r = color and 0xFF
+            val g = color shr 8 and 0xFF
+            val b = color shr 16 and 0xFF
+            val a = color shr 24 and 0xFF
+            return fromColor(a, r, g, b)
+        }
+    }
 
     constructor(other: Vector4fc) : this(other.x, other.y, other.z, other.w)
     constructor(value: Float) : this(value, value, value, value)
