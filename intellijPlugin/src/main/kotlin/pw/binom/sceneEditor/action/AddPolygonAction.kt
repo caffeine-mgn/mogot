@@ -6,6 +6,7 @@ import pw.binom.sceneEditor.SceneEditor
 import mogot.*
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.sceneEditor.nodeController.PolygonShape2DService
+import pw.binom.sceneEditor.nodeController.PolygonShape2DViwer
 
 class AddPolygonAction : AnAction() {
 
@@ -21,7 +22,7 @@ class AddPolygonAction : AnAction() {
 
         e.presentation.isEnabled = editor.viewer.view.selected
                 .asSequence()
-                .mapNotNull { it as? PolygonShape2D }
+                .mapNotNull { it as? PolygonShape2DViwer }
                 .mapNotNull {
                     val service = editor.viewer.view.getService(it) as PolygonShape2DService
                     service.getEditor(editor.viewer.view, it)
@@ -34,7 +35,7 @@ class AddPolygonAction : AnAction() {
         val editor = SceneEditor.currentSceneEditor!!
         val polygonEditor = editor.viewer.view.selected
                 .asSequence()
-                .mapNotNull { it as? PolygonShape2D }
+                .mapNotNull { it as? PolygonShape2DViwer }
                 .mapNotNull {
                     val service = editor.viewer.view.getService(it) as PolygonShape2DService
                     service.getEditor(editor.viewer.view, it)

@@ -36,22 +36,29 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
         }
 
         override var x: Float
-            get() = boxBody.getTransform().p.x
+            get() = tx.p.x
             set(value) {
                 set(value, y)
             }
         override var y: Float
-            get() = boxBody.getTransform().p.y
+            get() = tx.p.y
             set(value) {
                 set(x, value)
             }
-
     }
+
+    override var rotation: Float
+        get() = tx.q.getAngle()
+        set(value) {
+            tx.q.set(value)
+        }
 
     private val tx = boxBody.getTransform()
     override fun update(delta: Float) {
         super.position.set(tx.p.x, tx.p.y)
         super.rotation = tx.q.getAngle()
+        if (bodyType == BodyType.DYNAMIC)
+            println("angle=${tx.q.getAngle()}")
         super.update(delta)
     }
 

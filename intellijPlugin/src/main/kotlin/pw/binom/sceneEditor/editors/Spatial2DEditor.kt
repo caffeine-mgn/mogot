@@ -1,9 +1,8 @@
 package pw.binom.sceneEditor.editors
 
 import mogot.Spatial2D
-import mogot.math.Matrix4f
+import mogot.math.*
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.avg
 import pw.binom.sceneEditor.properties.Transform2DProperty
 import java.awt.event.MouseEvent
 
@@ -11,7 +10,20 @@ abstract class Spatial2DEditor(view: SceneEditorView, val selected: List<Spatial
     val initPositions = selected.asSequence().map {
         it to it.localToGlobalMatrix(Matrix4f())
     }.toMap()
-    val avgPosition = selected.asSequence().map { it.position }.avg()
+    val avgPosition: Vector2f// = selected.asSequence().map { it.position }.avg()
+
+    init {
+        val v = view.engine.mathPool.vec2f.poll()
+        val avr = Vector2f()
+        selected.asSequence().forEach {
+            v.set(0f, 0f)
+            it.localToGlobal(v, v)
+            avr.add(v)
+        }
+        avr.set(avr.x / selected.size.toFloat(), avr.y / selected.size.toFloat())
+        view.engine.mathPool.vec2f.push(v)
+        avgPosition = avr
+    }
 
     override fun resetInitPosition() {
         initPositions.forEach { (node, matrix) ->

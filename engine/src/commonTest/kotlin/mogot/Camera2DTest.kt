@@ -36,8 +36,8 @@ class Camera2DTest {
         }
         cam.position.set(10f, 10f)
         cam.worldToScreen(Vector2f(-200f, -150f)).also {
-            it.x.eq(10)
-            it.y.eq(10)
+            it.x.eq(-20)
+            it.y.eq(-20)
         }
     }
 
