@@ -8,7 +8,7 @@ import mogot.physics.box2d.dynamics.Fixture
 import mogot.physics.d2.PhysicsBody2D
 
 abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
-    var density: Float = 0f
+    var density: Float = 1f
         set(value) {
             field = value
             fixture?.setDensity(value)

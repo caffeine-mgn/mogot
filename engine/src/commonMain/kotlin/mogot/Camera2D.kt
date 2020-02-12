@@ -39,11 +39,16 @@ class Camera2D(engine: Engine) : Spatial2D(engine) {
 
     fun worldToScreen(pointX: Float, pointY: Float, dest: Vector2im = Vector2i()): Vector2im {
         val pos = Vector2f(
-                pointX * zoom + width * 0.5f,
-                pointY * zoom + height * 0.5f
+                pointX,
+                pointY
         )
-        localToGlobal(pos, pos)
-        dest.set(pos.x.roundToInt(), pos.y.roundToInt())
+        globalToLocal(pos, pos)
+        pos.x = pos.x * zoom + width * 0.5f
+        pos.y = pos.y * zoom + height * 0.5f
+        dest.set(
+                pos.x.roundToInt(),
+                pos.y.roundToInt()
+        )
         return dest
     }
 

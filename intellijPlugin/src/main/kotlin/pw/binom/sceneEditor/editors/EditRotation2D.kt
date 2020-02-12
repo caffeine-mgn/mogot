@@ -1,8 +1,11 @@
 package pw.binom.sceneEditor.editors
 
-import mogot.*
+import mogot.Camera2D
+import mogot.Node
+import mogot.Spatial2D
 import mogot.math.*
-import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.Line2D
+import pw.binom.sceneEditor.SceneEditorView
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import kotlin.math.atan2
@@ -25,15 +28,17 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, selecte
     val screenPos = view.editorCamera2D.worldToScreen(avgPosition)
 
     protected var totalRotation = 0f
+        private set
 
+    private val oldVirtualMouse = Vector2i(virtualMouse)
     private var startAngle = angle1()
     private var startAngle2 = angle2()
 
-    fun angle1(): Float {
-        return atan2(engine.stage.mousePosition.y.toFloat() - screenPos.y, engine.stage.mousePosition.x.toFloat() - screenPos.x)
+    private fun angle1(): Float {
+        return atan2(virtualMouse.y.toFloat() - screenPos.y, virtualMouse.x.toFloat() - screenPos.x)
     }
 
-    fun angle2(): Float {
+    private fun angle2(): Float {
         return atan2(virtualMouse.x.toFloat() - screenPos.x, -virtualMouse.y.toFloat() - screenPos.y)
     }
 
@@ -41,19 +46,18 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, selecte
     protected val center = Line2D(engine).also {
         it.parent = root
         it.material = view.default3DMaterial.instance(Vector4f(1f))
+        it.position.set(avgPosition)
     }
 
+
     override fun render(dt: Float) {
+        oldVirtualMouse.set(virtualMouse)
         super.render(dt)
-        center.position.set(avgPosition)
+        //center.position.set(avgPosition)
         val tmp = view.engine.mathPool.vec2f.poll()
         view.editorCamera2D.screenToWorld(virtualMouse, tmp)
         center.lineTo.set(tmp.sub(avgPosition))
         view.engine.mathPool.vec2f.push(tmp)
-//        center.lineTo.set(
-//                virtualMouse.x.toFloat() - screenPos.x,
-//                virtualMouse.y.toFloat() - screenPos.y
-//        )
 
         val angle = angle1()//atan2(virtualMouse.y.toFloat() - screenPos.y, virtualMouse.x.toFloat() - screenPos.x)
         val angle2 = angle2()//atan2(virtualMouse.x.toFloat() - screenPos.x, -virtualMouse.y.toFloat() - screenPos.y)
@@ -63,7 +67,7 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, selecte
         } else {
             startAngle - angle
         }
-//        val r = startAngle - angle
+
         startAngle = angle
         startAngle2 = angle2
 
@@ -78,74 +82,6 @@ abstract class EditRotateEditor2D(view: SceneEditorView, val root: Node, selecte
     }
 }
 
-/*
-@Strictfp
-class EditRotateOneAxis3D(view: SceneEditorView, root: Node, camera: Camera, selected: List<Spatial>, val axis: Axis) : EditRotateEditor3D(view, root, camera, selected) {
-    private val grid = Line(engine).also {
-        it.parent = root
-        it.material.value = view.default3DMaterial
-        it.position.set(avgPosition)
-
-        if (axis == Axis.Y) {
-            it.quaternion.rotateXYZ(0f, 0f, -PIf / 2f)
-        }
-
-        if (axis == Axis.Z) {
-            it.quaternion.rotateXYZ(0f, -PIf / 2f, 0f)
-        }
-    }
-
-    private val tempMatrix = Matrix4f()
-    private val globalRotation = Quaternionf()
-    private val newRotation = Quaternionf()
-    private val axisVec = Vector3f()
-    private val oldScale = Vector3f()
-    override fun render(dt: Float) {
-        super.render(dt)
-        globalRotation.identity()
-        val axis = when (axis) {
-            Axis.X -> {
-                val rotateDirection = if (camera.position.x - avgPosition.x > 0f) 1f else -1f
-                globalRotation.mul(axisVec.set(rotateDirection, 0f, 0f))
-            }
-            Axis.Y -> {
-                val rotateDirection = if (camera.position.y - avgPosition.y > 0f) 1f else -1f
-                globalRotation.mul(axisVec.set(0f, rotateDirection, 0f))
-            }
-            Axis.Z -> {
-                val rotateDirection = if (camera.position.z - avgPosition.z > 0f) 1f else -1f
-                globalRotation.mul(axisVec.set(0f, 0f, rotateDirection))
-            }
-        }
-        globalRotation.rotateAxis(totalRotation, axis.x, axis.y, axis.z)
-
-        if (initPositions.size == 1)
-            initPositions.forEach {
-                val m = tempMatrix.identity().rotate(globalRotation)
-                        .mul(it.value)
-                        .setTranslation(it.value.getTranslation(Vector3f()))
-                it.key.setGlobalTransform(m)
-            }
-        else
-            initPositions.forEach { (node, matrix) ->
-                val newPosition = globalRotation.mul(matrix.getTranslation(Vector3f()).sub(avgPosition)).add(avgPosition)
-                matrix.getScale(oldScale)
-                newRotation.identity().setFromUnnormalized(matrix).let { globalRotation.mul(it, it) }
-                val newMatrix = tempMatrix.identity()
-                        .translationRotateScale(newPosition, newRotation, oldScale)
-                node.setGlobalTransform(newMatrix)
-            }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        grid.parent = null
-        view.renderThread {
-            grid.close()
-        }
-    }
-}
-*/
 @Strictfp
 class EditRotateAllAxes2D(view: SceneEditorView, root: Node, camera: Camera2D, selected: List<Spatial2D>) : EditRotateEditor2D(view, root, selected) {
     private val tempMatrix = Matrix4f()

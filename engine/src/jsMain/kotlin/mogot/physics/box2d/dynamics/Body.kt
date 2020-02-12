@@ -10,6 +10,8 @@ actual external class Body {
     actual fun destroyFixture(fixture: Fixture)
     actual fun getTransform(): Transform
     actual fun setTransform(position: Vec2, angle: Float)
+    actual fun isFixedRotation():Boolean
+    actual fun setFixedRotation(value:Boolean)
 }
 
 actual fun Body.setType(type: BodyType) {
@@ -29,12 +31,12 @@ val BodyType.js
         BodyType.DYNAMIC -> js("planck.Body.DYNAMIC")
     }
 
-internal fun toMogotBodyType(enum:Any): BodyType {
-        if (enum === js("planck.Body.STATIC"))
-            return BodyType.STATIC
-        if (enum === js("planck.Body.KINEMATIC"))
-            return BodyType.KINEMATIC
-        if (enum === js("planck.Body.DYNAMIC"))
-            return BodyType.DYNAMIC
-        throw RuntimeException()
-    }
+internal fun toMogotBodyType(enum: Any): BodyType {
+    if (enum === js("planck.Body.STATIC"))
+        return BodyType.STATIC
+    if (enum === js("planck.Body.KINEMATIC"))
+        return BodyType.KINEMATIC
+    if (enum === js("planck.Body.DYNAMIC"))
+        return BodyType.DYNAMIC
+    throw RuntimeException()
+}

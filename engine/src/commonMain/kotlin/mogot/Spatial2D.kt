@@ -61,6 +61,7 @@ open class Spatial2D(val engine: Engine) : Node() {
         val mat = engine.mathPool.mat4f.poll()
         localToGlobalMatrix(mat)
         point.mulXY(mat, dest)
+        engine.mathPool.mat4f.push(mat)
         return dest
     }
 
