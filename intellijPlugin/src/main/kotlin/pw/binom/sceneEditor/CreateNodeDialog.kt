@@ -49,9 +49,7 @@ class CreateNodeDialog(view: SceneEditorView, project: Project) : DialogWrapper(
         init()
         title = "Select Type of New Node"
         list.cellRenderer = NodeListRender()
-        list.appendTo(layout) {
-            basis = 140
-        }
+        list.appendTo(layout)
 
         list.addListSelectionListener {
             refreshOkBtn()
@@ -93,6 +91,7 @@ class CreateNodeDialog(view: SceneEditorView, project: Project) : DialogWrapper(
 private class NodeListModel(view: SceneEditorView) : ListModel<NodeCreator> {
     private val creators by Services.byClassSequence(NodeCreator::class.java)
     private val classes = creators.toList()
+
     override fun getElementAt(index: Int): NodeCreator = classes[index]
 
     override fun getSize(): Int = classes.size

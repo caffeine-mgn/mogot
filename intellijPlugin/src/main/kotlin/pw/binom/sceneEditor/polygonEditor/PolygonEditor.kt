@@ -1,4 +1,4 @@
-package pw.binom.sceneEditor
+package pw.binom.sceneEditor.polygonEditor
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.MouseShortcut
@@ -6,12 +6,12 @@ import mogot.*
 import mogot.math.*
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
+import pw.binom.sceneEditor.MInstance
+import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.action.AddPolygonAction
 import pw.binom.sceneEditor.action.RemovePolygonAction
 import pw.binom.sceneEditor.editors.EditorWithVirtualMouse
 import pw.binom.sceneEditor.editors.Keys
-import pw.binom.sceneEditor.polygonEditor.AddPolygonNode
-import pw.binom.sceneEditor.polygonEditor.DeletePolygonNode
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
