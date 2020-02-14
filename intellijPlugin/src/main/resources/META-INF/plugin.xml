@@ -53,6 +53,10 @@
                       topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
         <ApplicationLoadListener implementation="pw.binom.Starter"></ApplicationLoadListener>
+
+        <applicationConfigurable parentId="proofread" instance="pw.binom.config.MogotConfigurable"
+                                 id="pw.binom.config.MogotConfigurable"/>
+
         <!-- SceneEditor -->
         <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>
