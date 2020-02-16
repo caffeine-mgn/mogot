@@ -4,7 +4,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.flip2
 import pw.binom.io.Closeable
-import pw.binom.io.wrap
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -117,6 +116,7 @@ class TextureManager(val engine: Engine) : Closeable {
             while (!it.dec()) {
             }
         }
+        files.clear()
     }
 }
 
@@ -125,7 +125,7 @@ fun Resources.loadTexture(file: VirtualFile): ExternalTextureFS {
     return manager.instance(file)
 }
 
-fun Resources.loadTextureResource(path:String): ExternalTextureInternal {
+fun Resources.loadTextureResource(path: String): ExternalTextureInternal {
     val manager = engine.manager("TextureManager") { TextureManager(engine) }
     return manager.instance(path)
 }

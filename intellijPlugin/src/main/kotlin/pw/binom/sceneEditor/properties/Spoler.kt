@@ -1,5 +1,6 @@
 package pw.binom.sceneEditor.properties
 
+import com.intellij.icons.AllIcons
 import pw.binom.FlexLayout
 import pw.binom.appendTo
 import java.awt.Color
@@ -11,8 +12,8 @@ import javax.swing.ImageIcon
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-private val spoler_open = ImageIcon(Spoler::class.java.classLoader.getResource("spoler_open.png")).resize(10, 10)
-private val spoler_close = ImageIcon(Spoler::class.java.classLoader.getResource("spoler_close.png")).resize(10, 10)
+private val spoler_open = AllIcons.General.ArrowDown//ImageIcon(Spoler::class.java.classLoader.getResource("spoler_open.png")).resize(10, 10)
+private val spoler_close = AllIcons.General.ArrowRight//ImageIcon(Spoler::class.java.classLoader.getResource("spoler_close.png")).resize(10, 10)
 
 fun ImageIcon.resize(w: Int, h: Int): ImageIcon {
     val image = this.image

@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import pw.binom.material.Default2DMaterial
 import pw.binom.material.ImageCompiler
 import pw.binom.material.MaterialCompiler
 import java.io.File
@@ -44,7 +45,12 @@ open class DesktopAssertTask : DefaultTask() {
         val assertPath = assertPath!!
         val outputPath = outputPath!!
         val behavioursGenerator = BehavioursGenerator()
-
+        val default2DMatFile = File(outputPath, "${mogot.material.DEFAULT_MATERIAL_2D_FILE}.mat.bin")
+        if (!default2DMatFile.isFile) {
+            default2DMatFile.outputStream().use {
+                MaterialCompiler.compile(Default2DMaterial.SOURCE, it)
+            }
+        }
         assertPath.walkTopDown().onEnter {
             true
         }.forEach {

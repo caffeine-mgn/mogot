@@ -17,16 +17,19 @@ class Vector2Value : JPanel() {
             get() = this@Vector2Value.x.value
             set(value) {
                 this@Vector2Value.x.value = value
+                eventChange.dispatch()
             }
         override var y: Float
             get() = this@Vector2Value.y.value
             set(value) {
                 this@Vector2Value.y.value = value
+                eventChange.dispatch()
             }
 
         override fun set(x: Float, y: Float): Vector2fm {
             this@Vector2Value.x.value = x
             this@Vector2Value.y.value = y
+            eventChange.dispatch()
             return this
         }
 
@@ -38,10 +41,10 @@ class Vector2Value : JPanel() {
         y.labelBackground = Color(8, 131, 19)
 
         x.eventChange.on {
-            eventChange.dispatch()
+            value.x = x.value
         }
         y.eventChange.on {
-            eventChange.dispatch()
+            value.y = y.value
         }
     }
 }

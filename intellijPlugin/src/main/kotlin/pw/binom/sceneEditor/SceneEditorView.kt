@@ -9,7 +9,7 @@ import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
-import pw.binom.io.*
+import pw.binom.io.Closeable
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -109,8 +109,12 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     val default3DMaterial: Default3DMaterial
         get() = _default3DMaterial
 
+    lateinit var default2DMaterial: Default2DMaterial
+        private set
+
     override fun destroy() {
         _default3DMaterial.dec()
+        default2DMaterial.dec()
         super.destroy()
     }
 
@@ -478,6 +482,9 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         engine.manager("Editor") { EditorHolder(this) }
         _default3DMaterial = Default3DMaterial(engine)
         _default3DMaterial.inc()
+
+        default2DMaterial = Default2DMaterial(engine)
+        default2DMaterial.inc()
 
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot

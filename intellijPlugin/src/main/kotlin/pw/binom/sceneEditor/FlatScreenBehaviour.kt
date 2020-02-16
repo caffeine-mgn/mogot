@@ -5,10 +5,10 @@ import mogot.math.Vector2i
 
 class FlatScreenBehaviour(val engine: Engine, val camera: Camera, val other: Spatial) : Behaviour() {
     public override val node
-        get() = super.node as Sprite
+        get() = super.node as SpriteFor3D
 
     override fun checkNode(node: Node?) {
-        node as Sprite?
+        node as SpriteFor3D?
     }
 
     override fun onUpdate(delta: Float) {
