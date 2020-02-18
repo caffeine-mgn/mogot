@@ -1,7 +1,11 @@
 package mogot
 
+import mogot.material.DEFAULT_MATERIAL_2D_FILE
+import mogot.material.MaterialInstance
+import mogot.material.loadMaterial
 import mogot.math.*
 import pw.binom.IntDataBuffer
+import pw.binom.async
 
 abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 
@@ -90,7 +94,12 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 
     protected abstract val material: Material
 
+    protected abstract val isReady: Boolean
+
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        if (!isReady)
+            return
+
         if (geom == null) {
             geom = Rect2D(engine.gl, size)
         }
@@ -114,8 +123,30 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 }
 
 open class Sprite(engine: Engine) : AbstractSprite(engine) {
-    var texture by ResourceHolder<Texture2D>()
+    var texture: Texture2D? = null
+        set(value) {
+            if (value === field)
+                return
+            field?.dec()
+            field = value
+            field?.inc()
+            if (value != null)
+                _material?.set("image", value)
+            else
+                _material?.remove("image")
+        }
+    private var _material: MaterialInstance? = null
     override val material: Material
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        get() = _material!!
+    override var isReady: Boolean = false
 
+    init {
+        async {
+            _material = engine.resources.loadMaterial("$DEFAULT_MATERIAL_2D_FILE.mat").instance()
+            if (texture != null) {
+                _material!!.set("image", texture!!)
+            }
+            isReady = true
+        }
+    }
 }
