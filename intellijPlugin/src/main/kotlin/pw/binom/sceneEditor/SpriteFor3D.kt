@@ -7,6 +7,8 @@ class SpriteFor3D(val view: SceneEditorView) : AbstractSprite(view.engine) {
     var internalMaterial by ResourceHolder<Material>()
     override val material
         get() = internalMaterial!!
+    override val isReady: Boolean
+        get() = true
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         if (!view.render3D)

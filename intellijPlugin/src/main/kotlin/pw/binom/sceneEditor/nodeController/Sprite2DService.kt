@@ -131,6 +131,9 @@ class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine) {
             material.image = value
         }
 
+    override val isReady: Boolean
+        get() = true
+
     public override val material = view.default2DMaterial.instance()
 
     override fun close() {
