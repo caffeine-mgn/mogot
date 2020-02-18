@@ -77,6 +77,9 @@ DOT = \.
 "*=" {return GLSLTypes.ASSIGN_TIMES;}
 "/=" {return GLSLTypes.ASSIGN_DIV;}
 
+"&&" {return GLSLTypes.OP_AND;}
+"||" {return GLSLTypes.OP_OR;}
+
 "=" {return GLSLTypes.ASSIGN;}
 "+" {return GLSLTypes.OP_PLUS;}
 "++" {return GLSLTypes.UNARY_PLUS;}
