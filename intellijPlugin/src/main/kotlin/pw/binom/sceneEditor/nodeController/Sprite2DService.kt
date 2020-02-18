@@ -22,8 +22,11 @@ object Sprite2DCreator : NodeCreator {
     override val icon: Icon?
         get() = null
 
-    override fun create(view: SceneEditorView): Node? =
-            Sprite(view.engine)
+    override fun create(view: SceneEditorView): Node? {
+        val node = EditableSprite(view)
+        view.nodesMeta[node] = SpriteMeta(view, node)
+        return node
+    }
 
 }
 
@@ -67,6 +70,7 @@ object Sprite2DService : NodeService {
 
     override fun delete(view: SceneEditorView, node: Node) {
         super.delete(view, node)
+        println("Delete sprite!")
         (view.nodesMeta.remove(node) as SpriteMeta).close()
     }
 
@@ -89,8 +93,8 @@ object Sprite2DService : NodeService {
         node as EditableSprite
         val material = node.material
         material.selected = selected
-        val meta = view.nodesMeta[node] as SpriteMeta
-        meta.center.visible = selected
+        val meta = view.nodesMeta[node] as? SpriteMeta
+        meta?.center?.visible = selected
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == EditableSprite::class.java
@@ -129,4 +133,9 @@ class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine) {
 
     public override val material = view.default2DMaterial.instance()
 
+    override fun close() {
+        texture = null
+        material.dec()
+        super.close()
+    }
 }
