@@ -95,9 +95,9 @@ open class Node : Closeable {
             }
 
     open fun apply(matrix: Matrix4fc): Matrix4fc = matrix
-    open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        //NOP
-    }
+//    open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+//        //NOP
+//    }
 
     protected open fun onStart() {
         childs.forEach {

@@ -14,7 +14,7 @@ import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
 
-class MInstance(val root: MaterialGLSL, color: Vector4fc) : Material, ResourceImpl() {
+class MInstance(val root: MaterialGLSL, color: Vector4fc) : EditableMaterial, ResourceImpl() {
     val color = Vector4f(color)
 
     init {
@@ -26,8 +26,13 @@ class MInstance(val root: MaterialGLSL, color: Vector4fc) : Material, ResourceIm
         super.dispose()
     }
 
+    override var hover: Boolean = false
+    override var selected: Boolean = false
+
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         root.use(model, projection, renderContext)
+        root.shader.uniform("selected", selected)
+        root.shader.uniform("hover", hover)
         root.shader.uniform("color", color)
     }
 

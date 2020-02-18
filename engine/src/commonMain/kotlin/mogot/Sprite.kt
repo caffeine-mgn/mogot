@@ -3,7 +3,7 @@ package mogot
 import mogot.math.*
 import pw.binom.IntDataBuffer
 
-open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by MaterialNodeImpl() {
+abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 
     companion object {
 
@@ -80,12 +80,16 @@ open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by Ma
             } while (skip)
             return
         }
+
     }
 
     val size = Vector2f()
     private var geom by ResourceHolder<Rect2D>()
 
     private val oldSize = Vector2f(size)
+
+    protected abstract val material: Material
+
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         if (geom == null) {
             geom = Rect2D(engine.gl, size)
@@ -96,7 +100,7 @@ open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by Ma
             oldSize.set(size)
         }
         super.render(model, projection, renderContext)
-        val mat = material.value ?: return
+        val mat = material
 
         mat.use(model, projection, renderContext)
         geom!!.draw()
@@ -104,8 +108,14 @@ open class Sprite(engine: Engine) : VisualInstance2D(engine), MaterialNode by Ma
     }
 
     override fun close() {
-        material.dispose()
         geom = null
         super.close()
     }
+}
+
+open class Sprite(engine: Engine) : AbstractSprite(engine) {
+    var texture by ResourceHolder<Texture2D>()
+    override val material: Material
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
 }

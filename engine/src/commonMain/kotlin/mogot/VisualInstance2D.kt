@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.math.Matrix4fc
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -15,4 +16,8 @@ abstract class VisualInstance2D(engine: Engine): Spatial2D(engine) {
     var visible = true
     override val type: Int
         get() = VISUAL_INSTANCE2D_TYPE
+
+    open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+        //NOP
+    }
 }

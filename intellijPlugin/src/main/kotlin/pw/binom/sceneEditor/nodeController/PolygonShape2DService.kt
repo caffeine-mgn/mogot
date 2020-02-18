@@ -170,7 +170,7 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     }
 
     private fun rebuildIndexes(): IntDataBuffer {
-        val indexes = Sprite.calcPolygonTriangulation(vertexs)
+        val indexes = AbstractSprite.calcPolygonTriangulation(vertexs)
         if (indexBuffer != null && indexBuffer!!.size != indexes.size) {
             indexBuffer?.close()
             indexBuffer = null

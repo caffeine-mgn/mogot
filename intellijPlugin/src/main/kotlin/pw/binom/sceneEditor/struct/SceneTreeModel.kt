@@ -69,7 +69,7 @@ class SceneTreeModel(val view: SceneEditorView) : TreeModel {
         val path = (node.asUpSequence().filter { it !== view.editorRoot }.toList()).reversed()
         val index = node.parent!!.childs.indexOf(node)
         val e = TreeModelEvent(source, path.toTypedArray(), intArrayOf(index), Array(1) { node })
-        listeners.forEach {
+        listeners.toTypedArray().forEach {
             it.treeNodesInserted(e)
         }
     }
@@ -78,7 +78,7 @@ class SceneTreeModel(val view: SceneEditorView) : TreeModel {
         val path = (node.asUpSequence().filter { it !== view.editorRoot }.toList()).reversed()
         val index = node.parent!!.childs.indexOf(node)
         val e = TreeModelEvent(source, path.toTypedArray(), intArrayOf(index), Array(1) { node })
-        listeners.forEach {
+        listeners.toTypedArray().forEach {
             it.treeNodesRemoved(e)
         }
     }

@@ -9,17 +9,15 @@ import pw.binom.io.writeUTF8String
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStream
+import java.io.StringReader
 
 object MaterialCompiler {
 
     @JvmStatic
-    fun compile(file: File, outputStream: OutputStream) {
-        val parser = file.inputStream().bufferedReader().use {
-            Parser(it)
-        }
+    fun compile(text: String, outputStream: OutputStream) {
+        val parser = Parser(StringReader(text))
         val compiler = Compiler(parser)
         val shader = GLES300Generator.mix(listOf(compiler))
         //val generator = GLES300Generator(compiler)
@@ -34,6 +32,12 @@ object MaterialCompiler {
         out.writeInt(dataFp.size)
         out.write(dataFp)
         out.flush()
+    }
+
+    @JvmStatic
+    fun compile(file: File, outputStream: OutputStream) {
+        val text = file.readText()
+        compile(text, outputStream)
     }
 
     @JvmStatic

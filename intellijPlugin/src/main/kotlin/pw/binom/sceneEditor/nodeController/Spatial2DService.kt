@@ -5,11 +5,13 @@ import mogot.Node
 import mogot.Spatial2D
 import mogot.Engine
 import mogot.math.*
+import pw.binom.sceneEditor.CenterNode2D
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import java.io.Closeable
 
 object Spatial2DService : NodeService {
 

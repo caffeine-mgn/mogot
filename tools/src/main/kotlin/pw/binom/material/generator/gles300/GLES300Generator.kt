@@ -339,6 +339,8 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             OperationExpression.Operator.LT -> "<"
             OperationExpression.Operator.NE -> "!="
             OperationExpression.Operator.EQ -> "=="
+            OperationExpression.Operator.AND -> "&&"
+            OperationExpression.Operator.OR -> "||"
         }?.let { sb.append(it) }
         sb.append("=")
         gen(statement.exp, sb)
@@ -402,6 +404,8 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             OperationExpression.Operator.LT -> "<"
             OperationExpression.Operator.NE -> "!="
             OperationExpression.Operator.EQ -> "=="
+            OperationExpression.Operator.AND -> "&&"
+            OperationExpression.Operator.OR -> "||"
         }
         sb.append(op)
         gen(expression.right, sb)

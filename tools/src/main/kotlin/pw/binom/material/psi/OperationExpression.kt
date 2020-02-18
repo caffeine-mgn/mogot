@@ -17,6 +17,8 @@ class OperationExpression(
         GE("compareTo", "compareTo"),
         LT("compareTo", "compareTo"),
         LE("compareTo", "compareTo"),
+        AND("compareTo", "compareTo"),
+        OR("compareTo", "compareTo"),
         NE("equals","equals"),
         EQ("equals","equals");
 
@@ -33,6 +35,8 @@ class OperationExpression(
                         TokenType.OP_LE -> LE
                         TokenType.OP_NE -> NE
                         TokenType.OP_EQ -> EQ
+                        TokenType.OP_AND -> AND
+                        TokenType.OP_OR -> OR
                         else -> throw IllegalArgumentException("Unknown operator $token")
                     }
         }
