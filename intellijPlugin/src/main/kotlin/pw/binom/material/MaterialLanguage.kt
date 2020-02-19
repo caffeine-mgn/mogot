@@ -162,7 +162,7 @@ class MaterialFileEditor(val project: Project,
         editor.component
     }
 
-    val hintManager = project.getComponent(HintManager::class.java)
+    //val hintManager = project.getComponent(HintManager::class.java)
 
     private fun refresh() {
 
