@@ -3,6 +3,8 @@ package pw.binom.sceneEditor.editors
 object Keys {
     const val ESCAPE = 27
     const val ENTER = 10
+    const val LEFT = 37
+    const val RIGHT = 39
     const val X = 88
     const val Y = 89
     const val Z = 90
