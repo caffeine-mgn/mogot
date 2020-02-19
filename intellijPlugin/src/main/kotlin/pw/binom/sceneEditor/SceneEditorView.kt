@@ -486,7 +486,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 //        stopRender()
         repaint()
         save()
-        editor1.save()
     }
 
     private val node2DRenderCallback = HashMap<Spatial2D, (RenderCallback) -> Unit>()

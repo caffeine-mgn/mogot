@@ -1,15 +1,15 @@
 package pw.binom
 
 
-import mogot.*
+import mogot.Camera
+import mogot.Spatial
 import mogot.gl.GLView
-import mogot.math.Quaternionf
 import mogot.math.*
-import mogot.math.forward
-import mogot.math.times
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
+
+private const val MIN_E = 0.0001f;
 
 abstract class View3D : GLView(MockFileSystem()) {
 
@@ -73,11 +73,16 @@ abstract class View3D : GLView(MockFileSystem()) {
                 val dy = _y - e.y
                 _y = e.y
                 h -= dx / 100f
-                v += dy / 100f
-                if (v < -Math.PI / 2.0 + 0.001)
-                    v = (-Math.PI / 2.0 + 0.001).toFloat()
-                if (v > Math.PI / 2.0 - 0.001)
-                    v = (Math.PI / 2.0 - 0.001).toFloat()
+                v -= dy / 100f
+                if (v > PIf - MIN_E)
+                    v = PIf - MIN_E
+                if (v < 0f + MIN_E)
+                    v = 0f + MIN_E
+//                if (v < -Math.PI / 2.0 + 0.001)
+//                    v = (-Math.PI / 2.0 + 0.001).toFloat()
+
+//                if (v > Math.PI / 2.0 - 0.001)
+//                    v = (Math.PI / 2.0 - 0.001).toFloat()
                 resetCam()
                 repaint()
             }
