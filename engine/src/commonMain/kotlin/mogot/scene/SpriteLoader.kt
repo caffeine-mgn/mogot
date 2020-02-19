@@ -12,7 +12,6 @@ object SpriteLoader : SceneLoader.NodeLoader {
         val out = Sprite(engine)
         Spatial2DLoader.load(engine, out, loaderContext, props)
         val texFile = props["texture"]
-                ?.let { "$it.bin" }
                 ?.let { engine.resources.createTexture2D(it) }
         out.texture = texFile
         out.size.set(

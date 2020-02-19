@@ -2,9 +2,8 @@ package mogot.physics.d2
 
 import mogot.Engine
 import mogot.Spatial2D
-import mogot.math.Vector2fProperty
+import mogot.math.Vector2fc
 import mogot.math.Vector2fm
-import mogot.math.angle
 import mogot.physics.box2d.common.Vec2
 import mogot.physics.box2d.dynamics.*
 
@@ -20,6 +19,12 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
             boxBody.setType(value)
         }
     private val pos = Vec2()
+
+    var fixedRotation: Boolean
+        get() = boxBody.isFixedRotation()
+        set(value) {
+            boxBody.setFixedRotation(value)
+        }
 
     init {
         val bodyDef = BodyDef()
@@ -64,4 +69,36 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
         engine.physicsManager2D.world.destroyBody(boxBody)
         super.close()
     }
+
+
+    private val linear = Vec2(0f, 0f)
+    private val linear2 = Box2DVector2f(boxBody.getLinearVelocity())
+
+    fun getLinearVelocity(): Vector2fc = linear2
+
+    fun setLinearVelocity(velocity: Vector2fc) {
+        linear.x = velocity.x
+        linear.y = velocity.y
+        boxBody.setLinearVelocity(linear)
+    }
+
+    fun setAngularVelocity(velocity: Float) {
+        boxBody.setAngularVelocity(velocity)
+    }
+
+    fun getAngularVelocity(): Float =
+            boxBody.getAngularVelocity()
+}
+
+private class Box2DVector2f(val box2d: Vec2) : Vector2fm {
+    override var x: Float
+        get() = box2d.x
+        set(value) {
+            box2d.x = value
+        }
+    override var y: Float
+        get() = box2d.y
+        set(value) {
+            box2d.y = value
+        }
 }
