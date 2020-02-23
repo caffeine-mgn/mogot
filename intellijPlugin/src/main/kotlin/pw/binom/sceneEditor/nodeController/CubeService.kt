@@ -87,7 +87,7 @@ object CubeService : NodeService {
         m?.selected = selected
     }
 
-    override fun hover(node: Node, hover: Boolean) {
+    override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
         m?.hover = hover

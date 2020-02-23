@@ -134,14 +134,14 @@ object InjectSceneNodeService : NodeService {
         return false
     }
 
-    override fun hover(node: Node, hover: Boolean) {
+    override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         val view = (node as? InjectedScene2D)?.view
                 ?: (node as? InjectedScene3D)?.view
                 ?: return
         node.childs.forEach {
             it.walk {
                 val service = view.getService(it)
-                service?.hover(it, hover)
+                service?.hover(view, it, hover)
                 true
             }
         }

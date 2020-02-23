@@ -64,7 +64,7 @@ object BoxShape2DService : NodeService {
         mat.color.set(if (selected) hoverColor else outColor)
     }
 
-    override fun hover(node: Node, hover: Boolean) {
+    override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         if (node !is BoxShape2D) return
         val mat = node.material.value as MInstance
         mat.color.set(if (hover) hoverColor else outColor)

@@ -108,7 +108,7 @@ object Sprite2DService : NodeService {
         return out
     }
 
-    override fun hover(node: Node, hover: Boolean) {
+    override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         node as EditableSprite
         val m = node.material
         m.hover = hover
