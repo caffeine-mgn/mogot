@@ -8,10 +8,7 @@ import mogot.collider.Panel2DCollider
 import mogot.math.*
 import mogot.physics.d2.shapes.BoxShape2D
 import pw.binom.sceneEditor.*
-import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
-import pw.binom.sceneEditor.properties.BoxShape2DPropertyFactory
-import pw.binom.sceneEditor.properties.PropertyFactory
-import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import pw.binom.sceneEditor.properties.*
 import javax.swing.Icon
 
 private val hoverColor = Vector4f(1f, 0f, 0f, 0.8f)
@@ -25,6 +22,7 @@ object BoxShape2DCreator : NodeCreator {
 
     override fun create(view: SceneEditorView): Node? {
         val node = BoxShape2D(view.engine)
+        node.size.set(100f, 100f)
         node.material.value = view.default3DMaterial.instance(outColor)
         return node
     }
@@ -32,7 +30,7 @@ object BoxShape2DCreator : NodeCreator {
 }
 
 object BoxShape2DService : NodeService {
-    private val properties = listOf(Transform2DPropertyFactory, BoxShape2DPropertyFactory, BehaviourPropertyFactory)
+    private val properties = listOf(Transform2DPropertyFactory, BoxShape2DPropertyFactory, PhysicsShapePropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             properties
 
@@ -45,6 +43,7 @@ object BoxShape2DService : NodeService {
                 properties["size.x"]?.toFloatOrNull() ?: 0f,
                 properties["size.y"]?.toFloatOrNull() ?: 0f
         )
+        node.sensor = properties["sensor"] == "1"
         node.material.value = view.default3DMaterial.instance(outColor)
         return node
     }
@@ -55,10 +54,11 @@ object BoxShape2DService : NodeService {
         Spatial2DService.save(view.engine, node, out)
         out["size.x"] = node.size.x.toString()
         out["size.y"] = node.size.y.toString()
+        out["sensor"] = if (node.sensor) "1" else "0"
         return out
     }
 
-    override fun selected(view: SceneEditorView, node: Node,selected:Boolean) {
+    override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         if (node !is BoxShape2D) return
         val mat = node.material.value as MInstance
         mat.color.set(if (selected) hoverColor else outColor)
@@ -76,6 +76,7 @@ object BoxShape2DService : NodeService {
         if (node !is BoxShape2D) return null
         val mat = node.material.value as MInstance
         val out = BoxShape2D(node.engine)
+        out.sensor = node.sensor
         out.material.value = (mat.root as Default3DMaterial).instance(outColor)
         Spatial2DService.cloneSpatial2D(node, out)
         out.size.set(node.size)

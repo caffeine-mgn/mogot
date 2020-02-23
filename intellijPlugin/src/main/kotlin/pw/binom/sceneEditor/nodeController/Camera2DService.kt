@@ -66,6 +66,8 @@ private class Camera2DMeta(val camera: CameraSprite, val view: SceneEditorView) 
 //        s.behaviour = b
 //        s.parent = view.editorRoot
         camera.size.set(800f, 600f)
+        selected = false
+        hover = false
     }
 
     override fun close() {

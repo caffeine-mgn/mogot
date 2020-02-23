@@ -14,6 +14,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.polygonEditor.PolygonEditor
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
+import pw.binom.sceneEditor.properties.PhysicsShapePropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
 import javax.swing.Icon
@@ -60,7 +61,7 @@ private class PolygonShape2DMeta(
 
 object PolygonShape2DService : NodeService {
 
-    private val properties = listOf(Transform2DPropertyFactory, BehaviourPropertyFactory)
+    private val properties = listOf(Transform2DPropertyFactory, PhysicsShapePropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             properties
 

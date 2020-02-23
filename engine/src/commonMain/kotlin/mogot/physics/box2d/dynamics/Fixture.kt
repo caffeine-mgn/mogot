@@ -10,4 +10,6 @@ expect class Fixture {
     fun getUserData(): Any?
     fun setUserData(data: Any?)
     fun getShape(): Shape
+    fun isSensor(): Boolean
+    fun setSensor(sensor: Boolean)
 }
