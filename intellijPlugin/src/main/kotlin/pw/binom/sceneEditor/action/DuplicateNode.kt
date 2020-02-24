@@ -4,8 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import mogot.Node
 import mogot.isChild
-import pw.binom.Services
-import pw.binom.sceneEditor.NodeService
+import mogot.waitFrame
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.struct.makeTreePath
 
@@ -39,16 +38,18 @@ class DuplicateNode : AnAction() {
         if (nodes.isEmpty())
             return
         val createdNodes = ArrayList<Node>()
-        nodes.forEach { node ->
-            val service = view.getService(node) ?: return@forEach
-            val clone = service.deepClone(editor.viewer.view, node) ?: return@forEach
-            clone.parent = node.parent
-            createdNodes += clone
-            editor.sceneStruct.model.created(editor.sceneStruct.tree, clone)
+        view.engine.waitFrame {
+            nodes.forEach { node ->
+                val service = view.getService(node) ?: return@forEach
+                val clone = service.deepClone(editor.viewer.view, node) ?: return@forEach
+                clone.parent = node.parent
+                createdNodes += clone
+                editor.sceneStruct.model.created(editor.sceneStruct.tree, clone)
+            }
+            editor.sceneStruct.tree.selectionPaths = createdNodes.map {
+                it.makeTreePath()
+            }.toTypedArray()
         }
-        editor.sceneStruct.tree.selectionPaths = createdNodes.map {
-            it.makeTreePath()
-        }.toTypedArray()
     }
 
 }

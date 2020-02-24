@@ -97,6 +97,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             }
         }
 
+    val settings = Settings()
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()

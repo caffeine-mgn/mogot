@@ -5,6 +5,7 @@ import mogot.*
 import mogot.collider.Collider2D
 import mogot.collider.Polygon2DCollider
 import mogot.math.*
+import mogot.physics.d2.PhysicsBody2D
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
@@ -13,10 +14,7 @@ import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.polygonEditor.PolygonEditor
-import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
-import pw.binom.sceneEditor.properties.PhysicsShapePropertyFactory
-import pw.binom.sceneEditor.properties.PropertyFactory
-import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import pw.binom.sceneEditor.properties.*
 import javax.swing.Icon
 import kotlin.collections.set
 
@@ -123,6 +121,7 @@ object PolygonShape2DService : NodeService {
         val out = PolygonShape2DViwer(view)
         Spatial2DService.cloneSpatial2D(node, out)
         out.vertexs = ArrayList(node.vertexs)
+        out.sensor=node.sensor
         view.nodesMeta[out] = createMeta(view, out)
         return out
     }
@@ -144,7 +143,7 @@ object PolygonShape2DService : NodeService {
     }
 }
 
-class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), MaterialNode by MaterialNodeImpl() {
+class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode, MaterialNode by MaterialNodeImpl() {
     var vertexs: List<Vector2f> = emptyList()
         set(value) {
             field = value
@@ -153,6 +152,9 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     private var geom by ResourceHolder<Geom2D>()
     private var indexBuffer: IntDataBuffer? = null
     private var vertexBuffer: FloatDataBuffer? = null
+
+    private val body
+        get() = parent as? PhysicsBody2D
 
     private fun rebuildVertex(): FloatDataBuffer {
         if (vertexBuffer != null && vertexBuffer!!.size != vertexs.size * 2) {
@@ -234,6 +236,8 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
         geom!!.draw()
         mat.unuse()
     }
+
+    override var sensor: Boolean = false
 }
 
 private class PolygonShapeEditor(val node: PolygonShape2DViwer, view: SceneEditorView) : PolygonEditor(view) {

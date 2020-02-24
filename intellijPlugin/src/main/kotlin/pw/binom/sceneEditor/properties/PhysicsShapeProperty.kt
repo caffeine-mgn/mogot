@@ -16,7 +16,7 @@ object PhysicsShapePropertyFactory : PropertyFactory {
 
 
 class PhysicsShapeProperty(view: SceneEditorView) : Property, Spoler("Shape") {
-    private var nodes: List<Shape2D> = emptyList()
+    private var nodes: List<ShapeEditorNode> = emptyList()
 
     private val layout = stage.gridBagLayout()
 
@@ -26,9 +26,9 @@ class PhysicsShapeProperty(view: SceneEditorView) : Property, Spoler("Shape") {
     private var enableDispatchEvent = true
 
     override fun setNodes(nodes: List<Node>) {
-        this.nodes = nodes.mapNotNull { it as? Shape2D }
+        this.nodes = nodes.mapNotNull { it as? ShapeEditorNode }
 
-        if (nodes.isEmpty()) {
+        if (this.nodes.isEmpty()) {
             enableDispatchEvent = false
             sensorTitle.resetVisible = false
             sensorEditor.isEnabled = false
@@ -63,5 +63,8 @@ class PhysicsShapeProperty(view: SceneEditorView) : Property, Spoler("Shape") {
 
     override fun close() {
     }
+}
 
+interface ShapeEditorNode {
+    var sensor: Boolean
 }

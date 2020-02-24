@@ -3,6 +3,7 @@ package mogot.physics.d2.shapes
 import mogot.Engine
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
+import mogot.math.mulXY
 import mogot.physics.box2d.collision.shapes.PolygonShape
 import mogot.physics.box2d.collision.shapes.Shape
 import mogot.physics.box2d.collision.shapes.getPoints
@@ -13,8 +14,11 @@ class PolygonShape2D(engine: Engine) : Shape2D(engine) {
 
     override fun makeShape(): Shape {
         val s = PolygonShape()
-        s.setAsBox(0.5f, 0.5f)
-        s.setPoints(vertex!!)
+//        s.setAsBox(0.5f, 0.5f)
+        val points = vertex.map {
+            it.mulXY(transform, Vector2f())
+        }
+        s.setPoints(points)
         return s
     }
 
@@ -23,21 +27,26 @@ class PolygonShape2D(engine: Engine) : Shape2D(engine) {
         super.removeFromBody(body)
     }
 
-    private var vertex: List<Vector2fc>? = listOf(
-            Vector2f(-0.5f, -0.5f),
-            Vector2f(-0.5f, 0.5f),
-            Vector2f(0.5f, 0.5f),
-            Vector2f(0.5f, -0.5f)
-    )
+    private var vertex: List<Vector2fc> = run {
+        val size = 100f
+        listOf(
+                Vector2f(-size * 0.5f, -size * 0.5f),
+                Vector2f(-size * 0.5f, size * 0.5f),
+                Vector2f(size * 0.5f, size * 0.5f),
+                Vector2f(size * 0.5f, -size * 0.5f)
+        )
+    }
 
-    fun getVertex() = vertex ?: (fixture!!.getShape() as PolygonShape).getPoints()
+    fun getVertex() = vertex
 
     fun setVertex(list: List<Vector2fc>) {
+        vertex = list
         val fixture = fixture
         if (fixture != null) {
-            (fixture.getShape() as PolygonShape).setPoints(list)
-        } else {
-            vertex = list
+            val points = vertex.map {
+                it.mulXY(transform, Vector2f())
+            }
+            (fixture.getShape() as PolygonShape).setPoints(points)
         }
     }
 }
