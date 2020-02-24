@@ -10,4 +10,6 @@ actual external class Fixture {
     actual fun getUserData(): Any?
     actual fun setUserData(data: Any?)
     actual fun getShape(): Shape
+    actual fun isSensor(): Boolean
+    actual fun setSensor(sensor: Boolean)
 }

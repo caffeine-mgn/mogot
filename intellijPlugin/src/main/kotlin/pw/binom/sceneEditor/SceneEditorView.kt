@@ -97,6 +97,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             }
         }
 
+    val settings = Settings()
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
@@ -446,13 +447,13 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                 if (hover != node) {
                     val service = getService(node!!)
                     if (service != null) {
-                        hover?.let { getService(it)?.hover(it, false) }
-                        node!!.let { getService(it)?.hover(it, true) }
+                        hover?.let { getService(it)?.hover(this, it, false) }
+                        node!!.let { getService(it)?.hover(this, it, true) }
                         hover = node
                     }
                 }
             } else {
-                hover?.let { getService(it)?.hover(it, false) }
+                hover?.let { getService(it)?.hover(this, it, false) }
                 hover = null
             }
 

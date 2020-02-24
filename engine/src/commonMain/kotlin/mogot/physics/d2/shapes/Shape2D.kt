@@ -19,6 +19,13 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
             fixture?.setFriction(value)
         }
     protected var fixture: Fixture? = null
+
+    var sensor = false
+        set(value) {
+            field = value
+            fixture?.setSensor(value)
+        }
+
     val body
         get() = parent as? PhysicsBody2D
 
@@ -35,6 +42,7 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
         fixture!!.setDensity(density)
         fixture!!.setFriction(friction)
         fixture!!.setUserData(this)
+        fixture!!.setSensor(sensor)
     }
 
     override var parent: Node?

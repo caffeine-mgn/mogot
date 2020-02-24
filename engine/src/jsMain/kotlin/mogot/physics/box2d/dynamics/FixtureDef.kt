@@ -7,4 +7,5 @@ actual external class FixtureDef{
     actual var shape: Shape
     actual var density:Float
     actual var friction:Float
+    actual var isSensor: Boolean
 }

@@ -14,7 +14,6 @@ import pw.binom.utils.isEmpty
 
 object PhysicsBody2DPropertyPropertyFactory : PropertyFactory {
     override fun create(view: SceneEditorView): Property = PhysicsBody2DProperty(view)
-
 }
 
 class PhysicsBody2DProperty(val view: SceneEditorView) : Property, Spoler("PhysicsBody2D") {

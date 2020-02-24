@@ -8,6 +8,8 @@ actual external class PolygonShape : Shape {
     actual fun setAsBox(hx: Float, hy: Float)
 
     actual constructor()
+
+    actual fun setAsBox(hx: Float, hy: Float, center: Vec2, angle: Float)
 }
 
 actual fun PolygonShape.getPoints(): List<Vector2fc> =

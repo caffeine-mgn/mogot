@@ -28,7 +28,7 @@ interface NodeService {
     fun getCollider(node: Node): Collider? = null
     fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? = null
     fun isInternalChilds(node: Node): Boolean = false
-    fun hover(node: Node, hover: Boolean) {
+    fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         //NOP
     }
 
