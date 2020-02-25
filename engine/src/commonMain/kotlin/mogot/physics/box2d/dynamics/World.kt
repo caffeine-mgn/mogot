@@ -1,5 +1,6 @@
 package mogot.physics.box2d.dynamics
 
+import mogot.physics.box2d.callbacks.ContactListener
 import mogot.physics.box2d.common.Vec2
 
 expect class World {
@@ -27,4 +28,6 @@ expect class World {
 
     fun setGravity(gravity: Vec2)
     fun getGravity(): Vec2
+
+    fun setContactListener(listener: ContactListener?)
 }

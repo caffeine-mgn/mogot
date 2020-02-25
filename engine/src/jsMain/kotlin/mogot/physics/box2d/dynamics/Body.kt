@@ -16,6 +16,10 @@ actual external class Body {
     actual fun setAngularVelocity(w: Float)
     actual fun getLinearVelocity(): Vec2
     actual fun getAngularVelocity(): Float
+    actual fun resetMassData()
+    actual fun getMass(): Float
+    actual fun setAwake(flag: Boolean)
+    actual fun isAwake(): Boolean
 }
 
 actual fun Body.setType(type: BodyType) {

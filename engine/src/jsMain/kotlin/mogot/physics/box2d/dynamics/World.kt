@@ -1,5 +1,6 @@
 package mogot.physics.box2d.dynamics
 
+import mogot.physics.box2d.callbacks.ContactListener
 import mogot.physics.box2d.common.Vec2
 
 actual external class World {
@@ -10,4 +11,5 @@ actual external class World {
     actual fun destroyBody(body: Body)
     actual fun setGravity(gravity: Vec2)
     actual fun getGravity(): Vec2
+    actual fun setContactListener(listener: ContactListener?)
 }

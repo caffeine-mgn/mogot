@@ -52,7 +52,7 @@ object BoxShape2DService : NodeService {
                 properties["size.x"]?.toFloatOrNull() ?: 0f,
                 properties["size.y"]?.toFloatOrNull() ?: 0f
         )
-        node.sensor = properties["sensor"] == "1"
+        PhysicsShapeUtils.load(node, properties)
         return node
     }
 
@@ -62,7 +62,7 @@ object BoxShape2DService : NodeService {
         Spatial2DService.save(view.engine, node, out)
         out["size.x"] = node.size.x.toString()
         out["size.y"] = node.size.y.toString()
-        out["sensor"] = if (node.sensor) "1" else "0"
+        PhysicsShapeUtils.save(node, out)
         return out
     }
 
@@ -81,7 +81,7 @@ object BoxShape2DService : NodeService {
     override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is BoxShape2DView) return null
         val out = BoxShape2DView(view)
-        out.sensor = node.sensor
+        PhysicsShapeUtils.clone(node, out)
         Spatial2DService.cloneSpatial2D(node, out)
         out.size.set(node.size)
         return out
@@ -159,4 +159,7 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
     }
 
     override var sensor: Boolean = false
+    override var density: Float = 1f
+    override var friction: Float = 0.5f
+    override var restitution: Float=0.2f
 }

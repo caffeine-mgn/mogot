@@ -5,6 +5,7 @@ import mogot.Node
 import mogot.VisualInstance2D
 import mogot.physics.box2d.collision.shapes.Shape
 import mogot.physics.box2d.dynamics.Fixture
+import mogot.physics.box2d.dynamics.FixtureDef
 import mogot.physics.d2.PhysicsBody2D
 
 abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
@@ -12,12 +13,22 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
         set(value) {
             field = value
             fixture?.setDensity(value)
+            body?.boxBody?.resetMassData()
+            println("3 ${id} -> Mass: ${body?.boxBody?.getMass()}  $density")
         }
-    var friction: Float = 0.2f
+    var friction: Float = 0.5f
         set(value) {
             field = value
             fixture?.setFriction(value)
         }
+
+    var restitution: Float = 0.2f
+        set(value) {
+            field = value
+            fixture?.setRestitution(value)
+        }
+
+
     protected var fixture: Fixture? = null
 
     var sensor = false
@@ -38,11 +49,16 @@ abstract class Shape2D(engine: Engine) : VisualInstance2D(engine) {
     }
 
     private fun addToBody(body: PhysicsBody2D) {
-        fixture = body.boxBody.createFixture(makeShape(), density)
-        fixture!!.setDensity(density)
-        fixture!!.setFriction(friction)
-        fixture!!.setUserData(this)
-        fixture!!.setSensor(sensor)
+        val def = FixtureDef()
+        def.shape = makeShape()
+        def.density = density
+        def.friction = friction
+        def.restitution = restitution
+        def.isSensor = sensor
+        def.userData = this
+        fixture = body.boxBody.createFixture(def)
+        body.boxBody.resetMassData()
+        println("1 ${id} -> Mass: ${body.boxBody.getMass()}  $density")
     }
 
     override var parent: Node?

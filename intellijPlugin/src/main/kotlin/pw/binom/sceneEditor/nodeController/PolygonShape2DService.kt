@@ -77,6 +77,7 @@ object PolygonShape2DService : NodeService {
         } ?: emptyList()
         val node = PolygonShape2DViwer(view)
         Spatial2DService.load(view.engine, node, properties)
+        PhysicsShapeUtils.load(node, properties)
         node.vertexs = vertex
         node.material.value = view.default3DMaterial.instance(SHAPE_VIEW_COLOR)
 
@@ -96,6 +97,7 @@ object PolygonShape2DService : NodeService {
         if (node !is PolygonShape2DViwer) return null
         val out = HashMap<String, String>()
         Spatial2DService.save(view.engine, node, out)
+        PhysicsShapeUtils.save(node, out)
         out["vertex"] = node.vertexs.map { "${it.x}+${it.y}" }.joinToString("|")
         return out
     }
@@ -120,8 +122,9 @@ object PolygonShape2DService : NodeService {
         if (node !is PolygonShape2DViwer) return null
         val out = PolygonShape2DViwer(view)
         Spatial2DService.cloneSpatial2D(node, out)
+        PhysicsShapeUtils.clone(node, out)
         out.vertexs = ArrayList(node.vertexs)
-        out.sensor=node.sensor
+        out.sensor = node.sensor
         view.nodesMeta[out] = createMeta(view, out)
         return out
     }
@@ -238,6 +241,9 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     }
 
     override var sensor: Boolean = false
+    override var density: Float = 1f
+    override var friction: Float = 0.5f
+    override var restitution: Float = 0.2f
 }
 
 private class PolygonShapeEditor(val node: PolygonShape2DViwer, view: SceneEditorView) : PolygonEditor(view) {
