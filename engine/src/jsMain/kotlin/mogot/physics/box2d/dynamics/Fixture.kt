@@ -12,4 +12,18 @@ actual external class Fixture {
     actual fun getShape(): Shape
     actual fun isSensor(): Boolean
     actual fun setSensor(sensor: Boolean)
+    /**
+     * Get the coefficient of restitution.
+     *
+     * @return
+     */
+    actual fun getRestitution(): Float
+
+    /**
+     * Set the coefficient of restitution. This will _not_ change the restitution of existing
+     * contacts.
+     *
+     * @param restitution
+     */
+    actual fun setRestitution(restitution: Float)
 }

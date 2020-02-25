@@ -76,16 +76,22 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
             get() = linear.x
             set(value) {
                 linear.x = value
+                if (value != 0f)
+                    boxBody.setAwake(true)
             }
         override var y: Float
             get() = linear.y
             set(value) {
                 linear.y = value
+                if (value != 0f)
+                    boxBody.setAwake(true)
             }
 
         override fun set(x: Float, y: Float): Vector2fm {
             linear.x = x
             linear.y = y
+            if (x != 0f || y != 0f)
+                boxBody.setAwake(true)
             return this
         }
     }
@@ -93,5 +99,7 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
         get() = boxBody.getAngularVelocity()
         set(value) {
             boxBody.setAngularVelocity(value)
+            if (value != 0f)
+                boxBody.setAwake(true)
         }
 }

@@ -8,5 +8,7 @@ expect class FixtureDef {
     var shape: Shape
     var density: Float
     var friction: Float
+    var restitution:Float
     var isSensor: Boolean
+    var userData: Any?
 }

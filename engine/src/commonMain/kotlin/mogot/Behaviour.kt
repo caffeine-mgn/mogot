@@ -1,5 +1,7 @@
 package mogot
 
+import mogot.physics.d2.Contact2D
+
 abstract class Behaviour {
     internal var _node: Node? = null
         set(value) {
@@ -22,6 +24,14 @@ abstract class Behaviour {
     }
 
     open fun onUpdate(delta: Float) {
+
+    }
+
+    open fun onCollisionEnter2D(contact: Contact2D) {
+
+    }
+
+    open fun onCollisionLeave2D(contact: Contact2D) {
 
     }
 }

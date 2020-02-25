@@ -16,6 +16,16 @@ expect class Body {
     fun setAngularVelocity(w: Float)
     fun getLinearVelocity(): Vec2
     fun getAngularVelocity(): Float
+    fun resetMassData()
+    fun getMass(): Float
+    fun setAwake(flag: Boolean)
+    fun isAwake(): Boolean
+    fun getLinearDamping(): Float
+    fun setLinearDamping(linearDamping: Float)
+    fun getAngularDamping(): Float
+    fun setAngularDamping(angularDamping: Float)
+    fun getGravityScale(): Float
+    fun setGravityScale(gravityScale: Float)
 }
 
 expect fun Body.setType(type: BodyType)

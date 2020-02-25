@@ -8,6 +8,7 @@ expect class BodyDef {
     var position: Vec2
     var angle: Float
     var fixedRotation:Boolean
+    var gravityScale:Float
 }
 
 expect var BodyDef.type: BodyType

@@ -8,6 +8,7 @@ actual external class BodyDef {
     actual var position: Vec2
     actual var angle: Float
     actual var fixedRotation: Boolean
+    actual var gravityScale: Float
 }
 
 actual var BodyDef.type: BodyType
