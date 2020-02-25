@@ -20,6 +20,12 @@ actual external class Body {
     actual fun getMass(): Float
     actual fun setAwake(flag: Boolean)
     actual fun isAwake(): Boolean
+    actual fun getLinearDamping(): Float
+    actual fun setLinearDamping(linearDamping: Float)
+    actual fun getAngularDamping(): Float
+    actual fun setAngularDamping(angularDamping: Float)
+    actual fun getGravityScale(): Float
+    actual fun setGravityScale(gravityScale: Float)
 }
 
 actual fun Body.setType(type: BodyType) {
