@@ -37,6 +37,10 @@ object Geoms {
     }
 
     fun circle(gl: GL, r: Float, segmentsCount: Int): Geom2D {
+        if (r <= 0f)
+            throw IllegalArgumentException("Radius must be more that 0")
+        if (segmentsCount <= 0)
+            throw IllegalArgumentException("Segments Count must be more that 0")
         val index = IntDataBuffer.alloc(segmentsCount * 3)
         val vertex = FloatDataBuffer.alloc((segmentsCount + 1) * 2)
         vertex[0] = 0f

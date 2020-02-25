@@ -54,21 +54,24 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
     override var rotation: Float
         get() = tx.q.getAngle()
         set(value) {
-            tx.q.set(value)
+//            tx.q.set(value)
+            pos.x = position.x
+            pos.y = position.y
+            boxBody.setTransform(pos, value)
         }
 
     private val tx = boxBody.getTransform()
-    override fun update(delta: Float) {
-        super.position.set(tx.p.x, tx.p.y)
-        super.rotation = tx.q.getAngle()
-        super.update(delta)
-    }
 
     override fun close() {
         engine.physicsManager2D.world.destroyBody(boxBody)
         super.close()
     }
 
+    override fun update(delta: Float) {
+        super.position.set(tx.p.x, tx.p.y)
+        super.rotation = tx.q.getAngle()
+        super.update(delta)
+    }
 
     private val linear = boxBody.getLinearVelocity()
     val linearVelocity: Vector2fm = object : Vector2fm {
