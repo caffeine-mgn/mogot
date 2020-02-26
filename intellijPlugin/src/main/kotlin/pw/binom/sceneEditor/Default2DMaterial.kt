@@ -33,7 +33,7 @@ class Material2DInstance(val root: Default2DMaterial) : EditableMaterial, Resour
         root.shader.uniform("hover", hover)
         if (image != null) {
             root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-            root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, image!!.gl.gl)
+            root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, image!!.gl.glTexture)
             root.shader.uniform(ToolsDefault2DMaterial.IMAGE_PROPERTY, 0)
         } else {
             root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
