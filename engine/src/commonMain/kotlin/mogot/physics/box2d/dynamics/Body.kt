@@ -3,7 +3,6 @@ package mogot.physics.box2d.dynamics
 import mogot.physics.box2d.collision.shapes.Shape
 import mogot.physics.box2d.common.Transform
 import mogot.physics.box2d.common.Vec2
-import kotlin.jvm.JvmName
 
 expect class Body {
     fun createFixture(shape: Shape?, density: Float): Fixture
@@ -11,8 +10,22 @@ expect class Body {
     fun destroyFixture(fixture: Fixture)
     fun getTransform(): Transform
     fun setTransform(position: Vec2, angle: Float)
-    fun isFixedRotation():Boolean
-    fun setFixedRotation(value:Boolean)
+    fun isFixedRotation(): Boolean
+    fun setFixedRotation(value: Boolean)
+    fun setLinearVelocity(v: Vec2)
+    fun setAngularVelocity(w: Float)
+    fun getLinearVelocity(): Vec2
+    fun getAngularVelocity(): Float
+    fun resetMassData()
+    fun getMass(): Float
+    fun setAwake(flag: Boolean)
+    fun isAwake(): Boolean
+    fun getLinearDamping(): Float
+    fun setLinearDamping(linearDamping: Float)
+    fun getAngularDamping(): Float
+    fun setAngularDamping(angularDamping: Float)
+    fun getGravityScale(): Float
+    fun setGravityScale(gravityScale: Float)
 }
 
 expect fun Body.setType(type: BodyType)

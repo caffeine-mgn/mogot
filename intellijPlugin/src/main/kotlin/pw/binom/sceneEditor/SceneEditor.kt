@@ -149,43 +149,26 @@ class SceneEditor(val project: Project,
         contentManager.removeAllContents(true)
         val c = contentManager.factory.createContent(component, "", false)
         contentManager.addContent(c)
-
-//        var c = contentManager.contents.firstOrNull()
-//        if (c == null) {
-//            c = contentManager.factory.createContent(component, "", false)
-//            contentManager.addContent(c)
-//        } else {
-//            c.component = component
-//        }
     }
 
     override fun selectNotify() {
         privateCurrentEditor = this
         viewer.view.startRender()
         println("selectNotify")
-        save()
-        println("first!")
         structToolWindow.useContent(sceneStruct)
-
-        println("second!")
         propertyToolWindow.useContent(propertyTool)
-        /*
-        //таб активен
-        val c = structToolWindow.contentManager.contents.find { it.component is SceneStruct }!!.component
-        run {
-            val content = structToolWindow.contentManager.factory.createContent(sceneStruct, "", false)
-            structToolWindow.contentManager.addContent(content)
-            sceneStruct
-        }
+//        structToolWindow.setAvailable(true, null)
+//        propertyToolWindow.setAvailable(true, null)
+    }
 
-        run {
-            val content = propertyToolWindow.contentManager.factory.createContent(propertyTool, "", false)
-            propertyToolWindow.contentManager.addContent(content)
-            propertyTool
-        }
-*/
-        structToolWindow.setAvailable(true, null)
-        propertyToolWindow.setAvailable(true, null)
+    override fun deselectNotify() {
+        structToolWindow.contentManager.removeAllContents(true)
+        propertyToolWindow.contentManager.removeAllContents(true)
+        privateCurrentEditor = null
+        viewer.view.stopRender()
+//        println("deselectNotify")
+//        structToolWindow.setAvailable(false, null)
+//        propertyToolWindow.setAvailable(false, null)
     }
 
     override fun <T : Any?> putUserData(key: Key<T>, value: T?) {
@@ -194,14 +177,6 @@ class SceneEditor(val project: Project,
 
     override fun getCurrentLocation(): FileEditorLocation? {
         return null
-    }
-
-    override fun deselectNotify() {
-        privateCurrentEditor = null
-        viewer.view.stopRender()
-        println("deselectNotify")
-        structToolWindow.setAvailable(false, null)
-        propertyToolWindow.setAvailable(false, null)
     }
 
     override fun getBackgroundHighlighter(): BackgroundEditorHighlighter? {
@@ -228,27 +203,6 @@ class SceneEditor(val project: Project,
 
 
     override fun getFile(): VirtualFile? = sourceFile
-
-    fun save() {
-        val cmd = object : BasicUndoableAction(ref), Runnable {
-            override fun redo() {
-                println("--->REDO")
-            }
-
-            override fun undo() {
-                println("--->UNDO")
-            }
-
-            override fun run() {
-                println("ACTION!")
-            }
-
-
-        }
-        CommandProcessor.getInstance().runUndoTransparentAction(cmd)
-//        CommandProcessor.getInstance().executeCommand(project, cmd, "ACTION1", "GROUP1", UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
-    }
-
 }
 
 class MoveNode : UndoableAction {

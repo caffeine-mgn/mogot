@@ -10,8 +10,22 @@ actual external class Body {
     actual fun destroyFixture(fixture: Fixture)
     actual fun getTransform(): Transform
     actual fun setTransform(position: Vec2, angle: Float)
-    actual fun isFixedRotation():Boolean
-    actual fun setFixedRotation(value:Boolean)
+    actual fun isFixedRotation(): Boolean
+    actual fun setFixedRotation(value: Boolean)
+    actual fun setLinearVelocity(v: Vec2)
+    actual fun setAngularVelocity(w: Float)
+    actual fun getLinearVelocity(): Vec2
+    actual fun getAngularVelocity(): Float
+    actual fun resetMassData()
+    actual fun getMass(): Float
+    actual fun setAwake(flag: Boolean)
+    actual fun isAwake(): Boolean
+    actual fun getLinearDamping(): Float
+    actual fun setLinearDamping(linearDamping: Float)
+    actual fun getAngularDamping(): Float
+    actual fun setAngularDamping(angularDamping: Float)
+    actual fun getGravityScale(): Float
+    actual fun setGravityScale(gravityScale: Float)
 }
 
 actual fun Body.setType(type: BodyType) {

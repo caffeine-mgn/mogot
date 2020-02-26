@@ -46,8 +46,7 @@ class LexTest {
 
     @Test
     fun test() {
-
-        val ee = Expression.read(makeStream("vec3(0,0,0)"))
+        Expression.read(makeStream("vec3(0,0,0)"))
                 .notNull()
                 .cast(MethodCallExpression::class)
 
@@ -170,6 +169,9 @@ class LexTest {
     fun operator() {
         val stream = makeStream("""i<10""")
         OperationExpression.read(stream).notNull()
+
+        val stream2 = makeStream("""i && 10""")
+        OperationExpression.read(stream2).notNull()
     }
 
     @Test

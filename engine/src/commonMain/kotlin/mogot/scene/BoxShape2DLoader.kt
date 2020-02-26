@@ -11,6 +11,7 @@ object BoxShape2DLoader : SceneLoader.NodeLoader {
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
         val node = BoxShape2D(engine)
         Spatial2DLoader.load(engine, node, loaderContext, props)
+        Shape2DLoader.load(node, props)
         node.size.set(
                 props["size.x"]?.toFloatOrNull() ?: 0f,
                 props["size.y"]?.toFloatOrNull() ?: 0f

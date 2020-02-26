@@ -12,6 +12,7 @@ object PolygonShape2DLoader : SceneLoader.NodeLoader {
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
         val node = PolygonShape2D(engine)
         Spatial2DLoader.load(engine, node, loaderContext, props)
+        Shape2DLoader.load(node, props)
         props["vertex"]?.splitToSequence('|')
                 ?.map {
                     val items = it.split('+')

@@ -47,14 +47,19 @@ class SceneStruct(val view: SceneEditorView) : JBPanel<JBPanel<*>>() {
                     nodes ?: return@setRemoveAction
                     nodes.forEach {
                         model.delete(tree, it)
-                        view.getService(it)?.delete(view, it)
-                        it.free()
+                        view.removeNode(it)
+                    }
+                    /*
+                    nodes.reversed().forEach {
+                        model.delete(tree, it)
+                        it.parent = null
                     }
                     view.engine.waitFrame {
                         nodes.forEach {
                             it.close()
                         }
                     }
+                    */
                 }
                 .createPanel()
 

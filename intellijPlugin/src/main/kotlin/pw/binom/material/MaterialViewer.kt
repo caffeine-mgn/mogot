@@ -15,23 +15,7 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
-    /*
-    class TextureFile(val file: VirtualFile) : Closeable {
-        private var texture: Texture2D? = null
-        var id: Int = -1
-        fun getTexture2D(engine: Engine): Texture2D {
-            if (texture == null) {
-                texture = engine.resources.syncCreateTexture2D(file.path)
-                texture!!.inc()
-            }
-            return texture!!
-        }
 
-        override fun close() {
-            texture?.dec()
-        }
-    }
-*/
     lateinit var material: DynamicMaterialGLSL
 
     private var vp = ""
@@ -71,36 +55,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
             params[name] = value
         updateTextureIndexes()
     }
-/*
-        if (value == null) {
-            val oldValue = params.remove(name)
-            if (oldValue is TextureFile) {
-                activeTextures.remove(oldValue)
-                updateTextureIndexes()
-                engine.waitFrame {
-                    oldValue.close()
-                }
-            }
-        } else {
-            val old = params.remove(name)
-            if (old is TextureFile && value is TextureFile) {
-                if (old.file.parent == value.file) {
-                    params[name] = old
-                    return
-                }
-            }
-            if (value is TextureFile) {
-                activeTextures += value
-            }
-            if (old is TextureFile) {
-                activeTextures.remove(old)
-                engine.waitFrame {
-                    old.close()
-                }
-            }
-            updateTextureIndexes()
-            params[name] = value
-            */
+
 
     inner class DynamicMaterialGLSL(engine: Engine) : MaterialGLSL(engine) {
         private val standart = SimpleMaterial(engine)

@@ -49,7 +49,7 @@ private fun createStub(view: SceneEditorView, camera: Camera) {
     view.renderThread {
         val s = SpriteFor3D(view)
         s.size.set(40f, 32f)
-        s.material.value = SolidTextureMaterial(view.engine).apply {
+        s.internalMaterial = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.camerasManager.cameraLightTexture.gl
         }
@@ -110,7 +110,7 @@ object CameraService : NodeService {
         }
 
         val sprite = view.engine.camerasManager.cameras[node]!!.node
-        val material = sprite.material.value as SolidTextureMaterial
+        val material = sprite.internalMaterial as SolidTextureMaterial
         if (selected)
             material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
         else

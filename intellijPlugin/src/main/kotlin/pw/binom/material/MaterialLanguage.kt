@@ -14,6 +14,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiManager
@@ -109,31 +110,6 @@ class MaterialFileEditor(val project: Project,
         this.state = state
     }
 
-
-    val VP = """#version 440 core
-
-layout(location = 0) in vec3 vertexPos;
-layout(location = 1) in vec3 normalList;
-layout(location = 2) in vec2 vertexUV;
-
-uniform mat4 projection;
-uniform mat4 model;
-
-uniform mat4 gl_ModelViewMatrix;
-uniform mat4 gl_ProjectionMatrix;
-uniform mat3 gl_NormalMatrix;
-out vec2 UV;
-out vec3 normal;
-out vec3 vVertex;
-
-void main() {
-    mat3 normalMatrix = mat3(transpose(inverse(model)));
-    normal = vec3(normalMatrix * normalList);
-    gl_Position = projection * model * vec4(vertexPos, 1.0);
-    //norm=normalize(vec3(gl_NormalMatrix * normalList));
-    vVertex = vec3(model * vec4(vertexPos, 1.0));
-    UV = vertexUV;
-}"""
     val editor = EditorFactory.getInstance().createEditor(document, project, sourceFile, false) as EditorImpl
     private val component = run {
         /*
@@ -186,7 +162,7 @@ void main() {
         editor.component
     }
 
-    val hintManager = project.getComponent(HintManager::class.java)
+    //val hintManager = project.getComponent(HintManager::class.java)
 
     private fun refresh() {
 
@@ -271,25 +247,28 @@ void main() {
 
     override fun <T : Any?> getUserData(key: Key<T>): T? = userData[key] as T?
 
+    fun ToolWindow.useContent(component: JComponent) {
+        contentManager.removeAllContents(true)
+        val c = contentManager.factory.createContent(component, "", false)
+        contentManager.addContent(c)
+    }
+
     override fun selectNotify() {
-        run {
-            val c = shaderEditViewer.contentManager.contents.find { it.component is MaterialViewer }
-            if (c == null) {
-                val content = shaderEditViewer.contentManager.factory.createContent(materialViewer, "", false)
-                shaderEditViewer.contentManager.addContent(content)
-            }
-        }
-/*
-        run {
-            val c = propertiesEditViewer.contentManager.contents.find { it.component is UniformEditor }
-            if (c == null) {
-                val content = propertiesEditViewer.contentManager.factory.createContent(uniformEditor, "", false)
-                propertiesEditViewer.contentManager.addContent(content)
-            }
-        }
-*/
-        shaderEditViewer.setAvailable(true, null)
-//        propertiesEditViewer.setAvailable(true, null)
+        shaderEditViewer.useContent(materialViewer)
+//        run {
+//            val c = shaderEditViewer.contentManager.contents.find { it.component is MaterialViewer }
+//            if (c == null) {
+//                val content = shaderEditViewer.contentManager.factory.createContent(materialViewer, "", false)
+//                shaderEditViewer.contentManager.addContent(content)
+//            }
+//        }
+//        shaderEditViewer.setAvailable(true, null)
+    }
+
+    override fun deselectNotify() {
+        shaderEditViewer.contentManager.removeAllContents(true)
+//        shaderEditViewer.setAvailable(false, null)
+//        propertiesEditViewer.setAvailable(false, null)
     }
 
     private val userData = HashMap<Key<*>, Any?>()
@@ -300,11 +279,6 @@ void main() {
 
     override fun getCurrentLocation(): FileEditorLocation? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun deselectNotify() {
-        shaderEditViewer.setAvailable(false, null)
-//        propertiesEditViewer.setAvailable(false, null)
     }
 
     override fun getBackgroundHighlighter(): BackgroundEditorHighlighter? {

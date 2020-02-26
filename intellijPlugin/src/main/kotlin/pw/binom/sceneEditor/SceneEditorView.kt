@@ -9,7 +9,8 @@ import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
 import pw.binom.Stack
-import pw.binom.io.*
+import pw.binom.io.Closeable
+import pw.binom.sceneEditor.dragdrop.SceneDropTarget
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
 import pw.binom.sceneEditor.struct.makeTreePath
@@ -96,6 +97,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             }
         }
 
+    val settings = Settings()
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
@@ -109,8 +111,12 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     val default3DMaterial: Default3DMaterial
         get() = _default3DMaterial
 
+    lateinit var default2DMaterial: Default2DMaterial
+        private set
+
     override fun destroy() {
         _default3DMaterial.dec()
+        default2DMaterial.dec()
         super.destroy()
     }
 
@@ -141,7 +147,63 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         return service
     }
 
+    fun removeNode(node: Node) {
+        println("Remove ${node::class.java.name}")
+        var sceneNode = false
+        var editorNode = false
+        node.currentToRoot {
+            if (it == sceneRoot) {
+                sceneNode = true
+                return@currentToRoot false
+            }
+            if (it == editorRoot) {
+                editorNode = true
+                return@currentToRoot false
+            }
+            true
+        }
+
+        fun removeChilds(node: Node) {
+            val service = getService(node)
+            if (service?.isInternalChilds(node) != true) {
+                node.childs.forEach {
+                    removeChilds(it)
+                }
+            }
+            node.parent = null
+            service?.delete(this, node)
+            node.close()
+        }
+
+        if (sceneNode) {
+            node.parent = null
+            println("Remove Scene Node  ${engine.frameListeners.size}")
+            engine.waitFrame {
+                try {
+                    println("Remove...")
+                    removeChilds(node)
+                    println("Removed!")
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
+            }
+            return
+        }
+
+        if (editorNode) {
+            node.parent = null
+            engine.waitFrame {
+                node.close()
+            }
+            return
+        }
+        throw IllegalArgumentException("Unknown node")
+    }
+
     init {
+
+        dropTarget = SceneDropTarget(this)
+//        transferHandler = SceneTransferHandler(this)
         sceneRoot.parent = editorRoot
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
@@ -385,13 +447,13 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                 if (hover != node) {
                     val service = getService(node!!)
                     if (service != null) {
-                        hover?.let { getService(it)?.hover(it, false) }
-                        node!!.let { getService(it)?.hover(it, true) }
+                        hover?.let { getService(it)?.hover(this, it, false) }
+                        node!!.let { getService(it)?.hover(this, it, true) }
                         hover = node
                     }
                 }
             } else {
-                hover?.let { getService(it)?.hover(it, false) }
+                hover?.let { getService(it)?.hover(this, it, false) }
                 hover = null
             }
 
@@ -425,7 +487,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 //        stopRender()
         repaint()
         save()
-        editor1.save()
     }
 
     private val node2DRenderCallback = HashMap<Spatial2D, (RenderCallback) -> Unit>()
@@ -478,6 +539,9 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         engine.manager("Editor") { EditorHolder(this) }
         _default3DMaterial = Default3DMaterial(engine)
         _default3DMaterial.inc()
+
+        default2DMaterial = Default2DMaterial(engine)
+        default2DMaterial.inc()
 
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot

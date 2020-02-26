@@ -89,6 +89,9 @@ DOT = \.
 "*=" {return TokenType.ASSIGN_TIMES;}
 "/=" {return TokenType.ASSIGN_DIV;}
 
+"&&" {return TokenType.OP_AND;}
+"||" {return TokenType.OP_OR;}
+
 "=" {return TokenType.ASSIGN;}
 "+" {return TokenType.OP_PLUS;}
 "!=" {return TokenType.OP_NE;}

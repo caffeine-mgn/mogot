@@ -5,6 +5,7 @@ import mogot.*
 import mogot.collider.Collider2D
 import mogot.collider.Polygon2DCollider
 import mogot.math.*
+import mogot.physics.d2.PhysicsBody2D
 import mogot.physics.d2.shapes.PolygonShape2D
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
@@ -13,9 +14,7 @@ import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.polygonEditor.PolygonEditor
-import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
-import pw.binom.sceneEditor.properties.PropertyFactory
-import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import pw.binom.sceneEditor.properties.*
 import javax.swing.Icon
 import kotlin.collections.set
 
@@ -60,7 +59,7 @@ private class PolygonShape2DMeta(
 
 object PolygonShape2DService : NodeService {
 
-    private val properties = listOf(Transform2DPropertyFactory, BehaviourPropertyFactory)
+    private val properties = listOf(Transform2DPropertyFactory, PhysicsShapePropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             properties
 
@@ -78,6 +77,7 @@ object PolygonShape2DService : NodeService {
         } ?: emptyList()
         val node = PolygonShape2DViwer(view)
         Spatial2DService.load(view.engine, node, properties)
+        PhysicsShapeUtils.load(node, properties)
         node.vertexs = vertex
         node.material.value = view.default3DMaterial.instance(SHAPE_VIEW_COLOR)
 
@@ -97,6 +97,7 @@ object PolygonShape2DService : NodeService {
         if (node !is PolygonShape2DViwer) return null
         val out = HashMap<String, String>()
         Spatial2DService.save(view.engine, node, out)
+        PhysicsShapeUtils.save(node, out)
         out["vertex"] = node.vertexs.map { "${it.x}+${it.y}" }.joinToString("|")
         return out
     }
@@ -121,7 +122,9 @@ object PolygonShape2DService : NodeService {
         if (node !is PolygonShape2DViwer) return null
         val out = PolygonShape2DViwer(view)
         Spatial2DService.cloneSpatial2D(node, out)
+        PhysicsShapeUtils.clone(node, out)
         out.vertexs = ArrayList(node.vertexs)
+        out.sensor = node.sensor
         view.nodesMeta[out] = createMeta(view, out)
         return out
     }
@@ -143,7 +146,7 @@ object PolygonShape2DService : NodeService {
     }
 }
 
-class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), MaterialNode by MaterialNodeImpl() {
+class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode, MaterialNode by MaterialNodeImpl() {
     var vertexs: List<Vector2f> = emptyList()
         set(value) {
             field = value
@@ -152,6 +155,9 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     private var geom by ResourceHolder<Geom2D>()
     private var indexBuffer: IntDataBuffer? = null
     private var vertexBuffer: FloatDataBuffer? = null
+
+    private val body
+        get() = parent as? PhysicsBody2D
 
     private fun rebuildVertex(): FloatDataBuffer {
         if (vertexBuffer != null && vertexBuffer!!.size != vertexs.size * 2) {
@@ -170,7 +176,7 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     }
 
     private fun rebuildIndexes(): IntDataBuffer {
-        val indexes = Sprite.calcPolygonTriangulation(vertexs)
+        val indexes = AbstractSprite.calcPolygonTriangulation(vertexs)
         if (indexBuffer != null && indexBuffer!!.size != indexes.size) {
             indexBuffer?.close()
             indexBuffer = null
@@ -233,6 +239,11 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
         geom!!.draw()
         mat.unuse()
     }
+
+    override var sensor: Boolean = false
+    override var density: Float = 1f
+    override var friction: Float = 0.5f
+    override var restitution: Float = 0.2f
 }
 
 private class PolygonShapeEditor(val node: PolygonShape2DViwer, view: SceneEditorView) : PolygonEditor(view) {

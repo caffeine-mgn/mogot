@@ -4,6 +4,7 @@ apply plugin: 'java'
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api project(':tools')
+    api project(':engine')
     api "pw.binom.io:json:$binom_io_version"
     api "pw.binom.io:file:$binom_io_version"
     compileOnly gradleApi()

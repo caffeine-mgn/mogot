@@ -13,6 +13,7 @@ object PhysicsBody2DLoader : SceneLoader.NodeLoader {
         val node = PhysicsBody2D(engine)
         Spatial2DLoader.load(engine, node, loaderContext, props)
         node.bodyType = props["type"]?.let { BodyType.valueOf(it) } ?: BodyType.STATIC
+        println("PhysicsBody2DLoader->${node.rotation}")
         return node
     }
 

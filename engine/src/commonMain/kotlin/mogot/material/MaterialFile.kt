@@ -9,6 +9,8 @@ import mogot.math.Vector4fc
 import pw.binom.asUTF8String
 import pw.binom.io.*
 
+const val DEFAULT_MATERIAL_2D_FILE = "Material2DDefault"
+
 class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceImpl() {
 
     private val activeTextures = ArrayList<Texture2D>()

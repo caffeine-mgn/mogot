@@ -52,6 +52,7 @@ object Body2DService : NodeService {
     override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is PhysicsBody2D) return null
         val out = PhysicsBody2D(node.engine)
+        out.bodyType = node.bodyType
         Spatial2DService.cloneSpatial2D(node, out)
         return out
     }

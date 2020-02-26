@@ -6,6 +6,8 @@ enum class TokenType {
     NUMBER,
     BAD_CHARACTER,
     OP_DIV,
+    OP_AND,
+    OP_OR,
     DERECTIVE,
     OP_TIMES,
     ASSIGN,
@@ -74,7 +76,7 @@ enum class TokenType {
 
     val isOperation
         get() = when (this) {
-            OP_PLUS, OP_MINUS, OP_LE, OP_GE, OP_LT, OP_GT, OP_DIV, OP_TIMES, OP_NE, OP_EQ -> true
+            OP_PLUS, OP_MINUS, OP_LE, OP_GE, OP_LT, OP_GT, OP_DIV, OP_TIMES, OP_NE, OP_EQ, OP_AND, OP_OR -> true
             else -> false
         }
 

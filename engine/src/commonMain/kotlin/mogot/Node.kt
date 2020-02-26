@@ -81,27 +81,25 @@ open class Node : Closeable {
         _childs.remove(node)
     }
 
-    fun findNode(id: String, recursive: Boolean = false): Node? =
-            if (recursive) {
-                var out: Node? = null
-                childs.forEach {
-                    currentToChilds {
-                        if (it.id == id) {
-                            out = it
-                            false
-                        }
-                        true
-                    }
-                }
-                out
-            } else {
-                childs.find { it.id == id }
+    fun findNode(id: String, recursive: Boolean = false): Node? {
+        if (recursive) {
+            childs.forEach {
+                if (it.id == id)
+                    return it
+                val result = it.findNode(id, true)
+                if (result != null)
+                    return result
             }
+            return null
+        } else {
+            return childs.find { it.id == id }
+        }
+    }
 
     open fun apply(matrix: Matrix4fc): Matrix4fc = matrix
-    open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        //NOP
-    }
+//    open fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+//        //NOP
+//    }
 
     open fun renderToShadowMap(model: Matrix4fc, view: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext, shader: DepthShader){
 

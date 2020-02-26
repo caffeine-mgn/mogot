@@ -10,4 +10,20 @@ expect class Fixture {
     fun getUserData(): Any?
     fun setUserData(data: Any?)
     fun getShape(): Shape
+    fun isSensor(): Boolean
+    fun setSensor(sensor: Boolean)
+    /**
+     * Get the coefficient of restitution.
+     *
+     * @return
+     */
+    fun getRestitution(): Float
+
+    /**
+     * Set the coefficient of restitution. This will _not_ change the restitution of existing
+     * contacts.
+     *
+     * @param restitution
+     */
+    fun setRestitution(restitution: Float)
 }

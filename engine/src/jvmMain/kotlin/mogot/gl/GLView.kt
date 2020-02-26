@@ -277,6 +277,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         }
 
         while (!engine.frameListeners.isEmpty) {
+            println("Execute... ${engine.frameListeners.size}")
             engine.frameListeners.popFirst().invoke()
         }
 

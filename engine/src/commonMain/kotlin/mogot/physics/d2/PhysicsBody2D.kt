@@ -2,9 +2,7 @@ package mogot.physics.d2
 
 import mogot.Engine
 import mogot.Spatial2D
-import mogot.math.Vector2fProperty
 import mogot.math.Vector2fm
-import mogot.math.angle
 import mogot.physics.box2d.common.Vec2
 import mogot.physics.box2d.dynamics.*
 
@@ -20,6 +18,12 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
             boxBody.setType(value)
         }
     private val pos = Vec2()
+
+    var fixedRotation: Boolean
+        get() = boxBody.isFixedRotation()
+        set(value) {
+            boxBody.setFixedRotation(value)
+        }
 
     init {
         val bodyDef = BodyDef()
@@ -50,20 +54,55 @@ class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
     override var rotation: Float
         get() = tx.q.getAngle()
         set(value) {
-            tx.q.set(value)
+//            tx.q.set(value)
+            pos.x = position.x
+            pos.y = position.y
+            boxBody.setTransform(pos, value)
         }
 
     private val tx = boxBody.getTransform()
-    override fun update(delta: Float) {
-        super.position.set(tx.p.x, tx.p.y)
-        super.rotation = tx.q.getAngle()
-        if (bodyType == BodyType.DYNAMIC)
-            println("angle=${tx.q.getAngle()}")
-        super.update(delta)
-    }
 
     override fun close() {
         engine.physicsManager2D.world.destroyBody(boxBody)
         super.close()
     }
+
+    override fun update(delta: Float) {
+        super.position.set(tx.p.x, tx.p.y)
+        super.rotation = tx.q.getAngle()
+        super.update(delta)
+    }
+
+    private val linear = boxBody.getLinearVelocity()
+    val linearVelocity: Vector2fm = object : Vector2fm {
+        override var x: Float
+            get() = linear.x
+            set(value) {
+                linear.x = value
+                if (value != 0f)
+                    boxBody.setAwake(true)
+            }
+        override var y: Float
+            get() = linear.y
+            set(value) {
+                linear.y = value
+                if (value != 0f)
+                    boxBody.setAwake(true)
+            }
+
+        override fun set(x: Float, y: Float): Vector2fm {
+            linear.x = x
+            linear.y = y
+            if (x != 0f || y != 0f)
+                boxBody.setAwake(true)
+            return this
+        }
+    }
+    var angularVelocity: Float
+        get() = boxBody.getAngularVelocity()
+        set(value) {
+            boxBody.setAngularVelocity(value)
+            if (value != 0f)
+                boxBody.setAwake(true)
+        }
 }

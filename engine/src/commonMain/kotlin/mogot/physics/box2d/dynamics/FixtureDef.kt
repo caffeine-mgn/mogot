@@ -2,9 +2,13 @@ package mogot.physics.box2d.dynamics
 
 import mogot.physics.box2d.collision.shapes.Shape
 
-expect class FixtureDef{
+expect class FixtureDef {
     constructor()
-    var shape:Shape
-    var density:Float
-    var friction:Float
+
+    var shape: Shape
+    var density: Float
+    var friction: Float
+    var restitution:Float
+    var isSensor: Boolean
+    var userData: Any?
 }

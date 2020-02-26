@@ -57,7 +57,7 @@ private fun createStub(view: SceneEditorView, light: PointLight) {
     view.renderThread {
         val s = SpriteFor3D(view)
         s.size.set(120f / 4f, 160f / 4f)
-        s.material.value = SolidTextureMaterial(view.engine).apply {
+        s.internalMaterial = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.omniManager.PointLightTexture.gl
         }
@@ -97,7 +97,7 @@ object OmniLightService : NodeService {
 
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         val sprite = view.engine.omniManager.lights[node]?.node ?: return
-        val material = sprite.material.value as SolidTextureMaterial
+        val material = sprite.internalMaterial as SolidTextureMaterial
         if (selected)
             material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
         else

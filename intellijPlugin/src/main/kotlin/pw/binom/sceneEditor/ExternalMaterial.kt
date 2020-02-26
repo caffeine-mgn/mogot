@@ -13,7 +13,7 @@ import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
 import java.io.StringReader
 
-private val EDITOR_SHADER = """
+val EDITOR_SHADER = """
     @property
     bool selected
     
