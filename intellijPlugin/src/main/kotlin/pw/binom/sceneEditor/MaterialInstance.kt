@@ -139,6 +139,7 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
     }
 
     fun get(uniform: Uniform) = values[uniform.name]
+    override var reservedTexturesMaxId: Int = 0
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         root.use(model, projection, renderContext)

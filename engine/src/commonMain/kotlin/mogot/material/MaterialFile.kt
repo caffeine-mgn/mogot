@@ -12,7 +12,7 @@ import pw.binom.io.*
 const val DEFAULT_MATERIAL_2D_FILE = "Material2DDefault"
 
 class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceImpl() {
-
+    override var reservedTexturesMaxId: Int = 0
     private val activeTextures = ArrayList<Texture2D>()
     private val textureIds = HashMap<Texture2D, Int>()
 
@@ -24,7 +24,7 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
 
     private fun updateTextureIndexes() {
         activeTextures.forEachIndexed { index, textureFile ->
-            textureFile.id2 = index
+            textureFile.id2 = (index + reservedTexturesMaxId)
         }
     }
 
@@ -62,6 +62,12 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
     private val params = HashMap<String, Any>()
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         material.use(model, projection, renderContext)
+        renderContext.shadowMaps.forEachIndexed { index, texture2D ->
+            gl.enable(gl.TEXTURE0+index)
+            gl.bindTexture(gl.TEXTURE_2D,texture2D.glTexture)
+            material.shader.uniform("shadowMaps[$index]",index)
+        }
+        reservedTexturesMaxId = renderContext.shadowMaps.size - 1
         params.forEach { (k, v) ->
             when (v) {
                 is Vector3fc -> material.shader.uniform(k, v)

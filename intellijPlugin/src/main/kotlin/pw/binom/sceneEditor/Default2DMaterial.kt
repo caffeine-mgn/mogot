@@ -14,6 +14,7 @@ import pw.binom.material.Default2DMaterial as ToolsDefault2DMaterial
 class Material2DInstance(val root: Default2DMaterial) : EditableMaterial, ResourceImpl() {
 
     override var selected = false
+    override var reservedTexturesMaxId: Int = 0
     override var hover = false
     var image by ResourceHolder<ExternalTextureFS>()
 

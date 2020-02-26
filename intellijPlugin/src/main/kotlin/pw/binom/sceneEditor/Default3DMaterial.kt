@@ -28,6 +28,7 @@ class MInstance(val root: MaterialGLSL, color: Vector4fc) : EditableMaterial, Re
 
     override var hover: Boolean = false
     override var selected: Boolean = false
+    override var reservedTexturesMaxId: Int = 0
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         root.use(model, projection, renderContext)

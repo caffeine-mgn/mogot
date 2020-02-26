@@ -290,7 +290,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
                 gl.gl.glEnable(GL2.GL_CULL_FACE)
 
                 if (camera != null) {
-                    (renderContext.shadowMaps as MutableList<Texture2D>).clear()
+                    renderContext.shadowMaps.clear()
                     directLightShadowsRender?.render(camera!!.position,root!!, renderContext)
                     renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
                 }

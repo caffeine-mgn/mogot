@@ -5,6 +5,7 @@ import mogot.math.Matrix4fc
 import mogot.math.Vector3f
 
 abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
+    override var reservedTexturesMaxId: Int = 0
     companion object{
         const val PROJECTION="gles_projection"
         const val MODEL="gles_model"
@@ -39,11 +40,12 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
             shader.uniform("lights[$index].diffuse", light.diffuse)
             shader.uniform("lights[$index].specular", light.specular)
         }
-        /*renderContext.shadowMaps.forEachIndexed { index, texture2D ->
-            engine.gl.enable(engine.gl.TEXTURE0+index+5)
+        renderContext.shadowMaps.forEachIndexed { index, texture2D ->
+            engine.gl.enable(engine.gl.TEXTURE0+index)
             engine.gl.bindTexture(engine.gl.TEXTURE_2D,texture2D.glTexture)
-            shader.uniform("shadowMaps[$index]",index+5)
-        }*/
+            shader.uniform("shadowMaps[$index]",index)
+        }
+        reservedTexturesMaxId = renderContext.shadowMaps.size - 1
         engine.gl.checkError { "After set material properties" }
     }
 
