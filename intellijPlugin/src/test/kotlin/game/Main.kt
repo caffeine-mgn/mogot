@@ -11,13 +11,17 @@ import pw.binom.sceneEditor.Default3DMaterial
 import pw.binom.sceneEditor.Grid3D
 import pw.binom.sceneEditor.GuideLine
 import pw.binom.sceneEditor.SimpleMaterial
+import pw.binom.ui.AnimateFrameView
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
+import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
+import javax.swing.JScrollBar
+import kotlin.collections.ArrayList
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -129,7 +133,7 @@ object Main {
             }
         })
         p.addMouseWheelListener {
-//            gTop.scale -= it.wheelRotation / 5f
+            //            gTop.scale -= it.wheelRotation / 5f
 //            gLeft.scale -= it.wheelRotation / 5f
             println("g.scale=${gTop.scale}")
         }
@@ -141,5 +145,79 @@ object Main {
 //        view.startRender()
         f.isVisible = true
         view.startRender()
+    }
+}
+
+class FrameImpl(override val color: Color, override var time: Int) : AnimateFrameView.Frame
+class FrameLine : AnimateFrameView.FrameLine {
+    val frames = TreeSet<AnimateFrameView.Frame> { a, b -> a.time - b.time }
+    override fun iterator(startTime: Float): Iterator<AnimateFrameView.Frame> {
+        val it2 = frames.iterator()
+        val it = frames.iterator()
+        while (it.hasNext()) {
+            val f = it.next()
+            if (f.time >= startTime) {
+                return it2
+            }
+            it2.next()
+        }
+        return emptyList<AnimateFrameView.Frame>().iterator()
+    }
+
+    override fun frame(time: Int): AnimateFrameView.Frame? =
+            frames.find { it.time == time }
+
+    override fun remove(frame: AnimateFrameView.Frame) {
+        frames.remove(frame)
+    }
+}
+
+class AnimateModel : AnimateFrameView.Model {
+    val frameLines = ArrayList<AnimateFrameView.FrameLine>()
+    override val lineCount: Int
+        get() = frameLines.size
+
+    override fun line(index: Int): AnimateFrameView.FrameLine = frameLines[index]
+}
+
+object Main2 {
+    @JvmStatic
+    fun main(args: Array<String>) {
+
+        val model = AnimateModel()
+        model.frameLines.add(FrameLine().also {
+            it.frames.add(FrameImpl(Color.YELLOW, 0))
+            it.frames.add(FrameImpl(Color.YELLOW, 10))
+            it.frames.add(FrameImpl(Color.GREEN, 20))
+            it.frames.add(FrameImpl(Color.GREEN, 25))
+        })
+
+        model.frameLines.add(FrameLine().also {
+            it.frames.add(FrameImpl(Color.BLUE, 0))
+            it.frames.add(FrameImpl(Color.BLUE, 15))
+            it.frames.add(FrameImpl(Color.GREEN, 21))
+            it.frames.add(FrameImpl(Color.BLUE, 30))
+        })
+        model.frameLines.add(FrameLine())
+
+        val f = JFrame()
+        val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
+        val vScroll = JScrollBar()
+
+        f.size = Dimension(800, 600)
+        f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        f.add(vScroll, BorderLayout.WEST)
+        f.add(hScroll, BorderLayout.SOUTH)
+        val view = AnimateFrameView()
+        view.model = model
+        view.frameCount = 200
+        f.add(view)
+
+        hScroll.addAdjustmentListener {
+            view.scrollX = hScroll.value
+        }
+        hScroll.minimum = 0
+        hScroll.maximum = view.frameCount
+        f.isVisible = true
     }
 }
