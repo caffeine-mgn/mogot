@@ -113,8 +113,19 @@ class AnimateFrameView : JComponent() {
 
     fun isSelected(frame: Int, line: Int) = selected[line]?.contains(frame) == true
 
-    init {
+    private val zeroDimension = Dimension(0, 0)
+    private val preferredDimension = Dimension(0, 0)
 
+    override fun getPreferredSize(): Dimension {
+        val model = model ?: run {
+            zeroDimension.setSize(0, 0)
+            return zeroDimension
+        }
+        preferredDimension.setSize((frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHight + frameLineHight * 0.5f).roundToInt())
+        return preferredDimension
+    }
+
+    init {
         addMouseMotionListener(object : MouseMotionListenerImpl {
             override fun mouseDragged(e: MouseEvent) {
                 if (state == null && lastClickFrame != null) {
@@ -132,8 +143,7 @@ class AnimateFrameView : JComponent() {
                 }
 
                 if (state == null && lastClickFrame == null) {
-                    val frameNum = floor((e.x + scrollX) / frameWidth).roundToInt()
-                    currentFrame = frameNum
+                    currentFrame = maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0)
                     repaint()
                     return
                 }
@@ -207,6 +217,11 @@ class AnimateFrameView : JComponent() {
             }
 
             override fun mouseClicked(e: MouseEvent) {
+                if (e.y < timeHeight) {
+                    currentFrame = maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0)
+                    repaint()
+                    return
+                }
                 val frame = getFrame(e.x, e.y)
                 val frameNum = frame?.x
                 val line = frame?.y

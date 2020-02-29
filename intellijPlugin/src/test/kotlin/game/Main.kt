@@ -6,6 +6,7 @@ import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
 import mogot.math.Vector2f
 import mogot.math.Vector3f
+import pw.binom.ComponentListenerImpl
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
 import pw.binom.sceneEditor.Grid3D
@@ -15,6 +16,8 @@ import pw.binom.ui.AnimateFrameView
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.event.ComponentEvent
+import java.awt.event.ComponentListener
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
@@ -198,13 +201,23 @@ object Main2 {
             it.frames.add(FrameImpl(Color.GREEN, 21))
             it.frames.add(FrameImpl(Color.BLUE, 30))
         })
-        model.frameLines.add(FrameLine())
+
+        (0 until 10).forEach {
+            model.frameLines.add(FrameLine())
+        }
+
+        model.frameLines.add(FrameLine().also {
+            it.frames.add(FrameImpl(Color.BLUE, 0))
+            it.frames.add(FrameImpl(Color.BLUE, 15))
+            it.frames.add(FrameImpl(Color.GREEN, 21))
+            it.frames.add(FrameImpl(Color.BLUE, 30))
+        })
 
         val f = JFrame()
         val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
         val vScroll = JScrollBar()
 
-        f.size = Dimension(800, 600)
+        f.size = Dimension(1000, 200)
         f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.add(vScroll, BorderLayout.WEST)
         f.add(hScroll, BorderLayout.SOUTH)
@@ -214,10 +227,26 @@ object Main2 {
         f.add(view)
 
         hScroll.addAdjustmentListener {
-            view.scrollX = hScroll.value
+            view.scrollX = maxOf(0, hScroll.value)
         }
-        hScroll.minimum = 0
-        hScroll.maximum = view.frameCount
+
+        vScroll.addAdjustmentListener {
+            view.scrollY = maxOf(0, vScroll.value)
+        }
+
+//        hScroll.minimum = 0
+//        hScroll.maximum = view.preferredSize.width - view.size.width
+
+        view.addComponentListener(object : ComponentListenerImpl {
+            override fun componentResized(e: ComponentEvent) {
+                hScroll.minimum = 0
+                hScroll.maximum = view.preferredSize.width - view.size.width
+
+                vScroll.minimum = 0
+                vScroll.maximum = view.preferredSize.height - view.size.height
+            }
+        })
+
         f.isVisible = true
     }
 }
