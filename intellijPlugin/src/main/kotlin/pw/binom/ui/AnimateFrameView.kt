@@ -4,6 +4,8 @@ import mogot.math.Math.PI
 import pw.binom.MouseListenerImpl
 import pw.binom.MouseMotionListenerImpl
 import java.awt.*
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 import java.awt.event.MouseEvent
 import java.util.*
 import javax.swing.JComponent
@@ -68,7 +70,7 @@ class AnimateFrameView : JComponent() {
             repaint()
         }
 
-    var frameLineHight: Float = 20f
+    var frameLineHeight: Float = 20f
         set(value) {
             if (value <= 0f)
                 throw IllegalArgumentException()
@@ -92,7 +94,7 @@ class AnimateFrameView : JComponent() {
     private fun getFrame(x: Int, y: Int): Point? {
         val model = model ?: return null
         val frameNum = floor((x + scrollX) / frameWidth).roundToInt()
-        val line = floor((y - timeHeight + scrollY) / frameLineHight).roundToInt()
+        val line = floor((y - timeHeight + scrollY) / frameLineHeight).roundToInt()
         if (line >= model.lineCount)
             return null
         if (y < timeHeight)
@@ -121,11 +123,21 @@ class AnimateFrameView : JComponent() {
             zeroDimension.setSize(0, 0)
             return zeroDimension
         }
-        preferredDimension.setSize((frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHight + frameLineHight * 0.5f).roundToInt())
+        preferredDimension.setSize((frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHeight + frameLineHeight * 0.5f).roundToInt())
         return preferredDimension
     }
 
     init {
+        addFocusListener(object : FocusListener {
+            override fun focusLost(e: FocusEvent?) {
+                selected.clear()
+                repaint()
+            }
+
+            override fun focusGained(e: FocusEvent?) {
+            }
+
+        })
         addMouseMotionListener(object : MouseMotionListenerImpl {
             override fun mouseDragged(e: MouseEvent) {
                 if (state == null && lastClickFrame != null) {
@@ -280,7 +292,7 @@ class AnimateFrameView : JComponent() {
 
         val offset = scrollX / frameWidth
         val model = model ?: return
-        val hight = (model.lineCount * frameLineHight).roundToInt()
+        val hight = (model.lineCount * frameLineHeight).roundToInt()
         val startFrame = floor(offset).toInt()
 
         for (i in 0 until frameCount) {
@@ -294,13 +306,13 @@ class AnimateFrameView : JComponent() {
                 g.fillRect(x, 0 + timeHeight, frameWidth.roundToInt(), hight)
             }
             for (row in 0 until model.lineCount) {
-                val y = (row * frameLineHight - scrollY).roundToInt()
+                val y = (row * frameLineHeight - scrollY).roundToInt()
 
                 if (state is SelectByDrag) {
                     val state = state as SelectByDrag
                     if (i.between(state.startFrame, state.currentFrame) && row.between(state.startLine, state.currentLine)) {
                         g.color = preSelectedColor
-                        g.fillRect(x, y + timeHeight, frameWidth.roundToInt(), frameLineHight.roundToInt())
+                        g.fillRect(x, y + timeHeight, frameWidth.roundToInt(), frameLineHeight.roundToInt())
                     }
                 }
 
@@ -308,7 +320,7 @@ class AnimateFrameView : JComponent() {
                 if (selectRow != null)
                     if (i in selectRow) {
                         g.color = selectedColor
-                        g.fillRect(x, y + timeHeight, frameWidth.roundToInt(), frameLineHight.roundToInt())
+                        g.fillRect(x, y + timeHeight, frameWidth.roundToInt(), frameLineHeight.roundToInt())
                     }
             }
             g.color = frameLineColor
@@ -321,14 +333,14 @@ class AnimateFrameView : JComponent() {
 
         val defaultTransform = g.transform
         for (i in 0 until model.lineCount) {
-            val y = (i * frameLineHight + frameLineHight - scrollY + timeHeight).roundToInt()
+            val y = (i * frameLineHeight + frameLineHeight - scrollY + timeHeight).roundToInt()
             g.color = frameLineColor
             g.drawLine(0, y, width, y)
             val line = model.line(i)
             val it = line.iterator(0f)
 
             it.forEach {
-                val pointY = (y - frameLineHight * 0.5f).roundToInt()
+                val pointY = (y - frameLineHeight * 0.5f).roundToInt()
                 val x = (it.time * frameWidth - scrollX + frameWidth * 0.5f).roundToInt()
                 g.translate(x, pointY)
                 g.rotate(PI * 0.25)
@@ -342,19 +354,19 @@ class AnimateFrameView : JComponent() {
             val state = state as MoveByDrag
             selected.forEach { row, frames ->
 
-                val y = (row * frameLineHight - scrollY + timeHeight).roundToInt()
+                val y = (row * frameLineHeight - scrollY + timeHeight).roundToInt()
                 frames.forEach FRAMES@{ f ->
                     val x = ((f + state.deltaFrame) * frameWidth - scrollX).roundToInt()
                     g.color = preSelectedColor
-                    g.fillRect(x, y, frameWidth.roundToInt(), frameLineHight.roundToInt())
+                    g.fillRect(x, y, frameWidth.roundToInt(), frameLineHeight.roundToInt())
                 }
             }
             selected.forEach { y, frames ->
                 val row = model.line(y)
                 frames.forEach FRAMES@{ f ->
-                    val y = (y * frameLineHight + frameLineHight - scrollY + timeHeight).roundToInt()
+                    val y = (y * frameLineHeight + frameLineHeight - scrollY + timeHeight).roundToInt()
                     val it = row.frame(f) ?: return@FRAMES
-                    val pointY = (y - frameLineHight * 0.5f).roundToInt()
+                    val pointY = (y - frameLineHeight * 0.5f).roundToInt()
 
                     val x = ((it.time + state.deltaFrame) * frameWidth - scrollX + frameWidth * 0.5f).roundToInt()
                     g.translate(x, pointY)
@@ -392,7 +404,7 @@ class AnimateFrameView : JComponent() {
                 g.color = Color.WHITE
                 g.drawString(str, (x + fontWidth * 0.5f).roundToInt(), fontHeight)
             }
-            if ((i + 1) % 5 == 0) {
+            if (i == 0 || (i + 1) % 5 == 0) {
                 val str = (i + 1).toString()
                 val fontWidth = g.getFontMetrics(font2).stringWidth(str)
                 g.color = Color.WHITE
@@ -403,8 +415,6 @@ class AnimateFrameView : JComponent() {
         }
         g.color = timeLinesSeparatorColor
         g.drawLine(0, timeHeight, width, timeHeight)
-
-
     }
 }
 

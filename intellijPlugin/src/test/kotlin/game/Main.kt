@@ -13,6 +13,7 @@ import pw.binom.sceneEditor.Grid3D
 import pw.binom.sceneEditor.GuideLine
 import pw.binom.sceneEditor.SimpleMaterial
 import pw.binom.ui.AnimateFrameView
+import pw.binom.ui.AnimatePropertyView
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -21,9 +22,7 @@ import java.awt.event.ComponentListener
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.util.*
-import javax.swing.JFrame
-import javax.swing.JPanel
-import javax.swing.JScrollBar
+import javax.swing.*
 import kotlin.collections.ArrayList
 import kotlin.math.cos
 import kotlin.math.sin
@@ -183,9 +182,27 @@ class AnimateModel : AnimateFrameView.Model {
     override fun line(index: Int): AnimateFrameView.FrameLine = frameLines[index]
 }
 
+class AnimateNode(override val icon: Icon?, override val text: String, override val properties: List<AnimatePropertyView.Property>) : AnimatePropertyView.Node {
+    override var lock: Boolean = false
+    override var visible: Boolean = false
+}
+
+class AnimateProperty(override val text: String) : AnimatePropertyView.Property {
+    override var lock: Boolean = false
+}
+
+class PropertyModel(override val nodes: List<AnimatePropertyView.Node>) : AnimatePropertyView.Model
+
 object Main2 {
     @JvmStatic
     fun main(args: Array<String>) {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        val propertiesModel = PropertyModel(listOf(
+                AnimateNode(null, "AnimateSprite", listOf(
+                        AnimateProperty("Position"),
+                        AnimateProperty("Rotation")
+                ))
+        ))
 
         val model = AnimateModel()
         model.frameLines.add(FrameLine().also {
@@ -217,14 +234,30 @@ object Main2 {
         val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
         val vScroll = JScrollBar()
 
+
+
         f.size = Dimension(1000, 200)
         f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        f.add(vScroll, BorderLayout.WEST)
-        f.add(hScroll, BorderLayout.SOUTH)
+
+
+        val pan = JPanel()
+
+
+        val propertyView = AnimatePropertyView()
+        propertyView.model = propertiesModel
+
         val view = AnimateFrameView()
         view.model = model
         view.frameCount = 200
-        f.add(view)
+        pan.layout = BorderLayout()
+        pan.add(view, BorderLayout.CENTER)
+        pan.add(vScroll, BorderLayout.EAST)
+        pan.add(hScroll, BorderLayout.SOUTH)
+        val split = JSplitPane()
+        split.leftComponent = propertyView
+        split.rightComponent = pan
+        split.resizeWeight = 0.2
+        f.add(split)
 
         hScroll.addAdjustmentListener {
             view.scrollX = maxOf(0, hScroll.value)
@@ -232,6 +265,7 @@ object Main2 {
 
         vScroll.addAdjustmentListener {
             view.scrollY = maxOf(0, vScroll.value)
+            propertyView.scrollY = maxOf(0, vScroll.value)
         }
 
 //        hScroll.minimum = 0
