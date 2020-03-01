@@ -56,6 +56,6 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
     }
 
     override fun unuse() {
-        engine.gl.useProgram(null)
+        shader.unuse()
     }
 }

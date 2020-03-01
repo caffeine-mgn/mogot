@@ -39,6 +39,7 @@ open class CSGBox(val engine: Engine) : CSGPrimitive(), MaterialNode by Material
             shader.uniform("view", view)
             shader.uniform("model", model)
             geom!!.draw()
+            shader.unuse()
         }
     }
 

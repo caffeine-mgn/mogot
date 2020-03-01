@@ -90,15 +90,9 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
                 println("withAlpcha=$withAlpcha")
                 val size = (if (withAlpcha) 4 else 3) * width * height
                 val data = ByteArray(size)
-
                 it.readFully(data)
-                val buf = ByteBuffer.allocateDirect(size)
-                buf.put(data)
+                val buf = ByteBuffer.wrap(data)
                 buf.flip2()
-                val byteDataBuffer = ByteDataBuffer.alloc(buf.remaining())
-                for(i in 0 until buf.remaining()){
-                    byteDataBuffer[i] = buf[i]
-                }
                 SourceImage(
                         if (withAlpcha)
                             SourceImage.Type.RGBA
@@ -106,7 +100,7 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
                             SourceImage.Type.RGB,
                         width,
                         height,
-                        byteDataBuffer
+                        ByteDataBuffer.wrap(buf)
                 )
             }
         }.await()

@@ -68,7 +68,7 @@ class TestGame(val engine: Engine) {
 
         root.addChild(s)
         s.size.set(100f, 100f)
-        s.material.value = mat
+
 
         engine.waitFrame {
             //val tex = engine.resources.createTexture2D("res/2.png")

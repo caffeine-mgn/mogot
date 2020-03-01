@@ -44,6 +44,10 @@ open class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
         gl.useProgram(id)
     }
 
+    fun unuse(){
+        gl.useProgram(null)
+    }
+
     fun use(f: () -> Unit) {
         try {
             gl.useProgram(id)

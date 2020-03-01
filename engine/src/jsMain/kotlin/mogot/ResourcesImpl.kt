@@ -21,7 +21,7 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
         ctx.drawImage(img,0.0,0.0)
         val imgData = ctx.getImageData(0.0,0.0,img.width.toDouble(),img.height.toDouble())
         val data = imgData.data
-        val byteDataBuffer = ByteDataBuffer.alloc(data.length)
+        val byteDataBuffer = ByteDataBuffer.alloc(data.length)//TODO(ByteDataBuffer(UInt8ClampedArray))
         for(i in 0 until data.length){
             byteDataBuffer[i] = data[i]
         }
