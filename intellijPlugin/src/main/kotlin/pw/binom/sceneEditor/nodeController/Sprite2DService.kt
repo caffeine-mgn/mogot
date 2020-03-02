@@ -6,12 +6,14 @@ import mogot.Node
 import mogot.Sprite
 import mogot.collider.Collider2D
 import mogot.collider.Panel2DCollider
+import mogot.math.Vector2fm
 import mogot.math.set
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Sprite2DPropertyFactory
 import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import pw.binom.utils.Vector2fmDelegator
 import java.io.Closeable
 import javax.swing.Icon
 import kotlin.collections.set
@@ -50,6 +52,11 @@ object Sprite2DService : NodeService {
     private val props = listOf(Transform2DPropertyFactory, Sprite2DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             props
+
+    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<*>> {
+        node as EditableSprite
+        return listOf(node.transformField, node.rotationField, node.scaleField)
+    }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != Sprite::class.java.name)
@@ -125,6 +132,22 @@ object Sprite2DService : NodeService {
 
 class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine) {
 
+    val transformField = PositionField2D(this)
+    val scaleField = ScaleField2D(this)
+    val rotationField = RotationField2D(this)
+
+    override val position: Vector2fm = Vector2fmDelegator(super.position) {
+        transformField.eventChange.dispatch()
+    }
+    override val scale: Vector2fm = Vector2fmDelegator(super.scale) {
+        scaleField.eventChange.dispatch()
+    }
+    override var rotation: Float
+        get() = super.rotation
+        set(value) {
+            super.rotation = value
+            rotationField.eventChange.dispatch()
+        }
     var texture: ExternalTextureFS?
         get() = material.image
         set(value) {
@@ -142,3 +165,4 @@ class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine) {
         super.close()
     }
 }
+

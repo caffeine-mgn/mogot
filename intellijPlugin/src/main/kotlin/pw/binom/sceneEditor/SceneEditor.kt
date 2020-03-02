@@ -16,6 +16,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import pw.binom.sceneEditor.animate.AnimateTab
+import pw.binom.sceneEditor.nodeController.EditAnimateNode
 import pw.binom.sceneEditor.properties.Property
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.struct.SceneStruct
@@ -35,11 +37,13 @@ class SceneEditor(val project: Project,
 
     private val SCENE_TOOL_WINDOW = "Scene"
     private val PROPERTIES_TOOL_WINDOW = "Properties"
+    private val ANIMATION_TOOL_WINDOW = "Animation"
 
     private val undoManager = UndoManager.getInstance(project)
 
     val structToolWindow: ToolWindow
     val propertyToolWindow: ToolWindow
+    val animationToolWindow: ToolWindow
 
     private val properties = HashMap<PropertyFactory, Property>()
 
@@ -100,6 +104,12 @@ class SceneEditor(val project: Project,
                         false,
                         ToolWindowAnchor.RIGHT
                 )
+        animationToolWindow = ToolWindowManager.getInstance(project).getToolWindow(ANIMATION_TOOL_WINDOW)
+                ?: ToolWindowManager.getInstance(project).registerToolWindow(
+                        ANIMATION_TOOL_WINDOW,
+                        false,
+                        ToolWindowAnchor.BOTTOM
+                )
     }
 
     private val userData = HashMap<Key<*>, Any?>()
@@ -108,6 +118,7 @@ class SceneEditor(val project: Project,
         get() = _viewer!!
     lateinit var sceneStruct: SceneStruct
     val propertyTool = PropertyToolWindow(this)
+    val animationTool = AnimateTab(this)
 
 
     init {
@@ -157,6 +168,7 @@ class SceneEditor(val project: Project,
         println("selectNotify")
         structToolWindow.useContent(sceneStruct)
         propertyToolWindow.useContent(propertyTool)
+        animationToolWindow.useContent(animationTool)
 //        structToolWindow.setAvailable(true, null)
 //        propertyToolWindow.setAvailable(true, null)
     }
@@ -164,6 +176,7 @@ class SceneEditor(val project: Project,
     override fun deselectNotify() {
         structToolWindow.contentManager.removeAllContents(true)
         propertyToolWindow.contentManager.removeAllContents(true)
+        animationToolWindow.contentManager.removeAllContents(true)
         privateCurrentEditor = null
         viewer.view.stopRender()
 //        println("deselectNotify")

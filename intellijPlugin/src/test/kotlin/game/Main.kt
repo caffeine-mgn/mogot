@@ -248,7 +248,7 @@ object Main2 {
 
         val view = AnimateFrameView()
         view.model = model
-        view.frameCount = 200
+        view.frameCount = 10
         pan.layout = BorderLayout()
         pan.add(view, BorderLayout.CENTER)
         pan.add(vScroll, BorderLayout.EAST)

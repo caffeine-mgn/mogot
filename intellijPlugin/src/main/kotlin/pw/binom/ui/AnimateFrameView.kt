@@ -13,6 +13,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
+
 /**
  * Component for view TimeLine
  */
@@ -34,12 +35,14 @@ class AnimateFrameView : JComponent() {
     }
 
     interface FrameLine {
-        fun iterator(startTime: Float): Iterator<Frame>
+        fun iterator(): Iterator<Frame>
         fun frame(time: Int): Frame?
         fun remove(frame: Frame)
     }
 
     interface Model {
+        val frameCount: Int
+        val frameInSeconds: Int
         val lineCount: Int
         fun line(index: Int): FrameLine
     }
@@ -47,6 +50,7 @@ class AnimateFrameView : JComponent() {
     var model: Model? = null
 
 
+    /*
     var frameCount = 0
         set(value) {
             if (value < 0)
@@ -54,6 +58,7 @@ class AnimateFrameView : JComponent() {
             field = value
             repaint()
         }
+    */
     var scrollX = 0
         set(value) {
             if (value < 0)
@@ -88,8 +93,7 @@ class AnimateFrameView : JComponent() {
     private val selected = TreeMap<Int, TreeSet<Int>>()
 
     private var lastClickFrame: Point? = null
-    var currentFrame = 30
-    var frameInSeconds = 24
+    var currentFrame = 0
 
     private fun getFrame(x: Int, y: Int): Point? {
         val model = model ?: return null
@@ -123,7 +127,7 @@ class AnimateFrameView : JComponent() {
             zeroDimension.setSize(0, 0)
             return zeroDimension
         }
-        preferredDimension.setSize((frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHeight + frameLineHeight * 0.5f).roundToInt())
+        preferredDimension.setSize((model.frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHeight + frameLineHeight * 0.5f).roundToInt())
         return preferredDimension
     }
 
@@ -154,8 +158,8 @@ class AnimateFrameView : JComponent() {
                     return
                 }
 
-                if (state == null && lastClickFrame == null) {
-                    currentFrame = maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0)
+                if (state == null && lastClickFrame == null && model != null) {
+                    currentFrame = minOf(maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0), model!!.frameCount - 1)
                     repaint()
                     return
                 }
@@ -229,8 +233,8 @@ class AnimateFrameView : JComponent() {
             }
 
             override fun mouseClicked(e: MouseEvent) {
-                if (e.y < timeHeight) {
-                    currentFrame = maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0)
+                if (e.y < timeHeight && model != null) {
+                    currentFrame = minOf(maxOf(floor((e.x + scrollX) / frameWidth).roundToInt(), 0), model!!.frameCount - 1)
                     repaint()
                     return
                 }
@@ -295,7 +299,7 @@ class AnimateFrameView : JComponent() {
         val hight = (model.lineCount * frameLineHeight).roundToInt()
         val startFrame = floor(offset).toInt()
 
-        for (i in 0 until frameCount) {
+        for (i in 0 until model.frameCount) {
             val x = (i * frameWidth - scrollX).roundToInt()
             if (x < 0)
                 continue
@@ -337,7 +341,7 @@ class AnimateFrameView : JComponent() {
             g.color = frameLineColor
             g.drawLine(0, y, width, y)
             val line = model.line(i)
-            val it = line.iterator(0f)
+            val it = line.iterator()
 
             it.forEach {
                 val pointY = (y - frameLineHeight * 0.5f).roundToInt()
@@ -392,14 +396,14 @@ class AnimateFrameView : JComponent() {
 
         g.font = font2
         val fontHeight = g.getFontMetrics(font2).height
-        for (i in 0 until frameCount) {
+        for (i in 0 until model.frameCount) {
             val x = (i * frameWidth - scrollX).roundToInt()
             if (x < 0)
                 continue
             if (x > width)
                 break
-            if ((i + 1) % frameInSeconds == 0) {
-                val str = "${(i + 1) / frameInSeconds} s"
+            if ((i + 1) % model.frameInSeconds == 0) {
+                val str = "${(i + 1) / model.frameInSeconds} s"
                 val fontWidth = g.getFontMetrics(font2).stringWidth(str)
                 g.color = Color.WHITE
                 g.drawString(str, (x + fontWidth * 0.5f).roundToInt(), fontHeight)

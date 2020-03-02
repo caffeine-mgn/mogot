@@ -13,6 +13,16 @@
 
     <actions>
         <group id="EditMogotGroup" popup="false">
+            <action id="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
+                    class="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
+                    text="Enter Animate Mode" description="Enter to Animate Mode">
+                <keyboard-shortcut first-keystroke="ENTER" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
+                    class="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
+                    text="Leave Animate Mode" description="Leave from Animate Mode">
+                <keyboard-shortcut first-keystroke="ENTER" keymap="$default"/>
+            </action>
             <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
                     text="Duplicate Node" description="Duplicate selected Node">
                 <keyboard-shortcut first-keystroke="control D" keymap="$default"/>

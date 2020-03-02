@@ -1,10 +1,9 @@
 package pw.binom.utils
 
-import mogot.math.Vector3f
-import mogot.math.Vector3fc
-import mogot.math.Vector2f
-import mogot.math.Vector2fc
+import mogot.math.*
 import org.jbox2d.dynamics.BodyType
+import javax.swing.SwingUtilities
+
 
 fun <T> Sequence<T>.equalsAll(): Boolean {
     val first = firstOrNull() ?: return true
@@ -82,3 +81,34 @@ val <T : Vector3fc> Sequence<T>.common: Vector3f
         }
         return vec
     }
+
+class Vector2fmDelegator(val vector: Vector2fm, val updateEvent: () -> Unit) : Vector2fm {
+    override var x: Float
+        get() = vector.x
+        set(value) {
+            vector.x = value
+            updateEvent()
+        }
+    override var y: Float
+        get() = vector.y
+        set(value) {
+            vector.y = value
+            updateEvent()
+        }
+
+    override fun set(x: Float, y: Float): Vector2fm {
+        vector.set(x, y)
+        updateEvent()
+        return this
+    }
+}
+
+fun executeOnUiThread(func: () -> Unit) {
+    if (SwingUtilities.isEventDispatchThread()) {
+        println("Execute in UI")
+        func()
+        return
+    }
+    println("Execute later")
+    SwingUtilities.invokeLater { func() }
+}
