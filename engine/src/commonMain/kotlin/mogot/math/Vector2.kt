@@ -36,6 +36,12 @@ interface Vector2fc {
     val x: Float
     val y: Float
 
+    fun lerp(other: Vector2fc, t: Float, dest: Vector2fm): Vector2fm {
+        dest.x = x + (other.x - x) * t
+        dest.y = y + (other.y - y) * t
+        return dest
+    }
+
     val lengthSquared
         get() = x * x + y * y
 

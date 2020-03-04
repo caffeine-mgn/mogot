@@ -23,6 +23,7 @@ import pw.binom.ui.NodeFieldDataFlavor
 import pw.binom.utils.relativePath
 import java.awt.BorderLayout
 import java.awt.dnd.*
+import mogot.math.*
 import java.io.Closeable
 import javax.swing.ComboBoxModel
 import javax.swing.event.ListDataEvent
@@ -155,18 +156,38 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
         refreshFrameAnimation()
     }
 
+    private fun interpolationBetween(currentFrame: Int, frameA: AnimateFile.AnimateProperty.AnimateFrame, frameB: AnimateFile.AnimateProperty.AnimateFrame): Any? {
+        require(frameA.property.type === frameB.property.type)
+        require(frameA.property === frameB.property)
+        require(frameA.time < frameB.time) { "frameA.time=${frameA.time} frameB.time=${frameB.time}" }
+        require(currentFrame >= frameA.time && currentFrame <= frameB.time)
+        val cof =
+                when {
+                    currentFrame == frameA.time -> 0f
+                    currentFrame == frameB.time -> 1f
+                    else -> (currentFrame - frameA.time).toFloat() / (frameB.time - frameA.time).toFloat()
+                }
+        println("cof=$cof")
+        return when (frameA.property.type) {
+            NodeService.FieldType.VEC2 -> {
+                (frameA.data as Vector2f).lerp(frameB.data as Vector2f, cof, Vector2f())
+            }
+            else -> TODO()
+        }
+    }
+
     private fun refreshFrameAnimation() {
         val model = animateModel ?: return
         val node = node ?: return
         model.nodes.forEach {
             it.properties.forEach {
                 val before = it.getFrameFor(frameView.currentFrame)
-                val after = it.getNextFrameFor(frameView.currentFrame)
+                val after = it.getNextFrameFor(frameView.currentFrame+1)
                 val field = it.getField(editor.viewer.view, node) as NodeService.Field<Any?>? ?: return@forEach
                 when {
                     before == null && after != null -> field.setTempValue(after.data)
                     before != null && after == null -> field.setTempValue(before.data)
-                    before != null && after != null -> field.setTempValue(before.data)
+                    before != null && after != null -> field.setTempValue(interpolationBetween(frameView.currentFrame, before, after))//field.setTempValue(before.data)
                 }
             }
         }

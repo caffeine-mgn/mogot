@@ -7,6 +7,7 @@ import mogot.AnimateNode
 import mogot.EventDispatcher
 import mogot.Node
 import pw.binom.array
+import mogot.math.*
 import pw.binom.obj
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
@@ -91,12 +92,26 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 animateNode.properties += animateProperty
                 property.obj["frames"].array.forEach { frame ->
                     val time = frame.obj["time"].intValue()
-                    val value = frame.obj["val"]?.textValue()
+                    val value = frame.obj["val"]?.textValue()?.let { fromString(type, it) }
                     animateProperty.addFrame(time, value)
                 }
             }
         }
     }
+
+    private fun fromString(type: NodeService.FieldType, value: String) =
+            when (type) {
+                NodeService.FieldType.FLOAT -> value.toFloatOrNull() ?: 0f
+                NodeService.FieldType.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
+                NodeService.FieldType.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
+            }
+
+    private fun toString(type: NodeService.FieldType, value: Any?): String? =
+            when (type) {
+                NodeService.FieldType.FLOAT -> (value as Float?)?.toString()
+                NodeService.FieldType.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
+                NodeService.FieldType.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
+            }
 
     fun save() {
         val root = json(
@@ -113,7 +128,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                                         "frames" to property.iterator().map { frame ->
                                             json(
                                                     "time" to frame.time.json(),
-                                                    "val" to frame.data?.toString()?.json()
+                                                    "val" to frame.data.let { toString(property.type, it) }?.json()
                                             )
                                         }.json()
                                 )
@@ -129,6 +144,8 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
         private val frames = TreeMap<Int, AnimateFrame>()
 
         inner class AnimateFrame(time: Int, var data: Any?) : AnimateFrameView.Frame {
+            val property
+                get() = this@AnimateProperty
             override val color: Color = Color.BLACK
             override var time: Int = time
                 set(value) {
