@@ -3,6 +3,6 @@ package mogot
 import mogot.math.Vector4fc
 
 interface RenderContext {
-    val pointLights: List<PointLight>
+    val lights: List<Light>
     val sceneColor: Vector4fc
 }

@@ -3,7 +3,7 @@ package pw.binom.sceneEditor.nodeController
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Engine
 import mogot.Node
-import mogot.OmniLight
+import mogot.PointLight
 import mogot.math.AABBm
 import mogot.math.set
 import pw.binom.SolidTextureMaterial
@@ -27,39 +27,39 @@ object OmniNodeCreator : NodeCreator {
     override val icon: Icon = ImageIcon(this::class.java.classLoader.getResource("/light-icon-16.png"))
 
     override fun create(view: SceneEditorView): Node {
-        val node = OmniLight()
+        val node = PointLight()
         createStub(view, node)
         return node
     }
 }
 
 private class OmniManager(val engine: Engine) : Closeable {
-    val lights = HashMap<OmniLight, FlatScreenBehaviour>()
+    val lights = HashMap<PointLight, FlatScreenBehaviour>()
 
-    lateinit var omniLightTexture: ExternalTexture
+    lateinit var PointLightTexture: ExternalTexture
 
     init {
         engine.editor.renderThread {
-            omniLightTexture = engine.resources.loadTextureResource("/light-icon.png")
-            omniLightTexture.inc()
+            PointLightTexture = engine.resources.loadTextureResource("/light-icon.png")
+            PointLightTexture.inc()
         }
     }
 
     override fun close() {
-        omniLightTexture.dec()
+        PointLightTexture.dec()
     }
 }
 
 private val Engine.omniManager: OmniManager
     get() = manager("omniManager") { OmniManager(this) }
 
-private fun createStub(view: SceneEditorView, light: OmniLight) {
+private fun createStub(view: SceneEditorView, light: PointLight) {
     view.renderThread {
         val s = SpriteFor3D(view)
         s.size.set(120f / 4f, 160f / 4f)
         s.internalMaterial = SolidTextureMaterial(view.engine).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
-            tex = view.engine.omniManager.omniLightTexture.gl
+            tex = view.engine.omniManager.PointLightTexture.gl
         }
         val b = FlatScreenBehaviour(view.engine, view.editorCamera, light)
         s.behaviour = b
@@ -76,10 +76,10 @@ object OmniLightService : NodeService {
 
     private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
-    override fun isEditor(node: Node): Boolean = node is OmniLight
+    override fun isEditor(node: Node): Boolean = node is PointLight
     override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is OmniLight) return null
-        val out = OmniLight()
+        if (node !is PointLight) return null
+        val out = PointLight()
         out.specular = node.specular
         out.diffuse.set(node.diffuse)
         SpatialService.cloneSpatial(node, out)
@@ -87,7 +87,7 @@ object OmniLightService : NodeService {
     }
 
     override fun delete(view: SceneEditorView, node: Node) {
-        if (node !is OmniLight) return
+        if (node !is PointLight) return
         super.delete(view, node)
         view.engine.omniManager.lights.remove(node)?.node?.let {
             it.parent = null
@@ -105,16 +105,16 @@ object OmniLightService : NodeService {
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != OmniLight::class.java.name)
+        if (clazz != PointLight::class.java.name)
             return null
-        val node = OmniLight()
+        val node = PointLight()
         createStub(view, node)
         SpatialService.loadSpatial(view.engine, node, properties)
         return node
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is OmniLight) return null
+        if (node !is PointLight) return null
         val out = HashMap<String, String>()
         SpatialService.saveSpatial(view.engine, node, out)
         out["specular"] = node.specular.toString()

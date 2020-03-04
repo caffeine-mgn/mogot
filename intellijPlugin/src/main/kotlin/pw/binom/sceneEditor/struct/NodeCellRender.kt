@@ -1,7 +1,7 @@
 package pw.binom.sceneEditor.struct
 
 import mogot.Node
-import mogot.OmniLight
+import mogot.PointLight
 import java.awt.Component
 import javax.swing.ImageIcon
 import javax.swing.JLabel
@@ -15,7 +15,7 @@ class NodeCellRender : TreeCellRenderer {
         value as Node
         label.text = value.id ?: value::class.java.simpleName
         label.icon = when (value) {
-            is OmniLight -> lightIcon
+            is PointLight -> lightIcon
             else -> null
         }
         return label

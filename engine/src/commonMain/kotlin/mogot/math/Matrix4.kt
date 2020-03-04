@@ -215,6 +215,13 @@ interface Matrix4fc {
             ortho2DGeneric(left, right, bottom, top, dest)
     }
 
+    fun ortho3D(left: Float, right: Float, bottom: Float, top: Float, zNear: Float, zFar: Float, dest: Matrix4f): Matrix4f{
+        return if (properties and PROPERTY_IDENTITY != 0)
+            dest.setOrtho3D(left, right, bottom, top,zNear,zFar)
+        else
+            ortho3DGeneric(left, right, bottom, top,zNear,zFar, dest)
+    }
+
     fun mul(right: Matrix4fc, dest: Matrix4f): Matrix4f {
         if (properties and PROPERTY_IDENTITY != 0)
             return dest.set(right)
@@ -692,6 +699,35 @@ private fun Matrix4fc.ortho2DGeneric(left: Float, right: Float, bottom: Float, t
     return dest
 }
 
+private fun Matrix4fc.ortho3DGeneric(left: Float, right: Float, bottom: Float, top: Float, zNear: Float, zFar: Float, dest: Matrix4f): Matrix4f{
+    val rm00 = 2.0f / (right - left)
+    val rm11 = 1.0f / (top - bottom)
+    val rm22 = -2.0f / (zFar - zNear)
+    val rm30 = (right + left) / (left - right)
+    val rm31 = (top + bottom) / (bottom - top)
+    val rm32 = (zFar + zNear) / (zNear - zFar)
+    // perform optimized multiplication
+// compute the last column first, because other columns do not depend on it
+    dest.m30 = (m00 * rm30 + m10 * rm31 + m30 * rm32)
+    dest.m31 = (m01 * rm30 + m11 * rm31 + m31 * rm32)
+    dest.m32 = (m02 * rm30 + m12 * rm31 + m32 * rm32)
+    dest.m33 = (m03 * rm30 + m13 * rm31 + m33 * rm32)
+    dest.m00 = (m00 * rm00)
+    dest.m01 = (m01 * rm00)
+    dest.m02 = (m02 * rm00)
+    dest.m03 = (m03 * rm00)
+    dest.m10 = (m10 * rm11)
+    dest.m11 = (m11 * rm11)
+    dest.m12 = (m12 * rm11)
+    dest.m13 = (m13 * rm11)
+    dest.m20 = (m20 * rm22)
+    dest.m21 = (m21 * rm22)
+    dest.m22 = (m22 * rm22)
+    dest.m23 = (m23 * rm22)
+    dest.properties = (properties and (PROPERTY_PERSPECTIVE or PROPERTY_IDENTITY or PROPERTY_TRANSLATION or PROPERTY_ORTHONORMAL).inv())
+    return dest
+}
+
 var PROPERTY_IDENTITY = 1 shl 2
 var PROPERTY_AFFINE = 1 shl 1
 var PROPERTY_TRANSLATION = 1 shl 3
@@ -744,6 +780,8 @@ class Matrix4f : Matrix4fc {
 
     fun ortho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f =
             ortho2D(left, right, bottom, top, this)
+    fun ortho3D(left: Float, right: Float, bottom: Float, top: Float, zNear: Float, zFar: Float): Matrix4f =
+            ortho3D(left, right, bottom, top,zNear,zFar,this)
 
     internal fun setOrtho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f {
         if (properties and PROPERTY_IDENTITY == 0) identity()
@@ -752,6 +790,18 @@ class Matrix4f : Matrix4fc {
         this.m22 = (-1.0f)
         this.m30 = ((right + left) / (left - right))
         this.m31 = ((top + bottom) / (bottom - top))
+        properties = PROPERTY_AFFINE
+        return this
+    }
+
+    internal fun setOrtho3D(left: Float, right: Float, bottom: Float, top: Float, zNear: Float, zFar: Float): Matrix4f {
+        if (properties and PROPERTY_IDENTITY == 0) identity()
+        this.m00 = (2.0f / (right - left))
+        this.m11 = (1.0f / (top - bottom))
+        this.m22 = (-2.0f / (zFar - zNear))
+        this.m30 = ((right + left) / (left - right))
+        this.m31 = ((top + bottom) / (bottom - top))
+        this.m33 = ((zFar+zNear)/(zNear-zFar))
         properties = PROPERTY_AFFINE
         return this
     }

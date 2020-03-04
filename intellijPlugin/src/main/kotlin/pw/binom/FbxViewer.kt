@@ -9,7 +9,7 @@ class FbxViewer(private val file: ByteArray) : View3D() {
         super.init()
         val model = FbxImporter.import(ByteArrayInputStream(file))
         val fbx = FbxImporter.import(gl, model) { SimpleMaterial(engine) }
-        val l = OmniLight()
+        val l = PointLight()
         val bb = CSGBox(engine)
         bb.width = 1f
         bb.depth = 1f

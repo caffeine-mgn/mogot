@@ -153,7 +153,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         }
         root!!.addChild(node)
 
-        val l = OmniLight()
+        val l = PointLight()
         val node1 = GeomNode().apply {
             geom.value = Geoms.solidSphere(gl, 1f, 30, 30)
             material.value = SimpleMaterial(engine)
