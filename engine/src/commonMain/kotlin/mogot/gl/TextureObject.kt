@@ -7,6 +7,11 @@ class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: 
         Nearest,
         Linear
     }
+    enum class Format{
+        RGB,
+        RGBA,
+        DEPTH_COMPONENT
+    }
 
     enum class MinFilterParameter {
         Nearest,

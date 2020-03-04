@@ -6,7 +6,7 @@ import mogot.math.Vector3ic
 import mogot.math.Vector4fc
 import pw.binom.io.Closeable
 
-class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
+open class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
     val id = gl.createProgram()
 
     init {
@@ -44,12 +44,16 @@ class Shader(val gl: GL, vertex: String, fragment: String) : Closeable {
         gl.useProgram(id)
     }
 
+    fun unuse(){
+        gl.useProgram(null)
+    }
+
     fun use(f: () -> Unit) {
         try {
             gl.useProgram(id)
             f()
         } finally {
-            gl.useProgram(null)
+            unuse()
         }
     }
 

@@ -99,8 +99,6 @@ kotlin {
                 api group: 'org.jogamp.jogl', name: 'nativewindow', version: '2.3.2'
                 api "pw.binom.io:file:$binom_io_version"
                 api 'org.jbox2d:jbox2d-library:2.2.1.1'
-
-
             }
         }
 

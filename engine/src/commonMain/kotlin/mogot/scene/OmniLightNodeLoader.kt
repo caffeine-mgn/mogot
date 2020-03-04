@@ -4,7 +4,7 @@ import mogot.Engine
 import mogot.Node
 import mogot.PointLight
 
-object OmniLightNodeLoader : SceneLoader.NodeLoader {
+object PointLightNodeLoader : SceneLoader.NodeLoader {
     override val nodeClass: String
         get() = "mogot.OmniLight"
 
