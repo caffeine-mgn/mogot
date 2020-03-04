@@ -80,7 +80,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         get() = renderContext.sceneColor
 
     protected object renderContext : RenderContext {
-        override val pointLights = ArrayList<PointLight>()
+        override val pointLights = ArrayList<Light>()
         override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     }
 
@@ -261,7 +261,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
         renderContext.pointLights.clear()
         root?.walk {
-            if (it is PointLight)
+            if (it is Light)
                 renderContext.pointLights += it
             true
         }
