@@ -90,15 +90,18 @@ class EditorVec2(val sceneEditor: SceneEditor, val fields: List<NodeService.Fiel
                     !x.isNaN() && !y.isNaN() -> {
                         val v = Vector2f(x, y)
                         fields.forEach {
+                            it.clearTempValue()
                             it.currentValue = v
                         }
                     }
                     !editor.value.x.isNaN() ->
                         fields.forEach {
+                            it.clearTempValue()
                             it.currentValue = Vector2f(x, it.currentValue.y)
                         }
                     !editor.value.y.isNaN() ->
                         fields.forEach {
+                            it.clearTempValue()
                             it.currentValue = Vector2f(it.currentValue.x, y)
                         }
 

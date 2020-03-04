@@ -7,25 +7,26 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
+import pw.binom.sceneEditor.AnimationFileType
 import pw.binom.sceneEditor.SceneFileType
 
-private const val TEMPLATE_SCENE_3D = "Scene3DTemplate"
+private const val ANIMATION_SCENE_3D = "AnimationTemplate"
 
-class CreateSceneFileAction : CreateFileFromTemplateAction("Scene", "Create new Scene file", SceneFileType.icon) {
+class CreateAnimationFile : CreateFileFromTemplateAction("Animation", "Create new Animation file", SceneFileType.icon) {
 
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String =
-            "Scene"
+            "Animation"
 
     override fun buildDialog(project: Project?, directory: PsiDirectory?, builder: CreateFileFromTemplateDialog.Builder) {
-        builder.setTitle("Create new Scene file")
-        builder.addKind("3D", SceneFileType.icon, TEMPLATE_SCENE_3D)
+        builder.setTitle("Create new Animation file")
+        builder.addKind("Animation", AnimationFileType.icon, ANIMATION_SCENE_3D)
     }
 
     override fun createFile(name: String, templateName: String, dir: PsiDirectory): PsiFile? {
-        if (templateName != TEMPLATE_SCENE_3D)
+        if (templateName != ANIMATION_SCENE_3D)
             return null
-        val text = "{\"scene\":[]}"
-        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.${SceneFileType.defaultExtension}", SceneFileType, text)
+        val text = "{\"frameInSecond\": 60}"
+        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.${AnimationFileType.defaultExtension}", AnimationFileType, text)
         dir.add(file)
         val virtualFile = file.virtualFile
         if (virtualFile != null)

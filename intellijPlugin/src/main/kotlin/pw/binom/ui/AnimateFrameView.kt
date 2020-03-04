@@ -1,5 +1,6 @@
 package pw.binom.ui
 
+import mogot.EventDispatcher
 import mogot.math.Math.PI
 import pw.binom.MouseListenerImpl
 import pw.binom.MouseMotionListenerImpl
@@ -91,9 +92,18 @@ class AnimateFrameView : JComponent() {
         }
 
     private val selected = TreeMap<Int, TreeSet<Int>>()
+    val currentFrameChangeEvent = EventDispatcher()
 
     private var lastClickFrame: Point? = null
     var currentFrame = 0
+        set(value) {
+            if (field == value) {
+                return
+            }
+
+            field = value
+            currentFrameChangeEvent.dispatch()
+        }
 
     private fun getFrame(x: Int, y: Int): Point? {
         val model = model ?: return null
@@ -116,6 +126,8 @@ class AnimateFrameView : JComponent() {
     }
 
     private var state: Any? = null
+
+    fun selectedLines(): Collection<Int> = selected.keys
 
     fun isSelected(frame: Int, line: Int) = selected[line]?.contains(frame) == true
 

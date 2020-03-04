@@ -1,5 +1,11 @@
 package pw.binom.utils
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.ObjectNode
+import mogot.Node
+import mogot.fullPath
 import mogot.math.*
 import org.jbox2d.dynamics.BodyType
 import javax.swing.SwingUtilities
@@ -111,4 +117,79 @@ fun executeOnUiThread(func: () -> Unit) {
     }
     println("Execute later")
     SwingUtilities.invokeLater { func() }
+}
+
+fun String.json() = JsonNodeFactory.instance.textNode(this)
+fun Int.json() = JsonNodeFactory.instance.numberNode(this)
+fun Float.json() = JsonNodeFactory.instance.numberNode(this)
+
+fun Map<String, JsonNode?>.json(): ObjectNode {
+    val node = JsonNodeFactory.instance.objectNode()
+    node.setAll<JsonNode>(node)
+    return node
+}
+
+fun json(vararg values: Pair<String, JsonNode?>): ObjectNode {
+    val node = JsonNodeFactory.instance.objectNode()
+    values.forEach {
+        node.set<JsonNode>(it.first, it.second)
+    }
+    return node
+}
+
+fun Collection<JsonNode>.json() = JsonNodeFactory.instance.arrayNode(size).addAll(this)
+fun <T : JsonNode> Iterator<T>.json(): ArrayNode {
+    val node = JsonNodeFactory.instance.arrayNode()
+    forEach {
+        node.add(it)
+    }
+    return node
+}
+
+fun <T, R> Iterator<T>.map(mapper: (T) -> R) = object : Iterator<R> {
+    override fun hasNext(): Boolean = this@map.hasNext()
+    override fun next(): R = mapper(this@map.next())
+}
+
+fun Node.relativePath(otherNode: Node): String? {
+    val thisPath = this.fullPath()
+    val otherPath = otherNode.fullPath()
+    var thisIndex = 0
+    var otherIndex = 0
+    while (true) {
+        if (thisPath.size > thisIndex && otherPath.size > otherIndex && thisPath[thisIndex] === otherPath[otherIndex]) {
+            thisIndex++
+            otherIndex++
+        } else {
+            break
+        }
+    }
+    val sb = StringBuilder()
+    if (thisIndex < thisPath.size) {
+        sb.append("../")
+        while (thisPath[thisIndex] !== this) {
+            thisIndex++
+            sb.append("../")
+        }
+    }
+    (otherIndex until otherPath.size).forEach {
+        if (!sb.endsWith("/") && sb.isNotEmpty())
+            sb.append("/")
+        sb.append(otherPath[it].id ?: return null)
+    }
+    return sb.toString()
+}
+
+fun Node.findByRelative(path: String): Node? {
+    var node = this
+    path.splitToSequence('/').forEach {
+        if (it == ".")
+            return@forEach
+        if (it == "..") {
+            node = node.parent ?: return null
+            return@forEach
+        }
+        node = node.findNode(it) ?: return null
+    }
+    return node
 }

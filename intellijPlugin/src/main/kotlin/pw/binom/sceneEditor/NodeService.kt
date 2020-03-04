@@ -22,6 +22,7 @@ interface NodeService {
         var currentValue: T
         val value: T
         val isEmpty: Boolean
+        fun clearTempValue()
         fun saveAsString(): String
         fun loadFromString(value: String)
         val name: String

@@ -22,6 +22,7 @@ class LeaveAnimationEditModeAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
+        editor.animationTool.leaveAnimation()
         editor.viewer.view.animateNode = null
         println("Leave from Animate Mode")
     }

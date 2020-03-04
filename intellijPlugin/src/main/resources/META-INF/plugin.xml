@@ -23,6 +23,11 @@
                     text="Leave Animate Mode" description="Leave from Animate Mode">
                 <keyboard-shortcut first-keystroke="ENTER" keymap="$default"/>
             </action>
+            <action id="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    class="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    text="Add Animate Frame" description="Add new Animate Frame for current Animation">
+                <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
+            </action>
             <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
                     text="Duplicate Node" description="Duplicate selected Node">
                 <keyboard-shortcut first-keystroke="control D" keymap="$default"/>
@@ -45,6 +50,12 @@
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
 
+        <action id="pw.binom.sceneEditor.action.CreateAnimationFile"
+                class="pw.binom.sceneEditor.action.CreateAnimationFile"
+                text="Animation" description="Create new Animation file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
+
         <action id="pw.binom.material.actions.CreateMaterialFileAction"
                 class="pw.binom.material.actions.CreateMaterialFileAction"
                 text="Material" description="Create new Material file">
@@ -63,6 +74,10 @@
                       topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
         <ApplicationLoadListener implementation="pw.binom.Starter"></ApplicationLoadListener>
+
+        <fileType name="ANIMATION" implementationClass="pw.binom.sceneEditor.AnimationFileType" fieldName="INSTANCE"
+                  language="Animation" extensions="anim"/>
+
         <!-- SceneEditor -->
         <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>

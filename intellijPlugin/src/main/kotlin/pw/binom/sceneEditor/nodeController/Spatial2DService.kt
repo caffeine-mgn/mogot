@@ -27,6 +27,11 @@ class PositionField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
         }
     override val value: Vector2fc
         get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
     override val name: String
         get() = "transform"
     override val displayName: String
@@ -57,6 +62,9 @@ class ScaleField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
         set(value) {
             node.scale.set(value)
         }
+    override fun clearTempValue() {
+        originalValue = null
+    }
     override val value: Vector2fc
         get() = originalValue ?: currentValue
     override val name: String
@@ -83,6 +91,9 @@ class RotationField2D(override val node: Spatial2D) : NodeService.FieldFloat() {
         get() = RotationField2D::class.java.hashCode()
     override val groupName: String
         get() = "Transform"
+    override fun clearTempValue() {
+        originalValue = null
+    }
     private var originalValue: Float? = null
     override var currentValue: Float
         get() = node.rotation

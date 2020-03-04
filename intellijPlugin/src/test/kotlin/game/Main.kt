@@ -153,17 +153,8 @@ object Main {
 class FrameImpl(override val color: Color, override var time: Int) : AnimateFrameView.Frame
 class FrameLine : AnimateFrameView.FrameLine {
     val frames = TreeSet<AnimateFrameView.Frame> { a, b -> a.time - b.time }
-    override fun iterator(startTime: Float): Iterator<AnimateFrameView.Frame> {
-        val it2 = frames.iterator()
-        val it = frames.iterator()
-        while (it.hasNext()) {
-            val f = it.next()
-            if (f.time >= startTime) {
-                return it2
-            }
-            it2.next()
-        }
-        return emptyList<AnimateFrameView.Frame>().iterator()
+    override fun iterator(): Iterator<AnimateFrameView.Frame> {
+        return frames.iterator()
     }
 
     override fun frame(time: Int): AnimateFrameView.Frame? =
@@ -176,6 +167,10 @@ class FrameLine : AnimateFrameView.FrameLine {
 
 class AnimateModel : AnimateFrameView.Model {
     val frameLines = ArrayList<AnimateFrameView.FrameLine>()
+    override val frameCount: Int
+        get() = 50
+    override val frameInSeconds: Int
+        get() = 24
     override val lineCount: Int
         get() = frameLines.size
 
@@ -248,7 +243,6 @@ object Main2 {
 
         val view = AnimateFrameView()
         view.model = model
-        view.frameCount = 10
         pan.layout = BorderLayout()
         pan.add(view, BorderLayout.CENTER)
         pan.add(vScroll, BorderLayout.EAST)

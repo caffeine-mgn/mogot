@@ -1,12 +1,21 @@
 package pw.binom.sceneEditor.nodeController
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.vfs.VirtualFile
+import mogot.AnimateNode
+import mogot.EventDispatcher
 import mogot.Node
+import pw.binom.array
+import pw.binom.obj
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
+import pw.binom.utils.findByRelative
+import pw.binom.utils.json
+import pw.binom.utils.map
 import java.awt.Color
 import java.util.*
 import javax.swing.Icon
@@ -23,24 +32,99 @@ object AnimateNodeCreator : NodeCreator {
 }
 
 object AnimateNodeService : NodeService {
+    override fun getClassName(node: Node): String = AnimateNode::class.java.name
+
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        return null
+        if (clazz != AnimateNode::class.java.name)
+            return null
+        val node = EditAnimateNode()
+        properties["files"]?.split('|')?.forEach {
+            node.add(it)
+        }
+        return node
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        return null
+        if (node::class.java != EditAnimateNode::class.java)
+            return null
+        node as EditAnimateNode
+        val out = HashMap<String, String>()
+        out["files"] = node.files.joinToString("|")
+        return out
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == EditAnimateNode::class.java
 
     override fun clone(view: SceneEditorView, node: Node): Node? {
-        return null
+        node as EditAnimateNode
+        val out = EditAnimateNode()
+        node.files.forEach {
+            out.add(it)
+        }
+        return out
     }
 
 }
 
-class AnimateFile : AnimatePropertyView.Model, AnimateFrameView.Model {
-    class AnimateProperty(override val text: String, val name: String, val type: NodeService.FieldType) : AnimatePropertyView.Property, AnimateFrameView.FrameLine {
+class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFrameView.Model {
+    private val doc = FileDocumentManager.getInstance().getDocument(file)!!
+    private val mapper = ObjectMapper()
+    override var frameCount: Int = 0
+    override var frameInSeconds: Int = 0
+    override val nodes = ArrayList<AnimateNode>()
+
+    init {
+        val tree = mapper.readTree(doc.text)
+
+        frameInSeconds = tree["frameInSecond"].intValue()
+        frameCount = tree["frameCount"].intValue()
+
+        tree["objects"]?.array?.forEach { line ->
+            val path = line.obj["path"].textValue()
+            val animateNode = AnimateNode(path)
+            nodes += animateNode
+            line.obj["properties"].array.forEach { property ->
+                val text = property.obj["text"].textValue()
+                val name = property.obj["name"].textValue()
+                val type = NodeService.FieldType.valueOf(property.obj["type"].textValue())
+                val animateProperty = AnimateProperty(text = text, name = name, type = type, node = animateNode)
+                animateNode.properties += animateProperty
+                property.obj["frames"].array.forEach { frame ->
+                    val time = frame.obj["time"].intValue()
+                    val value = frame.obj["val"]?.textValue()
+                    animateProperty.addFrame(time, value)
+                }
+            }
+        }
+    }
+
+    fun save() {
+        val root = json(
+                "frameInSecond" to frameInSeconds.json(),
+                "frameCount" to frameCount.json(),
+                "objects" to nodes.map { node ->
+                    json(
+                            "path" to node.nodePath.json(),
+                            "properties" to node.properties.map { property ->
+                                json(
+                                        "type" to property.type.name.json(),
+                                        "text" to property.name.json(),
+                                        "name" to property.name.json(),
+                                        "frames" to property.iterator().map { frame ->
+                                            json(
+                                                    "time" to frame.time.json(),
+                                                    "val" to frame.data?.toString()?.json()
+                                            )
+                                        }.json()
+                                )
+                            }.json()
+                    )
+                }.json()
+        )
+        doc.setText(mapper.writeValueAsString(root))
+    }
+
+    class AnimateProperty(val node: AnimateNode, override val text: String, val name: String, val type: NodeService.FieldType) : AnimatePropertyView.Property, AnimateFrameView.FrameLine {
         override var lock: Boolean = false
         private val frames = TreeMap<Int, AnimateFrame>()
 
@@ -50,12 +134,24 @@ class AnimateFile : AnimatePropertyView.Model, AnimateFrameView.Model {
                 set(value) {
                     if (value == field)
                         return
+                    frames.remove(field)
                     field = value
+                    frames[value] = this
                 }
         }
 
+        fun addFrame(time: Int, data: Any?) {
+            frames[time] = AnimateFrame(time, data)
+        }
+
+        fun getFrameFor(time: Int): AnimateFrame? = frames.floorEntry(time)?.value
+        fun getNextFrameFor(time: Int): AnimateFrame? = frames.ceilingEntry(time)?.value
+
         override fun iterator(): Iterator<AnimateFrame> =
                 frames.values.iterator()
+
+        val frameCount
+            get() = frames.size
 
         override fun frame(time: Int): AnimateFrameView.Frame? = frames[time]
 
@@ -81,9 +177,7 @@ class AnimateFile : AnimatePropertyView.Model, AnimateFrameView.Model {
         }
     }
 
-    override val nodes = ArrayList<AnimateNode>()
-    override var frameCount: Int = 0
-    override var frameInSeconds: Int = 0
+
     override val lineCount: Int
         get() = nodes.sumBy { it.properties.size + 1 }
 
@@ -104,6 +198,28 @@ class AnimateFile : AnimatePropertyView.Model, AnimateFrameView.Model {
 }
 
 class EditAnimateNode : Node() {
+    private val filePaths = ArrayList<String>()
+    val fileChangedEvent = EventDispatcher()
+    val files: List<String>
+        get() = filePaths
 
+    fun add(file: String) {
+        if (file in filePaths)
+            return
+        filePaths += file
+        fileChangedEvent.dispatch()
+    }
 
+    fun removeFile(file: String) {
+        if (filePaths.remove(file))
+            fileChangedEvent.dispatch()
+    }
+}
+
+fun AnimateFile.AnimateProperty.getField(view: SceneEditorView, node: EditAnimateNode): NodeService.Field<*>? {
+    val currentNode = node.findByRelative(this.node.nodePath) ?: return null
+    val service = view.getService(currentNode) ?: return null
+    return service.getFields(view, currentNode)
+            .find { it.name == this.name }
+            ?: return null
 }
