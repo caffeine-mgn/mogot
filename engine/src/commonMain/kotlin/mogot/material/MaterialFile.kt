@@ -62,12 +62,12 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
     private val params = HashMap<String, Any>()
     override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         material.use(model, projection, renderContext)
-        renderContext.shadowMaps.forEachIndexed { index, texture2D ->
+        /*renderContext.shadowMaps.forEachIndexed { index, texture2D ->
             gl.enable(gl.TEXTURE0+index)
             gl.bindTexture(gl.TEXTURE_2D,texture2D.glTexture)
             material.shader.uniform("shadowMaps[$index]",index)
         }
-        reservedTexturesMaxId = renderContext.shadowMaps.size - 1
+        reservedTexturesMaxId = renderContext.shadowMaps.size - 1*/
         params.forEach { (k, v) ->
             when (v) {
                 is Vector3fc -> material.shader.uniform(k, v)
