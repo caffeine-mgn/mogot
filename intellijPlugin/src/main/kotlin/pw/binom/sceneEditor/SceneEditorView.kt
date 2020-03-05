@@ -5,7 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.*
-import org.gradle.internal.logging.text.Style
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
@@ -42,9 +41,12 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         D3
     }
 
+    val changeAnimationModeEvent = EventDispatcher()
+
     var animateNode: EditAnimateNode? = null
         set(value) {
             field = value
+            changeAnimationModeEvent.dispatch()
             border = if (value != null) {
                 BorderFactory.createLineBorder(Color.RED, 2)
             } else {

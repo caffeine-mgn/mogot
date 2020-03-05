@@ -172,6 +172,9 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
 
         override fun frame(time: Int): AnimateFrameView.Frame? = frames[time]
 
+        override fun floorFrame(time: Int) = frames.floorEntry(time)?.value
+        override fun ceilingFrame(time: Int) = frames.ceilingEntry(time)?.value
+
         override fun remove(frame: AnimateFrameView.Frame) {
             check(frames[frame.time] === frame)
             frames.remove(frame.time)
@@ -188,6 +191,9 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
         override val properties = ArrayList<AnimateProperty>()
         override fun iterator(): Iterator<AnimateFrameView.Frame> = emptyList<AnimateFrameView.Frame>().iterator()
         override fun frame(time: Int): AnimateFrameView.Frame? = null
+        override fun floorFrame(time: Int): AnimateFrameView.Frame? = null
+
+        override fun ceilingFrame(time: Int): AnimateFrameView.Frame? = null
 
         override fun remove(frame: AnimateFrameView.Frame) {
             throw IllegalStateException()

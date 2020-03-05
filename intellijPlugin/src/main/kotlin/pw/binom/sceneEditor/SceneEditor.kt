@@ -102,7 +102,8 @@ class SceneEditor(val project: Project,
                 ?: ToolWindowManager.getInstance(project).registerToolWindow(
                         PROPERTIES_TOOL_WINDOW,
                         false,
-                        ToolWindowAnchor.RIGHT
+                        ToolWindowAnchor.RIGHT,
+                        true
                 )
         animationToolWindow = ToolWindowManager.getInstance(project).getToolWindow(ANIMATION_TOOL_WINDOW)
                 ?: ToolWindowManager.getInstance(project).registerToolWindow(
@@ -129,6 +130,15 @@ class SceneEditor(val project: Project,
             sceneStruct = SceneStruct(_viewer!!.view)
             viewer.view.eventSelectChanged.on {
                 propertyTool.setNodes(viewer.view.selected)
+            }
+        }
+
+        viewer.view.changeAnimationModeEvent.on {
+            if (viewer.view.animateNode != null) {
+                animationToolWindow.setAvailable(true, null)
+                animationToolWindow.show(null)
+            } else {
+                animationToolWindow.setAvailable(false, null)
             }
         }
     }
@@ -165,12 +175,19 @@ class SceneEditor(val project: Project,
     override fun selectNotify() {
         privateCurrentEditor = this
         viewer.view.startRender()
-        println("selectNotify")
         structToolWindow.useContent(sceneStruct)
         propertyToolWindow.useContent(propertyTool)
         animationToolWindow.useContent(animationTool)
-//        structToolWindow.setAvailable(true, null)
-//        propertyToolWindow.setAvailable(true, null)
+        structToolWindow.setAvailable(true, null)
+        propertyToolWindow.setAvailable(true, null)
+        structToolWindow.show(null)
+        propertyToolWindow.show(null)
+        if (viewer.view.animateNode == null) {
+            animationToolWindow.setAvailable(false, null)
+        } else {
+            animationToolWindow.setAvailable(true, null)
+            animationToolWindow.show(null)
+        }
     }
 
     override fun deselectNotify() {
@@ -179,9 +196,9 @@ class SceneEditor(val project: Project,
         animationToolWindow.contentManager.removeAllContents(true)
         privateCurrentEditor = null
         viewer.view.stopRender()
-//        println("deselectNotify")
-//        structToolWindow.setAvailable(false, null)
-//        propertyToolWindow.setAvailable(false, null)
+        animationToolWindow.setAvailable(false, null)
+        structToolWindow.setAvailable(false, null)
+        propertyToolWindow.setAvailable(false, null)
     }
 
     override fun <T : Any?> putUserData(key: Key<T>, value: T?) {

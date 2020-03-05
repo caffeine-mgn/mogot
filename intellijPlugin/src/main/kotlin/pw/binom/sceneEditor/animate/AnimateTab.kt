@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import pw.binom.sceneEditor.AnimationFileType
@@ -149,6 +150,7 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
     private val dropListener = AddFrameLineDropListener(this)
     private val configPanel = Panel()
     private val animationSelector = ComboBox<String>(100)
+    private val frameCount = JBIntSpinner(0, 0, Int.MAX_VALUE, 1)
     private val node: EditAnimateNode?
         get() = editor.viewer.view.animateNode
 
@@ -167,10 +169,17 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
                     currentFrame == frameB.time -> 1f
                     else -> (currentFrame - frameA.time).toFloat() / (frameB.time - frameA.time).toFloat()
                 }
-        println("cof=$cof")
         return when (frameA.property.type) {
             NodeService.FieldType.VEC2 -> {
                 (frameA.data as Vector2f).lerp(frameB.data as Vector2f, cof, Vector2f())
+            }
+            NodeService.FieldType.VEC3 -> {
+                (frameA.data as Vector3f).lerp(frameB.data as Vector3f, cof, Vector3f())
+            }
+            NodeService.FieldType.FLOAT->{
+                val a = frameA.data as Float
+                val b = frameB.data as Float
+                a + (b - a) * cof
             }
             else -> TODO()
         }
@@ -182,7 +191,7 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
         model.nodes.forEach {
             it.properties.forEach {
                 val before = it.getFrameFor(frameView.currentFrame)
-                val after = it.getNextFrameFor(frameView.currentFrame+1)
+                val after = it.getNextFrameFor(frameView.currentFrame + 1)
                 val field = it.getField(editor.viewer.view, node) as NodeService.Field<Any?>? ?: return@forEach
                 when {
                     before == null && after != null -> field.setTempValue(after.data)
@@ -257,6 +266,13 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
             animateModel = AnimateFile(file)
             frameView.model = animateModel
             propertyView.model = animateModel
+            frameCount.value = animateModel!!.frameCount
+            frameCount.isEnabled = true
+        }
+
+        frameCount.addChangeListener {
+            val model = animateModel ?: return@addChangeListener
+            model.frameInSeconds = frameCount.number
         }
     }
 
@@ -264,6 +280,7 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
         animationSelector.isEnabled = false
         (animationSelector.model as? AnimationComboBoxModel?)?.close()
         animationSelector.model = emptyModel2()
+        frameCount.isEnabled = false
 
         animateModel = null
         frameView.model = null
@@ -272,9 +289,11 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
 
     init {
         animationSelector.isEnabled = false
+        frameCount.isEnabled = false
 
         configPanel.add(animationSelector)
         configPanel.add(actions)
+        configPanel.add(frameCount)
         layout = BorderLayout()
         add(configPanel, BorderLayout.NORTH)
         splitter.firstComponent = propertyView

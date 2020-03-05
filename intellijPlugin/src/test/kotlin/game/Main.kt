@@ -150,18 +150,36 @@ object Main {
     }
 }
 
-class FrameImpl(override val color: Color, override var time: Int) : AnimateFrameView.Frame
+
 class FrameLine : AnimateFrameView.FrameLine {
-    val frames = TreeSet<AnimateFrameView.Frame> { a, b -> a.time - b.time }
-    override fun iterator(): Iterator<AnimateFrameView.Frame> {
-        return frames.iterator()
+    inner class FrameImpl(override val color: Color, time: Int) : AnimateFrameView.Frame {
+        override var time: Int = time
+            set(value) {
+                if (value == field)
+                    return
+                frames.remove(field)
+                field = value
+                frames[value] = this
+            }
     }
 
-    override fun frame(time: Int): AnimateFrameView.Frame? =
-            frames.find { it.time == time }
+    fun add(color: Color,time: Int) {
+        frames[time] = FrameImpl(color, time)
+    }
+
+    val frames = TreeMap<Int, AnimateFrameView.Frame>()
+    override fun iterator(): Iterator<AnimateFrameView.Frame> {
+        return frames.values.iterator()
+    }
+
+    override fun frame(time: Int): AnimateFrameView.Frame? = frames[time]
+
+    override fun floorFrame(time: Int): AnimateFrameView.Frame? = frames.floorEntry(time)?.value
+
+    override fun ceilingFrame(time: Int): AnimateFrameView.Frame? = frames.ceilingEntry(time)?.value
 
     override fun remove(frame: AnimateFrameView.Frame) {
-        frames.remove(frame)
+        frames.remove(frame.time)
     }
 }
 
@@ -201,17 +219,17 @@ object Main2 {
 
         val model = AnimateModel()
         model.frameLines.add(FrameLine().also {
-            it.frames.add(FrameImpl(Color.YELLOW, 0))
-            it.frames.add(FrameImpl(Color.YELLOW, 10))
-            it.frames.add(FrameImpl(Color.GREEN, 20))
-            it.frames.add(FrameImpl(Color.GREEN, 25))
+            it.add(Color.YELLOW, 0)
+            it.add(Color.YELLOW, 10)
+            it.add(Color.GREEN, 20)
+            it.add(Color.GREEN, 25)
         })
 
         model.frameLines.add(FrameLine().also {
-            it.frames.add(FrameImpl(Color.BLUE, 0))
-            it.frames.add(FrameImpl(Color.BLUE, 15))
-            it.frames.add(FrameImpl(Color.GREEN, 21))
-            it.frames.add(FrameImpl(Color.BLUE, 30))
+            it.add(Color.BLUE, 0)
+            it.add(Color.BLUE, 15)
+            it.add(Color.GREEN, 21)
+            it.add(Color.BLUE, 30)
         })
 
         (0 until 10).forEach {
@@ -219,16 +237,15 @@ object Main2 {
         }
 
         model.frameLines.add(FrameLine().also {
-            it.frames.add(FrameImpl(Color.BLUE, 0))
-            it.frames.add(FrameImpl(Color.BLUE, 15))
-            it.frames.add(FrameImpl(Color.GREEN, 21))
-            it.frames.add(FrameImpl(Color.BLUE, 30))
+            it.add(Color.BLUE, 0)
+            it.add(Color.BLUE, 15)
+            it.add(Color.GREEN, 21)
+            it.add(Color.BLUE, 30)
         })
 
         val f = JFrame()
-        val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
-        val vScroll = JScrollBar()
-
+//        val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
+//        val vScroll = JScrollBar()
 
 
         f.size = Dimension(1000, 200)
@@ -244,36 +261,36 @@ object Main2 {
         val view = AnimateFrameView()
         view.model = model
         pan.layout = BorderLayout()
-        pan.add(view, BorderLayout.CENTER)
-        pan.add(vScroll, BorderLayout.EAST)
-        pan.add(hScroll, BorderLayout.SOUTH)
+        val scrollPanel = JScrollPane(view)
+        pan.add(scrollPanel, BorderLayout.CENTER)
+//        pan.add(vScroll, BorderLayout.EAST)
+//        pan.add(hScroll, BorderLayout.SOUTH)
         val split = JSplitPane()
         split.leftComponent = propertyView
         split.rightComponent = pan
         split.resizeWeight = 0.2
         f.add(split)
 
-        hScroll.addAdjustmentListener {
-            view.scrollX = maxOf(0, hScroll.value)
-        }
-
-        vScroll.addAdjustmentListener {
-            view.scrollY = maxOf(0, vScroll.value)
-            propertyView.scrollY = maxOf(0, vScroll.value)
+//        hScroll.addAdjustmentListener {
+//            view.scrollX = maxOf(0, hScroll.value)
+//        }
+        scrollPanel.verticalScrollBar.addAdjustmentListener {
+            //view.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
+            propertyView.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
         }
 
 //        hScroll.minimum = 0
 //        hScroll.maximum = view.preferredSize.width - view.size.width
 
-        view.addComponentListener(object : ComponentListenerImpl {
-            override fun componentResized(e: ComponentEvent) {
-                hScroll.minimum = 0
-                hScroll.maximum = view.preferredSize.width - view.size.width
-
-                vScroll.minimum = 0
-                vScroll.maximum = view.preferredSize.height - view.size.height
-            }
-        })
+//        view.addComponentListener(object : ComponentListenerImpl {
+//            override fun componentResized(e: ComponentEvent) {
+//                hScroll.minimum = 0
+//                hScroll.maximum = view.preferredSize.width - view.size.width
+//
+//                vScroll.minimum = 0
+//                vScroll.maximum = view.preferredSize.height - view.size.height
+//            }
+//        })
 
         f.isVisible = true
     }

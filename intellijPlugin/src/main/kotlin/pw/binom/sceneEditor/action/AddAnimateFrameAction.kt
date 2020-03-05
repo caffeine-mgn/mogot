@@ -39,6 +39,8 @@ class AddAnimateFrameAction : AnAction() {
 //                    ?: return@forEach
             val value = when (field.fieldType) {
                 NodeService.FieldType.VEC2 -> Vector2f(field.currentValue as Vector2fc)
+                NodeService.FieldType.VEC3 -> Vector3f(field.currentValue as Vector3fc)
+                NodeService.FieldType.FLOAT -> field.currentValue as Float
                 else -> TODO()
             }
             property.addFrame(editor.animationTool.frameView.currentFrame, value)

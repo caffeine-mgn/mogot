@@ -6,7 +6,7 @@ import mogot.Node
 import mogot.Spatial2D
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
-import mogot.math.set
+import mogot.math.*
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
@@ -33,7 +33,7 @@ class PositionField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
     }
 
     override val name: String
-        get() = "transform"
+        get() = "position"
     override val displayName: String
         get() = "Position"
 
@@ -62,9 +62,11 @@ class ScaleField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
         set(value) {
             node.scale.set(value)
         }
+
     override fun clearTempValue() {
         originalValue = null
     }
+
     override val value: Vector2fc
         get() = originalValue ?: currentValue
     override val name: String
@@ -91,14 +93,16 @@ class RotationField2D(override val node: Spatial2D) : NodeService.FieldFloat() {
         get() = RotationField2D::class.java.hashCode()
     override val groupName: String
         get() = "Transform"
+
     override fun clearTempValue() {
         originalValue = null
     }
+
     private var originalValue: Float? = null
     override var currentValue: Float
-        get() = node.rotation
+        get() = toDegrees(node.rotation)
         set(value) {
-            node.scale.set(value)
+            node.rotation = toRadians(value)
         }
     override val value: Float
         get() = originalValue ?: currentValue
@@ -111,12 +115,12 @@ class RotationField2D(override val node: Spatial2D) : NodeService.FieldFloat() {
     override fun setTempValue(value: Float) {
         if (originalValue == null)
             originalValue = node.rotation
-        node.scale.set(value)
+        node.rotation = toRadians(value)
     }
 
     override fun resetValue() {
         if (originalValue != null) {
-            node.rotation = originalValue!!
+            node.rotation = toRadians(originalValue!!)
             originalValue = null
         }
     }

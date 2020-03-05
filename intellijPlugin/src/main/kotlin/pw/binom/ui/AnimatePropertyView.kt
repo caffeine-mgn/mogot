@@ -29,6 +29,10 @@ class AnimatePropertyView : JComponent() {
     }
 
     var model: Model? = null
+        set(value) {
+            field = value
+            repaint()
+        }
 
     var frameLineHeight: Float = 20f
         set(value) {

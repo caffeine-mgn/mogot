@@ -16,12 +16,12 @@
             <action id="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
                     class="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
                     text="Enter Animate Mode" description="Enter to Animate Mode">
-                <keyboard-shortcut first-keystroke="ENTER" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="E" keymap="$default"/>
             </action>
             <action id="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     class="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     text="Leave Animate Mode" description="Leave from Animate Mode">
-                <keyboard-shortcut first-keystroke="ENTER" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="E" keymap="$default"/>
             </action>
             <action id="pw.binom.sceneEditor.action.AddAnimateFrameAction"
                     class="pw.binom.sceneEditor.action.AddAnimateFrameAction"
