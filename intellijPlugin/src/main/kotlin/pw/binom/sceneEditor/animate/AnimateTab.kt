@@ -6,11 +6,16 @@ import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.ui.JBIntSpinner
-import com.intellij.ui.JBSplitter
+import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBScrollPane
+import mogot.math.Vector2f
+import mogot.math.Vector2fc
+import mogot.math.Vector3f
+import mogot.math.Vector3fc
 import pw.binom.sceneEditor.AnimationFileType
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
@@ -24,7 +29,6 @@ import pw.binom.ui.NodeFieldDataFlavor
 import pw.binom.utils.relativePath
 import java.awt.BorderLayout
 import java.awt.dnd.*
-import mogot.math.*
 import java.io.Closeable
 import javax.swing.ComboBoxModel
 import javax.swing.event.ListDataEvent
@@ -82,8 +86,9 @@ private class AddFrameLineDropListener(val tab: AnimateTab) : DropTargetListener
                             .also { line.properties.add(it) }
             tab.repaint()
         }
-        model.save()
-        println("Fields: ${fields.map { it.displayName }}")
+        ApplicationManager.getApplication().runWriteAction {
+            model.save()
+        }
     }
 
     override fun dragOver(dtde: DropTargetDragEvent) {
@@ -142,7 +147,7 @@ class AnimationComboBoxModel(val editor: SceneEditor, val node: EditAnimateNode)
 }
 
 class AnimateTab(val editor: SceneEditor) : Panel() {
-    private val splitter = JBSplitter(false, 0.3f)
+    private val splitter = OnePixelSplitter(false, 0.3f)
 
     val propertyView = AnimatePropertyView()
     val frameView = AnimateFrameView()
@@ -171,12 +176,12 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
                 }
         return when (frameA.property.type) {
             NodeService.FieldType.VEC2 -> {
-                (frameA.data as Vector2f).lerp(frameB.data as Vector2f, cof, Vector2f())
+                (frameA.data as Vector2fc).lerp(frameB.data as Vector2fc, cof, Vector2f())
             }
             NodeService.FieldType.VEC3 -> {
-                (frameA.data as Vector3f).lerp(frameB.data as Vector3f, cof, Vector3f())
+                (frameA.data as Vector3fc).lerp(frameB.data as Vector3fc, cof, Vector3f())
             }
-            NodeService.FieldType.FLOAT->{
+            NodeService.FieldType.FLOAT -> {
                 val a = frameA.data as Float
                 val b = frameB.data as Float
                 a + (b - a) * cof

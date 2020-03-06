@@ -12,25 +12,43 @@
     <idea-version since-build="191"/>
 
     <actions>
-        <group id="EditMogotGroup" popup="false">
+        <group id="AnimationMogotGroup" popup="true" text="Animation">
+            <action id="pw.binom.sceneEditor.action.NextFrameAction"
+                    class="pw.binom.sceneEditor.action.NextFrameAction"
+                    text="Next Frame" description="Switch to next Frame">
+                <keyboard-shortcut first-keystroke="." keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.PreviousFrameAction"
+                    class="pw.binom.sceneEditor.action.PreviousFrameAction"
+                    text="Previous Frame" description="Switch to previous Frame">
+                <keyboard-shortcut first-keystroke="COMMA" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    class="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    text="Add Animate Frame" description="Add new Animate Frame for current Animation Frame">
+                <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.DeleteFrameAction"
+                    class="pw.binom.sceneEditor.action.DeleteFrameAction"
+                    text="Delete Animate Frame" description="Delete Animate Frame from Animation">
+                <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
+            </action>
             <action id="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
                     class="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
                     text="Enter Animate Mode" description="Enter to Animate Mode">
-                <keyboard-shortcut first-keystroke="E" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="F8" keymap="$default"/>
             </action>
             <action id="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     class="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     text="Leave Animate Mode" description="Leave from Animate Mode">
                 <keyboard-shortcut first-keystroke="E" keymap="$default"/>
             </action>
-            <action id="pw.binom.sceneEditor.action.AddAnimateFrameAction"
-                    class="pw.binom.sceneEditor.action.AddAnimateFrameAction"
-                    text="Add Animate Frame" description="Add new Animate Frame for current Animation">
-                <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
-            </action>
+            <add-to-group group-id="EditMenu" anchor="last"/>
+        </group>
+        <group id="EditMogotGroup" popup="false">
             <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
                     text="Duplicate Node" description="Duplicate selected Node">
-                <keyboard-shortcut first-keystroke="control D" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="control D" second-keystroke="alt D" keymap="$default"/>
             </action>
             <action id="pw.binom.sceneEditor.action.AddPolygonAction"
                     class="pw.binom.sceneEditor.action.AddPolygonAction"

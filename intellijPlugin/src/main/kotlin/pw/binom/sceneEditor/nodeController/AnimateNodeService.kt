@@ -123,7 +123,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                             "properties" to node.properties.map { property ->
                                 json(
                                         "type" to property.type.name.json(),
-                                        "text" to property.name.json(),
+                                        "text" to property.text.json(),
                                         "name" to property.name.json(),
                                         "frames" to property.iterator().map { frame ->
                                             json(
@@ -179,6 +179,10 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
             check(frames[frame.time] === frame)
             frames.remove(frame.time)
         }
+
+        override fun remove(time: Int) {
+            frames.remove(time)
+        }
     }
 
     class AnimateNode(var nodePath: String) : AnimatePropertyView.Node, AnimateFrameView.FrameLine {
@@ -197,6 +201,9 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
 
         override fun remove(frame: AnimateFrameView.Frame) {
             throw IllegalStateException()
+        }
+
+        override fun remove(time: Int) {
         }
     }
 

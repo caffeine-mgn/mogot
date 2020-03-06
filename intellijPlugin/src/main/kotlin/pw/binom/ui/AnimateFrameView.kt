@@ -43,6 +43,7 @@ class AnimateFrameView : JComponent() {
         fun floorFrame(time: Int): Frame?
         fun ceilingFrame(time: Int): Frame?
         fun remove(frame: Frame)
+        fun remove(time:Int)
     }
 
     interface Model {
@@ -138,6 +139,9 @@ class AnimateFrameView : JComponent() {
     private var state: Any? = null
 
     fun selectedLines(): Collection<Int> = selected.keys
+
+    val selectedFrames: Map<Int, Set<Int>>
+        get() = selected
 
     fun isSelected(frame: Int, line: Int) = selected[line]?.contains(frame) == true
 
@@ -248,7 +252,6 @@ class AnimateFrameView : JComponent() {
             }
 
             override fun mouseReleased(e: MouseEvent) {
-                println("mouseReleased")
                 if (state is ChangeFrameState) {
                     state = null
                 }

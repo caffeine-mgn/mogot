@@ -15,9 +15,9 @@ class DuplicateNode : AnAction() {
         if (editor == null) {
             e.presentation.isEnabledAndVisible = false
             return
-        } else {
-            e.presentation.isVisible = true
         }
+        e.presentation.isVisible = true
+
 
         e.presentation.isEnabled = editor.viewer.view.selected.isNotEmpty()
     }
