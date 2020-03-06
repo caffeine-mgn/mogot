@@ -3,6 +3,7 @@ package mogot.gl
 import mogot.math.Matrix4fc
 import mogot.math.get
 import org.khronos.webgl.*
+import pw.binom.ByteDataBuffer
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 
@@ -110,6 +111,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.RENDERBUFFER
     actual val COLOR_ATTACHMENT0: Int
         get() = WebGLRenderingContext.COLOR_ATTACHMENT0
+    actual val DEPTH_ATTACHMENT: Int
+        get() = WebGLRenderingContext.DEPTH_ATTACHMENT
+    actual val DEPTH_COMPONEN: Int
+        get() = WebGLRenderingContext.DEPTH_COMPONENT
     actual val FRAMEBUFFER: Int
         get() = WebGLRenderingContext.FRAMEBUFFER
     actual val READ_FRAMEBUFFER: Int
@@ -126,6 +131,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.UNSIGNED_BYTE
     actual val RGB: Int
         get() = WebGLRenderingContext.RGB
+    actual val RGBA: Int
+        get() = WebGLRenderingContext.RGBA
     actual val MULTISAMPLE: Int
         get() = js("WebGL2RenderingContext.MULTISAMPLE")
 
@@ -149,6 +156,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
     actual val MAX_SAMPLES: Int
         get() = TODO("WebGLRenderingContext.MAX_SAMPLES")
+    actual val NONE: Int
+        get() = WebGLRenderingContext.NONE
 
     actual val MAX_TEXTURE_SIZE: Int
         get() = WebGLRenderingContext.MAX_TEXTURE_SIZE
@@ -164,6 +173,7 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.bufferData(target, data.buffer, usage)
     }
 
+
     actual fun clear(mask: Int) {
         ctx.clear(mask)
     }
@@ -171,6 +181,14 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun bindBuffer(target: Int, buffer: GLBuffer?) {
         buffer as JSBuffer?
         ctx.bindBuffer(target, buffer?.js)
+    }
+
+    actual fun drawBuffer(mode:Int){
+        TODO("drawBuffer(mode)")
+    }
+
+    actual fun readBuffer(mode: Int){
+        TODO("readBuffer(mode)")
     }
 
     actual fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int) {
@@ -362,7 +380,7 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun createFrameBuffer(): GLFrameBuffer =
             JSGLFrameBuffer(ctx.createFramebuffer()!!)
 
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteDataBuffer?) {
         TODO()
         //ctx.texImage2D(target,level,internalformat,width,height,border,format,type,pixels)
     }
@@ -426,6 +444,13 @@ actual class GL(val ctx: WebGL2RenderingContext) {
 
     actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
         TODO("ctx.blitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)")
+    }
+
+    actual fun viewPort(x:Int, y: Int, width:Int, height: Int){
+        ctx.viewport(x,y,width,height)
+    }
+    actual fun copyTexSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, x:Int, y:Int, width:Int, height:Int){
+        ctx.copyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height)
     }
 }
 

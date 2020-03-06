@@ -7,6 +7,7 @@ val Node.isVisualInstance
 
 open class VisualInstance : Spatial() {
     var visible = true
+    var shadow = false
     override val type: Int
         get() = VISUAL_INSTANCE3D_TYPE
 

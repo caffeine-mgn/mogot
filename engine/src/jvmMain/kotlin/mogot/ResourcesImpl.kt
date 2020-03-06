@@ -1,6 +1,7 @@
 package mogot
 
 import mogot.gl.flip2
+import pw.binom.ByteDataBuffer
 import pw.binom.io.*
 import pw.binom.io.file.File
 import pw.binom.io.file.FileInputStream
@@ -35,7 +36,11 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
             else
                 SourceImage.Type.RGB
             buf.flip2()
-            SourceImage(colorType, png.width, png.height, buf)
+            val byteDataBuffer = ByteDataBuffer.alloc(buf.remaining())
+            for(i in 0 until buf.remaining()){
+                byteDataBuffer[i] = buf[i]
+            }
+            SourceImage(colorType, png.width, png.height, byteDataBuffer)
         }
         return Texture2D(engine, image)
     }
@@ -57,7 +62,11 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
             else
                 SourceImage.Type.RGB
             buf.flip2()
-            SourceImage(colorType, png.width, png.height, buf)
+            val byteDataBuffer = ByteDataBuffer.alloc(buf.remaining())
+            for(i in 0 until buf.remaining()){
+                byteDataBuffer[i] = buf[i]
+            }
+            SourceImage(colorType, png.width, png.height, byteDataBuffer)
         }
         return Texture2D(engine, image)
     }
@@ -81,10 +90,8 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
                 println("withAlpcha=$withAlpcha")
                 val size = (if (withAlpcha) 4 else 3) * width * height
                 val data = ByteArray(size)
-
                 it.readFully(data)
-                val buf = ByteBuffer.allocateDirect(size)
-                buf.put(data)
+                val buf = ByteBuffer.wrap(data)
                 buf.flip2()
                 SourceImage(
                         if (withAlpcha)
@@ -93,7 +100,7 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
                             SourceImage.Type.RGB,
                         width,
                         height,
-                        buf
+                        ByteDataBuffer.wrap(buf)
                 )
             }
         }.await()
@@ -125,8 +132,7 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
     }
 
     actual fun createEmptyTexture2D(): Texture2D {
-        val buf = ByteBuffer.allocateDirect(2 * 2 * 4)
-        return Texture2D(engine, SourceImage(SourceImage.Type.RGBA, 2, 2, buf))
+        return Texture2D(engine, SourceImage(SourceImage.Type.RGBA, 2, 2, ByteDataBuffer.alloc(2 * 2 * 4)))
     }
 }
 

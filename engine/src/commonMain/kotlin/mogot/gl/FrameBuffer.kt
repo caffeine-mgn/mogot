@@ -9,7 +9,7 @@ class FrameBuffer(val gl: GL,val texture: TextureObject? = null, val renderBuffe
         fbo = gl.createFrameBuffer()
         bind()
         if(texture!=null) {
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture.target, texture.glTexture, 0)
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture.target, texture.gl, 0)
             gl.checkError {
                 "Framebuffer texture error"
             }

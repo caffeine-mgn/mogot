@@ -1,8 +1,9 @@
 package mogot.gl
 
+import mogot.SourceImage
 import pw.binom.io.Closeable
 
-class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable) : Closeable {
+class TextureObject(val glcontext: GL, image:SourceImage, val minFilter: MinFilterParameter = MinFilterParameter.Linear, val magFilter: MagFilterParameter = MagFilterParameter.Linear, val textureWrapS: TextureWrap = TextureWrap.Repeat, val textureWrapT: TextureWrap = TextureWrap.Repeat, val multisample: MSAALevels = MSAALevels.Disable, val format: Format = Format.RGB, val mipMaps: Int = 0) : Closeable {
     enum class MagFilterParameter {
         Nearest,
         Linear
@@ -35,85 +36,101 @@ class TextureObject(val gl: GL, val width: Int, val height: Int, val minFilter: 
         MSAAx16(16)
     }
 
-    val glTexture: GLTexture = gl.createTexture()
-    val target = if (multisample != MSAALevels.Disable) gl.TEXTURE_2D_MULTISAMPLE else gl.TEXTURE_2D
+    val gl: GLTexture = glcontext.createTexture()
+    val target = if (multisample != MSAALevels.Disable) glcontext.TEXTURE_2D_MULTISAMPLE else glcontext.TEXTURE_2D
+
+    constructor(gl: GL, width:Int, height:Int, minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, textureWrapS: TextureWrap = TextureWrap.Repeat, textureWrapT: TextureWrap = TextureWrap.Repeat, multisample: MSAALevels = MSAALevels.Disable, format: Format = Format.RGB, mipMaps: Int = 0):this(gl,SourceImage(if(format==Format.RGBA) SourceImage.Type.RGBA else SourceImage.Type.RGB,width,height,null))
 
     init {
-        gl.enable(gl.TEXTURE_2D)
-        gl.checkError {
+        glcontext.enable(glcontext.TEXTURE_2D)
+        glcontext.checkError {
             "Can't enable texture"
         }
         bind()
         if (multisample == MSAALevels.Disable) {
-            gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, when (minFilter) {
-                MinFilterParameter.Nearest -> gl.NEAREST
-                MinFilterParameter.Linear -> gl.LINEAR
-                MinFilterParameter.NearestMipmapNearest -> gl.NEAREST_MIPMAP_NEAREST
-                MinFilterParameter.LinearMipmapNearest -> gl.LINEAR_MIPMAP_NEAREST
-                MinFilterParameter.NearestMipmapLinear -> gl.NEAREST_MIPMAP_LINEAR
-                MinFilterParameter.LinearMipmapLinear -> gl.LINEAR_MIPMAP_LINEAR
+            glcontext.texParameteri(target, glcontext.TEXTURE_MIN_FILTER, when (minFilter) {
+                MinFilterParameter.Nearest -> glcontext.NEAREST
+                MinFilterParameter.Linear -> glcontext.LINEAR
+                MinFilterParameter.NearestMipmapNearest -> glcontext.NEAREST_MIPMAP_NEAREST
+                MinFilterParameter.LinearMipmapNearest -> glcontext.LINEAR_MIPMAP_NEAREST
+                MinFilterParameter.NearestMipmapLinear -> glcontext.NEAREST_MIPMAP_LINEAR
+                MinFilterParameter.LinearMipmapLinear -> glcontext.LINEAR_MIPMAP_LINEAR
             })
-            gl.checkError {
+            glcontext.checkError {
                 "Can't set texture params"
             }
-            gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, when (magFilter) {
-                MagFilterParameter.Nearest -> gl.NEAREST
-                MagFilterParameter.Linear -> gl.LINEAR
+            glcontext.texParameteri(target, glcontext.TEXTURE_MAG_FILTER, when (magFilter) {
+                MagFilterParameter.Nearest -> glcontext.NEAREST
+                MagFilterParameter.Linear -> glcontext.LINEAR
             })
-            gl.checkError {
+            glcontext.checkError {
                 "Can't set texture params"
             }
-            gl.texParameteri(target, gl.TEXTURE_WRAP_S, when (textureWrapS) {
-                TextureWrap.ClampToEdge -> gl.CLAMP_TO_EDGE
-                TextureWrap.MirroredRepeat -> gl.MIRRORED_REPEAT
-                TextureWrap.Repeat -> gl.REPEAT
+            glcontext.texParameteri(target, glcontext.TEXTURE_WRAP_S, when (textureWrapS) {
+                TextureWrap.ClampToEdge -> glcontext.CLAMP_TO_EDGE
+                TextureWrap.MirroredRepeat -> glcontext.MIRRORED_REPEAT
+                TextureWrap.Repeat -> glcontext.REPEAT
             })
-            gl.checkError {
+            glcontext.checkError {
                 "Can't set texture params"
             }
-            gl.texParameteri(target, gl.TEXTURE_WRAP_T, when (textureWrapT) {
-                TextureWrap.ClampToEdge -> gl.CLAMP_TO_EDGE
-                TextureWrap.MirroredRepeat -> gl.MIRRORED_REPEAT
-                TextureWrap.Repeat -> gl.REPEAT
+            glcontext.texParameteri(target, glcontext.TEXTURE_WRAP_T, when (textureWrapT) {
+                TextureWrap.ClampToEdge -> glcontext.CLAMP_TO_EDGE
+                TextureWrap.MirroredRepeat -> glcontext.MIRRORED_REPEAT
+                TextureWrap.Repeat -> glcontext.REPEAT
             })
-            gl.checkError {
+            glcontext.checkError {
                 "Can't set texture params"
+            }
+            if((minFilter!=MinFilterParameter.Nearest)&&(minFilter!=MinFilterParameter.Linear)) {
+                glcontext.texParameteri(target, glcontext.TEXTURE_MAX_LEVEL, mipMaps)
+                //TODO("glGenerateMipmap(GL_TEXTURE_2D);")
+                glcontext.checkError {
+                    "Can't set texture params"
+                }
             }
         }
 
 
         if (multisample != MSAALevels.Disable) {
-            gl.texImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, multisample.level, gl.RGB, width, height, true)
+            glcontext.texImage2DMultisample(glcontext.TEXTURE_2D_MULTISAMPLE, multisample.level, when(format){
+                Format.RGB -> glcontext.RGB
+                Format.RGBA -> glcontext.RGBA
+                Format.DEPTH_COMPONENT -> glcontext.DEPTH_COMPONEN
+            }, image.width, image.height, true)
         } else {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+            glcontext.texImage2D(glcontext.TEXTURE_2D, 0, when(format){
+                Format.RGB -> glcontext.RGB
+                Format.RGBA -> glcontext.RGBA
+                Format.DEPTH_COMPONENT -> glcontext.DEPTH_COMPONEN
+            }, image.width, image.height, 0, glcontext.RGB, glcontext.UNSIGNED_BYTE, image.data)
         }
-        gl.checkError {
+        glcontext.checkError {
             "Can't create texture"
         }
         unbind()
     }
 
     fun bind() {
-        gl.bindTexture(target, glTexture)
+        glcontext.bindTexture(target, gl)
     }
 
     fun unbind() {
-        gl.bindTexture(target, null)
+        glcontext.bindTexture(target, null)
     }
 
     override fun close() {
-        gl.disable(target)
-
+        glcontext.disable(target)
     }
 
     fun enable() {
         if (multisample != MSAALevels.Disable)
-            gl.enable(gl.MULTISAMPLE)
+            glcontext.enable(glcontext.MULTISAMPLE)
     }
 
     fun disable() {
         if (multisample != MSAALevels.Disable)
-            gl.disable(gl.MULTISAMPLE)
+            glcontext.disable(glcontext.MULTISAMPLE)
     }
 
 

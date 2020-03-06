@@ -2,6 +2,7 @@
 package mogot.gl
 
 import mogot.math.Matrix4fc
+import pw.binom.ByteDataBuffer
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import kotlin.jvm.JvmName
@@ -13,6 +14,8 @@ expect class GL {
     fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int)
     fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int)
     fun bindBuffer(target: Int, buffer: GLBuffer?)
+    fun drawBuffer(mode:Int)
+    fun readBuffer(mode: Int)
 
     fun createVertexArray(): GLVertexArray
     fun deleteVertexArray(array: GLVertexArray)
@@ -49,7 +52,7 @@ expect class GL {
     fun getProgramInfoLog(program: GLProgram): String?
     fun bindFrameBuffer(target: Int, frameBuffer: GLFrameBuffer?)
     fun createFrameBuffer(): GLFrameBuffer
-    fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?)
+    fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteDataBuffer?)
     fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean)
     fun texParameteri(target: Int, pname: Int, param: Int)
     fun framebufferTexture2D(target: Int, attachment: Int, textarget: Int, texture: GLTexture, level: Int)
@@ -72,6 +75,8 @@ expect class GL {
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
     fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
+    fun viewPort(x:Int, y: Int, width:Int, height: Int)
+    fun copyTexSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, x:Int, y:Int, width:Int, height:Int)
 
     val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
     val NEAREST: Int
@@ -84,6 +89,8 @@ expect class GL {
     val DEPTH24_STENCIL8: Int
     val RENDERBUFFER: Int
     val COLOR_ATTACHMENT0: Int
+    val DEPTH_ATTACHMENT: Int
+    val DEPTH_COMPONEN: Int
     val FRAMEBUFFER: Int
     val READ_FRAMEBUFFER: Int
     val DRAW_FRAMEBUFFER: Int
@@ -92,6 +99,7 @@ expect class GL {
     val TEXTURE_MIN_FILTER: Int
     val UNSIGNED_BYTE: Int
     val RGB: Int
+    val RGBA: Int
     val STATIC_DRAW: Int
     val DYNAMIC_DRAW: Int
     val STATIC_READ: Int
@@ -126,6 +134,7 @@ expect class GL {
     val LINEAR_MIPMAP_LINEAR: Int
     val MAX_TEXTURE_SIZE: Int
     val MAX_SAMPLES: Int
+    val NONE: Int
 }
 
 interface GLBuffer

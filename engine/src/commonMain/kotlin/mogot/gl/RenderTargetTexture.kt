@@ -49,7 +49,7 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
         frameBuffer.disable()
     }
 
-    fun getGlTexture() = frameBuffer.texture?.glTexture
+    fun getGlTexture() = frameBuffer.texture?.gl
     fun getGlTextureTarget() = frameBuffer.texture?.target
 
     override fun close() {

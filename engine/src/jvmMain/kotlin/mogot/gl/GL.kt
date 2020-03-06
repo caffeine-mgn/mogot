@@ -4,6 +4,7 @@ import com.jogamp.opengl.GL2
 import com.jogamp.opengl.GL3
 import mogot.math.Matrix4fc
 import mogot.math.get
+import pw.binom.ByteDataBuffer
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import java.nio.Buffer
@@ -320,8 +321,8 @@ actual class GL(val gl: GL2) {
         return JGLFrameBuffer(fbo[0])
     }
 
-    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: Long?) {
-        if (pixels != null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!)
+    actual fun texImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteDataBuffer?) {
+        if (pixels != null) gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels!!.buffer)
         else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
 
@@ -377,6 +378,10 @@ actual class GL(val gl: GL2) {
 
     actual val COLOR_ATTACHMENT0: Int
         get() = GL2.GL_COLOR_ATTACHMENT0
+    actual val DEPTH_ATTACHMENT: Int
+        get() = GL2.GL_DEPTH_ATTACHMENT
+    actual val DEPTH_COMPONEN: Int
+        get() = GL2.GL_DEPTH_COMPONENT
     actual val FRAMEBUFFER: Int
         get() = GL2.GL_FRAMEBUFFER
     actual val READ_FRAMEBUFFER: Int
@@ -393,11 +398,16 @@ actual class GL(val gl: GL2) {
         get() = GL2.GL_UNSIGNED_BYTE
     actual val RGB: Int
         get() = GL2.GL_RGB
+    actual val RGBA: Int
+        get() = GL2.GL_RGB
     actual val MAX_TEXTURE_SIZE: Int
        get() = GL2.GL_MAX_TEXTURE_SIZE
 
     actual val MAX_SAMPLES: Int
         get() = GL2.GL_MAX_SAMPLES
+
+    actual val NONE: Int
+        get() = GL2.GL_NONE
 
     actual fun deleteBuffers(texture: GLTexture) {
         val buffer = IntBuffer.allocate(1)
@@ -423,6 +433,14 @@ actual class GL(val gl: GL2) {
         gl.glDeleteBuffers(1, buffer_)
     }
 
+    actual fun drawBuffer(mode:Int){
+        gl.glDrawBuffer(mode)
+    }
+
+    actual fun readBuffer(mode: Int){
+        gl.glReadBuffer(mode)
+    }
+
     actual val FRAMEBUFFER_COMPLETE: Int
         get() = GL3.GL_FRAMEBUFFER_COMPLETE
     actual val DEPTH_STENCIL_ATTACHMENT: Int
@@ -445,6 +463,12 @@ actual class GL(val gl: GL2) {
     }
     actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
         gl.glBlitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)
+    }
+    actual fun viewPort(x:Int, y: Int, width:Int, height: Int){
+        gl.glViewport(x,y,width,height)
+    }
+    actual fun copyTexSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, x:Int, y:Int, width:Int, height:Int){
+        gl.glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height)
     }
 
     actual val CULL_FACE: Int
