@@ -13,13 +13,13 @@ class PreviousFrameAction : AnAction() {
             return
         }
         e.presentation.isVisible = true
-        e.presentation.isEnabled = editor.animationTool.animateModel != null
+        e.presentation.isEnabled = editor.animationTool?.animateModel != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        val frame = editor.animationTool.frameView.currentFrame
-        editor.animationTool.frameView.currentFrame = maxOf(frame - 1, 0)
-        editor.animationTool.frameView.repaint()
+        val frame = editor.animationTool?.frameView?.currentFrame?:return
+        editor.animationTool?.frameView?.currentFrame = maxOf(frame - 1, 0)
+        editor.animationTool?.frameView?.repaint()
     }
 }

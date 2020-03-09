@@ -25,7 +25,6 @@ class EnterAnimationEditModeAction : AnAction() {
         val editor = SceneEditor.currentSceneEditor!!
         val selected = editor.viewer.view.selected
         editor.viewer.view.animateNode = selected[0] as EditAnimateNode
-        editor.animationTool.enterAnimation()
         println("Enter to Animate Mode")
     }
 }

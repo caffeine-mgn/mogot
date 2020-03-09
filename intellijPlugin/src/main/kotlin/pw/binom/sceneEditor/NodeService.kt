@@ -13,7 +13,7 @@ import pw.binom.sceneEditor.properties.PropertyFactory
 interface NodeService {
 
     enum class FieldType {
-        VEC3, VEC2, FLOAT
+        VEC3, VEC2, FLOAT, STRING
     }
 
     interface Field<T> {
@@ -90,6 +90,23 @@ interface NodeService {
         override val isEmpty: Boolean = false
         override val fieldType: FieldType
             get() = FieldType.FLOAT
+    }
+
+    abstract class FieldString : Field<String> {
+        override val eventChange = EventDispatcher()
+        override fun saveAsString(): String {
+            val value = currentValue
+            return "STR $value"
+        }
+
+        override fun loadFromString(value: String) {
+            check(value.startsWith("STR "))
+            this.currentValue = value.substring(4)
+        }
+
+        override val isEmpty: Boolean = false
+        override val fieldType: FieldType
+            get() = FieldType.STRING
     }
 
     fun getFields(view: SceneEditorView, node: Node): List<Field<*>> = emptyList()

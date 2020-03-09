@@ -41,7 +41,7 @@
             <action id="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     class="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
                     text="Leave Animate Mode" description="Leave from Animate Mode">
-                <keyboard-shortcut first-keystroke="E" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="F8" keymap="$default"/>
             </action>
             <add-to-group group-id="EditMenu" anchor="last"/>
         </group>

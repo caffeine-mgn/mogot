@@ -119,7 +119,7 @@ class SceneEditor(val project: Project,
         get() = _viewer!!
     lateinit var sceneStruct: SceneStruct
     val propertyTool = PropertyToolWindow(this)
-    val animationTool = AnimateTab(this)
+    var animationTool: AnimateTab? = null
 
 
     init {
@@ -134,13 +134,20 @@ class SceneEditor(val project: Project,
         }
 
         viewer.view.changeAnimationModeEvent.on {
+            if (privateCurrentEditor !== this)
+                return@on
             if (viewer.view.animateNode != null) {
+                animationTool = AnimateTab(this, viewer.view.animateNode!!)
+                animationToolWindow.useContent(animationTool!!)
                 animationToolWindow.setAvailable(true, null)
                 animationToolWindow.show(null)
             } else {
+                animationTool?.close()
+                animationToolWindow.contentManager.removeAllContents(true)
                 animationToolWindow.setAvailable(false, null)
             }
         }
+
     }
 
     private val component: JComponent = _viewer ?: JButton("Scene must be inside some resource folder")
@@ -177,7 +184,8 @@ class SceneEditor(val project: Project,
         viewer.view.startRender()
         structToolWindow.useContent(sceneStruct)
         propertyToolWindow.useContent(propertyTool)
-        animationToolWindow.useContent(animationTool)
+        if (animationTool != null)
+            animationToolWindow.useContent(animationTool!!)
         structToolWindow.setAvailable(true, null)
         propertyToolWindow.setAvailable(true, null)
         structToolWindow.show(null)

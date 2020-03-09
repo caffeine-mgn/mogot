@@ -19,19 +19,19 @@ class DeleteFrameAction : AnAction() {
             return
         }
 
-        e.presentation.isEnabled = editor.animationTool.frameView.isFocusable && editor.animationTool.frameView.selectedFrames.asSequence().flatMap { it.value.asSequence() }.any()
+        e.presentation.isEnabled = editor.animationTool?.frameView?.isFocusable == true && editor.animationTool?.frameView?.selectedFrames?.asSequence()?.flatMap { it.value.asSequence() }?.any() == true
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        val model = editor.animationTool.animateModel!!
-        editor.animationTool.frameView.selectedFrames.forEach { line, frames ->
+        val model = editor.animationTool!!.animateModel!!
+        editor.animationTool?.frameView?.selectedFrames!!.forEach { line, frames ->
             val property = (model.line(line) as? AnimateFile.AnimateProperty) ?: return@forEach
             frames.forEach {
                 property.remove(it)
             }
         }
-        editor.animationTool.frameView.repaint()
+        editor.animationTool?.frameView?.repaint()
         ApplicationManager.getApplication().runWriteAction {
             model.save()
         }

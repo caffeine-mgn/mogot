@@ -28,6 +28,21 @@ val <T> Sequence<T>.isEmpty: Boolean
 val <T> Sequence<T>.isNotEmpty: Boolean
     get() = !isEmpty
 
+val Sequence<String>.common: String?
+    get() {
+        if (isEmpty)
+            return null
+
+        val it = iterator()
+        var vec = it.next()
+        while (it.hasNext()) {
+            val p = it.next()
+            if (vec != p)
+                return null
+        }
+        return vec
+    }
+
 val Sequence<Float>.common: Float
     get() {
         if (isEmpty)

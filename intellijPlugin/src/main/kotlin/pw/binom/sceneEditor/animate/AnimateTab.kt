@@ -9,7 +9,6 @@ import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.VfsUtilCore
-import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBScrollPane
 import mogot.math.Vector2f
@@ -25,6 +24,7 @@ import pw.binom.sceneEditor.nodeController.getField
 import pw.binom.sceneEditor.properties.Panel
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
+import pw.binom.ui.InlineIntegerEditor
 import pw.binom.ui.NodeFieldDataFlavor
 import pw.binom.utils.relativePath
 import java.awt.BorderLayout
@@ -86,9 +86,6 @@ private class AddFrameLineDropListener(val tab: AnimateTab) : DropTargetListener
                             .also { line.properties.add(it) }
             tab.repaint()
         }
-        ApplicationManager.getApplication().runWriteAction {
-            model.save()
-        }
     }
 
     override fun dragOver(dtde: DropTargetDragEvent) {
@@ -146,7 +143,7 @@ class AnimationComboBoxModel(val editor: SceneEditor, val node: EditAnimateNode)
 
 }
 
-class AnimateTab(val editor: SceneEditor) : Panel() {
+class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), Closeable {
     private val splitter = OnePixelSplitter(false, 0.3f)
 
     val propertyView = AnimatePropertyView()
@@ -155,9 +152,12 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
     private val dropListener = AddFrameLineDropListener(this)
     private val configPanel = Panel()
     private val animationSelector = ComboBox<String>(100)
-    private val frameCount = JBIntSpinner(0, 0, Int.MAX_VALUE, 1)
-    private val node: EditAnimateNode?
-        get() = editor.viewer.view.animateNode
+
+    //    private val frameCount = JBIntSpinner(0, 0, Int.MAX_VALUE, 1)
+    private val frameInSecond = InlineIntegerEditor(initValue = 1, minValue = 1, suffix = "Frame in Second")
+    private val frameCount = InlineIntegerEditor(initValue = 0, minValue = 0, suffix = "Frame Count")
+//    private val node: EditAnimateNode?
+//        get() = editor.viewer.view.animateNode
 
     private val onChangeFrame = frameView.currentFrameChangeEvent.on {
         refreshFrameAnimation()
@@ -252,52 +252,71 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
 
     //private val addAnimationButton = ActionButton(addAnimationAction, Presentation(""), ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE)
 
-    fun enterAnimation() {
-        val animation = editor.viewer.view.animateNode ?: TODO()
-        animation.files.map {
-            editor.file!!.findFileByRelativePath(it)
-        }
-        animationSelector.isEnabled = true
-        animationSelector.model = AnimationComboBoxModel(editor, node!!)
-    }
-
     var animateModel: AnimateFile? = null
         private set
 
-    init {
-        animationSelector.addActionListener {
-            val animationFile = animationSelector.selectedItem as String? ?: return@addActionListener
-            val file = editor.file!!.parent.findFileByRelativePath(animationFile) ?: return@addActionListener
-            animateModel = AnimateFile(file)
-            frameView.model = animateModel
-            propertyView.model = animateModel
-            frameCount.value = animateModel!!.frameCount
-            frameCount.isEnabled = true
-        }
-
-        frameCount.addChangeListener {
-            val model = animateModel ?: return@addChangeListener
-            model.frameInSeconds = frameCount.number
-        }
-    }
-
-    fun leaveAnimation() {
-        animationSelector.isEnabled = false
-        (animationSelector.model as? AnimationComboBoxModel?)?.close()
-        animationSelector.model = emptyModel2()
+    private fun leaveAnimation() {
+//        frameCount.isEnabled = false
+        frameInSecond.isEnabled = false
         frameCount.isEnabled = false
+
+        ApplicationManager.getApplication().runWriteAction {
+            animateModel?.save()
+        }
 
         animateModel = null
         frameView.model = null
         propertyView.model = null
     }
 
+
     init {
-        animationSelector.isEnabled = false
+        node.files.map {
+            editor.file!!.findFileByRelativePath(it)
+        }
+        animationSelector.model = AnimationComboBoxModel(editor, node)
+
+        animationSelector.addActionListener {
+            val animationFile = (animationSelector.selectedItem as String?)?.takeIf { it.isNotBlank() }
+            if (animationFile == null) {
+                if (animateModel != null) {
+                    leaveAnimation()
+                }
+                return@addActionListener
+            }
+            val file = editor.file!!.parent.findFileByRelativePath(animationFile) ?: return@addActionListener
+            animateModel = AnimateFile(file)
+            frameView.model = animateModel
+            propertyView.model = animateModel
+//            frameCount.value = animateModel!!.frameCount
+            frameInSecond.value = animateModel!!.frameInSeconds
+            frameCount.value = animateModel!!.frameCount
+            frameCount.isEnabled = true
+            frameInSecond.isEnabled = true
+//            frameCount.isEnabled = true
+        }
+
+//        frameCount.addChangeListener {
+//            val model = animateModel ?: return@addChangeListener
+//            model.frameInSeconds = frameCount.number
+//        }
+        frameInSecond.changeEvent.on {
+            val model = animateModel ?: return@on
+            model.frameInSeconds = frameInSecond.value
+        }
+
+        frameCount.changeEvent.on {
+            val model = animateModel ?: return@on
+            model.frameCount = frameCount.value
+        }
+//        frameCount.isEnabled = false
+        frameInSecond.isEnabled = false
         frameCount.isEnabled = false
 
         configPanel.add(animationSelector)
         configPanel.add(actions)
+//        configPanel.add(frameCount)
+        configPanel.add(frameInSecond)
         configPanel.add(frameCount)
         layout = BorderLayout()
         add(configPanel, BorderLayout.NORTH)
@@ -309,5 +328,13 @@ class AnimateTab(val editor: SceneEditor) : Panel() {
         frameView.model = emptyModel
 
         dropTarget = DropTarget(this, DnDConstants.ACTION_MOVE, dropListener, true)
+        scroll.verticalScrollBar.addAdjustmentListener {
+            propertyView.scrollY = maxOf(0, scroll.verticalScrollBar.value)
+        }
+    }
+
+    override fun close() {
+        if (animateModel != null)
+            leaveAnimation()
     }
 }

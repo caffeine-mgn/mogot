@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.action
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import pw.binom.sceneEditor.SceneEditor
 
 class LeaveAnimationEditModeAction : AnAction() {
@@ -22,8 +23,11 @@ class LeaveAnimationEditModeAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        editor.animationTool.leaveAnimation()
+        val model = editor.animationTool?.animateModel!!
         editor.viewer.view.animateNode = null
-        println("Leave from Animate Mode")
+
+        ApplicationManager.getApplication().runWriteAction {
+            model.save()
+        }
     }
 }

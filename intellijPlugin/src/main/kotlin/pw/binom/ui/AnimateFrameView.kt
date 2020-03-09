@@ -43,7 +43,7 @@ class AnimateFrameView : JComponent() {
         fun floorFrame(time: Int): Frame?
         fun ceilingFrame(time: Int): Frame?
         fun remove(frame: Frame)
-        fun remove(time:Int)
+        fun remove(time: Int)
     }
 
     interface Model {
@@ -100,6 +100,23 @@ class AnimateFrameView : JComponent() {
             repaint()
         }
 
+    private val minWidth: Int
+        get() {
+            val model = model ?: return 0
+            return (model.frameCount * frameWidth).roundToInt()
+        }
+
+    private val minHeight: Int
+        get() {
+            val model = model ?: return 0
+            return (timeHeight + model.lineCount * frameLineHeight + frameLineHeight * 0.5f).roundToInt()
+        }
+
+    override fun getHeight(): Int {
+        val model = model ?: return 0
+        return (model.lineCount * frameLineHeight + timeHeight).roundToInt()
+    }
+
     private val selected = TreeMap<Int, TreeSet<Int>>()
     val currentFrameChangeEvent = EventDispatcher()
 
@@ -153,7 +170,7 @@ class AnimateFrameView : JComponent() {
             zeroDimension.setSize(0, 0)
             return zeroDimension
         }
-        preferredDimension.setSize((model.frameCount * frameWidth + frameWidth).roundToInt(), (timeHeight + model.lineCount * frameLineHeight + frameLineHeight * 0.5f).roundToInt())
+        preferredDimension.setSize(minWidth, minHeight)
         return preferredDimension
     }
 

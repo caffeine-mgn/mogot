@@ -25,7 +25,7 @@ class AddAnimateFrameAction : AnAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        e.presentation.isEnabled = editor.animationTool.animateModel != null && editor.viewer.view.selected.isNotEmpty()
+        e.presentation.isEnabled = editor.animationTool?.animateModel != null && editor.viewer.view.selected.isNotEmpty()
     }
 
     private fun cloneValue(field:NodeService.Field<*>)=
@@ -37,13 +37,13 @@ class AddAnimateFrameAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        val model = editor.animationTool.animateModel!!
-        val lines = editor.animationTool.frameView.selectedLines()
+        val model = editor.animationTool?.animateModel?:return
+        val lines = editor.animationTool?.frameView?.selectedLines()?:return
         val animNode = editor.viewer.view.animateNode!!
         val selected = editor.viewer.view.selected
         if (selected.isEmpty())
             return
-        val currentFrame = editor.animationTool.frameView.currentFrame
+        val currentFrame = editor.animationTool?.frameView?.currentFrame?:return
         model.nodes.forEach { line ->
             val node = animNode.findByRelative(line.nodePath) ?: return@forEach
             if (node in selected) {
@@ -54,7 +54,7 @@ class AddAnimateFrameAction : AnAction() {
                 }
             }
         }
-        editor.animationTool.repaint()
+        editor.animationTool?.repaint()
 //        lines.forEach {
 //            val property = model.line(it) as? AnimateFile.AnimateProperty ?: return@forEach
 //            val field = property.getField(editor.viewer.view, animNode) ?: return@forEach
