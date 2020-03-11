@@ -44,7 +44,7 @@ kotlin {
         commonMain {
             dependencies {
                 api "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-                api project(":engine")
+                api project(path: ":engine", configuration: 'default')
             }
         }
 

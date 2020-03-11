@@ -16,7 +16,7 @@ intellij {
 }
 
 runIde{
-    //ideDirectory = "C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2019.3/"
+    ideDirectory = "C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2019.3/"
 }
 apply plugin: 'kotlin-platform-jvm'
 //apply plugin: 'org.jetbrains.intellij'
@@ -50,7 +50,7 @@ dependencies {
     api 'org.jogamp.gluegen:gluegen-rt:2.3.2'
     api 'org.joml:joml:1.9.20'
     api project(':engine')
-    api project(':tools')
+    api project(path: ':tools', configuration: 'default')
     api group: 'org.jogamp.jogl', name: 'nativewindow', version: '2.3.2'
     api "pw.binom.io:json:$binom_io_version"
     api "pw.binom.io:file:$binom_io_version"
