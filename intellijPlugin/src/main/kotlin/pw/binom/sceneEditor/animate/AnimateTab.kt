@@ -259,6 +259,8 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
 //        frameCount.isEnabled = false
         frameInSecond.isEnabled = false
         frameCount.isEnabled = false
+        frameInSecond.invalid = true
+        frameCount.invalid = true
 
         ApplicationManager.getApplication().runWriteAction {
             animateModel?.save()
@@ -288,18 +290,14 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             animateModel = AnimateFile(file)
             frameView.model = animateModel
             propertyView.model = animateModel
-//            frameCount.value = animateModel!!.frameCount
             frameInSecond.value = animateModel!!.frameInSeconds
             frameCount.value = animateModel!!.frameCount
             frameCount.isEnabled = true
             frameInSecond.isEnabled = true
-//            frameCount.isEnabled = true
+            frameCount.invalid=false
+            frameInSecond.invalid=false
         }
 
-//        frameCount.addChangeListener {
-//            val model = animateModel ?: return@addChangeListener
-//            model.frameInSeconds = frameCount.number
-//        }
         frameInSecond.changeEvent.on {
             val model = animateModel ?: return@on
             model.frameInSeconds = frameInSecond.value
@@ -312,10 +310,11 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
 //        frameCount.isEnabled = false
         frameInSecond.isEnabled = false
         frameCount.isEnabled = false
+        frameCount.invalid=true
+        frameInSecond.invalid=true
 
         configPanel.add(animationSelector)
         configPanel.add(actions)
-//        configPanel.add(frameCount)
         configPanel.add(frameInSecond)
         configPanel.add(frameCount)
         layout = BorderLayout()

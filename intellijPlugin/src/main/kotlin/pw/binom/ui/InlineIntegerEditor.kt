@@ -19,8 +19,19 @@ class InlineIntegerEditor(initValue: Int, var minValue: Int = Int.MIN_VALUE, var
         set(value) {
             field = value
             edit.text = value.toString()
-            valueLabel.text = "$value"
+            refreshValueLabel()
         }
+
+    private fun refreshValueLabel(){
+        valueLabel.text = if (invalid) "-" else "$value"
+    }
+
+    var invalid: Boolean = false
+        set(value) {
+            field = value
+            refreshValueLabel()
+        }
+
     private var oldValue: Int = initValue
 
     private val valueLabel = JLabel(value.toString()).appendTo(layout, grow = 0)

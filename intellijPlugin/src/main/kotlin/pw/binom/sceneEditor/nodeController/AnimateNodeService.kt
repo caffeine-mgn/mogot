@@ -104,6 +104,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 NodeService.FieldType.FLOAT -> value.toFloatOrNull() ?: 0f
                 NodeService.FieldType.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
                 NodeService.FieldType.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
+                NodeService.FieldType.STRING -> value
             }
 
     private fun toString(type: NodeService.FieldType, value: Any?): String? =
@@ -111,6 +112,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 NodeService.FieldType.FLOAT -> (value as Float?)?.toString()
                 NodeService.FieldType.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
                 NodeService.FieldType.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
+                NodeService.FieldType.STRING -> value as String?
             }
 
     fun save() {
