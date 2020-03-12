@@ -13,9 +13,17 @@ abstract class ExternalTexture(val engine: Engine) : ResourceImpl() {
     protected abstract fun isNeedUpdateTexture(): Boolean
     protected abstract fun textureStream(func: (InputStream) -> Unit)
 
+    var width = 0
+        private set
+
+    var height = 0
+        private set
+
     private fun loadPng(stream: InputStream): Texture2D {
         val image = stream.let {
             val png = PNGDecoder(it)
+            width = png.width
+            height = png.height
             val color = if (png.hasAlpha())
                 PNGDecoder.Format.RGBA
             else

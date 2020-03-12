@@ -87,7 +87,7 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
                 val texture = nodes.first().texture
                 this.texture.selected = if (texture == null) null else PsiManager.getInstance(view.project).findFile(texture.file)
                 if (texture != null)
-                    sizeTitle.resetVisible = sizeEditor.value.x != texture.gl.width.toFloat() || sizeEditor.value.y != texture.gl.height.toFloat()
+                    sizeTitle.resetVisible = sizeEditor.value.x != texture.width.toFloat() || sizeEditor.value.y != texture.height.toFloat()
                 else
                     sizeTitle.resetVisible = sizeEditor.value.x != 0f || sizeEditor.value.y != 0f
             } else {
