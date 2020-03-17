@@ -21,6 +21,7 @@ import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.nodeController.AnimateFile
 import pw.binom.sceneEditor.nodeController.EditAnimateNode
 import pw.binom.sceneEditor.nodeController.getField
+import pw.binom.sceneEditor.nodeController.getNode
 import pw.binom.sceneEditor.properties.Panel
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
@@ -269,6 +270,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
         animateModel = null
         frameView.model = null
         propertyView.model = null
+        refreshSelectedNodes()
     }
 
 
@@ -295,6 +297,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             frameInSecond.isEnabled = true
             frameCount.invalid = false
             frameInSecond.invalid = false
+            refreshSelectedNodes()
         }
 
         frameInSecond.changeEvent.on {
@@ -334,7 +337,29 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             animationSelector.selectedIndex = node.currentAnimation
     }
 
+    private val eventSelectChangedEvent = editor.viewer.view.eventSelectChanged.on {
+        refreshSelectedNodes()
+    }
+
+    private fun refreshSelectedNodes() {
+        val model = animateModel ?: return
+        val selected = model.nodes.asSequence()
+                .mapNotNull {
+                    val node = it.getNode(node) ?: return@mapNotNull null
+                    it to node
+                }
+                .filter { it.second in editor.viewer.view.selected }
+                .map { it.first }
+
+        propertyView.backlightNodes.clear()
+        frameView.backlightNodes.clear()
+        propertyView.backlightNodes.addAll(selected)
+        frameView.backlightNodes.addAll(selected)
+        repaint()
+    }
+
     override fun close() {
+        eventSelectChangedEvent.close()
         if (animateModel != null)
             leaveAnimation()
     }

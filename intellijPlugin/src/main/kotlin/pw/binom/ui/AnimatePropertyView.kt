@@ -1,5 +1,7 @@
 package pw.binom.ui
 
+import pw.binom.sceneEditor.nodeController.EditAnimateNode
+import pw.binom.utils.findByRelative
 import java.awt.*
 import javax.swing.Icon
 import javax.swing.JComponent
@@ -10,6 +12,7 @@ class AnimatePropertyView : JComponent() {
     private val backgroundColor = Color(83, 83, 83)
     private val timeLinesSeparatorColor = Color(62, 62, 62)
     private val frameLineColor = Color(95, 95, 95)
+    private val backlightNodeColor = Color(212, 56, 0, 127)
 
     interface Node {
         val icon: Icon?
@@ -23,6 +26,8 @@ class AnimatePropertyView : JComponent() {
         val text: String
         var lock: Boolean
     }
+
+    var backlightNodes = HashSet<Node>()
 
     interface Model {
         val nodes: List<Node>
@@ -80,6 +85,10 @@ class AnimatePropertyView : JComponent() {
         val ovalSize = 4
 
         model.nodes.forEach { node ->
+            if (node in backlightNodes) {
+                g.color = backlightNodeColor
+                g.fillRect(0, lineY(line), width, frameLineHeight.roundToInt())
+            }
             g.color = Color.WHITE
             g.drawString(node.text, 5, lineY(line) + fontHeight)
             g.color = frameLineColor

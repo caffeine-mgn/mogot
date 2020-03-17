@@ -4,6 +4,7 @@ import mogot.EventDispatcher
 import mogot.math.Math.PI
 import pw.binom.MouseListenerImpl
 import pw.binom.MouseMotionListenerImpl
+import pw.binom.sceneEditor.Line
 import java.awt.*
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
@@ -31,6 +32,9 @@ class AnimateFrameView : JComponent() {
     private val timeLinesSeparatorColor = Color(62, 62, 62)
     private val currentFrameLineColor = Color(178, 0, 0)
     private val currentFrameBackgroundColor = Color(178, 0, 0, 128)
+    private val backlightNodeColor = Color(212, 56, 0, 127)
+
+    var backlightNodes = HashSet<FrameLine>()
 
     interface Frame {
         val color: Color
@@ -406,12 +410,19 @@ class AnimateFrameView : JComponent() {
                 continue
             if (x > width)
                 break
+
             if ((i + 1) % 5 == 0) {
                 g.color = backgroundOddColor
                 g.fillRect(x, 0 + timeHeight, frameWidth.roundToInt(), hight)
             }
             for (row in 0 until model.lineCount) {
+
                 val y = (row * frameLineHeight - scrollY).roundToInt()
+
+                if (model.line(row) in backlightNodes) {
+                    g.color = backlightNodeColor
+                    g.fillRect(x, y + timeHeight, frameWidth.roundToInt(), frameLineHeight.roundToInt())
+                }
 
                 if (state is SelectByDrag) {
                     val state = state as SelectByDrag

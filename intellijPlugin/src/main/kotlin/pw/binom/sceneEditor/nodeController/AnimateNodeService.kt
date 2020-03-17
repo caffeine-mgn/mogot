@@ -322,3 +322,5 @@ fun AnimateFile.AnimateProperty.getField(view: SceneEditorView, node: EditAnimat
             .find { it.name == this.name }
             ?: return null
 }
+
+fun AnimateFile.AnimateNode.getNode(animation: EditAnimateNode) = animation.findByRelative(this.nodePath)
