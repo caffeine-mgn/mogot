@@ -277,7 +277,6 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             editor.file!!.findFileByRelativePath(it)
         }
         animationSelector.model = AnimationComboBoxModel(editor, node)
-
         animationSelector.addActionListener {
             val animationFile = (animationSelector.selectedItem as String?)?.takeIf { it.isNotBlank() }
             if (animationFile == null) {
@@ -294,8 +293,8 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             frameCount.value = animateModel!!.frameCount
             frameCount.isEnabled = true
             frameInSecond.isEnabled = true
-            frameCount.invalid=false
-            frameInSecond.invalid=false
+            frameCount.invalid = false
+            frameInSecond.invalid = false
         }
 
         frameInSecond.changeEvent.on {
@@ -310,8 +309,8 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
 //        frameCount.isEnabled = false
         frameInSecond.isEnabled = false
         frameCount.isEnabled = false
-        frameCount.invalid=true
-        frameInSecond.invalid=true
+        frameCount.invalid = true
+        frameInSecond.invalid = true
 
         configPanel.add(animationSelector)
         configPanel.add(actions)
@@ -330,6 +329,9 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
         scroll.verticalScrollBar.addAdjustmentListener {
             propertyView.scrollY = maxOf(0, scroll.verticalScrollBar.value)
         }
+
+        if (node.currentAnimation >= 0 && node.currentAnimation < node.files.size)
+            animationSelector.selectedIndex = node.currentAnimation
     }
 
     override fun close() {

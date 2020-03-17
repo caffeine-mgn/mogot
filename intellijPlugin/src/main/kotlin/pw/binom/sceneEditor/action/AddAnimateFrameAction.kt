@@ -34,6 +34,7 @@ class AddAnimateFrameAction : AnAction() {
                 NodeService.FieldType.VEC2->field.currentValue?.let { it as Vector2fc }?.let { Vector2f(it.x,it.y) }
                 NodeService.FieldType.VEC3->field.currentValue?.let { it as Vector3fc }?.let { Vector3f(it.x,it.y,it.z) }
                 NodeService.FieldType.STRING->field.currentValue?.let { it as String }
+                NodeService.FieldType.INT->field.currentValue?.let { it as Int }
             }
 
     override fun actionPerformed(e: AnActionEvent) {

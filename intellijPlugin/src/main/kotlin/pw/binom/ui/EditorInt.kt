@@ -7,18 +7,20 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.utils.common
 
-class EditorFloat(sceneEditor: SceneEditor, fields: List<NodeService.Field<Float>>) : AbstractEditor<Float>(sceneEditor, fields) {
+class EditorInt(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>) : AbstractEditor<Int>(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
-    private val editor = FloatEditText().appendTo(layout, 1, 0)
+    private val editor = IntEditText().appendTo(layout, 1, 0)
 
     private var enableEvents = true
     private var enableEvents2 = true
 
     private fun refreshValues() {
         enableEvents = false
-        editor.value = fields.asSequence().map { it.currentValue }.common
+        val common = fields.asSequence().map { it.currentValue }.common
+        editor.value = common ?: 0
+        editor.valid = common != null
         enableEvents = true
     }
 
@@ -32,15 +34,11 @@ class EditorFloat(sceneEditor: SceneEditor, fields: List<NodeService.Field<Float
         }
         editor.eventChange.on {
             enableEvents2 = false
-            val value = editor.value
-            if (enableEvents)
-                when {
-                    !value.isNaN() -> {
-                        fields.forEach {
-                            it.clearTempValue()
-                            it.currentValue = value
-                        }
-                    }
+            val value = if (editor.valid) editor.value else null
+            if (value != null && enableEvents)
+                fields.forEach {
+                    it.clearTempValue()
+                    it.currentValue = value
                 }
             enableEvents2 = true
         }

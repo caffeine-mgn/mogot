@@ -9,11 +9,12 @@ import mogot.math.*
 import pw.binom.Services
 import pw.binom.sceneEditor.nodeController.EmptyNodeService
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.ui.*
 
 interface NodeService {
 
     enum class FieldType {
-        VEC3, VEC2, FLOAT, STRING
+        VEC3, VEC2, FLOAT, STRING, INT
     }
 
     interface Field<T> {
@@ -32,6 +33,7 @@ interface NodeService {
         val fieldType: FieldType
         val node: Node
         val eventChange: EventDispatcher
+        fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<T>>): AbstractEditor<T>
     }
 
     abstract class FieldVec3 : Field<Vector3fc> {
@@ -53,6 +55,31 @@ interface NodeService {
         override val isEmpty: Boolean = false
         override val fieldType: FieldType
             get() = FieldType.VEC3
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector3fc>>): AbstractEditor<Vector3fc> {
+            return EditorVec3(sceneEditor, fields)
+        }
+    }
+
+    abstract class FieldInt : Field<Int> {
+        override val eventChange = EventDispatcher()
+        override fun saveAsString(): String {
+            val value = currentValue
+            return "INT $value"
+        }
+
+        override fun loadFromString(value: String) {
+            check(value.startsWith("INT "))
+            this.currentValue = value.substring(4).toInt()
+        }
+
+        override val isEmpty: Boolean = false
+        override val fieldType: FieldType
+            get() = FieldType.INT
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Int>>): AbstractEditor<Int> {
+            return EditorInt(sceneEditor, fields)
+        }
     }
 
     abstract class FieldVec2 : Field<Vector2fc> {
@@ -73,6 +100,10 @@ interface NodeService {
         override val isEmpty: Boolean = false
         override val fieldType: FieldType
             get() = FieldType.VEC2
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector2fc>>): AbstractEditor<Vector2fc> {
+            return EditorVec2(sceneEditor, fields)
+        }
     }
 
     abstract class FieldFloat : Field<Float> {
@@ -90,6 +121,10 @@ interface NodeService {
         override val isEmpty: Boolean = false
         override val fieldType: FieldType
             get() = FieldType.FLOAT
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Float>>): AbstractEditor<Float> {
+            return EditorFloat(sceneEditor, fields)
+        }
     }
 
     abstract class FieldString : Field<String> {
@@ -107,9 +142,13 @@ interface NodeService {
         override val isEmpty: Boolean = false
         override val fieldType: FieldType
             get() = FieldType.STRING
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<String>>): AbstractEditor<String> {
+            return EditorString(sceneEditor, fields)
+        }
     }
 
-    fun getFields(view: SceneEditorView, node: Node): List<Field<*>> = emptyList()
+    fun getFields(view: SceneEditorView, node: Node): List<Field<Any?>> = emptyList()
     fun getClassName(node: Node): String = node::class.java.name
     fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node?
     fun save(view: SceneEditorView, node: Node): Map<String, String>?

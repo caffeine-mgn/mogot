@@ -6,14 +6,18 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.AnimateNode
 import mogot.EventDispatcher
 import mogot.Node
+import mogot.Spatial2D
 import pw.binom.array
 import mogot.math.*
 import pw.binom.obj
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
+import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.SceneEditorView
+import pw.binom.ui.AbstractEditor
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
+import pw.binom.ui.EditorAnimationSelector
 import pw.binom.utils.findByRelative
 import pw.binom.utils.json
 import pw.binom.utils.map
@@ -35,12 +39,20 @@ object AnimateNodeCreator : NodeCreator {
 object AnimateNodeService : NodeService {
     override fun getClassName(node: Node): String = AnimateNode::class.java.name
 
+    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any?>> {
+        node as EditAnimateNode
+        return listOf<NodeService.Field<Any?>>(node.currentAnimationField as NodeService.Field<Any?>)
+    }
+
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != AnimateNode::class.java.name)
             return null
         val node = EditAnimateNode()
-        properties["files"]?.split('|')?.forEach {
+        properties["files"]?.split('|')?.filter { it.isNotBlank() }?.forEach {
             node.add(it)
+        }
+        properties["animationIndex"]?.toIntOrNull()?.also {
+            node.currentAnimation = it
         }
         return node
     }
@@ -51,6 +63,10 @@ object AnimateNodeService : NodeService {
         node as EditAnimateNode
         val out = HashMap<String, String>()
         out["files"] = node.files.joinToString("|")
+        node.currentAnimation.takeIf { it >= 0 }.also {
+            out["animationIndex"] = it.toString()
+        }
+
         return out
     }
 
@@ -104,6 +120,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 NodeService.FieldType.FLOAT -> value.toFloatOrNull() ?: 0f
                 NodeService.FieldType.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
                 NodeService.FieldType.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
+                NodeService.FieldType.INT -> value.toIntOrNull() ?: 0
                 NodeService.FieldType.STRING -> value
             }
 
@@ -113,6 +130,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 NodeService.FieldType.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
                 NodeService.FieldType.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
                 NodeService.FieldType.STRING -> value as String?
+                NodeService.FieldType.INT -> (value as Int).toString()
             }
 
     fun save() {
@@ -229,11 +247,60 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
     }
 }
 
+class CurrentAnimationField(override val node: EditAnimateNode) : NodeService.FieldInt() {
+    override val id: Int
+        get() = ScaleField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Animation"
+    private var originalValue: Int? = null
+    override var currentValue: Int
+        get() = node.currentAnimation
+        set(value) {
+            node.currentAnimation = value
+        }
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val value: Int
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "animationIndex"
+    override val displayName: String
+        get() = "Animation"
+
+    override fun setTempValue(value: Int) {
+        if (originalValue == null)
+            originalValue = node.currentAnimation
+        node.currentAnimation = value
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.currentAnimation = originalValue!!
+            originalValue = null
+        }
+    }
+
+    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>): AbstractEditor<Int> {
+        return EditorAnimationSelector(sceneEditor, fields)
+    }
+}
+
 class EditAnimateNode : Node() {
     private val filePaths = ArrayList<String>()
     val fileChangedEvent = EventDispatcher()
     val files: List<String>
         get() = filePaths
+
+    val currentAnimationField = CurrentAnimationField(this)
+
+    var currentAnimation = -1
+        set(value) {
+            field = value
+            currentAnimationField.eventChange.dispatch()
+        }
 
     fun add(file: String) {
         if (file in filePaths)

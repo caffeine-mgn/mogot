@@ -12,7 +12,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.dnd.*
 import java.io.Closeable
 
-class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.FieldVec2>) : AbstractEditor<Vector2fc>(sceneEditor, fields) {
+class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector2fc>>) : AbstractEditor<Vector2fc>(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)

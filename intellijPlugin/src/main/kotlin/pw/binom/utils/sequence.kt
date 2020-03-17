@@ -57,6 +57,21 @@ val Sequence<Float>.common: Float
         return vec
     }
 
+val Sequence<Int>.common: Int?
+    get() {
+        if (isEmpty)
+            return null
+
+        val it = iterator()
+        val vec = it.next()
+        while (it.hasNext()) {
+            val p = it.next()
+            if (p != vec)
+                return null
+        }
+        return vec
+    }
+
 val Sequence<BodyType>.common: BodyType?
     get() {
         if (isEmpty)

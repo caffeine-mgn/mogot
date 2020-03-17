@@ -7,7 +7,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.utils.common
 
-class EditorString(sceneEditor: SceneEditor, fields: List<NodeService.FieldString>) : AbstractEditor<String>(sceneEditor, fields) {
+class EditorString(sceneEditor: SceneEditor, fields: List<NodeService.Field<String>>) : AbstractEditor<String>(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)

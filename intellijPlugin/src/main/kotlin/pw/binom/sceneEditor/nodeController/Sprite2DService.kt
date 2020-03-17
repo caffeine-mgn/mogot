@@ -53,9 +53,9 @@ object Sprite2DService : NodeService {
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             props
 
-    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<*>> {
+    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any?>> {
         node as EditableSprite
-        return listOf(node.transformField, node.rotationField, node.scaleField)
+        return listOf(node.transformField, node.rotationField, node.scaleField) as List<NodeService.Field<Any?>>
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
