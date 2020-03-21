@@ -39,7 +39,7 @@ class TextureObject(val glcontext: GL, image:SourceImage, val minFilter: MinFilt
     val gl: GLTexture = glcontext.createTexture()
     val target = if (multisample != MSAALevels.Disable) glcontext.TEXTURE_2D_MULTISAMPLE else glcontext.TEXTURE_2D
 
-    constructor(gl: GL, width:Int, height:Int, minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, textureWrapS: TextureWrap = TextureWrap.Repeat, textureWrapT: TextureWrap = TextureWrap.Repeat, multisample: MSAALevels = MSAALevels.Disable, format: Format = Format.RGB, mipMaps: Int = 0):this(gl,SourceImage(if(format==Format.RGBA) SourceImage.Type.RGBA else SourceImage.Type.RGB,width,height,null))
+    constructor(gl: GL, width:Int, height:Int, minFilter: MinFilterParameter = MinFilterParameter.Linear, magFilter: MagFilterParameter = MagFilterParameter.Linear, textureWrapS: TextureWrap = TextureWrap.Repeat, textureWrapT: TextureWrap = TextureWrap.Repeat, multisample: MSAALevels = MSAALevels.Disable, format: Format = Format.RGB, mipMaps: Int = 0):this(gl,SourceImage(if(format==Format.RGBA) SourceImage.Type.RGBA else SourceImage.Type.RGB,width,height,null),minFilter,magFilter,textureWrapS,textureWrapT,multisample,format, mipMaps)
 
     init {
         glcontext.enable(glcontext.TEXTURE_2D)
@@ -82,13 +82,8 @@ class TextureObject(val glcontext: GL, image:SourceImage, val minFilter: MinFilt
             glcontext.checkError {
                 "Can't set texture params"
             }
-            if((minFilter!=MinFilterParameter.Nearest)&&(minFilter!=MinFilterParameter.Linear)) {
-                glcontext.texParameteri(target, glcontext.TEXTURE_MAX_LEVEL, mipMaps)
-                //TODO("glGenerateMipmap(GL_TEXTURE_2D);")
-                glcontext.checkError {
-                    "Can't set texture params"
-                }
-            }
+            glcontext.texParameteri(target, glcontext.TEXTURE_MAX_LEVEL, mipMaps)
+            glcontext.generateMipmap(glcontext.TEXTURE_2D)
         }
 
 

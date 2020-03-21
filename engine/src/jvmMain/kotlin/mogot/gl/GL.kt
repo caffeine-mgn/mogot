@@ -12,6 +12,9 @@ import java.nio.Buffer
 import java.nio.IntBuffer
 
 actual class GL(val gl: GL2) {
+    actual fun generateMipmap(target: Int){
+        gl.glGenerateMipmap(target)
+    }
     actual fun createBuffer(): GLBuffer {
         val v = IntArray(1)
         gl.glGenBuffers(1, v, 0)

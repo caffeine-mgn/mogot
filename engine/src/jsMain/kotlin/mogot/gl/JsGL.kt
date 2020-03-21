@@ -34,7 +34,9 @@ abstract external class WebGL2RenderingContext : WebGLRenderingContext {
 
 actual class GL(val ctx: WebGL2RenderingContext) {
 //    private var vaoExt = ctx.getExtension("OES_vertex_array_object").unsafeCast<WebGLVAOExtension>()
-
+    actual fun generateMipmap(target: Int){
+        ctx.generateMipmap(target)
+    }
     actual val STATIC_DRAW: Int
         get() = WebGLRenderingContext.STATIC_DRAW
 

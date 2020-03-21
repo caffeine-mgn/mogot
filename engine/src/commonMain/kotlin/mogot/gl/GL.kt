@@ -8,6 +8,7 @@ import pw.binom.IntDataBuffer
 import kotlin.jvm.JvmName
 
 expect class GL {
+    fun generateMipmap(target: Int)
     fun clear(mask: Int)
     fun createBuffer(): GLBuffer
     fun deleteBuffer(buffer: GLBuffer)

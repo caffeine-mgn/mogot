@@ -3,7 +3,7 @@ package mogot
 import mogot.gl.GLTexture
 import mogot.gl.TextureObject
 
-class Texture2D(var textureObject: TextureObject) : ResourceImpl() {
+class Texture2D(private var textureObject: TextureObject) : ResourceImpl() {
     constructor(engine: Engine, image: SourceImage) : this(TextureObject(engine.gl, image,
             TextureObject.MinFilterParameter.LinearMipmapLinear,
             TextureObject.MagFilterParameter.Linear,
@@ -19,8 +19,10 @@ class Texture2D(var textureObject: TextureObject) : ResourceImpl() {
 
     val gl:GLTexture
         get() = textureObject.gl
+    fun getTextureObject() = textureObject
     override fun dispose() {
         textureObject.close()
         super.dispose()
     }
+
 }
