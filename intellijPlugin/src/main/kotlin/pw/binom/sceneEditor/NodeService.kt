@@ -2,6 +2,7 @@ package pw.binom.sceneEditor
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.EventDispatcher
+import mogot.Field
 import mogot.Node
 import mogot.collider.Collider
 import mogot.collider.Collider2D
@@ -13,11 +14,11 @@ import pw.binom.ui.*
 
 interface NodeService {
 
-    enum class FieldType {
-        VEC3, VEC2, FLOAT, STRING, INT
-    }
+//    enum class FieldType {
+//        VEC3, VEC2, FLOAT, STRING, INT
+//    }
 
-    interface Field<T> {
+    interface Field<T:Any> {
         val id: Int
         val groupName: String
         var currentValue: T
@@ -30,7 +31,7 @@ interface NodeService {
         val displayName: String
         fun setTempValue(value: T)
         fun resetValue()
-        val fieldType: FieldType
+        val fieldType: mogot.Field.Type
         val node: Node
         val eventChange: EventDispatcher
         fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<T>>): AbstractEditor<T>
@@ -53,8 +54,8 @@ interface NodeService {
         }
 
         override val isEmpty: Boolean = false
-        override val fieldType: FieldType
-            get() = FieldType.VEC3
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.VEC3
 
         override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector3fc>>): AbstractEditor<Vector3fc> {
             return EditorVec3(sceneEditor, fields)
@@ -74,8 +75,8 @@ interface NodeService {
         }
 
         override val isEmpty: Boolean = false
-        override val fieldType: FieldType
-            get() = FieldType.INT
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.INT
 
         override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Int>>): AbstractEditor<Int> {
             return EditorInt(sceneEditor, fields)
@@ -98,8 +99,8 @@ interface NodeService {
         }
 
         override val isEmpty: Boolean = false
-        override val fieldType: FieldType
-            get() = FieldType.VEC2
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.VEC2
 
         override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector2fc>>): AbstractEditor<Vector2fc> {
             return EditorVec2(sceneEditor, fields)
@@ -119,8 +120,8 @@ interface NodeService {
         }
 
         override val isEmpty: Boolean = false
-        override val fieldType: FieldType
-            get() = FieldType.FLOAT
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.FLOAT
 
         override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Float>>): AbstractEditor<Float> {
             return EditorFloat(sceneEditor, fields)
@@ -140,15 +141,15 @@ interface NodeService {
         }
 
         override val isEmpty: Boolean = false
-        override val fieldType: FieldType
-            get() = FieldType.STRING
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.STRING
 
         override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<String>>): AbstractEditor<String> {
             return EditorString(sceneEditor, fields)
         }
     }
 
-    fun getFields(view: SceneEditorView, node: Node): List<Field<Any?>> = emptyList()
+    fun getFields(view: SceneEditorView, node: Node): List<Field<Any>> = emptyList()
     fun getClassName(node: Node): String = node::class.java.name
     fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node?
     fun save(view: SceneEditorView, node: Node): Map<String, String>?

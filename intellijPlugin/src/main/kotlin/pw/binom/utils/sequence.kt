@@ -209,17 +209,3 @@ fun Node.relativePath(otherNode: Node): String? {
     }
     return sb.toString()
 }
-
-fun Node.findByRelative(path: String): Node? {
-    var node = this
-    path.splitToSequence('/').forEach {
-        if (it == ".")
-            return@forEach
-        if (it == "..") {
-            node = node.parent ?: return null
-            return@forEach
-        }
-        node = node.findNode(it) ?: return null
-    }
-    return node
-}

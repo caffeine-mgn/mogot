@@ -3,13 +3,12 @@ package pw.binom.sceneEditor.nodeController
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.vfs.VirtualFile
-import mogot.AnimateNode
-import mogot.EventDispatcher
-import mogot.Node
-import mogot.Spatial2D
-import pw.binom.array
-import mogot.math.*
-import pw.binom.obj
+import mogot.*
+import mogot.math.Vector2f
+import mogot.math.Vector2fc
+import mogot.math.Vector3f
+import mogot.math.Vector3fc
+import pw.binom.animation.Animation
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
@@ -18,13 +17,23 @@ import pw.binom.ui.AbstractEditor
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
 import pw.binom.ui.EditorAnimationSelector
-import pw.binom.utils.findByRelative
-import pw.binom.utils.json
-import pw.binom.utils.map
 import java.awt.Color
+import java.io.StringReader
 import java.util.*
 import javax.swing.Icon
 import kotlin.collections.ArrayList
+import kotlin.collections.Iterator
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.find
+import kotlin.collections.forEach
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.plusAssign
+import kotlin.collections.set
+import kotlin.collections.sumBy
 
 object AnimateNodeCreator : NodeCreator {
     override val name: String
@@ -39,17 +48,17 @@ object AnimateNodeCreator : NodeCreator {
 object AnimateNodeService : NodeService {
     override fun getClassName(node: Node): String = AnimateNode::class.java.name
 
-    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any?>> {
+    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any>> {
         node as EditAnimateNode
-        return listOf<NodeService.Field<Any?>>(node.currentAnimationField as NodeService.Field<Any?>)
+        return listOf<NodeService.Field<Any>>(node.currentAnimationField as NodeService.Field<Any>)
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != AnimateNode::class.java.name)
             return null
         val node = EditAnimateNode()
-        properties["files"]?.split('|')?.filter { it.isNotBlank() }?.forEach {
-            node.add(it)
+        properties.asSequence().filter { it.key.startsWith("files.") }.forEach {
+            node.add(it.value.removePrefix("FILE "))
         }
         properties["animationIndex"]?.toIntOrNull()?.also {
             node.currentAnimation = it
@@ -62,7 +71,9 @@ object AnimateNodeService : NodeService {
             return null
         node as EditAnimateNode
         val out = HashMap<String, String>()
-        out["files"] = node.files.joinToString("|")
+        node.files.forEachIndexed { index, s ->
+            out["files.$index"]="FILE $s"
+        }
         node.currentAnimation.takeIf { it >= 0 }.also {
             out["animationIndex"] = it.toString()
         }
@@ -80,7 +91,6 @@ object AnimateNodeService : NodeService {
         }
         return out
     }
-
 }
 
 class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFrameView.Model {
@@ -90,80 +100,129 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
     override var frameInSeconds: Int = 0
     override val nodes = ArrayList<AnimateNode>()
 
-    init {
-        val tree = mapper.readTree(doc.text)
+    inner class Visitor : Animation.AnimationVisitor {
+        override fun start(frameInSecond: Int, frameCount: Int) {
+            this@AnimateFile.frameInSeconds = frameInSecond
+            this@AnimateFile.frameCount = frameCount
+        }
 
-        frameInSeconds = tree["frameInSecond"].intValue()
-        frameCount = tree["frameCount"].intValue()
-
-        tree["objects"]?.array?.forEach { line ->
-            val path = line.obj["path"].textValue()
-            val animateNode = AnimateNode(path)
-            nodes += animateNode
-            line.obj["properties"].array.forEach { property ->
-                val text = property.obj["text"].textValue()
-                val name = property.obj["name"].textValue()
-                val type = NodeService.FieldType.valueOf(property.obj["type"].textValue())
-                val animateProperty = AnimateProperty(text = text, name = name, type = type, node = animateNode)
-                animateNode.properties += animateProperty
-                property.obj["frames"].array.forEach { frame ->
-                    val time = frame.obj["time"].intValue()
-                    val value = frame.obj["val"]?.textValue()?.let { fromString(type, it) }
-                    animateProperty.addFrame(time, value)
-                }
-            }
+        override fun obj(path: String): Animation.ObjectVisitor? {
+            val node = AnimateNode(path)
+            nodes += node
+            return ObjVisitor(node)
         }
     }
 
-    private fun fromString(type: NodeService.FieldType, value: String) =
-            when (type) {
-                NodeService.FieldType.FLOAT -> value.toFloatOrNull() ?: 0f
-                NodeService.FieldType.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
-                NodeService.FieldType.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
-                NodeService.FieldType.INT -> value.toIntOrNull() ?: 0
-                NodeService.FieldType.STRING -> value
-            }
-
-    private fun toString(type: NodeService.FieldType, value: Any?): String? =
-            when (type) {
-                NodeService.FieldType.FLOAT -> (value as Float?)?.toString()
-                NodeService.FieldType.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
-                NodeService.FieldType.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
-                NodeService.FieldType.STRING -> value as String?
-                NodeService.FieldType.INT -> (value as Int).toString()
-            }
-
-    fun save() {
-        val root = json(
-                "frameInSecond" to frameInSeconds.json(),
-                "frameCount" to frameCount.json(),
-                "objects" to nodes.map { node ->
-                    json(
-                            "path" to node.nodePath.json(),
-                            "properties" to node.properties.map { property ->
-                                json(
-                                        "type" to property.type.name.json(),
-                                        "text" to property.text.json(),
-                                        "name" to property.name.json(),
-                                        "frames" to property.iterator().map { frame ->
-                                            json(
-                                                    "time" to frame.time.json(),
-                                                    "val" to frame.data.let { toString(property.type, it) }?.json()
-                                            )
-                                        }.json()
-                                )
-                            }.json()
-                    )
-                }.json()
-        )
-        doc.setText(mapper.writeValueAsString(root))
+    private inner class ObjVisitor(val node: AnimateNode) : Animation.ObjectVisitor {
+        override fun property(display: String, name: String, type: Field.Type): Animation.PropertyVisitor? {
+            val animateProperty = AnimateProperty(
+                    text = display,
+                    name = name,
+                    type = type/*when (type) {
+                        Field.Type.FLOAT -> NodeService.FieldType.FLOAT
+                        Field.Type.INT -> NodeService.FieldType.INT
+                        Field.Type.STRING -> NodeService.FieldType.STRING
+                        Field.Type.VEC2 -> NodeService.FieldType.VEC2
+                        Field.Type.VEC3 -> NodeService.FieldType.VEC3
+                    }*/,
+                    node = node
+            )
+            node.properties += animateProperty
+            return PropertyVisitor(animateProperty)
+        }
     }
 
-    class AnimateProperty(val node: AnimateNode, override val text: String, val name: String, val type: NodeService.FieldType) : AnimatePropertyView.Property, AnimateFrameView.FrameLine {
+    private inner class PropertyVisitor(val property: AnimateProperty) : Animation.PropertyVisitor {
+        override fun addFrame(time: Int, value: Any) {
+            property.addFrame(time, value)
+        }
+
+    }
+
+    init {
+        Animation.load(StringReader(doc.text), Visitor())
+
+//        val tree = mapper.readTree(doc.text)
+//        frameInSeconds = tree["frameInSecond"].intValue()
+//        frameCount = tree["frameCount"].intValue()
+//
+//        tree["objects"]?.array?.forEach { line ->
+//            val path = line.obj["path"].textValue()
+//            val animateNode = AnimateNode(path)
+//            nodes += animateNode
+//            line.obj["properties"].array.forEach { property ->
+//                val text = property.obj["text"].textValue()
+//                val name = property.obj["name"].textValue()
+//                val type = NodeService.FieldType.valueOf(property.obj["type"].textValue())
+//                val animateProperty = AnimateProperty(text = text, name = name, type = type, node = animateNode)
+//                animateNode.properties += animateProperty
+//                property.obj["frames"].array.forEach { frame ->
+//                    val time = frame.obj["time"].intValue()
+//                    val value = frame.obj["val"]?.textValue()?.let { fromString(type, it) }
+//                    animateProperty.addFrame(time, value)
+//                }
+//            }
+//        }
+    }
+
+    fun save() {
+        val sb = StringBuilder()
+        val r = Animation.AnimationJsonVisitor(sb)
+        r.start(frameInSeconds, frameCount)
+        nodes.forEach {
+            val o = r.obj(it.nodePath)
+            if (o != null)
+                it.properties.forEach {
+                    val l = o.property(
+                            display = it.text,
+                            name = it.name,
+                            type = it.type/*when (it.type) {
+                                NodeService.FieldType.FLOAT -> Animation.PropertyType.FLOAT
+                                NodeService.FieldType.INT -> Animation.PropertyType.INT
+                                NodeService.FieldType.STRING -> Animation.PropertyType.STRING
+                                NodeService.FieldType.VEC2 -> Animation.PropertyType.VEC2
+                                NodeService.FieldType.VEC3 -> Animation.PropertyType.VEC3
+                            }*/
+                    )
+                    if (l != null)
+                        it.iterator().forEach { f ->
+                            l.addFrame(f.time, f.data)
+                        }
+                }
+        }
+        r.end()
+
+        doc.setText(sb.toString())
+//        val root = json(
+//                "frameInSecond" to frameInSeconds.json(),
+//                "frameCount" to frameCount.json(),
+//                "objects" to nodes.map { node ->
+//                    json(
+//                            "path" to node.nodePath.json(),
+//                            "properties" to node.properties.map { property ->
+//                                json(
+//                                        "type" to property.type.name.json(),
+//                                        "text" to property.text.json(),
+//                                        "name" to property.name.json(),
+//                                        "frames" to property.iterator().map { frame ->
+//                                            json(
+//                                                    "time" to frame.time.json(),
+//                                                    "val" to frame.data.let { toString(property.type, it) }?.json()
+//                                            )
+//                                        }.json()
+//                                )
+//                            }.json()
+//                    )
+//                }.json()
+//        )
+//        doc.setText(mapper.writeValueAsString(root))
+    }
+
+    class AnimateProperty(val node: AnimateNode, override val text: String, val name: String, val type: Field.Type) : AnimatePropertyView.Property, AnimateFrameView.FrameLine {
         override var lock: Boolean = false
         private val frames = TreeMap<Int, AnimateFrame>()
 
-        inner class AnimateFrame(time: Int, var data: Any?) : AnimateFrameView.Frame {
+        inner class AnimateFrame(time: Int, var data: Any) : AnimateFrameView.Frame {
             val property
                 get() = this@AnimateProperty
             override val color: Color = Color.BLACK
@@ -177,7 +236,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                 }
         }
 
-        fun addFrame(time: Int, data: Any?) {
+        fun addFrame(time: Int, data: Any) {
             frames[time] = AnimateFrame(time, data)
         }
 

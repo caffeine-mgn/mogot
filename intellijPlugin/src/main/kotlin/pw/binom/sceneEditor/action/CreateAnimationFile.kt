@@ -25,7 +25,7 @@ class CreateAnimationFile : CreateFileFromTemplateAction("Animation", "Create ne
     override fun createFile(name: String, templateName: String, dir: PsiDirectory): PsiFile? {
         if (templateName != ANIMATION_SCENE_3D)
             return null
-        val text = "{\"frameInSecond\": 60}"
+        val text = "{\"frameInSecond\": 60, \"frameCount\": 60}"
         val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.${AnimationFileType.defaultExtension}", AnimationFileType, text)
         dir.add(file)
         val virtualFile = file.virtualFile

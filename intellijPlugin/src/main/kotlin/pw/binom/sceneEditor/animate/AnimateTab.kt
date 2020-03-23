@@ -11,6 +11,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBScrollPane
+import mogot.Field
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
 import mogot.math.Vector3f
@@ -164,7 +165,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
         refreshFrameAnimation()
     }
 
-    private fun interpolationBetween(currentFrame: Int, frameA: AnimateFile.AnimateProperty.AnimateFrame, frameB: AnimateFile.AnimateProperty.AnimateFrame): Any? {
+    private fun interpolationBetween(currentFrame: Int, frameA: AnimateFile.AnimateProperty.AnimateFrame, frameB: AnimateFile.AnimateProperty.AnimateFrame): Any {
         require(frameA.property.type === frameB.property.type)
         require(frameA.property === frameB.property)
         require(frameA.time < frameB.time) { "frameA.time=${frameA.time} frameB.time=${frameB.time}" }
@@ -176,13 +177,13 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
                     else -> (currentFrame - frameA.time).toFloat() / (frameB.time - frameA.time).toFloat()
                 }
         return when (frameA.property.type) {
-            NodeService.FieldType.VEC2 -> {
+            Field.Type.VEC2 -> {
                 (frameA.data as Vector2fc).lerp(frameB.data as Vector2fc, cof, Vector2f())
             }
-            NodeService.FieldType.VEC3 -> {
+            Field.Type.VEC3 -> {
                 (frameA.data as Vector3fc).lerp(frameB.data as Vector3fc, cof, Vector3f())
             }
-            NodeService.FieldType.FLOAT -> {
+            Field.Type.FLOAT -> {
                 val a = frameA.data as Float
                 val b = frameB.data as Float
                 a + (b - a) * cof
@@ -198,7 +199,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             it.properties.forEach {
                 val before = it.getFrameFor(frameView.currentFrame)
                 val after = it.getNextFrameFor(frameView.currentFrame + 1)
-                val field = it.getField(editor.viewer.view, node) as NodeService.Field<Any?>? ?: return@forEach
+                val field = it.getField(editor.viewer.view, node) as NodeService.Field<Any>? ?: return@forEach
                 when {
                     before == null && after != null -> field.setTempValue(after.data)
                     before != null && after == null -> field.setTempValue(before.data)

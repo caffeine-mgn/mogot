@@ -3,6 +3,7 @@ package pw.binom.sceneEditor.action
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import mogot.Field
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
 import mogot.math.Vector3f
@@ -11,7 +12,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.nodeController.AnimateFile
 import pw.binom.sceneEditor.nodeController.getField
-import pw.binom.utils.findByRelative
+import mogot.findByRelative
 
 class AddAnimateFrameAction : AnAction() {
     override fun isTransparentUpdate(): Boolean = true
@@ -30,11 +31,12 @@ class AddAnimateFrameAction : AnAction() {
 
     private fun cloneValue(field:NodeService.Field<*>)=
             when (field.fieldType){
-                NodeService.FieldType.FLOAT->field.currentValue
-                NodeService.FieldType.VEC2->field.currentValue?.let { it as Vector2fc }?.let { Vector2f(it.x,it.y) }
-                NodeService.FieldType.VEC3->field.currentValue?.let { it as Vector3fc }?.let { Vector3f(it.x,it.y,it.z) }
-                NodeService.FieldType.STRING->field.currentValue?.let { it as String }
-                NodeService.FieldType.INT->field.currentValue?.let { it as Int }
+                Field.Type.FLOAT->field.currentValue
+                Field.Type.VEC2->field.currentValue.let { it as Vector2fc }.let { Vector2f(it.x,it.y) }
+                Field.Type.VEC3->field.currentValue.let { it as Vector3fc }.let { Vector3f(it.x,it.y,it.z) }
+                Field.Type.STRING->field.currentValue.let { it as String }
+                Field.Type.INT->field.currentValue.let { it as Int }
+                Field.Type.BOOL->field.currentValue.let { it as Boolean }
             }
 
     override fun actionPerformed(e: AnActionEvent) {

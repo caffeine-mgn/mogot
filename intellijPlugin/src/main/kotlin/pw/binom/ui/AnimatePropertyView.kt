@@ -1,7 +1,5 @@
 package pw.binom.ui
 
-import pw.binom.sceneEditor.nodeController.EditAnimateNode
-import pw.binom.utils.findByRelative
 import java.awt.*
 import javax.swing.Icon
 import javax.swing.JComponent

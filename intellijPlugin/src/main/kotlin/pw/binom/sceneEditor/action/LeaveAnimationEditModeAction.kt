@@ -23,11 +23,12 @@ class LeaveAnimationEditModeAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        val model = editor.animationTool?.animateModel!!
+        val model = editor.animationTool?.animateModel
         editor.viewer.view.animateNode = null
 
-        ApplicationManager.getApplication().runWriteAction {
-            model.save()
-        }
+        if (model != null)
+            ApplicationManager.getApplication().runWriteAction {
+                model.save()
+            }
     }
 }

@@ -51,7 +51,7 @@ class AnimateTransferHandler(val fields: List<NodeService.Field<*>>) : DragGestu
     }
 }
 
-abstract class AbstractEditor<T>(val sceneEditor: SceneEditor, val fields: List<NodeService.Field<T>>):Panel(), Closeable {
+abstract class AbstractEditor<T:Any>(val sceneEditor: SceneEditor, val fields: List<NodeService.Field<T>>):Panel(), Closeable {
     private val animateTransferHandler = AnimateTransferHandler(fields)
     private val dgr = DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, animateTransferHandler)
     protected val closable = ArrayList<pw.binom.io.Closeable>()

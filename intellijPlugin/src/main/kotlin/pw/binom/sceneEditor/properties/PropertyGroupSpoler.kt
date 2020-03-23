@@ -9,7 +9,7 @@ import pw.binom.ui.EditorVec2
 import pw.binom.ui.EditorVec3
 import java.io.Closeable
 
-class PropertyGroupSpoler(val sceneEditor: SceneEditor, title: String, list: List<NodeService.Field<Any?>>) : Spoler(title), Closeable {
+class PropertyGroupSpoler(val sceneEditor: SceneEditor, title: String, list: List<NodeService.Field<Any>>) : Spoler(title), Closeable {
     private val layout = FlexLayout(stage, FlexLayout.Direction.COLUMN)
     private val closable = ArrayList<Closeable>()
 

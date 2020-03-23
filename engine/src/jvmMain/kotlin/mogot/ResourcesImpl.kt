@@ -63,7 +63,7 @@ actual class Resources actual constructor(actual val engine: Engine, actual val 
     }
 
     actual suspend fun createTexture2D(path: String): Texture2D {
-        val file = engine.resources.fileSystem.get(Unit, path + ".bin")?.read()
+        val file = engine.resources.fileSystem.get(Unit, "$path.bin")?.read()
                 ?: throw FileSystem.FileNotFoundException(path)
         val source = tasks.async {
             file.use {
