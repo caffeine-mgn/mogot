@@ -7,7 +7,7 @@ class SpriteTest {
 
     @Test
     fun test(){
-        Sprite.calcPolygonTriangulation(
+        AbstractSprite.calcPolygonTriangulation(
                 listOf(
                         Vector2f(3f,1f),
                         Vector2f(2f,3f),
@@ -27,7 +27,7 @@ class SpriteTest {
 
     @Test
     fun test2(){
-        Sprite.calcPolygonTriangulation(
+        AbstractSprite.calcPolygonTriangulation(
                 listOf(
                         Vector2f(3f,1f),
                         Vector2f(4f,3f),
@@ -47,7 +47,7 @@ class SpriteTest {
 
     @Test
     fun test3(){
-        Sprite.calcPolygonTriangulation(
+        AbstractSprite.calcPolygonTriangulation(
                 listOf(
                         Vector2f(3f,1f),
                         Vector2f(1f,2f),
