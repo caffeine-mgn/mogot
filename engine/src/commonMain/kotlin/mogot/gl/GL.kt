@@ -1,4 +1,5 @@
 @file:JvmName("GLCommonKt")
+
 package mogot.gl
 
 import mogot.math.Matrix4fc
@@ -7,6 +8,10 @@ import pw.binom.IntDataBuffer
 import kotlin.jvm.JvmName
 
 expect class GL {
+
+    fun clearColor(r: Float, g: Float, b: Float, a: Float)
+    fun blendFunc(sfactor: Int, dfactor: Int)
+    fun viewport(x: Int, y: Int, w: Int, h: Int)
     fun clear(mask: Int)
     fun createBuffer(): GLBuffer
     fun deleteBuffer(buffer: GLBuffer)
@@ -56,10 +61,10 @@ expect class GL {
     fun createRenderBuffer(): GLRenderBuffer
     fun bindRenderBuffer(target: Int, renderbuffer: GLRenderBuffer?)
     fun renderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int)
-    fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int)
+    fun renderbufferStorageMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int)
     fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer)
     fun checkFramebufferStatus(target: Int): Int
-    fun getIntegerv(target: Int):Int
+    fun getIntegerv(target: Int): Int
 
     fun vertexAttribPointer(index: Int, size: Int, type: Int, normalized: Boolean, stride: Int, offset: Int)
     fun drawElements(mode: Int, count: Int, type: Int, offset: Int)
@@ -71,8 +76,11 @@ expect class GL {
     fun enable(feature: Int)
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
-    fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
+    fun glBlitFramebuffer(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
 
+    val SRC_ALPHA: Int
+    val ONE_MINUS_SRC_ALPHA: Int
+    val BLEND: Int
     val MAX_TEXTURE_MAX_ANISOTROPY_EXT: Int
     val NEAREST: Int
     val CULL_FACE: Int

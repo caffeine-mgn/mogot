@@ -6,6 +6,7 @@ import com.jogamp.opengl.util.Animator
 import com.jogamp.opengl.util.FPSAnimator
 import mogot.*
 import mogot.math.*
+import mogot.rendering.Display
 import pw.binom.io.FileSystem
 import java.awt.Cursor
 import java.awt.Dimension
@@ -15,7 +16,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 
 
-open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
+open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
     override val mouseDown = EventValueDispatcher<Int>()
     override val mouseUp = EventValueDispatcher<Int>()
@@ -192,13 +193,10 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
     }
 
     protected open fun setup(width: Int, height: Int) {
-        gl.gl.glViewport(0, 0, width, height)
+        display.setup(renderContext,gl,width,height)
         camera?.resize(width, height)
         camera2D?.resize(width, height)
-        gl.gl.glClearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
-        gl.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-        gl.gl.glEnable(GL2.GL_BLEND)
-        gl.disable(gl.MULTISAMPLE)
+
         repaint()
     }
 
@@ -273,18 +271,7 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         if (root != null) {
             update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
             if (render3D) {
-                if (camera != null)
-                    camera?.begin()
-                gl.gl.glEnable(GL2.GL_DEPTH_TEST)
-                gl.gl.glEnable(GL2.GL_CULL_FACE)
-
-                if (camera != null)
-                    renderNode3D(root!!, cameraModel3DMatrix, camera!!.projectionMatrix, renderContext)
-
-                gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-                gl.gl.glDisable(GL2.GL_CULL_FACE)
-                if (camera != null)
-                    camera?.end(renderContext)
+                display.render(renderContext,gl,camera,camera2D,root!!)
             }
             if (render2D) {
                 if (!render3D) {
@@ -325,21 +312,6 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
 
         node.childs.forEach {
             update(dt, it, camModel = mat3d, ortoModel = mat2d)
-        }
-    }
-
-    private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        var pos = model
-        if (node.isVisualInstance) {
-            node as VisualInstance
-            if (!node.visible)
-                return
-            pos = node.matrix
-            node.render(node.matrix, projection, renderContext)
-        }
-
-        node.childs.forEach {
-            renderNode3D(it, pos, projection, renderContext)
         }
     }
 

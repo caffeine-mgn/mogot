@@ -126,6 +126,13 @@ actual class GL(val gl: GL2) {
     actual val COMPILE_STATUS: Int
         get() = GL2.GL_COMPILE_STATUS
 
+    actual val SRC_ALPHA: Int
+        get() = GL2.GL_SRC_ALPHA
+    actual val ONE_MINUS_SRC_ALPHA: Int
+        get() = GL2.GL_ONE_MINUS_SRC_ALPHA
+    actual val BLEND: Int
+        get() = GL2.GL_BLEND
+
     actual val TEXTURE_MAX_LEVEL: Int
         get() = GL2.GL_TEXTURE_MAX_LEVEL
 
@@ -143,18 +150,31 @@ actual class GL(val gl: GL2) {
     actual val REPEAT: Int
         get() = GL2.GL_REPEAT
     actual val NEAREST_MIPMAP_NEAREST: Int
-        get() =  GL2.GL_NEAREST_MIPMAP_NEAREST
+        get() = GL2.GL_NEAREST_MIPMAP_NEAREST
     actual val LINEAR_MIPMAP_NEAREST: Int
-        get() =  GL2.GL_LINEAR_MIPMAP_NEAREST
+        get() = GL2.GL_LINEAR_MIPMAP_NEAREST
     actual val NEAREST_MIPMAP_LINEAR: Int
-        get() =  GL2.GL_NEAREST_MIPMAP_LINEAR
+        get() = GL2.GL_NEAREST_MIPMAP_LINEAR
     actual val LINEAR_MIPMAP_LINEAR: Int
-        get() =  GL2.GL_LINEAR_MIPMAP_LINEAR
+        get() = GL2.GL_LINEAR_MIPMAP_LINEAR
 
     actual fun deleteProgram(program: GLProgram) {
         program as JGLProgram
         gl.glDeleteProgram(program.id)
     }
+
+    actual fun viewport(x: Int, y: Int, w: Int, h: Int) {
+        gl.glViewport(x, y, w, h)
+    }
+
+    actual fun clearColor(r: Float, g: Float, b: Float, a: Float){
+        gl.glClearColor(r,g,b,a)
+    }
+
+    actual fun blendFunc(sfactor:Int, dfactor: Int){
+        gl.glBlendFunc(sfactor, dfactor)
+    }
+
 
     actual val LINK_STATUS: Int
         get() = GL2.GL_LINK_STATUS
@@ -325,13 +345,13 @@ actual class GL(val gl: GL2) {
         else gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, null)
     }
 
-    actual fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean){
-        gl.glTexImage2DMultisample(target,samples,internalformat,width,height,fixedsamplelocations)
+    actual fun texImage2DMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int, fixedsamplelocations: Boolean) {
+        gl.glTexImage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations)
     }
 
-    actual fun getIntegerv(target: Int):Int{
+    actual fun getIntegerv(target: Int): Int {
         val value = IntBuffer.allocate(1)
-        gl.glGetIntegerv(target,value)
+        gl.glGetIntegerv(target, value)
         return value[0]
     }
 
@@ -358,8 +378,8 @@ actual class GL(val gl: GL2) {
         gl.glRenderbufferStorage(target, internalformat, width, height)
     }
 
-    actual fun renderbufferStorageMultisample(target: Int, samples:Int, internalformat: Int, width: Int, height: Int){
-        gl.glRenderbufferStorageMultisample(target,samples,internalformat,width,height)
+    actual fun renderbufferStorageMultisample(target: Int, samples: Int, internalformat: Int, width: Int, height: Int) {
+        gl.glRenderbufferStorageMultisample(target, samples, internalformat, width, height)
     }
 
     actual fun framebufferRenderbuffer(target: Int, attachment: Int, renderbuffertarget: Int, renderbuffer: GLRenderBuffer) {
@@ -394,7 +414,7 @@ actual class GL(val gl: GL2) {
     actual val RGB: Int
         get() = GL2.GL_RGB
     actual val MAX_TEXTURE_SIZE: Int
-       get() = GL2.GL_MAX_TEXTURE_SIZE
+        get() = GL2.GL_MAX_TEXTURE_SIZE
 
     actual val MAX_SAMPLES: Int
         get() = GL2.GL_MAX_SAMPLES
@@ -443,8 +463,9 @@ actual class GL(val gl: GL2) {
     actual fun texParameterf(target: Int, pname: Int, param: Float) {
         gl.glTexParameterf(target, pname, param)
     }
-    actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
-        gl.glBlitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)
+
+    actual fun glBlitFramebuffer(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int) {
+        gl.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, srcX0, dstY0, dstX1, dstY1, mask, filter)
     }
 
     actual val CULL_FACE: Int

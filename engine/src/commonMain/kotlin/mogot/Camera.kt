@@ -1,18 +1,9 @@
 package mogot
 
-import mogot.gl.PostEffectPipeline
 import mogot.math.*
 
 
 class Camera : Spatial() {
-    private var _postEffectPipeline by ResourceHolder<PostEffectPipeline>()
-    var postEffectPipeline: PostEffectPipeline?
-        set(value) {
-            _postEffectPipeline = value
-            resize(width, height)
-        }
-        get() = _postEffectPipeline
-
     val projectionMatrix = Matrix4f()
 
     var width = 0
@@ -46,10 +37,6 @@ class Camera : Spatial() {
                 width.toFloat() / height.toFloat(),
                 near,
                 far, false)
-        postEffectPipeline?.let {
-            it.close()
-            it.init(width, height)
-        }
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
@@ -72,13 +59,6 @@ class Camera : Spatial() {
         viewMatrix4f.translate(-position)
     }
 
-    fun begin() {
-        postEffectPipeline?.begin()
-    }
-
-    fun end(renderContext: RenderContext) {
-        postEffectPipeline?.end(renderContext)
-    }
 
     fun worldToScreenPoint(position: Vector3fc): Vector2i? {
         val out = Vector2i()
@@ -126,11 +106,6 @@ class Camera : Spatial() {
         )
         dest.direction.normalize()
         return dest
-    }
-
-    override fun close() {
-        super.close()
-        postEffectPipeline = null
     }
 }
 

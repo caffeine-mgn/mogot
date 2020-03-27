@@ -150,6 +150,13 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual val MAX_SAMPLES: Int
         get() = TODO("WebGLRenderingContext.MAX_SAMPLES")
 
+    actual val SRC_ALPHA: Int
+        get() = WebGLRenderingContext.SRC_ALPHA
+    actual val ONE_MINUS_SRC_ALPHA: Int
+        get() = WebGLRenderingContext.ONE_MINUS_SRC_ALPHA
+    actual val BLEND: Int
+        get() = WebGLRenderingContext.BLEND
+
     actual val MAX_TEXTURE_SIZE: Int
         get() = WebGLRenderingContext.MAX_TEXTURE_SIZE
 
@@ -158,6 +165,18 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun deleteBuffer(buffer: GLBuffer) {
         buffer as JSBuffer
         ctx.deleteBuffer(buffer.js)
+    }
+
+    actual fun viewport(x:Int,y:Int,w:Int,h:Int){
+        ctx.viewport(x,y,w,h)
+    }
+
+    actual fun clearColor(r: Float, g: Float, b: Float, a: Float){
+        ctx.clearColor(r,g,b,a)
+    }
+
+    actual fun blendFunc(sfactor:Int, dfactor: Int){
+        ctx.blendFunc(sfactor, dfactor)
     }
 
     actual fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int) {
