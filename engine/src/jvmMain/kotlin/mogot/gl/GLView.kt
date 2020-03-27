@@ -251,7 +251,6 @@ open class GLView(val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJ
         gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
 
 
-        gl.gl.glMatrixMode(GL2.GL_MODELVIEW)
         camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
 
         camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
