@@ -5,6 +5,10 @@ apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
 apply plugin: "org.xbib.gradle.plugin.jflex"
+intellij {
+    version '193.6494.35'
+    type 'IC'
+}
 
 sourceSets {
     main {
