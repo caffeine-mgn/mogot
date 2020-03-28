@@ -7,6 +7,7 @@ import mogot.math.Matrix4fc
 import mogot.math.Vector3fc
 import mogot.math.Vector3ic
 import mogot.math.Vector4fc
+import mogot.rendering.Display
 import pw.binom.SimpleMaterial
 import pw.binom.View3D
 import pw.binom.sceneEditor.ExternalTexture
@@ -74,8 +75,8 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
             super.dispose()
         }
 
-        override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-            super.use(model, projection, renderContext)
+        override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+            super.use(model, projection, context)
             params.forEach { (name, value) ->
                 when (value) {
                     is Int -> shader.uniform(name, value)
@@ -184,8 +185,8 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
 
     private inner class GeomNode2 : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         var geom = ResourceHolder<Geom3D2>()
-        override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-            material.value?.use(model, projection, renderContext)
+        override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+            material.value?.use(model, projection, context)
             renderListeners.forEach {
                 it()
             }

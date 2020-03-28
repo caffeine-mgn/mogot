@@ -1,10 +1,9 @@
 package pw.binom.sceneEditor
 
 import mogot.Material
-import mogot.RenderContext
 import mogot.ResourceImpl
 import mogot.math.*
-import pw.binom.material.MaterialViewer
+import mogot.rendering.Display
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.compiler.SingleType
 
@@ -109,7 +108,7 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
                         Type.Vec2 -> it.value!!.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
                         Type.Vec3 -> it.value!!.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
                         Type.Vec4 -> it.value!!.split(';').let { Vector4f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat(), it[3].toFloat()) }
-                        Type.Texture -> root.file.parent.findFileByRelativePath(it.value!!)?.let { root.engine.resources.loadTexture(it) }
+                        Type.Texture -> root.file.parent.findFileByRelativePath(it.value!!)?.let { root.gl.resources.loadTexture(it) }
                     }
                     set(it, value)
                 }
@@ -141,8 +140,8 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
 
     fun get(uniform: Uniform) = values[uniform.name]
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        root.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        root.use(model, projection, context)
         root.shader.uniform("selected", selected)
         root.shader.uniform("hover", hover)
         values.forEach { (name, value) ->
@@ -153,8 +152,8 @@ class MaterialInstance(val root: ExternalMaterial) : Material, ResourceImpl() {
                 is Vector3ic -> root.shader.uniform(name, value)
                 is Vector4fc -> root.shader.uniform(name, value)
                 is ExternalTexture -> {
-                    root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-                    root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, value.gl.gl)
+                    root.gl.gl.activeTexture(root.gl.gl.TEXTURE0)
+                    root.gl.gl.bindTexture(root.gl.gl.TEXTURE_2D, value.gl.gl)
                     root.shader.uniform(name, 0)
                 }
                 else -> throw IllegalStateException("Unknown uniform type ${value::class.java.name}")

@@ -8,7 +8,7 @@ import mogot.math.Matrix4fc
 import mogot.math.Vector2fProperty
 import mogot.math.Vector4f
 import mogot.math.set
-import mogot.physics.d2.shapes.BoxShape2D
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.sceneEditor.CenterNode2D
@@ -193,9 +193,9 @@ class CameraSprite(view: SceneEditorView) : VisualInstance2D(view.engine) {
         }
 
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         checkGeom()
-        mat!!.use(model, projection, renderContext)
+        mat!!.use(model, projection, context)
         geom!!.draw()
         mat!!.unuse()
     }

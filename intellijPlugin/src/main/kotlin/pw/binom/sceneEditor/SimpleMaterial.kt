@@ -1,16 +1,15 @@
 package pw.binom.sceneEditor
 
 import mogot.Engine
-import mogot.RenderContext
 import mogot.Texture2D
-import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.*
+import mogot.rendering.Display
 
 internal class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
     private val gl
-    get()=engine.gl
+    get()= gl.gl
 
     override fun dispose() {
         shader.close()
@@ -64,8 +63,8 @@ void main() {
             }
         }
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, projection, context)
         if (tex != null) {
             gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
         }

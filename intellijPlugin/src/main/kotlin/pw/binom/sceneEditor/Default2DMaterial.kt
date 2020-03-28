@@ -4,7 +4,7 @@ import mogot.*
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
-import mogot.math.Vector4fc
+import mogot.rendering.Display
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
@@ -27,17 +27,17 @@ class Material2DInstance(val root: Default2DMaterial) : EditableMaterial, Resour
         super.dispose()
     }
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        root.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        root.use(model, projection, context)
         root.shader.uniform("selected", selected)
         root.shader.uniform("hover", hover)
         if (image != null) {
-            root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-            root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, image!!.gl.gl)
+            root.gl.gl.activeTexture(root.gl.gl.TEXTURE0)
+            root.gl.gl.bindTexture(root.gl.gl.TEXTURE_2D, image!!.gl.gl)
             root.shader.uniform(ToolsDefault2DMaterial.IMAGE_PROPERTY, 0)
         } else {
-            root.engine.gl.activeTexture(root.engine.gl.TEXTURE0)
-            root.engine.gl.bindTexture(root.engine.gl.TEXTURE_2D, null)
+            root.gl.gl.activeTexture(root.gl.gl.TEXTURE0)
+            root.gl.gl.bindTexture(root.gl.gl.TEXTURE_2D, null)
             root.shader.uniform(ToolsDefault2DMaterial.IMAGE_PROPERTY, 0)
         }
     }

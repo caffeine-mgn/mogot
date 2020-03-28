@@ -4,7 +4,7 @@ import mogot.gl.GL
 import mogot.gl.RenderTargetTexture
 import mogot.gl.TextureObject
 
-abstract class TextureRenderPass : BaseRenderPass() {
+abstract class ToTextureRenderPass(nextPass:RenderPass?) : BaseRenderPass(nextPass) {
     protected var width:Int = 0
     protected var height:Int = 0
     protected var renderTargetTexture: RenderTargetTexture? = null

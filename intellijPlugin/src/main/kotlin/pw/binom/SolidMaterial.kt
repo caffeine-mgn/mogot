@@ -1,13 +1,11 @@
 package pw.binom
 
-import com.jogamp.opengl.GL2
 import mogot.Engine
 import mogot.gl.MaterialGLSL
-import mogot.RenderContext
-import mogot.gl.GL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
+import mogot.rendering.Display
 
 internal class SolidMaterial(engine: Engine) : MaterialGLSL(engine) {
 
@@ -39,8 +37,8 @@ void main() {
 """
     )
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, projection, context)
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }
 }

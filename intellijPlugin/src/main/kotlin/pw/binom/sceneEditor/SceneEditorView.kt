@@ -5,6 +5,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.gl.GLView
 import mogot.math.*
+import mogot.rendering.CanvasRenderPass
+import mogot.rendering.Display
+import mogot.rendering.FinalRenderPass
+import mogot.rendering.SceneRenderPass
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
@@ -32,7 +36,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass(null)))),MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -42,7 +46,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         val node: Node
         val model: Matrix4fc
         val projection: Matrix4fc
-        val renderContext: RenderContext
+        val context: Display.Context
         val view: SceneEditorView
     }
 
@@ -50,7 +54,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         override lateinit var node: Node
         override lateinit var model: Matrix4fc
         override lateinit var projection: Matrix4fc
-        override lateinit var renderContext: RenderContext
+        override lateinit var context: Display.Context
         override val view: SceneEditorView
             get() = this@SceneEditorView
     }
@@ -412,7 +416,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             return
         }
         editorFactories.forEach {
-            it.keyDown(this, e);
+            it.keyDown(this, e)
             if (editor != null)
                 return
         }
@@ -445,10 +449,10 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 
             if (node != null) {
                 if (hover != node) {
-                    val service = getService(node!!)
+                    val service = getService(node)
                     if (service != null) {
                         hover?.let { getService(it)?.hover(this, it, false) }
-                        node!!.let { getService(it)?.hover(this, it, true) }
+                        node.let { getService(it)?.hover(this, it, true) }
                         hover = node
                     }
                 }
@@ -501,15 +505,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         node2DRenderCallback.remove(node)
     }
 
-    override fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
-        super.renderNode2D(node, projection, renderContext)
+    fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
+        //super.renderNode2D(node, projection, context)
         if (node.isSpatial2D()) {
             val func = node2DRenderCallback[node]
             if (func != null) {
                 renderCallback.also {
                     it.model = node.matrix
                     it.projection = projection
-                    it.renderContext = renderContext
+                    it.context = context
                     it.node = node
                 }
                 func(renderCallback)

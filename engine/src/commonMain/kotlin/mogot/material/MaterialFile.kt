@@ -6,6 +6,7 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector3fc
 import mogot.math.Vector4fc
+import mogot.rendering.Display
 import pw.binom.asUTF8String
 import pw.binom.io.*
 
@@ -57,11 +58,11 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
     private var needUpdateTextureIndex = false
 
     private inline val gl
-        get() = material.engine.gl
+        get() = material.gl.gl
 
     private val params = HashMap<String, Any>()
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        material.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        material.use(model, projection, context)
         params.forEach { (k, v) ->
             when (v) {
                 is Vector3fc -> material.shader.uniform(k, v)

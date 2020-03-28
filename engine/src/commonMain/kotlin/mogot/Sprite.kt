@@ -4,6 +4,7 @@ import mogot.material.DEFAULT_MATERIAL_2D_FILE
 import mogot.material.MaterialInstance
 import mogot.material.loadMaterial
 import mogot.math.*
+import mogot.rendering.Display
 import pw.binom.IntDataBuffer
 import pw.binom.async
 
@@ -96,7 +97,7 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 
     protected abstract val isReady: Boolean
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!isReady)
             return
 
@@ -108,10 +109,10 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
             geom!!.size.set(size)
             oldSize.set(size)
         }
-        super.render(model, projection, renderContext)
+        super.render(model, projection, context)
         val mat = material
 
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         geom!!.draw()
         mat.unuse()
     }

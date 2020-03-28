@@ -10,6 +10,7 @@ import mogot.math.Vector4f
 import mogot.math.set
 import mogot.physics.d2.PhysicsBody2D
 import mogot.physics.d2.shapes.BoxShape2D
+import mogot.rendering.Display
 import pw.binom.sceneEditor.CenterNode2D
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
@@ -133,7 +134,7 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
             refreshColor()
         }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (center == null) {
             center = CenterNode2D(this, view)
             center!!.parent = view.editorRoot
@@ -146,7 +147,7 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
         if (size.resetChangeFlag()) {
             rect2D!!.size.set(size)
         }
-        material!!.use(model, projection, renderContext)
+        material!!.use(model, projection, context)
         rect2D!!.draw()
         material!!.unuse()
     }

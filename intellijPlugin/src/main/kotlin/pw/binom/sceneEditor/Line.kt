@@ -7,10 +7,10 @@ import mogot.VisualInstance
 import mogot.*
 import mogot.math.Matrix4fc
 import mogot.math.Vector3f
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.alloc
-import pw.binom.intDataOf
 import pw.binom.sceneEditor.editors.Axis
 
 class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
@@ -72,12 +72,12 @@ class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.render(model, projection, renderContext)
-        val mat = material ?: return
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, projection, context)
+        val mat = material
         if (geom == null || needUpdate)
             update()
-        mat.value?.use(model, projection, renderContext)
+        mat.value?.use(model, projection, context)
         geom!!.draw()
         mat.value?.unuse()
     }

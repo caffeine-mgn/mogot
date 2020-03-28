@@ -1,13 +1,11 @@
 package pw.binom
 
-import com.jogamp.opengl.GL2
 import mogot.Engine
 import mogot.gl.MaterialGLSL
-import mogot.RenderContext
-import mogot.gl.GL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
+import mogot.rendering.Display
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
@@ -175,8 +173,8 @@ void main() {
 """
     )
 */
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, projection, context)
 //        image?.bind()
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

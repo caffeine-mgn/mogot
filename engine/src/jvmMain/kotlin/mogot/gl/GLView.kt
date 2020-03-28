@@ -78,12 +78,8 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
     val engine
         get() = _engine
     val backgroundColor
-        get() = renderContext.sceneColor
+        get() = display.context.backgroundColor
 
-    protected object renderContext : RenderContext {
-        override val lights = ArrayList<Light>()
-        override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
-    }
 
     init {
         animator = if (fps == null) Animator(this) else FPSAnimator(this, fps, true)
@@ -193,7 +189,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
     }
 
     protected open fun setup(width: Int, height: Int) {
-        display.setup(renderContext,gl,width,height)
+        display.setup(gl,0,0,width,height)
         camera?.resize(width, height)
         camera2D?.resize(width, height)
         repaint()
@@ -246,13 +242,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         }
         render2(dt)
 
-        renderContext.lights.clear()
-        root?.walk {
-            if (it is Light)
-                renderContext.lights += it
-            true
-        }
-
         while (!engine.frameListeners.isEmpty) {
             println("Execute... ${engine.frameListeners.size}")
             engine.frameListeners.popFirst().invoke()
@@ -260,17 +249,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
 
         if (root != null) {
             update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
-            display.render(renderContext,gl,camera,camera2D,root!!)
-            if (render2D) {
-                if (!render3D) {
-                    gl.gl.glDisable(GL2.GL_DEPTH_TEST)
-                    gl.gl.glDisable(GL2.GL_CULL_FACE)
-                }
-                renderNode2D(root!!,
-                        camera2D?.projectionMatrix
-                                ?: cameraModel2DMatrix.identity().setOrtho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-                        , renderContext)
-            }
+            display.render(gl,root!!)
         }
 
         if (lockMouse) {
@@ -303,18 +282,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         }
     }
 
-    protected open fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
-        if (node.isVisualInstance2D()) {
-            if (!node.visible)
-                return
-            node.render(node.matrix, projection, renderContext)
-        }
 
-
-        node.childs.forEach {
-            renderNode2D(it, projection, renderContext)
-        }
-    }
 
     protected open fun init() {
         _engine = Engine(this, fileSystem)

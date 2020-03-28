@@ -1,6 +1,7 @@
 package mogot
 
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 
 
 open class CSGBox(val engine: Engine) : CSGPrimitive(), MaterialNode by MaterialNodeImpl() {
@@ -18,13 +19,13 @@ open class CSGBox(val engine: Engine) : CSGPrimitive(), MaterialNode by Material
         rebuild()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (geomNode3D2 == null)
             rebuild()
-        super.render(model, projection, renderContext)
-        val material = material ?: return
+        super.render(model, projection, context)
+        val material = material
         val geom = geomNode3D2
-        material.value?.use(model, projection, renderContext)
+        material.value?.use(model, projection, context)
         geom!!.draw()
         material.value?.unuse()
     }

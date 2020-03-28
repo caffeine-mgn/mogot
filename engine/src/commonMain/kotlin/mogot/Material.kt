@@ -1,9 +1,10 @@
 package mogot
 
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 
 interface Material : Resource {
-    fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext)
+    fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context)
     fun unuse()
 }
 

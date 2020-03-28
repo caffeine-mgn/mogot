@@ -3,8 +3,9 @@ package mogot.gl
 import mogot.*
 import mogot.math.Matrix4fc
 import mogot.math.Vector3f
+import mogot.rendering.Display
 
-abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
+abstract class MaterialGLSL(val gl: GL) : Material, ResourceImpl() {
     companion object{
         const val PROJECTION="gles_projection"
         const val MODEL="gles_model"
@@ -22,24 +23,24 @@ abstract class MaterialGLSL(val engine: Engine) : Material, ResourceImpl() {
 
     val TEMP_VECTOR3F = Vector3f()
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         check(!closed){"Material closed"}
-        engine.gl.checkError { "Before set material properties" }
+        gl.checkError { "Before set material properties" }
         shader.use()
-        engine.gl.checkError { "1" }
+        gl.checkError { "1" }
         shader.uniform(PROJECTION, projection)
-        engine.gl.checkError { "2" }
+        gl.checkError { "2" }
         shader.uniform(MODEL, model)
-        engine.gl.checkError { "2" }
-        shader.uniform("lights_len", renderContext.lights.size)
-        engine.gl.checkError { "3" }
-        renderContext.lights.forEachIndexed { index, light ->
+        gl.checkError { "2" }
+        shader.uniform("lights_len", context.lights.size)
+        gl.checkError { "3" }
+        context.lights.forEachIndexed { index, light ->
             light.matrix.getTranslation(TEMP_VECTOR3F)
             shader.uniform("lights[$index].position", TEMP_VECTOR3F)
             shader.uniform("lights[$index].diffuse", light.diffuse)
             shader.uniform("lights[$index].specular", light.specular)
         }
-        engine.gl.checkError { "After set material properties" }
+        gl.checkError { "After set material properties" }
     }
 
     override fun dispose() {

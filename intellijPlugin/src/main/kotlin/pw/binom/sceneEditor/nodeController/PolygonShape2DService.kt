@@ -7,6 +7,7 @@ import mogot.collider.Polygon2DCollider
 import mogot.math.*
 import mogot.physics.d2.PhysicsBody2D
 import mogot.physics.d2.shapes.PolygonShape2D
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.sceneEditor.CenterNode2D
@@ -218,11 +219,11 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     }
 
     fun render(callback: SceneEditorView.RenderCallback) {
-        render(callback.model, callback.projection, callback.renderContext)
+        render(callback.model, callback.projection, callback.context)
     }
 
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val mat = material.value ?: run {
             println("Material not set")
             return
@@ -235,7 +236,7 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
             checkGeom()
             needCheckGeom = false
         }
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         geom!!.draw()
         mat.unuse()
     }

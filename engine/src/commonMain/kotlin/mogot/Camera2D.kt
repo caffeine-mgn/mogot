@@ -5,6 +5,8 @@ import kotlin.math.roundToInt
 
 class Camera2D(engine: Engine) : Spatial2D(engine) {
 
+    var enabled:Boolean = false
+
     val projectionMatrix = Matrix4f()
 
     var width = 0

@@ -4,6 +4,7 @@ import mogot.math.*
 
 
 class Camera : Spatial() {
+    var enabled = false
     val projectionMatrix = Matrix4f()
 
     var width = 0

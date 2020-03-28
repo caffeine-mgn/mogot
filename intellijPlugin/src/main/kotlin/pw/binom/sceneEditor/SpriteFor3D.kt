@@ -2,6 +2,7 @@ package pw.binom.sceneEditor
 
 import mogot.*
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 
 class SpriteFor3D(val view: SceneEditorView) : AbstractSprite(view.engine) {
     var internalMaterial by ResourceHolder<Material>()
@@ -10,9 +11,9 @@ class SpriteFor3D(val view: SceneEditorView) : AbstractSprite(view.engine) {
     override val isReady: Boolean
         get() = true
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!view.render3D)
             return
-        super.render(model, projection, renderContext)
+        super.render(model, projection, context)
     }
 }

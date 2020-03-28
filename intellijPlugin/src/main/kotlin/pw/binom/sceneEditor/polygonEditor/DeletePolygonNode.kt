@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.polygonEditor
 
 import mogot.*
 import mogot.math.*
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.sceneEditor.MInstance
@@ -13,14 +14,14 @@ class DeletePolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engin
     private var outterMat by ResourceHolder<MInstance>()
 
 
-    fun render(x: Float, y: Float, model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    fun render(x: Float, y: Float, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val pos = engine.mathPool.vec3f.poll()
         _matrix.identity()
         model.getTranslation(pos)
         _matrix.scale(1f / view.editorCamera2D.zoom, 1f / view.editorCamera2D.zoom, 1f)
         _matrix.translate(pos)
         _matrix.translate(-x, -y, 0f)
-        render(matrix, projection, renderContext)
+        render(matrix, projection, context)
     }
 
     override fun close() {
@@ -30,7 +31,7 @@ class DeletePolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engin
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (innerMat == null) {
             innerMat = view.default3DMaterial.instance(Vector4f.fromColor(255, 0, 255, 0))
         }
@@ -59,12 +60,12 @@ class DeletePolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engin
 
 
         engine.gl.gl.glLineWidth(3f)
-        outterMat!!.use(model, projection, renderContext)
+        outterMat!!.use(model, projection, context)
         addGeom!!.draw()
         outterMat!!.unuse()
 
         engine.gl.gl.glLineWidth(1f)
-        innerMat!!.use(model, projection, renderContext)
+        innerMat!!.use(model, projection, context)
         addGeom!!.draw()
         innerMat!!.unuse()
     }

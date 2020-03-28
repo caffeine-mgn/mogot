@@ -5,6 +5,7 @@ import mogot.math.*
 import mogot.physics.box2d.collision.shapes.PolygonShape
 import mogot.physics.box2d.collision.shapes.Shape
 import mogot.physics.box2d.common.Vec2
+import mogot.rendering.Display
 
 class BoxShape2D(engine: Engine) : Shape2D(engine), MaterialNode by MaterialNodeImpl() {
 
@@ -58,7 +59,7 @@ class BoxShape2D(engine: Engine) : Shape2D(engine), MaterialNode by MaterialNode
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (rect == null)
             rect = Rect2D(engine.gl, null)
         if (size.resetChangeFlag()) {
@@ -67,7 +68,7 @@ class BoxShape2D(engine: Engine) : Shape2D(engine), MaterialNode by MaterialNode
             println("Reset size to ${size.x} x ${size.y}")
         }
         val mat = material.value ?: return
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         rect!!.draw()
         mat.unuse()
     }

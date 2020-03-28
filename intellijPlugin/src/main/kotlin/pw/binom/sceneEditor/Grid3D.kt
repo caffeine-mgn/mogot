@@ -2,8 +2,8 @@ package pw.binom.sceneEditor
 
 import mogot.*
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
-import pw.binom.IntDataBuffer
 import pw.binom.intDataOf
 
 class Grid3D(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
@@ -64,12 +64,12 @@ class Grid3D(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNod
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.render(model, projection, renderContext)
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, projection, context)
         val mat = material.value ?: return
         if (geom == null)
             update()
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         geom!!.draw()
         mat.unuse()
     }

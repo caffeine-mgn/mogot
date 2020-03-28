@@ -2,6 +2,7 @@ package pw.binom.sceneEditor
 
 import mogot.*
 import mogot.math.*
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.*
@@ -88,12 +89,12 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
 
     //override fun apply(matrix: Matrix4fc): Matrix4fc = node.matrix
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val mat = material.value ?: return
         if (geom == null || size.resetChangeFlag()) {
             rebuildGeom()
         }
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         geom!!.draw()
         mat.unuse()
     }

@@ -1,12 +1,12 @@
 package mogot.gl
 
 import mogot.Engine
-import mogot.RenderContext
 import mogot.ResourceHolder
 import mogot.ResourceImpl
 import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 import pw.binom.floatDataOf
 import pw.binom.intDataOf
 import pw.binom.io.Closeable
@@ -56,9 +56,9 @@ open class ScreenRect(val gl: GL) : Closeable {
     }
 }
 
-class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
+class FullScreenMaterial(gl: GL) : MaterialGLSL(gl) {
     override val shader: Shader
-        get() = Shader(engine.gl, """#version 450 core
+        get() = Shader(gl, """#version 450 core
                                         layout (location = 0) in vec3 aPos;
                                         layout (location = 2) in vec2 aTexCoords;
                                         out vec2 TexCoords;
@@ -84,11 +84,11 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
 
     var texture2D: GLTexture? = null
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, projection, context)
         if (texture2D != null) {
-            engine.gl.activeTexture(engine.gl.TEXTURE0)
-            engine.gl.bindTexture(engine.gl.TEXTURE_2D, texture2D!!)
+            gl.activeTexture(gl.TEXTURE0)
+            gl.bindTexture(gl.TEXTURE_2D, texture2D!!)
             shader.use()
             shader.uniform("screenTexture", 0)
 
@@ -97,21 +97,21 @@ class FullScreenMaterial(engine: Engine) : MaterialGLSL(engine) {
 
     override fun unuse() {
         if (texture2D != null) {
-            engine.gl.activeTexture(engine.gl.TEXTURE0)
-            engine.gl.bindTexture(engine.gl.TEXTURE_2D, null)
+            gl.activeTexture(gl.TEXTURE0)
+            gl.bindTexture(gl.TEXTURE_2D, null)
         }
         super.unuse()
     }
 }
 
-class FullScreenSprite(engine: Engine): ResourceImpl() {
+class FullScreenSprite(gl: GL): ResourceImpl() {
     //    var defaultMaterial = FullScreenMaterial(engine)
-    var material by ResourceHolder<MaterialGLSL>(FullScreenMaterial(engine))
-    private val rect = ScreenRect(engine.gl)
+    var material by ResourceHolder<MaterialGLSL>(FullScreenMaterial(gl))
+    private val rect = ScreenRect(gl)
 
-    fun draw(renderContext: RenderContext) {
+    fun draw(context: Display.Context) {
         val mat = material ?: TODO()
-        mat.use(MATRIX4_ONE, Matrix4f().identity(), renderContext)
+        mat.use(MATRIX4_ONE, Matrix4f().identity(), context)
         rect.draw()
         mat.unuse()
     }
@@ -122,6 +122,7 @@ class FullScreenSprite(engine: Engine): ResourceImpl() {
     }
 }
 
+@Deprecated("Will be removed in future")
 class PostEffectPipeline(val engine: Engine): ResourceImpl() {
     private var isClosed: Boolean = false
     private val gl
@@ -145,7 +146,7 @@ class PostEffectPipeline(val engine: Engine): ResourceImpl() {
             effects.add(effect)
     }
 
-    private val mat = FullScreenMaterial(engine)
+    private val mat = FullScreenMaterial(gl)
 
     fun begin(){
         if(isClosed) throw IllegalStateException("Object is closed")
@@ -154,7 +155,7 @@ class PostEffectPipeline(val engine: Engine): ResourceImpl() {
         gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
     }
 
-    fun end(renderContext: RenderContext){
+    fun end(context: Display.Context){
         if(isClosed) throw IllegalStateException("Object is closed")
         renderTargetTexture?.end()
         effects.forEach { currentFrameEffect ->
@@ -162,7 +163,7 @@ class PostEffectPipeline(val engine: Engine): ResourceImpl() {
             renderTargetTexture!!.begin()
             gl.clear(gl.COLOR_BUFFER_BIT)
             sprite?.material = currentFrameEffect
-            sprite?.draw(renderContext)
+            sprite?.draw(context)
             renderTargetTexture!!.end()
             gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, null)
         }
@@ -172,14 +173,14 @@ class PostEffectPipeline(val engine: Engine): ResourceImpl() {
         sprite?.material = mat
         gl.activeTexture(engine.gl.TEXTURE0)
         gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, renderTargetTexture!!.getGlTexture())
-        sprite?.draw(renderContext)
+        sprite?.draw(context)
         gl.bindTexture(renderTargetTexture!!.getGlTextureTarget()!!, null)
     }
 
     fun init(resolutionWidth: Int, resolutionHeight: Int) {
         isClosed = false
         renderTargetTexture = RenderTargetTexture(engine.gl, resolutionWidth, resolutionHeight,MSAALevel)
-        sprite = FullScreenSprite(engine)
+        sprite = FullScreenSprite(gl)
     }
 
     override fun dispose() {

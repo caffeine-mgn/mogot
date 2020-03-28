@@ -9,6 +9,7 @@ import mogot.math.Vector4f
 import mogot.math.set
 import mogot.physics.d2.PhysicsBody2D
 import mogot.physics.d2.shapes.CircleShape2D
+import mogot.rendering.Display
 import pw.binom.sceneEditor.CenterNode2D
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
@@ -127,7 +128,7 @@ class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engin
             refreshColor()
         }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (center == null) {
             center = CenterNode2D(this, view)
             center!!.parent = view.editorRoot
@@ -140,7 +141,7 @@ class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engin
         val mat = engine.mathPool.mat4f.poll()
         mat.set(model)
         mat.scale(radius * 2f, radius * 2f, 1f)
-        material!!.use(mat, projection, renderContext)
+        material!!.use(mat, projection, context)
         engine.mathPool.mat4f.push(mat)
         geom!!.draw()
         material!!.unuse()

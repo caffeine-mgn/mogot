@@ -1,8 +1,8 @@
 package pw.binom.sceneEditor
 
-import mogot.gl.GL
 import mogot.*
 import mogot.math.*
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.intDataOf
 
@@ -13,7 +13,7 @@ class Line2D(engine: Engine) : VisualInstance2D(engine) {
     val lineTo = Vector2fProperty()
     private val data = FloatDataBuffer.alloc(4)
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!visible)
             return
 
@@ -32,7 +32,7 @@ class Line2D(engine: Engine) : VisualInstance2D(engine) {
             geom!!.vertexBuffer.uploadArray(data)
         }
 
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         geom!!.draw()
         mat.unuse()
     }

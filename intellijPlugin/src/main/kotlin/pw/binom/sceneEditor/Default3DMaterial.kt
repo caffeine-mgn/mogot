@@ -1,14 +1,13 @@
 package pw.binom.sceneEditor
 
 import mogot.Engine
-import mogot.Material
-import mogot.RenderContext
 import mogot.ResourceImpl
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 import mogot.math.Vector4fc
+import mogot.rendering.Display
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
 import pw.binom.material.psi.Parser
@@ -29,8 +28,8 @@ class MInstance(val root: MaterialGLSL, color: Vector4fc) : EditableMaterial, Re
     override var hover: Boolean = false
     override var selected: Boolean = false
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        root.use(model, projection, renderContext)
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        root.use(model, projection, context)
         root.shader.uniform("selected", selected)
         root.shader.uniform("hover", hover)
         root.shader.uniform("color", color)

@@ -3,6 +3,7 @@ package pw.binom.sceneEditor
 import mogot.*
 import mogot.math.*
 import mogot.gl.*
+import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.*
@@ -134,8 +135,8 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
-        super.render(model, projection, renderContext)
+    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, projection, context)
         val mat = material.value ?: return
         if (near != camera.near ||
                 far != camera.far ||
@@ -146,7 +147,7 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         if (geom == null)
             update()
         engine.gl.checkError { "Before Material" }
-        mat.use(model, projection, renderContext)
+        mat.use(model, projection, context)
         engine.gl.checkError { "After Material" }
         geom!!.draw()
         mat.unuse()

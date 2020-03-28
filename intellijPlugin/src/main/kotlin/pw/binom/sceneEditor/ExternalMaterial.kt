@@ -2,11 +2,11 @@ package pw.binom.sceneEditor
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Engine
-import mogot.RenderContext
 import mogot.Resources
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
+import mogot.rendering.Display
 import pw.binom.io.Closeable
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
@@ -88,16 +88,16 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
         if (_shader == null) {
             val c = Parser(StringReader(EDITOR_SHADER)).let { Compiler(it) }
             val gen = GLES300Generator.mix(listOf(compiler, c))
-            _shader = Shader(engine.gl, gen.vp, gen.fp)
+            _shader = Shader(gl.gl, gen.vp, gen.fp)
         }
     }
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         checkValid()
         if (_shader == null) {
             return
         }
-        super.use(model, projection, renderContext)
+        super.use(model, projection, context)
     }
 
     override fun unuse() {
