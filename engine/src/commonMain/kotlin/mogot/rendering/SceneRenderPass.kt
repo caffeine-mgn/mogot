@@ -7,10 +7,7 @@ import mogot.gl.TextureObject
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 
-class SceneRenderPass : BaseRenderPass() {
-    private var width:Int = 0
-    private var height:Int = 0
-    private var renderTargetTexture: RenderTargetTexture? = null
+class SceneRenderPass : TextureRenderPass() {
     private val cameraModel3DMatrix = Matrix4f()
     //private val cameraModel2DMatrix = Matrix4f()
 
@@ -18,26 +15,9 @@ class SceneRenderPass : BaseRenderPass() {
         outputRenderPassData.values["stage"] = SceneRenderPass::class.simpleName!!
     }
     override fun render(renderContext: RenderContext, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
-        val w = inputRenderPassData.values["width"] as Int
-        val h = inputRenderPassData.values["height"] as Int
-        if((w!=width)||(h!=height)){
-            width = w
-            height = h
-            renderTargetTexture?.close()
-            val msaaParam = inputRenderPassData.values["msaa"]
-            var msaa = TextureObject.MSAALevels.Disable
-            msaaParam?.let {
-                msaa = when(it){
-                    "4" -> TextureObject.MSAALevels.MSAAx4
-                    "16" -> TextureObject.MSAALevels.MSAAx16
-                    "8" -> TextureObject.MSAALevels.MSAAx8
-                    else -> TextureObject.MSAALevels.Disable
-                }
-            }
-            renderTargetTexture = RenderTargetTexture(gl,width,height,msaa)
-        }
+        resize(inputRenderPassData, gl)
         requireNotNull(renderTargetTexture).apply {
-            camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
+            camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())//camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
             begin()
             gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
             gl.enable(gl.DEPTH_TEST)
@@ -47,7 +27,9 @@ class SceneRenderPass : BaseRenderPass() {
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)
             end()
-            outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE]
+            outputRenderPassData.values[RenderPassData.WIDTH] = width
+            outputRenderPassData.values[RenderPassData.HEIGHT] = height
+            outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
         }
         return super.render(renderContext,gl,camera,camera2D,root, dt, outputRenderPassData)
     }

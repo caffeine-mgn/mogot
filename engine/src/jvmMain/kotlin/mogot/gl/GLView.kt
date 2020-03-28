@@ -196,7 +196,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         display.setup(renderContext,gl,width,height)
         camera?.resize(width, height)
         camera2D?.resize(width, height)
-
         repaint()
     }
 
@@ -246,15 +245,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
             mousePosition.set(size.x / 2, size.y / 2)
         }
         render2(dt)
-        gl.gl.glClear(com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT or com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT)
-
-
-        camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
-
-        camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
-                ?: cameraModel2DMatrix.identity()
-
-//        camera2D = null
 
         renderContext.lights.clear()
         root?.walk {
@@ -270,9 +260,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
 
         if (root != null) {
             update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
-            if (render3D) {
-                display.render(renderContext,gl,camera,camera2D,root!!)
-            }
+            display.render(renderContext,gl,camera,camera2D,root!!)
             if (render2D) {
                 if (!render3D) {
                     gl.gl.glDisable(GL2.GL_DEPTH_TEST)

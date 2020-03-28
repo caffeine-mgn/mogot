@@ -2,16 +2,19 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.GL
+import mogot.math.Vector4f
 
 open class Display(private val renderPassChain: RenderPass, private val startRenderPassData: RenderPassData = RenderPassData()) {
     private var lastFrameTime = CurrentTime.getNano()
     private var time = CurrentTime.getNano()
     var deltaTime: Float = Float.MAX_VALUE
+    var backgroundColor = Vector4f()
+
 
     fun setup(renderContext: RenderContext,gl: GL,width: Int, height: Int) {
         gl.viewport(0, 0, width, height)
-        startRenderPassData.values["width"] = width
-        startRenderPassData.values["height"] = height
+        startRenderPassData.values[RenderPassData.WIDTH] = width
+        startRenderPassData.values[RenderPassData.HEIGHT] = height
         gl.clearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.enable(gl.BLEND)
