@@ -33,6 +33,7 @@ class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
         return super.render(context,gl,camera,camera2D,root, dt, outputRenderPassData)
     }
 
+
     private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         var pos = model
         if (node.isVisualInstance) {

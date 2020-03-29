@@ -29,4 +29,9 @@ abstract class ToTextureRenderPass(nextPass:RenderPass?) : BaseRenderPass(nextPa
             renderTargetTexture = RenderTargetTexture(gl,width,height,msaa)
         }
     }
+
+    override fun cleanup() {
+        renderTargetTexture?.close()
+        super.cleanup()
+    }
 }

@@ -2,6 +2,7 @@ package mogot.gl
 
 import mogot.*
 import mogot.math.*
+import mogot.rendering.Display
 import org.khronos.webgl.WebGLRenderingContext
 import org.w3c.dom.events.KeyboardEvent
 import org.w3c.dom.events.MouseEvent
@@ -9,18 +10,13 @@ import pw.binom.io.FileSystem
 import kotlin.browser.document
 import kotlin.browser.window
 
-open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
+open class GLView(val display: Display,val fileSystem: FileSystem<Unit>) : AbstractGLView() {
     open var camera: Camera? = null
     protected open val root
         get() = camera?.asUpSequence()?.last()
 
     val backgroundColor
-        get() = renderContext.sceneColor
-
-    private object renderContext : RenderContext {
-        override val lights = ArrayList<Light>()
-        override val sceneColor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
-    }
+        get() = display.context.backgroundColor
 
     private val viewMatrix = Matrix4f()
 
@@ -44,12 +40,6 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         gl.ctx.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.ctx.enable(WebGLRenderingContext.CULL_FACE)
         camera?.globalToLocalMatrix(viewMatrix.identity())
-        renderContext.lights.clear()
-        root?.walk {
-            if (it is Light)
-                renderContext.lights += it
-            true
-        }
 
         while (!engine.frameListeners.isEmpty) {
             engine.frameListeners.popLast().invoke()
@@ -59,13 +49,13 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
 //            update(root!!, viewMatrix)
 //            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
             update(dt, root!!, camModel = viewMatrix, ortoModel = MATRIX4_ONE)
-            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
+            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, display.context)
 
             gl.ctx.disable(WebGLRenderingContext.DEPTH_TEST)
             gl.ctx.disable(WebGLRenderingContext.CULL_FACE)
 
             viewMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, viewMatrix, renderContext)
+            renderNode2D(root!!, viewMatrix, display.context)
         }
 
 
@@ -161,8 +151,7 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         this.width = width
         this.height = height
         super.setup(width, height)
-        gl.ctx.clearColor(renderContext.sceneColor.x, renderContext.sceneColor.y, renderContext.sceneColor.z, renderContext.sceneColor.w)
-        camera?.resize(width, height)
+        display.setup(gl,0,0,width,height)
     }
 
     private var lastFrameTime = window.performance.now().unsafeCast<Float>()
@@ -180,27 +169,27 @@ open class GLView(val fileSystem: FileSystem<Unit>) : AbstractGLView() {
         }
     }
 
-    private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
+    private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         var pos = model
         if (node is VisualInstance) {
 //            pos = node.apply(model)
             pos = node.matrix
-            node.render(node.matrix, projection, renderContext)
+            node.render(node.matrix, projection, context)
         }
 
         node.childs.forEach {
-            renderNode3D(it, pos, projection, renderContext)
+            renderNode3D(it, pos, projection, context)
         }
     }
 
-    private fun renderNode2D(node: Node, projection: Matrix4fc, renderContext: RenderContext) {
+    private fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
         if (node is VisualInstance2D) {
-            node.render(node.matrix, projection, renderContext)
+            node.render(node.matrix, projection, context)
         }
 
 
         node.childs.forEach {
-            renderNode2D(it, projection, renderContext)
+            renderNode2D(it, projection, context)
         }
     }
 }

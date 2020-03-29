@@ -11,4 +11,8 @@ abstract class BaseRenderPass(override var next: RenderPass?) : RenderPass {
     override fun render(context: Display.Context, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt:Float, inputRenderPassData: RenderPassData): RenderPassData {
         return next?.render(context,gl, camera, camera2D,root,dt,outputRenderPassData)?:outputRenderPassData
     }
+
+    override fun cleanup() {
+        next?.cleanup()
+    }
 }

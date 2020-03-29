@@ -1,6 +1,7 @@
 package mogot.material
 
 import mogot.*
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -58,7 +59,7 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
     private var needUpdateTextureIndex = false
 
     private inline val gl
-        get() = material.gl.gl
+        get() = material.gl
 
     private val params = HashMap<String, Any>()
     override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
@@ -98,8 +99,8 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
 
 }
 
-class ExternalMaterialGLSL(engine: Engine, vp: String, fp: String) : MaterialGLSL(engine) {
-    override val shader = Shader(engine.gl, vp, fp)
+class ExternalMaterialGLSL(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
+    override val shader = Shader(gl, vp, fp)
     fun instance() = MaterialInstance(this)
 }
 
@@ -123,7 +124,7 @@ object MaterialLoader {
                 else -> println("Unknown property: $name")
             }
         }
-        return ExternalMaterialGLSL(engine, gles300Vp!!, gles300Fp!!)
+        return ExternalMaterialGLSL(engine.gl, gles300Vp!!, gles300Fp!!)
     }
 }
 

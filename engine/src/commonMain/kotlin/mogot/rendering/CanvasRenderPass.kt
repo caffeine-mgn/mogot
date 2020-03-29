@@ -25,10 +25,10 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
             requireNotNull(renderTargetTexture).apply {
                 begin()
                 gl.clear(gl.COLOR_BUFFER_BIT)
-                mat.texture2D = texture.getGlTexture()
-                sprite.material = mat
+                mat?.texture2D = texture.getGlTexture()
+                sprite?.material = mat
                 gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
-                sprite.draw(context)
+                sprite?.draw(context)
                 gl.bindTexture(texture.getGlTextureTarget()!!, null)
                 if(camera2D!=null)
                     renderNode2D(root,camera2D.projectionMatrix,context)
@@ -41,14 +41,18 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
         return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
     }
 
+    override fun cleanup() {
+        sprite?.dec()
+        mat?.dec()
+        super.cleanup()
+    }
+
     private fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
         if (node.isVisualInstance2D()) {
             if (!node.visible)
                 return
             node.render(node.matrix, projection, context)
         }
-
-
         node.childs.forEach {
             renderNode2D(it, projection, context)
         }

@@ -28,4 +28,10 @@ class FinalRenderPass(nextPass:RenderPass) : BaseRenderPass(nextPass) {
         gl.bindTexture(texture.getGlTextureTarget()!!, null)
         return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
     }
+
+    override fun cleanup() {
+        sprite?.dec()
+        mat?.dec()
+        super.cleanup()
+    }
 }
