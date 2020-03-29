@@ -1,6 +1,6 @@
 package pw.binom
 
-import mogot.Engine
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -69,7 +69,7 @@ vec4 fragment(vec4 color2){
  
 """
 
-internal class SimpleMaterial(engile: Engine) : MaterialGLSL(engile) {
+internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
 
     override fun dispose() {
         shader.close()
@@ -82,7 +82,7 @@ internal class SimpleMaterial(engile: Engine) : MaterialGLSL(engile) {
         val gen = Parser(StringReader(shaderText))
                 .let { Compiler(it) }
                 .let { GLES300Generator.mix(listOf(it)) }
-        Shader(engile.gl,gen.vp,gen.fp)
+        Shader(gl,gen.vp,gen.fp)
     }
     /*
     override val shader: Shader = Shader(engile.gl,

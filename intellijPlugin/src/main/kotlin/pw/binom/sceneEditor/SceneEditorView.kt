@@ -36,7 +36,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass(null)))),MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))),MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -541,10 +541,10 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     override fun init() {
         super.init()
         engine.manager("Editor") { EditorHolder(this) }
-        _default3DMaterial = Default3DMaterial(engine)
+        _default3DMaterial = Default3DMaterial(engine.gl)
         _default3DMaterial.inc()
 
-        default2DMaterial = Default2DMaterial(engine)
+        default2DMaterial = Default2DMaterial(engine.gl)
         default2DMaterial.inc()
 
         editorCamera2D = Camera2D(engine)
@@ -559,11 +559,11 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
         val grid = Grid3D(engine)
         grid.parent = root
-        val mat = SolidMaterial(engine)
+        val mat = SolidMaterial(engine.gl)
         grid.material.value = mat
         mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
 //        editorCamera.behaviour = FpsCam(engine)
-        selectorMaterial = SolidMaterial(engine)
+        selectorMaterial = SolidMaterial(engine.gl)
 
 
         SceneFileLoader.load(this, file)

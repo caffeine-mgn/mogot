@@ -1,6 +1,7 @@
 package pw.binom.sceneEditor
 
 import mogot.*
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -32,12 +33,12 @@ class Material2DInstance(val root: Default2DMaterial) : EditableMaterial, Resour
         root.shader.uniform("selected", selected)
         root.shader.uniform("hover", hover)
         if (image != null) {
-            root.gl.gl.activeTexture(root.gl.gl.TEXTURE0)
-            root.gl.gl.bindTexture(root.gl.gl.TEXTURE_2D, image!!.gl.gl)
+            root.gl.activeTexture(root.gl.TEXTURE0)
+            root.gl.bindTexture(root.gl.TEXTURE_2D, image!!.gl.gl)
             root.shader.uniform(ToolsDefault2DMaterial.IMAGE_PROPERTY, 0)
         } else {
-            root.gl.gl.activeTexture(root.gl.gl.TEXTURE0)
-            root.gl.gl.bindTexture(root.gl.gl.TEXTURE_2D, null)
+            root.gl.activeTexture(root.gl.TEXTURE0)
+            root.gl.bindTexture(root.gl.TEXTURE_2D, null)
             root.shader.uniform(ToolsDefault2DMaterial.IMAGE_PROPERTY, 0)
         }
     }
@@ -48,7 +49,7 @@ class Material2DInstance(val root: Default2DMaterial) : EditableMaterial, Resour
 
 }
 
-class Default2DMaterial(engine: Engine) : MaterialGLSL(engine) {
+class Default2DMaterial(gl: GL) : MaterialGLSL(gl) {
 
     fun instance() = Material2DInstance(this)
 
@@ -58,7 +59,7 @@ class Default2DMaterial(engine: Engine) : MaterialGLSL(engine) {
 
         val compiler = Compiler(Parser(StringReader(text)))
         val gen = GLES300Generator.mix(listOf(compiler, c))
-        Shader(engine.gl, gen.vp, gen.fp)
+        Shader(gl, gen.vp, gen.fp)
     }
 
     override fun dispose() {

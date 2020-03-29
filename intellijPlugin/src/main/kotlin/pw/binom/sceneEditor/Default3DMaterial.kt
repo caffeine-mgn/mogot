@@ -1,7 +1,7 @@
 package pw.binom.sceneEditor
 
-import mogot.Engine
 import mogot.ResourceImpl
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -41,7 +41,7 @@ class MInstance(val root: MaterialGLSL, color: Vector4fc) : EditableMaterial, Re
 
 }
 
-class Default3DMaterial(engine: Engine) : MaterialGLSL(engine) {
+class Default3DMaterial(gl: GL) : MaterialGLSL(gl) {
 
     fun instance(color: Vector4fc) = MInstance(this, color)
 
@@ -77,7 +77,7 @@ vec4 fragment(vec4 color2){
         """
         val compiler = Compiler(Parser(StringReader(text)))
         val gen = GLES300Generator.mix(listOf(compiler))
-        Shader(engine.gl, gen.vp, gen.fp)
+        Shader(gl, gen.vp, gen.fp)
     }
 
     override fun dispose() {

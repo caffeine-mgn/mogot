@@ -1,13 +1,13 @@
 package pw.binom
 
-import mogot.Engine
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 import mogot.rendering.Display
 
-internal class SolidMaterial(engine: Engine) : MaterialGLSL(engine) {
+internal class SolidMaterial(gl: GL) : MaterialGLSL(gl) {
 
     override fun dispose() {
         shader.close()
@@ -15,7 +15,7 @@ internal class SolidMaterial(engine: Engine) : MaterialGLSL(engine) {
     }
 
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
-    override val shader: Shader = Shader(engine.gl,
+    override val shader: Shader = Shader(gl,
             vertex = """#version 440 core
 
 layout(location = 0) in vec3 vertexPos;

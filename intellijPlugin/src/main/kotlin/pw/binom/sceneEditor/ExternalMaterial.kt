@@ -3,6 +3,7 @@ package pw.binom.sceneEditor
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Engine
 import mogot.Resources
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -36,7 +37,7 @@ val EDITOR_SHADER = """
     }
 """
 
-class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(engine) {
+class ExternalMaterial(val engine: Engine, val file: VirtualFile) : MaterialGLSL(engine.gl) {
     private var _shader: Shader? = null
 
     private fun load() = file.inputStream.bufferedReader().use {
@@ -88,7 +89,7 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
         if (_shader == null) {
             val c = Parser(StringReader(EDITOR_SHADER)).let { Compiler(it) }
             val gen = GLES300Generator.mix(listOf(compiler, c))
-            _shader = Shader(gl.gl, gen.vp, gen.fp)
+            _shader = Shader(gl, gen.vp, gen.fp)
         }
     }
 
@@ -113,7 +114,7 @@ class ExternalMaterial(engine: Engine, val file: VirtualFile) : MaterialGLSL(eng
         super.dispose()
     }
 
-    fun instance() = MaterialInstance(this)
+    fun instance() = MaterialInstance(engine,this)
 }
 
 class ExternalManager(val engine: Engine) : Closeable {

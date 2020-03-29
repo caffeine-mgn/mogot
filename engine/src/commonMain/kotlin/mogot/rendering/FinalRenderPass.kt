@@ -7,7 +7,7 @@ import mogot.gl.GL
 import mogot.gl.RenderTargetTexture
 
 
-class FinalRenderPass(nextPass:RenderPass) : BaseRenderPass(nextPass) {
+class FinalRenderPass() : BaseRenderPass(null) {
     private var sprite:FullScreenSprite? = null
     private var mat:FullScreenMaterial? = null
     init {

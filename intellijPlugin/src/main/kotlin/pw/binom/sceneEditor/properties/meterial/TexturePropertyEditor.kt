@@ -6,6 +6,7 @@ import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.sceneEditor.ExternalTextureFS
 import pw.binom.sceneEditor.MaterialInstance
+import pw.binom.sceneEditor.loadTexture
 import pw.binom.sceneEditor.properties.Panel
 import pw.binom.utils.equalsAll
 import javax.swing.JButton
@@ -79,7 +80,7 @@ class TexturePropertyEditor(val panel: MaterialProperties, override val uniform:
             chooser.showDialog()
             val file = chooser.selectedFile
             if (file != null) {
-                texture = u.materialInstance.root.gl.resources.loadTexture(file.virtualFile)
+                texture = u.materialInstance.engine.resources.loadTexture(file.virtualFile)
             }
         }
     }

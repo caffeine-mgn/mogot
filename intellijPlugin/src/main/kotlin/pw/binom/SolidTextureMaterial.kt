@@ -1,14 +1,14 @@
 package pw.binom
 
-import mogot.Engine
 import mogot.gl.MaterialGLSL
 import mogot.Texture2D
+import mogot.gl.GL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 import mogot.rendering.Display
 
-internal class SolidTextureMaterial(engine: Engine) : MaterialGLSL(engine) {
+internal class SolidTextureMaterial(gl: GL) : MaterialGLSL(gl) {
 
     override fun dispose() {
         shader.close()
@@ -16,7 +16,7 @@ internal class SolidTextureMaterial(engine: Engine) : MaterialGLSL(engine) {
     }
 
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
-    override val shader: Shader = Shader(engine.gl,
+    override val shader: Shader = Shader(gl,
             vertex = """#version 440 core
 
 layout(location = 0) in vec3 gles_vertex;
@@ -48,19 +48,19 @@ void main() {
             field = value
             shader.use()
             if (tex != null) {
-                gl.gl.activeTexture(gl.gl.TEXTURE0)
-                gl.gl.bindTexture(gl.gl.TEXTURE_2D, tex!!.gl)
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
                 shader.uniform("tex", 0)
             } else {
-                gl.gl.activeTexture(gl.gl.TEXTURE0)
-                gl.gl.bindTexture(gl.gl.TEXTURE_2D, null)
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, null)
             }
         }
 
     override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         super.use(model, projection, context)
         if (tex != null) {
-            gl.gl.bindTexture(gl.gl.TEXTURE_2D, tex!!.gl)
+            gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

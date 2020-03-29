@@ -5,13 +5,17 @@ import mogot.Camera
 import mogot.Spatial
 import mogot.gl.GLView
 import mogot.math.*
+import mogot.rendering.CanvasRenderPass
+import mogot.rendering.Display
+import mogot.rendering.FinalRenderPass
+import mogot.rendering.SceneRenderPass
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 
 private const val MIN_E = 0.0001f;
 
-abstract class View3D : GLView(MockFileSystem()) {
+abstract class View3D : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))),MockFileSystem()) {
 
     private var _x = 0
     private var _y = 0

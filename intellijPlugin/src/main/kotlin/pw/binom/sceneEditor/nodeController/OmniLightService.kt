@@ -57,7 +57,7 @@ private fun createStub(view: SceneEditorView, light: PointLight) {
     view.renderThread {
         val s = SpriteFor3D(view)
         s.size.set(120f / 4f, 160f / 4f)
-        s.internalMaterial = SolidTextureMaterial(view.engine).apply {
+        s.internalMaterial = SolidTextureMaterial(view.engine.gl).apply {
             diffuseColor.set(0f, 0f, 0f, 0f)
             tex = view.engine.omniManager.PointLightTexture.gl
         }

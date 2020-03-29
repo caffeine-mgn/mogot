@@ -1,6 +1,7 @@
 package pw.binom.material
 
 import mogot.*
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
@@ -58,8 +59,8 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
     }
 
 
-    inner class DynamicMaterialGLSL(engine: Engine) : MaterialGLSL(engine) {
-        private val standart = SimpleMaterial(engine)
+    inner class DynamicMaterialGLSL(gl: GL) : MaterialGLSL(gl) {
+        private val standart = SimpleMaterial(gl)
 
         init {
             standart.inc()
@@ -147,7 +148,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         initListeners.forEach {
             it()
         }
-        material = DynamicMaterialGLSL(engine)
+        material = DynamicMaterialGLSL(engine.gl)
         val node = GeomNode2().also {
             it.geom.value = Geoms.buildCube2(gl, 1f)
             it.material.value = material
@@ -157,7 +158,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         val l = PointLight()
         val node1 = GeomNode().apply {
             geom.value = Geoms.solidSphere(gl, 1f, 30, 30)
-            material.value = SimpleMaterial(engine)
+            material.value = SimpleMaterial(engine.gl)
         }
         node1.position.z = -30f
         node1.position.x = 30f
