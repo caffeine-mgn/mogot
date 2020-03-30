@@ -65,8 +65,8 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         get() = display.context.camera2D
     protected open val camera: Camera?
         get() = display.context.camera
-    protected open val root
-        get() = camera?.asUpSequence()?.last()
+    protected open var root:Node? = null
+
 
     private lateinit var _engine: Engine
     val engine

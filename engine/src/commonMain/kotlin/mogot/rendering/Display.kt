@@ -28,8 +28,6 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
         context.x = x
         context.y = y
         gl.viewport(x, y, width, height)
-        startRenderPassData.values[RenderPassData.WIDTH] = width
-        startRenderPassData.values[RenderPassData.HEIGHT] = height
         gl.clearColor(context.backgroundColor.x, context.backgroundColor.y, context.backgroundColor.z, context.backgroundColor.w)
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
         gl.enable(gl.BLEND)

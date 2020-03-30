@@ -18,8 +18,6 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
             mat = FullScreenMaterial(gl)
         val texture = inputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] as RenderTargetTexture
         if(bypass){
-            outputRenderPassData.values[RenderPassData.WIDTH] = width
-            outputRenderPassData.values[RenderPassData.HEIGHT] = height
             outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = texture
         }else {
             requireNotNull(renderTargetTexture).apply {
@@ -35,8 +33,6 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
                     renderNode2D(root, camera2D.projectionMatrix, context)
                 }
                 end()
-                outputRenderPassData.values[RenderPassData.WIDTH] = width
-                outputRenderPassData.values[RenderPassData.HEIGHT] = height
                 outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
             }
         }

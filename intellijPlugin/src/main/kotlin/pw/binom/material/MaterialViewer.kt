@@ -148,6 +148,7 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         initListeners.forEach {
             it()
         }
+        root = Node()
         material = DynamicMaterialGLSL(engine.gl)
         val node = GeomNode2().also {
             it.geom.value = Geoms.buildCube2(gl, 1f)

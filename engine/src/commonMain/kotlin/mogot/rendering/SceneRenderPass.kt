@@ -27,8 +27,6 @@ open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass)
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)
             end()
-            outputRenderPassData.values[RenderPassData.WIDTH] = width
-            outputRenderPassData.values[RenderPassData.HEIGHT] = height
             outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
         }
         return super.render(context,gl,camera,camera2D,root, dt, outputRenderPassData)

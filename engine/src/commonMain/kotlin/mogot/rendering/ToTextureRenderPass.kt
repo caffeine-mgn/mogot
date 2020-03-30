@@ -10,11 +10,7 @@ abstract class ToTextureRenderPass(nextPass:RenderPass?) : BaseRenderPass(nextPa
     protected var renderTargetTexture: RenderTargetTexture? = null
 
     fun resize(inputRenderPassData: RenderPassData, gl: GL){
-        val w = inputRenderPassData.values[RenderPassData.WIDTH] as Int
-        val h = inputRenderPassData.values[RenderPassData.HEIGHT] as Int
-        if((w!=width)||(h!=height)){
-            width = w
-            height = h
+        if((renderTargetTexture?.width!=width)||(renderTargetTexture?.height!=height)){
             renderTargetTexture?.close()
             val msaaParam = inputRenderPassData.values[RenderPassData.MSAA]
             var msaa = TextureObject.MSAALevels.Disable
