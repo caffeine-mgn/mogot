@@ -34,30 +34,40 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
         gl.enable(gl.BLEND)
         gl.disable(gl.MULTISAMPLE)
+        context.camera?.resize(width,height)
+        context.camera2D?.resize(width,height)
     }
 
-
-    fun render(gl: GL, root: Node) {
+    protected open fun process(root: Node){
         context.lights.clear()
         root.walk {
             if (it is Light){
-
+                context.lights += it
             }
             else if (it is Camera) {
                 if (it.enabled) {
-                    context.camera?.enabled = false
-                    context.camera = it
-                    context.camera?.resize(context.width,context.height)
+                    if(context.camera!=it) {
+                        context.camera?.enabled = false
+                        context.camera = it
+                        context.camera?.resize(context.width, context.height)
+                    }
                 }
             }else if(it is Camera2D){
                 if (it.enabled) {
-                    context.camera2D?.enabled = false
-                    context.camera2D = it
-                    context.camera2D?.resize(context.width,context.height)
+                    if(context.camera2D!=it) {
+                        context.camera2D?.enabled = false
+                        context.camera2D = it
+                        context.camera2D?.resize(context.width, context.height)
+                    }
                 }
             }
             true
         }
+    }
+
+
+    fun render(gl: GL, root: Node) {
+        process(root)
         time = CurrentTime.getNano()
         deltaTime = (time - lastFrameTime) / 1e+9f
 

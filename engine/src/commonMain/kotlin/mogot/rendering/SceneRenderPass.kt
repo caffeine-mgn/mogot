@@ -5,7 +5,7 @@ import mogot.gl.GL
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 
-class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
+open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
     private val cameraModel3DMatrix = Matrix4f()
     //private val cameraModel2DMatrix = Matrix4f()
 
@@ -15,14 +15,15 @@ class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
     override fun render(context: Display.Context, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         resize(inputRenderPassData, gl)
         requireNotNull(renderTargetTexture).apply {
-            camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())//camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
             begin()
             gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
             gl.enable(gl.DEPTH_TEST)
             gl.enable(gl.CULL_FACE)
             if (camera != null)
-                if(!bypass)
-                    renderNode3D(root,camera.transform,cameraModel3DMatrix,context)
+                if(!bypass) {
+                    camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
+                    renderNode3D(root, camera.transform, cameraModel3DMatrix, context)
+                }
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)
             end()

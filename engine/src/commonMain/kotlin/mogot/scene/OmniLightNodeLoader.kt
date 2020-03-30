@@ -6,7 +6,7 @@ import mogot.PointLight
 
 object PointLightNodeLoader : SceneLoader.NodeLoader {
     override val nodeClass: String
-        get() = "mogot.OmniLight"
+        get() = "mogot.PointLight"
 
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
         val node = PointLight()

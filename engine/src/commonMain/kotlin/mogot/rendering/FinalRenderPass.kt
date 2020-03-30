@@ -23,9 +23,9 @@ class FinalRenderPass() : BaseRenderPass(null) {
         gl.clear(gl.COLOR_BUFFER_BIT)
         mat?.texture2D = texture.getGlTexture()
         sprite?.material = mat
-        gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
+        //gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
         sprite?.draw(context)
-        gl.bindTexture(texture.getGlTextureTarget()!!, null)
+        //gl.bindTexture(texture.getGlTextureTarget()!!, null)
         return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
     }
 

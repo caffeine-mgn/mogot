@@ -61,16 +61,10 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
             return tempSize
         }
     private val robot = Robot()
-    protected open var camera2D: Camera2D? = null
-        set(value) {
-            value?.resize(width, height)
-            field = value
-        }
-    protected open var camera: Camera? = null
-        set(value) {
-            value?.resize(width, height)
-            field = value
-        }
+    protected open val camera2D: Camera2D?
+        get() = display.context.camera2D
+    protected open val camera: Camera?
+        get() = display.context.camera
     protected open val root
         get() = camera?.asUpSequence()?.last()
 
@@ -190,8 +184,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
 
     protected open fun setup(width: Int, height: Int) {
         display.setup(gl,0,0,width,height)
-        camera?.resize(width, height)
-        camera2D?.resize(width, height)
         repaint()
     }
 
@@ -233,6 +225,10 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
     }
 
     protected open fun render() {
+        camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
+
+        camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
+                ?: cameraModel2DMatrix.identity()
         val time = System.nanoTime()
         val dt = (time - lastFrameTime) / 1e+9f
 

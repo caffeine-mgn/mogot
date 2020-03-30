@@ -3,6 +3,7 @@ package pw.binom.sceneEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
+import mogot.rendering.EditorDisplay
 import mogot.gl.GLView
 import mogot.math.*
 import mogot.rendering.CanvasRenderPass
@@ -36,7 +37,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))),MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))),MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -77,7 +78,8 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             field = value
             when (value) {
                 Mode.D2 -> {
-                    camera2D = editorCamera2D
+                    (display as EditorDisplay).setCamera2D(editorCamera2D)
+                    (display as EditorDisplay).setCamera(null)
                     render3D = false
                     sceneRoot.walk {
                         if (it.isVisualInstance2D()) {
@@ -88,7 +90,8 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     viewPlane.guideVisible = true
                 }
                 Mode.D3 -> {
-                    camera2D = null
+                    (display as EditorDisplay).setCamera2D(null)
+                    (display as EditorDisplay).setCamera(editorCamera)
                     render3D = true
                     sceneRoot.walk {
                         if (it.isVisualInstance2D()) {
@@ -212,7 +215,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
         editorCamera.parent = editorRoot
-        camera = editorCamera
+        (display as EditorDisplay).setCamera(editorCamera)
 
         editorCamera.position.set(3f, 3f, 3f)
         editorCamera.lookTo(Vector3f(0f, 0f, 0f))
@@ -549,7 +552,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot
-        camera2D = editorCamera2D
+        editorCamera2D.enabled = true
 
         grid2d = Grid2D(this)
         grid2d.parent = root

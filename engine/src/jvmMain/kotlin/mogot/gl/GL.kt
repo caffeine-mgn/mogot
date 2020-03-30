@@ -108,6 +108,7 @@ actual class GL(val gl: GL2) {
     }
 
     actual fun drawElements(mode: Int, count: Int, type: Int, offset: Int) {
+        //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
         gl.glDrawElements(mode, count, type, offset.toLong())
     }
 
@@ -170,6 +171,7 @@ actual class GL(val gl: GL2) {
     actual fun clearColor(r: Float, g: Float, b: Float, a: Float){
         gl.glClearColor(r,g,b,a)
     }
+
 
     actual fun blendFunc(sfactor:Int, dfactor: Int){
         gl.glBlendFunc(sfactor, dfactor)

@@ -27,11 +27,13 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
                 gl.clear(gl.COLOR_BUFFER_BIT)
                 mat?.texture2D = texture.getGlTexture()
                 sprite?.material = mat
-                gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
+                //gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
                 sprite?.draw(context)
-                gl.bindTexture(texture.getGlTextureTarget()!!, null)
-                if(camera2D!=null)
-                    renderNode2D(root,camera2D.projectionMatrix,context)
+                //gl.bindTexture(texture.getGlTextureTarget()!!, null)
+                if(camera2D!=null) {
+                    //camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
+                    renderNode2D(root, camera2D.projectionMatrix, context)
+                }
                 end()
                 outputRenderPassData.values[RenderPassData.WIDTH] = width
                 outputRenderPassData.values[RenderPassData.HEIGHT] = height
