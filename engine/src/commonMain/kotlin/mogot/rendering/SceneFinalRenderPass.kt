@@ -17,9 +17,9 @@ class SceneFinalRenderPass : BaseRenderPass(null) {
                 gl.enable(gl.DEPTH_TEST)
                 gl.enable(gl.CULL_FACE)
                 camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
+                renderNode3D(root, camera.transform, cameraModel3DMatrix, context)
                 gl.disable(gl.DEPTH_TEST)
                 gl.disable(gl.CULL_FACE)
-                renderNode3D(root, camera.transform, cameraModel3DMatrix, context)
             }
         return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
     }
