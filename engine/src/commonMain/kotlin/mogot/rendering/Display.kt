@@ -80,7 +80,7 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
         time = CurrentTime.getNano()
         deltaTime = (time - lastFrameTime) / 1e+9f
         gl.checkError{""}
-        renderPassChain.render(context, gl, context.camera, context.camera2D, root, deltaTime, startRenderPassData)
+        renderPassChain.render(context, gl, root, deltaTime, startRenderPassData)
         gl.checkError{""}
         lastFrameTime = time
     }

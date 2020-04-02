@@ -7,13 +7,13 @@ import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 
 open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
-    private val cameraModel3DMatrix = Matrix4f()
+    //private val cameraModel3DMatrix = Matrix4f()
     //private val cameraModel2DMatrix = Matrix4f()
 
     init {
         outputRenderPassData.values["stage"] = SceneRenderPass::class.simpleName!!
     }
-    override fun render(context: Display.Context, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
+    override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         resize(context,inputRenderPassData, gl)
         requireNotNull(renderTargetTexture).apply {
             begin()
@@ -24,10 +24,10 @@ open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass)
             gl.checkError{""}
             gl.enable(gl.CULL_FACE)
             gl.checkError{""}
-            if (camera != null)
+            if (context.camera != null)
                 if(!bypass) {
-                    camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
-                    renderNode3D(root, camera.transform, cameraModel3DMatrix, context)
+                    //camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
+                    renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
                 }
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)
@@ -35,7 +35,7 @@ open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass)
             gl.checkError{""}
             outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
         }
-        return super.render(context,gl,camera,camera2D,root, dt, outputRenderPassData)
+        return super.render(context,gl,root, dt, outputRenderPassData)
     }
 
 

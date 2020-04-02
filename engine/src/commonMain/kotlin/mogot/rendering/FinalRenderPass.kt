@@ -10,7 +10,7 @@ class FinalRenderPass() : BaseRenderPass(null) {
     init {
         outputRenderPassData.values["stage"] = FinalRenderPass::class.simpleName!!
     }
-    override fun render(context: Display.Context, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
+    override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         if(sprite==null)
             sprite = FullScreenSprite(gl)
         if(mat == null)
@@ -24,7 +24,7 @@ class FinalRenderPass() : BaseRenderPass(null) {
         sprite?.draw(context)
         gl.checkError{""}
         //gl.bindTexture(texture.getGlTextureTarget()!!, null)
-        return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
+        return super.render(context, gl, root, dt, outputRenderPassData)
     }
 
     override fun cleanup() {

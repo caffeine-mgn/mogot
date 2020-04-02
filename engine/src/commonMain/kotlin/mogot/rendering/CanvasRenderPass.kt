@@ -10,7 +10,7 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
     }
     private var sprite:FullScreenSprite? = null
     private var mat:FullScreenMaterial? = null
-    override fun render(context: Display.Context, gl: GL, camera: Camera?, camera2D: Camera2D?, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
+    override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         resize(context,inputRenderPassData,gl)
         if(sprite==null)
             sprite = FullScreenSprite(gl)
@@ -29,9 +29,9 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
                 //gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
                 sprite?.draw(context)
                 //gl.bindTexture(texture.getGlTextureTarget()!!, null)
-                if(camera2D!=null) {
+                if(context.camera2D!=null) {
                     //camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
-                    renderNode2D(root, camera2D.projectionMatrix, context)
+                    renderNode2D(root, context.camera2D!!.projectionMatrix, context)
                     gl.checkError{""}
                 }
                 end()
@@ -39,7 +39,7 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
                 outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
             }
         }
-        return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
+        return super.render(context, gl, root, dt, outputRenderPassData)
     }
 
     override fun cleanup() {
