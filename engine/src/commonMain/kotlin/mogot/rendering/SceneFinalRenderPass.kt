@@ -2,6 +2,7 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.GL
+import mogot.gl.checkError
 import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 
@@ -18,6 +19,7 @@ class SceneFinalRenderPass : BaseRenderPass(null) {
                 gl.enable(gl.CULL_FACE)
                 camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
                 renderNode3D(root, camera.transform, cameraModel3DMatrix, context)
+                gl.checkError{""}
                 gl.disable(gl.DEPTH_TEST)
                 gl.disable(gl.CULL_FACE)
             }

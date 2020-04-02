@@ -34,6 +34,9 @@ abstract external class WebGL2RenderingContext : WebGLRenderingContext {
 actual class GL(val ctx: WebGL2RenderingContext) {
 //    private var vaoExt = ctx.getExtension("OES_vertex_array_object").unsafeCast<WebGLVAOExtension>()
 
+    actual val NONE:Int
+        get() = WebGLRenderingContext.NONE
+
     actual val STATIC_DRAW: Int
         get() = WebGLRenderingContext.STATIC_DRAW
 
@@ -110,6 +113,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.RENDERBUFFER
     actual val COLOR_ATTACHMENT0: Int
         get() = WebGLRenderingContext.COLOR_ATTACHMENT0
+    actual val DEPTH_ATTACHMENT: Int
+        get() = WebGLRenderingContext.DEPTH_ATTACHMENT
+    actual val DEPTH_COMPONEN: Int
+        get() = WebGLRenderingContext.DEPTH_COMPONENT
     actual val FRAMEBUFFER: Int
         get() = WebGLRenderingContext.FRAMEBUFFER
     actual val READ_FRAMEBUFFER: Int
@@ -126,6 +133,8 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         get() = WebGLRenderingContext.UNSIGNED_BYTE
     actual val RGB: Int
         get() = WebGLRenderingContext.RGB
+    actual val RGBA: Int
+        get() = WebGLRenderingContext.RGBA
     actual val MULTISAMPLE: Int
         get() = js("WebGL2RenderingContext.MULTISAMPLE")
 
@@ -167,6 +176,10 @@ actual class GL(val ctx: WebGL2RenderingContext) {
         ctx.deleteBuffer(buffer.js)
     }
 
+    actual fun generateMipmap(target: Int){
+        ctx.generateMipmap(target)
+    }
+
     actual fun viewport(x:Int,y:Int,w:Int,h:Int){
         ctx.viewport(x,y,w,h)
     }
@@ -190,6 +203,14 @@ actual class GL(val ctx: WebGL2RenderingContext) {
     actual fun bindBuffer(target: Int, buffer: GLBuffer?) {
         buffer as JSBuffer?
         ctx.bindBuffer(target, buffer?.js)
+    }
+
+    actual fun drawBuffer(mode:Int){
+        TODO("drawBuffer(mode)")
+    }
+
+    actual fun readBuffer(mode: Int){
+        TODO("readBuffer(mode)")
     }
 
     actual fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int) {
@@ -445,6 +466,13 @@ actual class GL(val ctx: WebGL2RenderingContext) {
 
     actual fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int){
         TODO("ctx.blitFramebuffer(srcX0,srcY0,srcX1,srcY1,srcX0,dstY0,dstX1,dstY1,mask,filter)")
+    }
+
+    actual fun viewPort(x:Int, y: Int, width:Int, height: Int){
+        ctx.viewport(x,y,width,height)
+    }
+    actual fun copyTexSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, x:Int, y:Int, width:Int, height:Int){
+        ctx.copyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height)
     }
 }
 

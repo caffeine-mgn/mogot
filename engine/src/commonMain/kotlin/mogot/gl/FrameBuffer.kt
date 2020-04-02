@@ -50,8 +50,10 @@ class FrameBuffer(val gl: GL,val texture: TextureObject? = null, val renderBuffe
     }
 
     fun check(){
-        if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!=gl.FRAMEBUFFER_COMPLETE){
-            println("FrameBuffer not complected")
+        val status:Int = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        if(status!=gl.FRAMEBUFFER_COMPLETE){
+            println("FrameBuffer not complected: $status")
+            TODO("FrameBuffer not complected $status")
         }
     }
 

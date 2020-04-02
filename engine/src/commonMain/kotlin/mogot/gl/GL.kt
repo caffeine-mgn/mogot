@@ -8,7 +8,7 @@ import pw.binom.IntDataBuffer
 import kotlin.jvm.JvmName
 
 expect class GL {
-
+    fun generateMipmap(target: Int)
     fun clearColor(r: Float, g: Float, b: Float, a: Float)
     fun blendFunc(sfactor: Int, dfactor: Int)
     fun viewport(x: Int, y: Int, w: Int, h: Int)
@@ -18,6 +18,8 @@ expect class GL {
     fun bufferData(target: Int, size: Int, data: FloatDataBuffer, usage: Int)
     fun bufferData(target: Int, size: Int, data: IntDataBuffer, usage: Int)
     fun bindBuffer(target: Int, buffer: GLBuffer?)
+    fun drawBuffer(mode:Int)
+    fun readBuffer(mode: Int)
 
     fun createVertexArray(): GLVertexArray
     fun deleteVertexArray(array: GLVertexArray)
@@ -76,7 +78,9 @@ expect class GL {
     fun enable(feature: Int)
     fun disable(feature: Int)
     fun texParameterf(target: Int, pname: Int, param: Float)
-    fun glBlitFramebuffer(srcX0: Int, srcY0: Int, srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
+    fun glBlitFramebuffer(  srcX0: Int,srcY0: Int,srcX1: Int, srcY1: Int, dstX0: Int, dstY0: Int, dstX1: Int, dstY1: Int, mask: Int, filter: Int)
+    fun viewPort(x:Int, y: Int, width:Int, height: Int)
+    fun copyTexSubImage2D(target:Int, level:Int, xoffset:Int, yoffset:Int, x:Int, y:Int, width:Int, height:Int)
 
     val SRC_ALPHA: Int
     val ONE_MINUS_SRC_ALPHA: Int
@@ -92,6 +96,8 @@ expect class GL {
     val DEPTH24_STENCIL8: Int
     val RENDERBUFFER: Int
     val COLOR_ATTACHMENT0: Int
+    val DEPTH_ATTACHMENT: Int
+    val DEPTH_COMPONEN: Int
     val FRAMEBUFFER: Int
     val READ_FRAMEBUFFER: Int
     val DRAW_FRAMEBUFFER: Int
@@ -100,6 +106,7 @@ expect class GL {
     val TEXTURE_MIN_FILTER: Int
     val UNSIGNED_BYTE: Int
     val RGB: Int
+    val RGBA: Int
     val STATIC_DRAW: Int
     val DYNAMIC_DRAW: Int
     val STATIC_READ: Int
@@ -134,6 +141,7 @@ expect class GL {
     val LINEAR_MIPMAP_LINEAR: Int
     val MAX_TEXTURE_SIZE: Int
     val MAX_SAMPLES: Int
+    val NONE: Int
 }
 
 interface GLBuffer

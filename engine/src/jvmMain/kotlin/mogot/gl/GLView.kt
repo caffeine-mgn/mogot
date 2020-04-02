@@ -228,7 +228,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
 
         camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
-                ?: cameraModel2DMatrix.identity()
         val time = System.nanoTime()
         val dt = (time - lastFrameTime) / 1e+9f
 

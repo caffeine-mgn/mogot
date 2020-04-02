@@ -2,7 +2,10 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.GL
+import mogot.gl.checkError
 import mogot.math.Vector4f
+import mogot.math.isPowerOfTwo
+import mogot.math.nextPowerOfTwo
 
 open class Display(private val renderPassChain: RenderPass, private val startRenderPassData: RenderPassData = RenderPassData()) {
     class Context {
@@ -23,15 +26,23 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
 
 
     fun setup(gl: GL, x: Int, y: Int, width: Int, height: Int) {
-        context.width = width
-        context.height = height
+        if(width!=0)
+            context.width = width
+        if(height!=0)
+            context.height = height
         context.x = x
         context.y = y
+        gl.checkError{""}
         gl.viewport(x, y, width, height)
+        gl.checkError{""}
         gl.clearColor(context.backgroundColor.x, context.backgroundColor.y, context.backgroundColor.z, context.backgroundColor.w)
+        gl.checkError{""}
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+        gl.checkError{""}
         gl.enable(gl.BLEND)
+        gl.checkError{""}
         gl.disable(gl.MULTISAMPLE)
+        gl.checkError{""}
         context.camera?.resize(width,height)
         context.camera2D?.resize(width,height)
     }
@@ -68,9 +79,9 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
         process(root)
         time = CurrentTime.getNano()
         deltaTime = (time - lastFrameTime) / 1e+9f
-
+        gl.checkError{""}
         renderPassChain.render(context, gl, context.camera, context.camera2D, root, deltaTime, startRenderPassData)
-
+        gl.checkError{""}
         lastFrameTime = time
     }
 

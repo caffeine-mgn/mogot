@@ -5,7 +5,8 @@ enum class RenderBufferFormat{
     DEPTH_COMPONENT24,
     DEPTH24_STENCIL8,
     STENCIL_INDEX8,
-    GL_RGB8
+    GL_RGB8,
+    GL_RGBA8
 }
 
 inline fun getRenderBufferFormat(gl: GL, format:RenderBufferFormat): Int {
@@ -15,5 +16,6 @@ inline fun getRenderBufferFormat(gl: GL, format:RenderBufferFormat): Int {
         RenderBufferFormat.DEPTH24_STENCIL8 -> gl.DEPTH24_STENCIL8
         RenderBufferFormat.STENCIL_INDEX8 -> TODO()
         RenderBufferFormat.GL_RGB8 -> TODO()
+        RenderBufferFormat.GL_RGBA8 -> TODO()
     }
 }

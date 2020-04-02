@@ -5,12 +5,10 @@ import mogot.gl.RenderTargetTexture
 import mogot.gl.TextureObject
 
 abstract class ToTextureRenderPass(nextPass:RenderPass?) : BaseRenderPass(nextPass) {
-    protected var width:Int = 0
-    protected var height:Int = 0
     protected var renderTargetTexture: RenderTargetTexture? = null
 
-    fun resize(inputRenderPassData: RenderPassData, gl: GL){
-        if((renderTargetTexture?.width!=width)||(renderTargetTexture?.height!=height)){
+    fun resize(context: Display.Context,inputRenderPassData: RenderPassData, gl: GL){
+        if((renderTargetTexture?.width!=context.width)||(renderTargetTexture?.height!=context.height)){
             renderTargetTexture?.close()
             val msaaParam = inputRenderPassData.values[RenderPassData.MSAA]
             var msaa = TextureObject.MSAALevels.Disable
@@ -22,7 +20,7 @@ abstract class ToTextureRenderPass(nextPass:RenderPass?) : BaseRenderPass(nextPa
                     else -> TextureObject.MSAALevels.Disable
                 }
             }
-            renderTargetTexture = RenderTargetTexture(gl,width,height,msaa)
+            renderTargetTexture = RenderTargetTexture(gl,context.width,context.height,msaa)
         }
     }
 

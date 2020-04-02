@@ -18,7 +18,7 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
                 TextureObject(gl,width,height,TextureObject.MinFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,msaa),
                 RenderBuffer(gl,width,height,RenderBufferFormat.DEPTH24_STENCIL8,msaa)) else null
     val frameBuffer = FrameBuffer(gl,
-            TextureObject(gl,width,height,TextureObject.MinFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,TextureObject.MSAALevels.Disable),
+            TextureObject(gl,width,height,TextureObject.MinFilterParameter.Nearest,TextureObject.MagFilterParameter.Nearest,TextureObject.TextureWrap.ClampToEdge,TextureObject.TextureWrap.ClampToEdge,TextureObject.MSAALevels.Disable,TextureObject.Format.RGBA),
             if(msaa !=TextureObject.MSAALevels.Disable) null else RenderBuffer(gl,width,height,RenderBufferFormat.DEPTH24_STENCIL8,TextureObject.MSAALevels.Disable))
     fun begin(){
         if(isClosed)
@@ -26,11 +26,16 @@ class RenderTargetTexture(val gl: GL, val width:Int,val height:Int,val msaa: Tex
         if(msaa!=TextureObject.MSAALevels.Disable) {
             msaaFrameBuffer?.let {
                 it.enable()
+                gl.checkError{""}
                 it.bind()
+                gl.checkError{""}
             }
+            gl.checkError{""}
         }else{
             frameBuffer.enable()
+            gl.checkError{""}
             frameBuffer.bind()
+            gl.checkError{""}
         }
     }
 

@@ -22,6 +22,22 @@ fun safeAcos(v: Float): Float {
     return if (v < -1.0f) PIf else if (v > +1.0) 0.0f else acos(v)
 }
 
+fun isPowerOfTwo(n: Int): Boolean {
+    return n > 0 && n and n - 1 == 0
+}
+
+fun nextPowerOfTwo(n: Int): Int {
+    var n = n
+    n--
+    n = n or (n shr 1)
+    n = n or (n shr 2)
+    n = n or (n shr 4)
+    n = n or (n shr 8)
+    n = n or (n shr 16)
+    n++
+    return n
+}
+
 private const val DEGREES_TO_RADIANS = 0.017453292519943295
 private const val DEGREES_TO_RADIANSf = 0.017453292519943295f
 private const val RADIANS_TO_DEGREES = 57.29577951308232

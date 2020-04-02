@@ -1,10 +1,7 @@
 package mogot.rendering
 
 import mogot.*
-import mogot.gl.FullScreenMaterial
-import mogot.gl.FullScreenSprite
-import mogot.gl.GL
-import mogot.gl.RenderTargetTexture
+import mogot.gl.*
 
 
 class FinalRenderPass() : BaseRenderPass(null) {
@@ -25,6 +22,7 @@ class FinalRenderPass() : BaseRenderPass(null) {
         sprite?.material = mat
         //gl.bindTexture(texture.getGlTextureTarget()!!, texture.getGlTexture())
         sprite?.draw(context)
+        gl.checkError{""}
         //gl.bindTexture(texture.getGlTextureTarget()!!, null)
         return super.render(context, gl, camera, camera2D, root, dt, outputRenderPassData)
     }
