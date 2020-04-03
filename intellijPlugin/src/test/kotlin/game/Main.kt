@@ -6,6 +6,7 @@ import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
 import mogot.math.Vector2f
 import mogot.math.Vector3f
+import mogot.rendering.*
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
 import pw.binom.sceneEditor.Grid3D
@@ -63,17 +64,17 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(Display(SceneFinalRenderPass()),MockFileSystem()) {
+class DDD : GLView(Display(SceneFinalRenderPass()), MockFileSystem()) {
 
     private var closed = false
     private var inited = false
-    var cam = Camera().apply { this.enabled = true }
+    override var root: Node? = Node()
+    var cam = Camera()
 
     override var camera: Camera? = cam
 
     override fun init() {
-        root = Node()
-        display.context.backgroundColor.set(0.0f, 0.5f, 0.5f, 1f)
+        backgroundColor.set(1f, 0.5f, 0.5f, 1f)
         super.init()
         val gg = Grid3D(engine)
         gg.material.value = Default3DMaterial(engine.gl)
@@ -81,12 +82,13 @@ class DDD : GLView(Display(SceneFinalRenderPass()),MockFileSystem()) {
         inited = true
         cam.parent = root
         cam.position.set(5f, 5f, 5f)
-        cam.lookTo(Vector3f(0f, 0f, 0f))
+        //cam.lookTo(Vector3f(6f, 6f, 6f))
         cam.behaviour = FpsCamB(engine)
         val box = CSGBox(engine)
         box.material.value = SimpleMaterial(engine.gl)
         box.parent = root
         cam.lookTo(Vector3f(0f, 0f, 0f))
+        cam.enabled = true
     }
 
     override fun dispose() {
@@ -134,11 +136,11 @@ object Main {
 //            gLeft.scale -= it.wheelRotation / 5f
             println("g.scale=${gTop.scale}")
         }
-        //f.contentPane.add(p, BorderLayout.CENTER)
+        f.contentPane.add(p, BorderLayout.CENTER)
 
         f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.size = Dimension(800, 600)
-//        f.add(view3d)
+        f.add(view)
 //        view.startRender()
         f.isVisible = true
         view.startRender()
