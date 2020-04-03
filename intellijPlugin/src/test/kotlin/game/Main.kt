@@ -20,8 +20,9 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import kotlin.math.cos
 import kotlin.math.sin
+import mogot.rendering.*
 
-class FullScreenSprite(engine: Engine) {
+/*class FullScreenSprite(engine: Engine) {
     var material: Material? = null
     private val rect = Rect2D(engine.gl, Vector2f(16f, 16f))
     private val projection = Matrix4f().ortho2D(0f, 16f, 16f, 0f)
@@ -32,7 +33,7 @@ class FullScreenSprite(engine: Engine) {
         rect.draw()
         mat.unuse()
     }
-}
+}*/
 
 /*
 class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
@@ -62,28 +63,28 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(MockFileSystem()) {
+class DDD : GLView(Display(SceneFinalRenderPass()),MockFileSystem()) {
 
     private var closed = false
     private var inited = false
-    override val root: Node = Node()
-    var cam = Camera()
+    var cam = Camera().apply { this.enabled = true }
 
     override var camera: Camera? = cam
 
     override fun init() {
-        backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
+        root = Node()
+        display.context.backgroundColor.set(0.0f, 0.5f, 0.5f, 1f)
         super.init()
         val gg = Grid3D(engine)
-        gg.material.value = Default3DMaterial(engine)
+        gg.material.value = Default3DMaterial(engine.gl)
         gg.parent = root
         inited = true
         cam.parent = root
         cam.position.set(5f, 5f, 5f)
-        //cam.lookTo(Vector3f(6f, 6f, 6f))
+        cam.lookTo(Vector3f(0f, 0f, 0f))
         cam.behaviour = FpsCamB(engine)
         val box = CSGBox(engine)
-        box.material.value = SimpleMaterial(engine)
+        box.material.value = SimpleMaterial(engine.gl)
         box.parent = root
         cam.lookTo(Vector3f(0f, 0f, 0f))
     }
@@ -133,7 +134,7 @@ object Main {
 //            gLeft.scale -= it.wheelRotation / 5f
             println("g.scale=${gTop.scale}")
         }
-        f.contentPane.add(p, BorderLayout.CENTER)
+        //f.contentPane.add(p, BorderLayout.CENTER)
 
         f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         f.size = Dimension(800, 600)
