@@ -11,10 +11,6 @@ class FinalRenderPass() : BaseRenderPass(null) {
         outputRenderPassData.values["stage"] = FinalRenderPass::class.simpleName!!
     }
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
-        if(sprite==null)
-            sprite = FullScreenSprite(gl)
-        if(mat == null)
-            mat = FullScreenMaterial(gl)
         val texture = inputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] as RenderTargetTexture
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
         gl.clear(gl.COLOR_BUFFER_BIT)
@@ -31,5 +27,13 @@ class FinalRenderPass() : BaseRenderPass(null) {
         sprite?.dec()
         mat?.dec()
         super.cleanup()
+    }
+
+    override fun setup(context: Display.Context, gl: GL, width: Int, height: Int, msaaLevel: TextureObject.MSAALevels) {
+        if(sprite==null)
+            sprite = FullScreenSprite(gl)
+        if(mat == null)
+            mat = FullScreenMaterial(gl)
+        super.setup(context, gl, width, height, msaaLevel)
     }
 }

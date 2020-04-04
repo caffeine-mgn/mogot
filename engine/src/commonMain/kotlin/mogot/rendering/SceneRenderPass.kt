@@ -7,14 +7,10 @@ import mogot.math.Matrix4f
 import mogot.math.Matrix4fc
 
 open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
-    //private val cameraModel3DMatrix = Matrix4f()
-    //private val cameraModel2DMatrix = Matrix4f()
-
     init {
         outputRenderPassData.values["stage"] = SceneRenderPass::class.simpleName!!
     }
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
-        resize(context,inputRenderPassData, gl)
         requireNotNull(renderTargetTexture).apply {
             begin()
             gl.checkError{""}
@@ -26,7 +22,6 @@ open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass)
             gl.checkError{""}
             if (context.camera != null)
                 if(!bypass) {
-                    //camera.globalToLocalMatrix(cameraModel3DMatrix.identity())
                     renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
                 }
             gl.disable(gl.DEPTH_TEST)
@@ -36,21 +31,5 @@ open class SceneRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass)
             outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = this
         }
         return super.render(context,gl,root, dt, outputRenderPassData)
-    }
-
-
-    private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        var pos = model
-        if (node.isVisualInstance) {
-            node as VisualInstance
-            if (!node.visible)
-                return
-            pos = node.matrix
-            node.render(node.matrix, projection, context)
-        }
-
-        node.childs.forEach {
-            renderNode3D(it, pos, projection, context)
-        }
     }
 }

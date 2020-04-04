@@ -11,11 +11,6 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
     private var sprite:FullScreenSprite? = null
     private var mat:FullScreenMaterial? = null
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
-        resize(context,inputRenderPassData,gl)
-        if(sprite==null)
-            sprite = FullScreenSprite(gl)
-        if(mat == null)
-            mat = FullScreenMaterial(gl)
         val texture = inputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] as RenderTargetTexture
         if(bypass){
             outputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] = texture
@@ -46,6 +41,14 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
         sprite?.dec()
         mat?.dec()
         super.cleanup()
+    }
+
+    override fun setup(context: Display.Context, gl: GL, width: Int, height: Int, msaaLevel: TextureObject.MSAALevels) {
+        super.setup(context, gl, width, height, msaaLevel)
+        if(sprite==null)
+            sprite = FullScreenSprite(gl)
+        if(mat == null)
+            mat = FullScreenMaterial(gl)
     }
 
     private fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {

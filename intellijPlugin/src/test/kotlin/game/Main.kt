@@ -64,7 +64,7 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(Display(SceneFinalRenderPass()), MockFileSystem()) {
+class DDD : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))), MockFileSystem()) {
 
     private var closed = false
     private var inited = false
@@ -77,7 +77,7 @@ class DDD : GLView(Display(SceneFinalRenderPass()), MockFileSystem()) {
         backgroundColor.set(1f, 0.5f, 0.5f, 1f)
         super.init()
         val gg = Grid3D(engine)
-        gg.material.value = Default3DMaterial(engine.gl)
+        gg.material.value = Default3DMaterial(engine.gl).instance(mogot.math.Vector4f(0.0f,0.0f,0.0f,1.0f))
         gg.parent = root
         inited = true
         cam.parent = root

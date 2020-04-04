@@ -108,7 +108,6 @@ actual class GL(val gl: GL2) {
     }
 
     actual fun drawElements(mode: Int, count: Int, type: Int, offset: Int) {
-        //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
         gl.glDrawElements(mode, count, type, offset.toLong())
     }
 
