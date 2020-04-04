@@ -64,7 +64,7 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))), MockFileSystem()) {
+class DDD : GLView(Display(SceneToTextureRenderPass(CanvasFinalRenderPass())), MockFileSystem()) {
 
     private var closed = false
     private var inited = false

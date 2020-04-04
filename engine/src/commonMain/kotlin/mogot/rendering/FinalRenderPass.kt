@@ -13,6 +13,7 @@ class FinalRenderPass() : BaseRenderPass(null) {
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         val texture = inputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] as RenderTargetTexture
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
+        gl.clearColor(0.0f,0.0f,1.0f,1.0f)
         gl.clear(gl.COLOR_BUFFER_BIT)
         mat?.texture2D = texture.getGlTexture()
         sprite?.material = mat

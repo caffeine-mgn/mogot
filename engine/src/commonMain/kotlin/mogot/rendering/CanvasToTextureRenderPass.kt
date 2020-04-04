@@ -4,9 +4,9 @@ import mogot.*
 import mogot.gl.*
 import mogot.math.Matrix4fc
 
-class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
+class CanvasToTextureRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
     init {
-        outputRenderPassData.values["stage"] = CanvasRenderPass::class.simpleName!!
+        outputRenderPassData.values["stage"] = CanvasToTextureRenderPass::class.simpleName!!
     }
     private var sprite:FullScreenSprite? = null
     private var mat:FullScreenMaterial? = null
@@ -49,16 +49,5 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
             sprite = FullScreenSprite(gl)
         if(mat == null)
             mat = FullScreenMaterial(gl)
-    }
-
-    private fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
-        if (node.isVisualInstance2D()) {
-            if (!node.visible)
-                return
-            node.render(node.matrix, projection, context)
-        }
-        node.childs.forEach {
-            renderNode2D(it, projection, context)
-        }
     }
 }

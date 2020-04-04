@@ -31,6 +31,17 @@ abstract class BaseRenderPass(override var next: RenderPass?) : RenderPass {
         }
     }
 
+    protected fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
+        if (node.isVisualInstance2D()) {
+            if (!node.visible)
+                return
+            node.render(node.matrix, projection, context)
+        }
+        node.childs.forEach {
+            renderNode2D(it, projection, context)
+        }
+    }
+
     override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
         next?.setup(context,gl, msaaLevel)
     }

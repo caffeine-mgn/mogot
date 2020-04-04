@@ -2,14 +2,11 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.GL
-import mogot.gl.TextureObject
 import mogot.gl.checkError
-import mogot.math.Matrix4f
-import mogot.math.Matrix4fc
 
 class SceneFinalRenderPass : BaseRenderPass(null) {
     init {
-        outputRenderPassData.values["stage"] = SceneRenderPass::class.simpleName!!
+        outputRenderPassData.values["stage"] = SceneToTextureRenderPass::class.simpleName!!
     }
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         if (context.camera != null)

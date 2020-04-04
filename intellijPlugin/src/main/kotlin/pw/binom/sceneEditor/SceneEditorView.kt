@@ -6,10 +6,9 @@ import mogot.*
 import mogot.rendering.EditorDisplay
 import mogot.gl.GLView
 import mogot.math.*
-import mogot.rendering.CanvasRenderPass
+import mogot.rendering.CanvasFinalRenderPass
 import mogot.rendering.Display
-import mogot.rendering.FinalRenderPass
-import mogot.rendering.SceneRenderPass
+import mogot.rendering.SceneToTextureRenderPass
 import pw.binom.MockFileSystem
 import pw.binom.Services
 import pw.binom.SolidMaterial
@@ -37,7 +36,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(SceneRenderPass(CanvasRenderPass(FinalRenderPass()))),MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(SceneToTextureRenderPass(CanvasFinalRenderPass())),MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
