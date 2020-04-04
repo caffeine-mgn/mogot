@@ -43,8 +43,8 @@ class CanvasRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
         super.cleanup()
     }
 
-    override fun setup(context: Display.Context, gl: GL, width: Int, height: Int, msaaLevel: TextureObject.MSAALevels) {
-        super.setup(context, gl, width, height, msaaLevel)
+    override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
+        super.setup(context, gl, msaaLevel)
         if(sprite==null)
             sprite = FullScreenSprite(gl)
         if(mat == null)

@@ -31,7 +31,7 @@ abstract class BaseRenderPass(override var next: RenderPass?) : RenderPass {
         }
     }
 
-    override fun setup(context: Display.Context, gl: GL, width: Int, height: Int, msaaLevel: TextureObject.MSAALevels) {
-        next?.setup(context,gl, width, height, msaaLevel)
+    override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
+        next?.setup(context,gl, msaaLevel)
     }
 }

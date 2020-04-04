@@ -11,5 +11,5 @@ interface RenderPass {
     var next: RenderPass?
     fun render(renderContext: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData
     fun cleanup()
-    fun setup(renderContext: Display.Context, gl: GL,width:Int,height:Int, msaaLevel: TextureObject.MSAALevels)
+    fun setup(renderContext: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels)
 }

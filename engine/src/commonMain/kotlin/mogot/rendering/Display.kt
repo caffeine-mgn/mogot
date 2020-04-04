@@ -46,7 +46,7 @@ open class Display(private val renderPassChain: RenderPass, private val startRen
         gl.checkError{""}
         context.camera?.resize(width,height)
         context.camera2D?.resize(width,height)
-        renderPassChain.setup(context,gl,width,height,TextureObject.MSAALevels.Disable)
+        renderPassChain.setup(context,gl,TextureObject.MSAALevels.Disable)
     }
 
     protected open fun process(root: Node){

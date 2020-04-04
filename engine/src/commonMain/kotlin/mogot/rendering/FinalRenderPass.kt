@@ -29,11 +29,11 @@ class FinalRenderPass() : BaseRenderPass(null) {
         super.cleanup()
     }
 
-    override fun setup(context: Display.Context, gl: GL, width: Int, height: Int, msaaLevel: TextureObject.MSAALevels) {
+    override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
         if(sprite==null)
             sprite = FullScreenSprite(gl)
         if(mat == null)
             mat = FullScreenMaterial(gl)
-        super.setup(context, gl, width, height, msaaLevel)
+        super.setup(context, gl, msaaLevel)
     }
 }
