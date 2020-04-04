@@ -74,7 +74,7 @@ class DDD : GLView(Display(SceneRenderPass(CanvasRenderPass(FinalRenderPass())))
     override var camera: Camera? = cam
 
     override fun init() {
-        backgroundColor.set(1f, 0.5f, 0.5f, 1f)
+        backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
         val gg = Grid3D(engine)
         gg.material.value = Default3DMaterial(engine.gl).instance(mogot.math.Vector4f(0.0f,0.0f,0.0f,1.0f))
