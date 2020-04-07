@@ -7,8 +7,11 @@ import mogot.gl.TextureObject
 abstract class ToTextureRenderPass(nextPass: RenderPass?) : BaseRenderPass(nextPass) {
     protected var renderTargetTexture: RenderTargetTexture? = null
     override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
-        renderTargetTexture?.close()
-        renderTargetTexture = RenderTargetTexture(gl, context.width, context.height, msaaLevel)
+        //renderTargetTexture?.close()
+        if (renderTargetTexture == null)
+            renderTargetTexture = RenderTargetTexture(gl, context.width, context.height, msaaLevel)
+        else
+            renderTargetTexture?.resize(context.width, context.height)
         super.setup(context, gl, msaaLevel)
     }
 

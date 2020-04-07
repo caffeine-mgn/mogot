@@ -151,9 +151,7 @@ open class GLView(val display: Display,val fileSystem: FileSystem<Unit>) : Abstr
         this.width = width
         this.height = height
         super.setup(width, height)
-        engine.waitFrame {
-            display.setup(gl, 0, 0, width, height)
-        }
+        display.setup(gl, 0, 0, width, height)
     }
 
     private var lastFrameTime = window.performance.now().unsafeCast<Float>()
