@@ -2,9 +2,10 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.GL
+import mogot.gl.TextureObject
 import mogot.gl.checkError
 
-class SceneFinalRenderPass : BaseRenderPass(null) {
+class SceneFinalRenderPass : BaseRenderPass() {
     init {
         outputRenderPassData.values["stage"] = SceneToTextureRenderPass::class.simpleName!!
     }
@@ -14,12 +15,21 @@ class SceneFinalRenderPass : BaseRenderPass(null) {
                 gl.clear(gl.COLOR_BUFFER_BIT or gl.DEPTH_BUFFER_BIT)
                 gl.enable(gl.DEPTH_TEST)
                 gl.enable(gl.CULL_FACE)
-                renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
+                customPreDraw3D(context.camera!!.transform, context.camera!!.projectionMatrix, context)
+                context.renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
                 gl.checkError{""}
                 gl.disable(gl.DEPTH_TEST)
                 gl.disable(gl.CULL_FACE)
             }
         return super.render(context, gl, root, dt, outputRenderPassData)
+    }
+
+    override fun cleanup() {
+
+    }
+
+    override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
+
     }
 
 

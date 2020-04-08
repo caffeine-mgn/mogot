@@ -4,7 +4,7 @@ import mogot.*
 import mogot.gl.*
 
 
-class FinalRenderPass() : BaseRenderPass(null) {
+class FinalRenderPass() : BaseRenderPass() {
     private var sprite:FullScreenSprite? = null
     private var mat:FullScreenMaterial? = null
     init {
@@ -13,7 +13,6 @@ class FinalRenderPass() : BaseRenderPass(null) {
     override fun render(context: Display.Context, gl: GL, root: Node, dt: Float, inputRenderPassData: RenderPassData): RenderPassData {
         val texture = inputRenderPassData.values[RenderPassData.RENDER_TARGET_TEXTURE] as RenderTargetTexture
         gl.bindFrameBuffer(gl.FRAMEBUFFER, null)
-        gl.clearColor(0.0f,0.0f,1.0f,1.0f)
         gl.clear(gl.COLOR_BUFFER_BIT)
         mat?.texture2D = texture.getGlTexture()
         sprite?.material = mat
@@ -27,7 +26,6 @@ class FinalRenderPass() : BaseRenderPass(null) {
     override fun cleanup() {
         sprite?.dec()
         mat?.dec()
-        super.cleanup()
     }
 
     override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
@@ -35,6 +33,5 @@ class FinalRenderPass() : BaseRenderPass(null) {
             sprite = FullScreenSprite(gl)
         if(mat == null)
             mat = FullScreenMaterial(gl)
-        super.setup(context, gl, msaaLevel)
     }
 }

@@ -2,9 +2,8 @@ package mogot.rendering
 
 import mogot.*
 import mogot.gl.*
-import mogot.math.Matrix4fc
 
-class CanvasToTextureRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextPass) {
+class CanvasToTextureRenderPass() : ToTextureRenderPass() {
     init {
         outputRenderPassData.values["stage"] = CanvasToTextureRenderPass::class.simpleName!!
     }
@@ -26,7 +25,8 @@ class CanvasToTextureRenderPass(nextPass:RenderPass) : ToTextureRenderPass(nextP
                 //gl.bindTexture(texture.getGlTextureTarget()!!, null)
                 if(context.camera2D!=null) {
                     //camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
-                    renderNode2D(root, context.camera2D!!.projectionMatrix, context)
+                    customPreDraw2D(context.camera2D!!.projectionMatrix, context)
+                    context.renderNode2D(root, context.camera2D!!.projectionMatrix, context)
                     gl.checkError{""}
                 }
                 end()

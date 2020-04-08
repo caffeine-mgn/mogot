@@ -1,8 +1,10 @@
-package mogot.rendering
-
+package pw.binom.sceneEditor
 import mogot.*
+import mogot.gl.GL
+import mogot.rendering.*
 
-class EditorDisplay(renderPassChain: RenderPass, startRenderPassData: RenderPassData = RenderPassData()) : Display(renderPassChain, startRenderPassData) {
+class EditorDisplay(val sceneRender: EditorSceneToTextureRenderPass = EditorSceneToTextureRenderPass(), val canvasRender: EditorCanvasToTexturePass = EditorCanvasToTexturePass(), startRenderPassData: RenderPassData = RenderPassData()) : Display(listOf(sceneRender,CanvasToTextureRenderPass(),FinalRenderPass()), startRenderPassData) {
+
     fun setCamera(camera: Camera?){
         context.camera = camera
         context.camera?.enabled = true

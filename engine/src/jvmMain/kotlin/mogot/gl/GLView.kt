@@ -187,8 +187,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         repaint()
     }
 
-    private val cameraModel3DMatrix = Matrix4f()
-    private val cameraModel2DMatrix = Matrix4f()
+
     private var oldLockMouse = false
 
     protected open fun render2(dt: Float) {
@@ -225,9 +224,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
     }
 
     protected open fun render() {
-        camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
-
-        camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
         val time = System.nanoTime()
         val dt = (time - lastFrameTime) / 1e+9f
 
@@ -243,7 +239,6 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
         }
 
         if (root != null) {
-            update(dt, root!!, camModel = cameraModel3DMatrix, ortoModel = cameraModel2DMatrix)
             display.render(gl,root!!)
         }
 
@@ -260,22 +255,7 @@ open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: I
 
     private var lastFrameTime = System.nanoTime()
 
-    private fun update(dt: Float, node: Node, camModel: Matrix4fc, ortoModel: Matrix4fc) {
-        node.update(dt)
-        var mat3d = camModel
-        var mat2d = ortoModel
 
-        if (node.isSpatial())
-            mat3d = node.apply(mat3d)
-
-        if (node.isSpatial2D())
-            mat2d = node.apply(mat2d)
-
-
-        node.childs.forEach {
-            update(dt, it, camModel = mat3d, ortoModel = mat2d)
-        }
-    }
 
 
 

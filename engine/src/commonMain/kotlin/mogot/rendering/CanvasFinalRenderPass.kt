@@ -2,8 +2,9 @@ package mogot.rendering
 
 import mogot.Node
 import mogot.gl.*
+import mogot.math.Matrix4fc
 
-class CanvasFinalRenderPass() : BaseRenderPass(null) {
+open class CanvasFinalRenderPass() : BaseRenderPass() {
     init {
         outputRenderPassData.values["stage"] = CanvasFinalRenderPass::class.simpleName!!
     }
@@ -24,7 +25,8 @@ class CanvasFinalRenderPass() : BaseRenderPass(null) {
             //gl.bindTexture(texture.getGlTextureTarget()!!, null)
             if (context.camera2D != null) {
                 //camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())?: cameraModel2DMatrix.identity()
-                renderNode2D(root, context.camera2D!!.projectionMatrix, context)
+                customPreDraw2D(context.camera2D!!.projectionMatrix, context)
+                context.renderNode2D(root, context.camera2D!!.projectionMatrix, context)
                 gl.checkError { "" }
             }
             gl.checkError { "" }
@@ -32,14 +34,14 @@ class CanvasFinalRenderPass() : BaseRenderPass(null) {
         return super.render(context, gl, root, dt, outputRenderPassData)
     }
 
+
+
     override fun cleanup() {
         sprite?.dec()
         mat?.dec()
-        super.cleanup()
     }
 
     override fun setup(context: Display.Context, gl: GL, msaaLevel: TextureObject.MSAALevels) {
-        super.setup(context, gl, msaaLevel)
         if (sprite == null)
             sprite = FullScreenSprite(gl)
         if (mat == null)

@@ -8,10 +8,6 @@ import mogot.math.Vector2f
 import mogot.math.Vector3f
 import mogot.rendering.*
 import pw.binom.MockFileSystem
-import pw.binom.sceneEditor.Default3DMaterial
-import pw.binom.sceneEditor.Grid3D
-import pw.binom.sceneEditor.GuideLine
-import pw.binom.sceneEditor.SimpleMaterial
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -22,6 +18,7 @@ import javax.swing.JPanel
 import kotlin.math.cos
 import kotlin.math.sin
 import mogot.rendering.*
+import pw.binom.sceneEditor.*
 
 /*class FullScreenSprite(engine: Engine) {
     var material: Material? = null
@@ -64,7 +61,7 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(Display(SceneToTextureRenderPass(CanvasFinalRenderPass())), MockFileSystem()) {
+class DDD : GLView(EditorDisplay(), MockFileSystem()) {
 
     private var closed = false
     private var inited = false
@@ -76,9 +73,9 @@ class DDD : GLView(Display(SceneToTextureRenderPass(CanvasFinalRenderPass())), M
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
-        val gg = Grid3D(engine)
+        /*val gg = Grid3D(engine.gl)
         gg.material.value = Default3DMaterial(engine.gl).instance(mogot.math.Vector4f(0.0f,0.0f,0.0f,1.0f))
-        gg.parent = root
+        gg.parent = root*/
         inited = true
         cam.parent = root
         cam.position.set(5f, 5f, 5f)
@@ -89,6 +86,7 @@ class DDD : GLView(Display(SceneToTextureRenderPass(CanvasFinalRenderPass())), M
         box.parent = root
         cam.lookTo(Vector3f(0f, 0f, 0f))
         cam.enabled = true
+        (display as EditorDisplay).setCamera(camera)
     }
 
     override fun dispose() {

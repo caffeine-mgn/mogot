@@ -4,7 +4,7 @@ import mogot.*
 import mogot.gl.GL
 import mogot.gl.checkError
 
-open class SceneToTextureRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(nextPass) {
+open class SceneToTextureRenderPass() : ToTextureRenderPass() {
     init {
         outputRenderPassData.values["stage"] = SceneToTextureRenderPass::class.simpleName!!
     }
@@ -19,7 +19,8 @@ open class SceneToTextureRenderPass(nextPass:RenderPass?) : ToTextureRenderPass(
             gl.checkError{""}
             if (context.camera != null)
                 if(!bypass) {
-                    renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
+                    customPreDraw3D(context.camera!!.transform, context.camera!!.projectionMatrix, context)
+                    context.renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
                 }
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)

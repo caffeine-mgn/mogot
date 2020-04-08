@@ -13,7 +13,7 @@ import java.awt.event.MouseMotionListener
 
 private const val MIN_E = 0.0001f;
 
-abstract class View3D : GLView(Display(SceneFinalRenderPass()),MockFileSystem()) {
+abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileSystem()) {
 
     private var _x = 0
     private var _y = 0
@@ -27,6 +27,7 @@ abstract class View3D : GLView(Display(SceneFinalRenderPass()),MockFileSystem())
         val root = Spatial()
         camera!!.parent = root
         camera!!.enabled = true
+        resetCam()
     }
 
     protected fun resetCam() {

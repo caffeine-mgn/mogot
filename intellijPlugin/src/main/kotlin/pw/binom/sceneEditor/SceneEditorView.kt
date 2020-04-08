@@ -3,7 +3,6 @@ package pw.binom.sceneEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
-import mogot.rendering.EditorDisplay
 import mogot.gl.GLView
 import mogot.math.*
 import mogot.rendering.CanvasFinalRenderPass
@@ -36,7 +35,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(SceneToTextureRenderPass(CanvasFinalRenderPass())),MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(),MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -556,16 +555,12 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         editorCamera2D.enabled = true
 
         grid2d = Grid2D(this)
-        grid2d.parent = root
+        (display as EditorDisplay).canvasRender.grid = grid2d
 
 
 
         backgroundColor.set(0.376f, 0.376f, 0.376f, 1f)
-        val grid = Grid3D(engine)
-        grid.parent = root
-        val mat = SolidMaterial(engine.gl)
-        grid.material.value = mat
-        mat.diffuseColor.set(1f, 1f, 1f, 0.5f)
+
 //        editorCamera.behaviour = FpsCam(engine)
         selectorMaterial = SolidMaterial(engine.gl)
 

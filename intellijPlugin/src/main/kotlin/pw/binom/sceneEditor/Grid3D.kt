@@ -1,12 +1,13 @@
 package pw.binom.sceneEditor
 
 import mogot.*
+import mogot.gl.GL
 import mogot.math.Matrix4fc
 import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.intDataOf
 
-class Grid3D(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
+class Grid3D(val gl:GL) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     /**
      * кол-во квадратов
      */
@@ -46,7 +47,7 @@ class Grid3D(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNod
         }
         val indexes = intDataOf(*(0 until vertex.size).map { it }.toIntArray())
         geom = Geom3D2(
-                gl = engine.gl,
+                gl = gl,
                 vertex = vertex,
                 index = indexes,
                 normals = null,
