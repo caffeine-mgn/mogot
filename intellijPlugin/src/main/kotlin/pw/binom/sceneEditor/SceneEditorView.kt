@@ -508,22 +508,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         node2DRenderCallback.remove(node)
     }
 
-    fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
-        //super.renderNode2D(node, projection, context)
-        if (node.isSpatial2D()) {
-            val func = node2DRenderCallback[node]
-            if (func != null) {
-                renderCallback.also {
-                    it.model = node.matrix
-                    it.projection = projection
-                    it.context = context
-                    it.node = node
-                }
-                func(renderCallback)
-            }
-        }
-    }
-
     override fun keyUp(e: KeyEvent) {
         if (editor != null) {
             editor!!.keyUp(e.keyCode)
