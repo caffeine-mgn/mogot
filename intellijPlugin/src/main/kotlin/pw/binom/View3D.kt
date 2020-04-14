@@ -32,8 +32,10 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
 
     protected fun resetCam() {
         val q = Quaternionf()
-        q.rotateAxis(v, 1f, 0f, 0f)
-        q.rotateAxis(h, 0f, 1f, 0f)
+        if(v!=0.0f)
+            q.rotateAxis(v, 1f, 0f, 0f)
+        if(h!=0.0f)
+            q.rotateAxis(h, 0f, 1f, 0f)
         camera!!.position.set(q.forward * d)
         camera!!.lookTo(Vector3f(0f, 0f, 0f))
     }
