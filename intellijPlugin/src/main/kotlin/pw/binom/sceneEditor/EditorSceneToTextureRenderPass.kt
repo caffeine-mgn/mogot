@@ -7,6 +7,7 @@ import pw.binom.SolidMaterial
 
 class EditorSceneToTextureRenderPass() : SceneToTextureRenderPass() {
     var grid: Grid3D? = null
+    //var editorRoot: mogot.Node? = null
     override fun customPreDraw3D(model: Matrix4fc, projection: Matrix4fc, context: Display.Context){
         if(grid!=null) {
             context.update(grid!!)

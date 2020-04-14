@@ -230,7 +230,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
             }
         }
 
-        root = sceneRoot
+        root = editorRoot
     }
 
     private val selectedNodes = ArrayList<Node>()

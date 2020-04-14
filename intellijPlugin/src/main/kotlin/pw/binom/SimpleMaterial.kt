@@ -28,43 +28,13 @@ mat4 projection
 mat4 model
 vec3 normal
 
-class Light {
-    vec3 position
-    vec3 diffuse
-    float specular
-}
-
-@property(hidden=true)
-Light lights[10]
-
-@property(hidden=true)
-int lights_len
 
 vec4 vertex(){
-    vec3 ff = vec3(0f,0f,0f)
-    mat3 normalMatrix = mat3(transpose(inverse(model)))
-    normal = vec3(normalMatrix * normalList)
     return vec4(projection * model * vec4(vertexPos, 1f))
 }
 
 vec4 fragment(vec4 color2){
-    vec4 cc = vec4(0.5f,0.5f,0.5f,1f)
-
-    for (int i=0; i<lights_len; i++) {
-        vec3 lightDir = lights[i].position - vertexPos
-        vec3 N = normalize(normal)
-        vec3 L = normalize(lightDir)
-
-        float lambertTerm = dot(N,L)
-        float cosTheta = dot( N,L )
-        float distation = length(lightDir)
-        vec3 E = normalize(-vertexPos)
-        vec3 R = normalize(-reflect(L, N))
-        float LightPower = 1000f
-        cc += vec4(lights[i].diffuse, 1f) * LightPower * cosTheta / (distation * distation)
-
-    }
-    return cc
+    return vec4(0.7f,0.7f,0.7f,1f)
 }
  
 """

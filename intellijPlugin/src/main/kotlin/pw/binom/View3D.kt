@@ -17,8 +17,8 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
 
     private var _x = 0
     private var _y = 0
-    private var h = 0f
-    private var v = 0f
+    private var h = 0.01f
+    private var v = 0.01f//1.0E-4f
     private var d = 6f
 
     override var camera: Camera? = Camera()

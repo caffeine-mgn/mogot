@@ -3,6 +3,7 @@ package pw.binom.material
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.lang.Language
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -164,7 +165,7 @@ class MaterialFileEditor(val project: Project,
 
     //val hintManager = project.getComponent(HintManager::class.java)
 
-    private fun refresh() {
+    fun refresh() {
 
         fun setUniform(type: TypeDesc, name: String, value: String?) {
             if (type is SingleType && type.clazz.name == "sampler2D") {
@@ -239,6 +240,8 @@ class MaterialFileEditor(val project: Project,
                 refresh()
             }
         })
+
+
     }
 
     override fun getComponent(): JComponent = component

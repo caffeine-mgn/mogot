@@ -166,6 +166,8 @@ class MaterialViewer(val materialFileEditor: MaterialFileEditor) : View3D() {
         node1.addChild(l)
         root!!.addChild(node1)
         resetCam()
+        repaint()
+        materialFileEditor.refresh()
     }
 
     override fun dispose() {
