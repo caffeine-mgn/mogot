@@ -24,7 +24,7 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
     override var camera: Camera? = Camera()
 
     init {
-        val root = Spatial()
+        root = Spatial()
         camera!!.parent = root
         camera!!.enabled = true
         resetCam()

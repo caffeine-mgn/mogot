@@ -59,6 +59,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     }
 
     private val renderCallback = RenderCallbackImpl()
+    val selectors = ArrayList<Selector3D>()
 
     public override var render3D: Boolean
         get() = super.render3D
@@ -236,7 +237,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     val selected: List<Node>
         get() = selectedNodes
     val nodesMeta = HashMap<Node, Any>()
-    private var selectors = ArrayList<Selector3D>()
     fun select(nodeList: List<Node>) {
         renderThread {
 
