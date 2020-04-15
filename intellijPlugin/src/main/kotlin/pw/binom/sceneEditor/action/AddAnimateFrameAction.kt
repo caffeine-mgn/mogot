@@ -4,10 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import mogot.Field
-import mogot.math.Vector2f
-import mogot.math.Vector2fc
-import mogot.math.Vector3f
-import mogot.math.Vector3fc
+import mogot.math.*
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.nodeController.AnimateFile
@@ -29,25 +26,26 @@ class AddAnimateFrameAction : AnAction() {
         e.presentation.isEnabled = editor.animationTool?.animateModel != null && editor.viewer.view.selected.isNotEmpty()
     }
 
-    private fun cloneValue(field:NodeService.Field<*>)=
-            when (field.fieldType){
-                Field.Type.FLOAT->field.currentValue
-                Field.Type.VEC2->field.currentValue.let { it as Vector2fc }.let { Vector2f(it.x,it.y) }
-                Field.Type.VEC3->field.currentValue.let { it as Vector3fc }.let { Vector3f(it.x,it.y,it.z) }
-                Field.Type.STRING->field.currentValue.let { it as String }
-                Field.Type.INT->field.currentValue.let { it as Int }
-                Field.Type.BOOL->field.currentValue.let { it as Boolean }
+    private fun cloneValue(field: NodeService.Field<*>) =
+            when (field.fieldType) {
+                Field.Type.FLOAT -> field.currentValue
+                Field.Type.VEC2 -> field.currentValue.let { it as Vector2fc }.let { Vector2f(it.x, it.y) }
+                Field.Type.VEC3 -> field.currentValue.let { it as Vector3fc }.let { Vector3f(it.x, it.y, it.z) }
+                Field.Type.STRING -> field.currentValue.let { it as String }
+                Field.Type.INT -> field.currentValue.let { it as Int }
+                Field.Type.BOOL -> field.currentValue.let { it as Boolean }
+                Field.Type.VEC4 -> field.currentValue.let { it as Vector4fc }.let { Vector4f(it.x, it.y, it.z, it.w) }
             }
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = SceneEditor.currentSceneEditor!!
-        val model = editor.animationTool?.animateModel?:return
-        val lines = editor.animationTool?.frameView?.selectedLines()?:return
+        val model = editor.animationTool?.animateModel ?: return
+        val lines = editor.animationTool?.frameView?.selectedLines() ?: return
         val animNode = editor.viewer.view.animateNode!!
         val selected = editor.viewer.view.selected
         if (selected.isEmpty())
             return
-        val currentFrame = editor.animationTool?.frameView?.currentFrame?:return
+        val currentFrame = editor.animationTool?.frameView?.currentFrame ?: return
         model.nodes.forEach { line ->
             val node = animNode.findByRelative(line.nodePath) ?: return@forEach
             if (node in selected) {

@@ -123,6 +123,19 @@ class AnimateFrameView : JComponent() {
 
     private val selected = TreeMap<Int, TreeSet<Int>>()
     val currentFrameChangeEvent = EventDispatcher()
+    val selectedFrameChangeEvent = EventDispatcher()
+
+    fun clearSelect() {
+        selected.clear()
+    }
+
+    fun selectAllFrameLine(index: Int) {
+        val model = model ?: throw IllegalStateException("Model is null")
+        val set = selected.getOrPut(index) { TreeSet() }
+        (0 until model.frameCount).forEach {
+            set += it
+        }
+    }
 
     private var lastClickFrame: Point? = null
     var currentFrame = 0
@@ -181,11 +194,11 @@ class AnimateFrameView : JComponent() {
     init {
         addFocusListener(object : FocusListener {
             override fun focusLost(e: FocusEvent?) {
-                selected.clear()
                 repaint()
             }
 
             override fun focusGained(e: FocusEvent?) {
+                repaint()
             }
 
         })
@@ -286,6 +299,7 @@ class AnimateFrameView : JComponent() {
                             line.add(f)
                         }
                     }
+                    selectedFrameChangeEvent.dispatch()
                     this@AnimateFrameView.state = null
                     repaint()
                 }
@@ -365,6 +379,7 @@ class AnimateFrameView : JComponent() {
                                 }
                             }
                         }
+                        selectedFrameChangeEvent.dispatch()
                     }
                     e.isControlDown -> {
                         line ?: return
@@ -376,11 +391,14 @@ class AnimateFrameView : JComponent() {
                         } else {
                             ll.add(frameNum)
                         }
+                        selectedFrameChangeEvent.dispatch()
                     }
                     else -> {
                         selected.clear()
-                        if (line != null && frameNum != null)
+                        if (line != null && frameNum != null) {
                             selected.getOrPut(line) { TreeSet() }.add(frameNum)
+                            selectedFrameChangeEvent.dispatch()
+                        }
                     }
                 }
                 repaint()

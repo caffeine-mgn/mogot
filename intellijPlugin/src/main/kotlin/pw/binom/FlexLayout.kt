@@ -163,6 +163,7 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
     }
 
     var componentPadding = 0
+
     // Метод расположения компонентов в контейнере
     override fun layoutContainer(c: Container) {
         val ins = (c as JComponent).border?.getBorderInsets(c)
@@ -271,9 +272,22 @@ class FlexLayout(val componentPlace: Container, direction: Direction = Direction
     }
 }
 
-fun <T : Component> T.appendTo(layout: FlexLayout, grow: Int = 1): T {
+fun <T : Component> T.appendTo(layout: FlexLayout, grow: Int = 1, after: JComponent? = null, before: JComponent? = null): T {
+    require(!(after != null && before != null))
     layout.settingFor(this).grow = grow.toFloat()
-    layout.componentPlace.add(this)
+    when {
+        after != null -> {
+            val index = layout.componentPlace.components.indexOf(after)
+            check(index >= 0)
+            layout.componentPlace.add(this, index + 1)
+        }
+        before != null -> {
+            val index = layout.componentPlace.components.indexOf(after)
+            check(index >= 0)
+            layout.componentPlace.add(this, index)
+        }
+        else -> layout.componentPlace.add(this)
+    }
     return this
 }
 

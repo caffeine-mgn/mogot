@@ -2,11 +2,14 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.CSGBox
+import mogot.Engine
 import mogot.MaterialNode
 import mogot.Node
 import mogot.collider.BoxCollider
 import mogot.collider.Collider
 import mogot.math.AABBm
+import mogot.math.Quaternionfm
+import mogot.math.Vector3fm
 import mogot.math.Vector4f
 import pw.binom.sceneEditor.MaterialInstance
 import pw.binom.sceneEditor.NodeCreator
@@ -16,8 +19,32 @@ import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
+import pw.binom.utils.QuaternionfmDelegator
+import pw.binom.utils.Vector2fmDelegator
+import pw.binom.utils.Vector3fmDelegator
 import javax.swing.Icon
 import javax.swing.ImageIcon
+
+class EditableCSGBox(view: SceneEditorView) : CSGBox(view.engine), EditableNode {
+    override val position: Vector3fm = Vector3fmDelegator(super.position) {
+        positionField.eventChange.dispatch()
+    }
+    override val scale: Vector3fm = Vector3fmDelegator(super.scale) {
+        positionField.eventChange.dispatch()
+    }
+    override val quaternion: Quaternionfm = QuaternionfmDelegator(super.quaternion) {
+        rotationField.eventChange.dispatch()
+    }
+
+
+    val positionField = PositionField3D(this)
+    val scaleField = ScaleField3D(this)
+    val rotationField = RotateField3D(this)
+    val materialField = MaterialField(view, this)
+
+    private val fields = listOf(positionField, rotationField, scaleField, materialField)
+    override fun getEditableFields(): List<NodeService.Field<out Any>> = fields
+}
 
 object CubeNodeCreator : NodeCreator {
     override val name: String
@@ -25,7 +52,7 @@ object CubeNodeCreator : NodeCreator {
     override val icon: Icon = ImageIcon(this::class.java.classLoader.getResource("/cube-icon-16.png"))
 
     override fun create(view: SceneEditorView): Node {
-        val node = CSGBox(view.engine)
+        val node = EditableCSGBox(view)
         node.material.value = view.default3DMaterial.instance(Vector4f(1f))
         return node
     }
@@ -34,10 +61,10 @@ object CubeNodeCreator : NodeCreator {
 object CubeService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
-    override fun isEditor(node: Node): Boolean = node::class.java == CSGBox::class.java
+    override fun isEditor(node: Node): Boolean = node::class.java == EditableCSGBox::class.java
     override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is CSGBox) return null
-        val out = CSGBox(node.engine)
+        if (node !is EditableCSGBox) return null
+        val out = EditableCSGBox(view)
         out.width = node.width
         out.height = node.height
         out.depth = node.depth
@@ -47,7 +74,7 @@ object CubeService : NodeService {
     }
 
     override fun getCollider(node: Node): Collider? {
-        node as CSGBox
+        node as EditableCSGBox
         val collider = BoxCollider()
         collider.node = node
         collider.size.set(node.width, node.height, node.depth)
@@ -55,16 +82,16 @@ object CubeService : NodeService {
     }
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean {
-        node as CSGBox
+        node as EditableCSGBox
         aabb.position.set(0f)
         aabb.size.set(node.width, node.height, node.depth)
         return true
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != CSGBox::class.java.name)
+        if (clazz != EditableCSGBox::class.java.name)
             return null
-        val node = CSGBox(view.engine)
+        val node = EditableCSGBox(view)
         SpatialService.loadSpatial(view.engine, node, properties)
         MaterialNodeUtils.load(view, node, properties)
         if (node.material.value == null)
@@ -73,7 +100,7 @@ object CubeService : NodeService {
     }
 
     override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is CSGBox)
+        if (node !is EditableCSGBox)
             return null
         val out = HashMap<String, String>()
         SpatialService.saveSpatial(view.engine, node, out)

@@ -2,12 +2,12 @@ package pw.binom.sceneEditor
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.EventDispatcher
-import mogot.Field
 import mogot.Node
 import mogot.collider.Collider
 import mogot.collider.Collider2D
 import mogot.math.*
 import pw.binom.Services
+import pw.binom.sceneEditor.nodeController.EditableNode
 import pw.binom.sceneEditor.nodeController.EmptyNodeService
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.ui.*
@@ -18,7 +18,7 @@ interface NodeService {
 //        VEC3, VEC2, FLOAT, STRING, INT
 //    }
 
-    interface Field<T:Any> {
+    interface Field<T : Any> {
         val id: Int
         val groupName: String
         var currentValue: T
@@ -34,15 +34,24 @@ interface NodeService {
         val fieldType: mogot.Field.Type
         val node: Node
         val eventChange: EventDispatcher
+        val subFieldsEventChange: EventDispatcher
         fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<T>>): AbstractEditor<T>
+        fun getSubFields(): List<Field<out Any>> = emptyList()
+        fun isEquals(field: Field<T>): Boolean
     }
 
     abstract class FieldVec3 : Field<Vector3fc> {
+        override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
         override fun saveAsString(): String {
             val value = currentValue
             return "VEC3 ${value.x};${value.y};${value.z}"
         }
+
+        override fun isEquals(field: Field<Vector3fc>): Boolean =
+                currentValue.x == field.currentValue.x
+                        && currentValue.y == field.currentValue.y
+                        && currentValue.z == field.currentValue.z
 
         override fun loadFromString(value: String) {
             check(value.startsWith("VEC3 "))
@@ -63,11 +72,15 @@ interface NodeService {
     }
 
     abstract class FieldInt : Field<Int> {
+        override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
         override fun saveAsString(): String {
             val value = currentValue
             return "INT $value"
         }
+
+        override fun isEquals(field: Field<Int>): Boolean =
+                currentValue == field.currentValue
 
         override fun loadFromString(value: String) {
             check(value.startsWith("INT "))
@@ -84,11 +97,16 @@ interface NodeService {
     }
 
     abstract class FieldVec2 : Field<Vector2fc> {
+        override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
         override fun saveAsString(): String {
             val value = currentValue
             return "VEC2 ${value.x};${value.y}"
         }
+
+        override fun isEquals(field: Field<Vector2fc>): Boolean =
+                currentValue.x == field.currentValue.x
+                        && currentValue.y == field.currentValue.y
 
         override fun loadFromString(value: String) {
             check(value.startsWith("VEC2 "))
@@ -108,11 +126,15 @@ interface NodeService {
     }
 
     abstract class FieldFloat : Field<Float> {
+        override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
         override fun saveAsString(): String {
             val value = currentValue
             return "FLOAT $value"
         }
+
+        override fun isEquals(field: Field<Float>): Boolean =
+                currentValue == field.currentValue
 
         override fun loadFromString(value: String) {
             check(value.startsWith("FLOAT "))
@@ -129,11 +151,15 @@ interface NodeService {
     }
 
     abstract class FieldString : Field<String> {
+        override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
         override fun saveAsString(): String {
             val value = currentValue
             return "STR $value"
         }
+
+        override fun isEquals(field: Field<String>): Boolean =
+                currentValue == field.currentValue
 
         override fun loadFromString(value: String) {
             check(value.startsWith("STR "))
@@ -149,7 +175,12 @@ interface NodeService {
         }
     }
 
-    fun getFields(view: SceneEditorView, node: Node): List<Field<Any>> = emptyList()
+    fun getFields(view: SceneEditorView, node: Node): List<Field<out Any>> {
+        if (node is EditableNode)
+            return node.getEditableFields()
+        return emptyList()
+    }
+
     fun getClassName(node: Node): String = node::class.java.name
     fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node?
     fun save(view: SceneEditorView, node: Node): Map<String, String>?

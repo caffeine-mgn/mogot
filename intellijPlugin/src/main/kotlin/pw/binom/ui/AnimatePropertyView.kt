@@ -1,8 +1,12 @@
 package pw.binom.ui
 
+import mogot.EventDispatcher
+import pw.binom.MouseListenerImpl
 import java.awt.*
+import java.awt.event.MouseEvent
 import javax.swing.Icon
 import javax.swing.JComponent
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class AnimatePropertyView : JComponent() {
@@ -11,17 +15,21 @@ class AnimatePropertyView : JComponent() {
     private val timeLinesSeparatorColor = Color(62, 62, 62)
     private val frameLineColor = Color(95, 95, 95)
     private val backlightNodeColor = Color(212, 56, 0, 127)
+    private val selectedColor = Color(38, 130, 235)
 
-    interface Node {
-        val icon: Icon?
+    interface Line {
         val text: String
+    }
+
+    interface Node : Line {
+        val icon: Icon?
         var visible: Boolean
         var lock: Boolean
         val properties: List<Property>
+        fun remove(property: Property)
     }
 
-    interface Property {
-        val text: String
+    interface Property : Line {
         var lock: Boolean
     }
 
@@ -29,6 +37,21 @@ class AnimatePropertyView : JComponent() {
 
     interface Model {
         val nodes: List<Node>
+        fun remove(node: Node)
+        fun property(index: Int): Line? {
+            var i = 0
+            nodes.forEach { node ->
+                if (i == index)
+                    return node
+                i++
+                node.properties.forEach { property ->
+                    if (i == index)
+                        return property
+                    i++
+                }
+            }
+            return null
+        }
     }
 
     var model: Model? = null
@@ -36,6 +59,27 @@ class AnimatePropertyView : JComponent() {
             field = value
             repaint()
         }
+
+    private val _selectedLines = HashSet<Line>()
+    val selectedLines: Set<Line>
+        get() = _selectedLines
+
+    private val _selected = HashSet<Int>()
+    val selected: Set<Int>
+        get() = _selected
+
+    fun addSelect(index: Int) {
+        val model = model ?: throw IllegalStateException("Model is null")
+        val prop = model.property(index) ?: throw IllegalStateException("Can't find property #$index")
+        _selectedLines += prop
+        _selected += index
+
+    }
+
+    fun clearSelect() {
+        _selectedLines.clear()
+        _selected.clear()
+    }
 
     var frameLineHeight: Float = 20f
         set(value) {
@@ -68,7 +112,24 @@ class AnimatePropertyView : JComponent() {
 
     private val timeHeight = 30
     private val font2 = Font("Arial", Font.BOLD, 9)
+    val selectedPropertyChangeEvent = EventDispatcher()
 
+    init {
+        addMouseListener(object : MouseListenerImpl {
+            override fun mouseReleased(e: MouseEvent) {
+                val model = model ?: return
+                val index = floor((e.y - timeHeight + scrollY).toFloat() / frameLineHeight).toInt()
+                val prop = model.property(index)
+
+
+                if (!e.isShiftDown)
+                    clearSelect()
+                if (prop != null)
+                    addSelect(index)
+                selectedPropertyChangeEvent.dispatch()
+            }
+        })
+    }
 
     override fun paint(g: Graphics) {
         g as Graphics2D
@@ -83,6 +144,10 @@ class AnimatePropertyView : JComponent() {
         val ovalSize = 4
 
         model.nodes.forEach { node ->
+            if (node in selectedLines) {
+                g.color = selectedColor
+                g.fillRect(0, lineY(line), width, frameLineHeight.roundToInt())
+            }
             if (node in backlightNodes) {
                 g.color = backlightNodeColor
                 g.fillRect(0, lineY(line), width, frameLineHeight.roundToInt())
@@ -95,6 +160,10 @@ class AnimatePropertyView : JComponent() {
             g.fillOval(width - ovalSize - 10, (0f + lineY(line) + frameLineHeight * 0.5 - ovalSize * 0.5f).roundToInt(), ovalSize, ovalSize)
             line++
             node.properties.forEach { property ->
+                if (property in selectedLines) {
+                    g.color = selectedColor
+                    g.fillRect(0, lineY(line), width, frameLineHeight.roundToInt())
+                }
                 g.color = Color.WHITE
                 g.drawString(property.text, 20, lineY(line) + fontHeight)
                 g.color = frameLineColor

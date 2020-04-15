@@ -3,6 +3,7 @@
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'maven-publish'
 
 apply plugin: "org.xbib.gradle.plugin.jflex"
 
@@ -71,3 +72,14 @@ task bnfGenerator {
     }
 }
 */
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "pw.binom.mogot"
+            artifactId 'tools'
+            version "0.1"
+            from components.java
+        }
+    }
+}

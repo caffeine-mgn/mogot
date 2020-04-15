@@ -3,8 +3,9 @@ package mogot
 import mogot.math.Vector2f
 import mogot.math.Vector2fc
 import mogot.math.Vector3fc
+import mogot.math.Vector4fc
+import mogot.math.lerp
 
-private fun Float.lerp(to: Float, cof: Float) = this + (to - this) * cof
 fun <T : Any> AnimationFile.Frame<T>.lerp(frameCount: Int, currentFrame: Float, next: AnimationFile.Frame<T>, lerpFunc: (T, T, Float) -> Unit) {
     if (next.time > time) {
         lerpFunc(value, next.value, currentFrame / (next.time - time))
@@ -53,7 +54,6 @@ open class FrameHolder<T : Any>(val animation: AnimationFile.Property<T>) {
             }
             return current.frame to next.frame
         } else {
-            println("current=${current.frame.time} -> ${next.frame.time}         :${time}")
             TODO()
         }
     }
@@ -66,7 +66,7 @@ open class FrameHolder<T : Any>(val animation: AnimationFile.Property<T>) {
             lerpFunc(
                     frames.first.value,
                     frames.second.value,
-                    time / fullTime
+                    1f - time / fullTime
             )
         }
         if (frames.first.time > frames.second.time) {
@@ -77,7 +77,7 @@ open class FrameHolder<T : Any>(val animation: AnimationFile.Property<T>) {
                 animation.file.frameCount - frames.first.time + frame
             }
             lerpFunc(
-                    frames.first.value, frames.second.value, time / fullTime
+                    frames.first.value, frames.second.value, 1f - time / fullTime
             )
         }
     }
@@ -87,6 +87,14 @@ class AnimateNode(val engine: Engine) : Node() {
     val animations = ArrayList<String>()
 
     sealed class AnimatedProperty<T : Any>(val field: Field, animation: AnimationFile.Property<T>) : FrameHolder<T>(animation) {
+
+        class Vec4(field: Field, animation: AnimationFile.Property<Vector4fc>) : AnimatedProperty<Vector4fc>(field, animation) {
+
+            override fun playNext(frame: kotlin.Float, revers: Boolean) {
+                TODO("Not yet implemented")
+            }
+        }
+
         class Vec3(field: Field, animation: AnimationFile.Property<Vector3fc>) : AnimatedProperty<Vector3fc>(field, animation) {
 
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
@@ -102,16 +110,6 @@ class AnimateNode(val engine: Engine) : Node() {
                 lerp(frame, revers) { current, next, cof ->
                     current.lerp(next, cof, currentValue)
                 }
-//                val current = animation.getCurrentFrame(floor(frame).toInt(), revers)
-//                var next = this.animation.getNextFrame(ceil(frame).toInt(), revers)
-//                if (next != null) {
-//                    currentValue.lerp(next.value, frame / (next.time - current.time), currentValue)
-//                } else {
-//                    next = animation.getCurrentFrame(0, revers)
-//                    val dd = frameCount.toFloat() - frame + next!!.time
-//                    val fullDelay = frameCount.toFloat() - current.time + next!!.time
-//                    currentValue.lerp(next.value, dd / fullDelay, currentValue)
-//                }
                 field.value = currentValue
             }
         }
@@ -127,7 +125,6 @@ class AnimateNode(val engine: Engine) : Node() {
                 lerp(frame, revers) { current, next, cof ->
                     val v = current.lerp(next, cof)
                     field.value = v
-//                    println("$frame: $current -> $next (${v}   $cof)")
                 }
             }
         }
@@ -156,7 +153,6 @@ class AnimateNode(val engine: Engine) : Node() {
         set(value) {
             if (value != null) {
                 val animProperties = ArrayList<AnimatedProperty<out Any>>()
-                println("Loading animations...")
                 value.objects.forEach { animObj ->
                     val node = this.findByRelative(animObj.path)
                     if (node == null) {
@@ -176,6 +172,7 @@ class AnimateNode(val engine: Engine) : Node() {
                             Field.Type.INT -> AnimatedProperty.Int(field, animProp as AnimationFile.Property<Int>)
                             Field.Type.BOOL -> AnimatedProperty.Bool(field, animProp as AnimationFile.Property<Boolean>)
                             Field.Type.FLOAT -> AnimatedProperty.Float(field, animProp as AnimationFile.Property<Float>)
+                            Field.Type.VEC4 -> AnimatedProperty.Vec4(field, animProp as AnimationFile.Property<Vector4fc>)
                         }
                         animProperties += v
                     }

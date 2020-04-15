@@ -50,7 +50,7 @@ object AnimateNodeService : NodeService {
 
     override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any>> {
         node as EditAnimateNode
-        return listOf<NodeService.Field<Any>>(node.currentAnimationField as NodeService.Field<Any>)
+        return listOf(node.currentAnimationField as NodeService.Field<Any>)
     }
 
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
@@ -72,7 +72,7 @@ object AnimateNodeService : NodeService {
         node as EditAnimateNode
         val out = HashMap<String, String>()
         node.files.forEachIndexed { index, s ->
-            out["files.$index"]="FILE $s"
+            out["files.$index"] = "FILE $s"
         }
         node.currentAnimation.takeIf { it >= 0 }.also {
             out["animationIndex"] = it.toString()
@@ -99,6 +99,10 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
     override var frameCount: Int = 0
     override var frameInSeconds: Int = 0
     override val nodes = ArrayList<AnimateNode>()
+    override fun remove(node: AnimatePropertyView.Node) {
+        nodes.remove(node)
+    }
+
 
     inner class Visitor : Animation.AnimationVisitor {
         override fun start(frameInSecond: Int, frameCount: Int) {
@@ -272,6 +276,10 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
         override var visible: Boolean = true
         override var lock: Boolean = false
         override val properties = ArrayList<AnimateProperty>()
+        override fun remove(property: AnimatePropertyView.Property) {
+            properties.remove(property)
+        }
+
         override fun iterator(): Iterator<AnimateFrameView.Frame> = emptyList<AnimateFrameView.Frame>().iterator()
         override fun frame(time: Int): AnimateFrameView.Frame? = null
         override fun floorFrame(time: Int): AnimateFrameView.Frame? = null

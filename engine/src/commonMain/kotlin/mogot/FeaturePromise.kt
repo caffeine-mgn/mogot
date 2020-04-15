@@ -1,5 +1,5 @@
 package mogot
-
+/*
 import pw.binom.Stack
 import kotlin.coroutines.suspendCoroutine
 
@@ -30,3 +30,5 @@ suspend fun <T> FeaturePromise<T>.await(): T =
                 it.resumeWith(result)
             }
         }
+
+*/

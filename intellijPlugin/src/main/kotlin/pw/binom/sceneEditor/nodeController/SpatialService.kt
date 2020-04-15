@@ -1,13 +1,128 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
-import mogot.Node
 import mogot.Engine
-import mogot.math.*
+import mogot.Node
 import mogot.Spatial
+import mogot.math.*
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
-import pw.binom.sceneEditor.properties.*
+import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
+import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
+import pw.binom.utils.Vector3mDegrees
+
+class PositionField3D(override val node: Spatial) : NodeService.FieldVec3() {
+    private var originalValue: Vector3fc? = null
+    override val id: Int
+        get() = PositionField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+    override var currentValue: Vector3fc
+        get() = node.position
+        set(value) {
+            node.position.set(value)
+        }
+    override val value: Vector3fc
+        get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "position"
+    override val displayName: String
+        get() = "Position"
+
+    override fun setTempValue(value: Vector3fc) {
+        if (originalValue == null)
+            originalValue = Vector3f(node.position)
+        node.position.set(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.position.set(originalValue!!)
+            originalValue = null
+        }
+    }
+}
+
+class ScaleField3D(override val node: Spatial) : NodeService.FieldVec3() {
+    override val id: Int
+        get() = ScaleField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+    private var originalValue: Vector3fc? = null
+    override var currentValue: Vector3fc
+        get() = node.scale
+        set(value) {
+            node.scale.set(value)
+        }
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val value: Vector3fc
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "scale"
+    override val displayName: String
+        get() = "Scale"
+
+    override fun setTempValue(value: Vector3fc) {
+        if (originalValue == null)
+            originalValue = Vector3f(node.scale)
+        node.scale.set(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.scale.set(originalValue!!)
+            originalValue = null
+        }
+    }
+}
+
+class RotateField3D(override val node: Spatial) : NodeService.FieldVec3() {
+    override val id: Int
+        get() = RotateField3D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+    private var originalValue: Vector3fc? = null
+    private val internalValue = Vector3mDegrees(RotationVector(node.quaternion))
+    override var currentValue: Vector3fc
+        get() = internalValue
+        set(value) {
+            internalValue.set(value)
+        }
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val value: Vector3fc
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "rotate"
+    override val displayName: String
+        get() = "Rotation"
+
+    override fun setTempValue(value: Vector3fc) {
+        if (originalValue == null)
+            originalValue = Vector3f(internalValue)
+        internalValue.set(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            internalValue.set(originalValue!!)
+            originalValue = null
+        }
+    }
+}
 
 object SpatialService : NodeService {
 

@@ -2,6 +2,7 @@ package pw.binom.sceneEditor.animate
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.TreeFileChooserFactory
+import com.intellij.internal.performance.currentLatencyRecordKey
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -16,6 +17,7 @@ import mogot.math.Vector2f
 import mogot.math.Vector2fc
 import mogot.math.Vector3f
 import mogot.math.Vector3fc
+import pw.binom.MouseListenerImpl
 import pw.binom.sceneEditor.AnimationFileType
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
@@ -31,6 +33,7 @@ import pw.binom.ui.NodeFieldDataFlavor
 import pw.binom.utils.relativePath
 import java.awt.BorderLayout
 import java.awt.dnd.*
+import java.awt.event.MouseEvent
 import java.io.Closeable
 import javax.swing.ComboBoxModel
 import javax.swing.event.ListDataEvent
@@ -57,6 +60,11 @@ private fun <T> emptyModel2() = object : ComboBoxModel<T> {
 private val emptyModel = object : AnimatePropertyView.Model, AnimateFrameView.Model {
     override val nodes: List<AnimatePropertyView.Node>
         get() = emptyList()
+
+    override fun remove(node: AnimatePropertyView.Node) {
+        throw IllegalArgumentException()
+    }
+
     override val frameCount: Int
         get() = 100
     override val frameInSeconds: Int
@@ -165,6 +173,24 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
         refreshFrameAnimation()
     }
 
+    private val changeSelected = frameView.selectedFrameChangeEvent.on {
+        val model = animateModel ?: return@on
+        propertyView.clearSelect()
+        frameView.selectedLines().forEach {
+            propertyView.addSelect(it)
+        }
+        repaint()
+    }
+
+    private val changeSelected2 = propertyView.selectedPropertyChangeEvent.on {
+        val model = animateModel ?: return@on
+        frameView.clearSelect()
+        propertyView.selected.forEach {
+            frameView.selectAllFrameLine(it)
+        }
+        repaint()
+    }
+
     private fun interpolationBetween(currentFrame: Int, frameA: AnimateFile.AnimateProperty.AnimateFrame, frameB: AnimateFile.AnimateProperty.AnimateFrame): Any {
         require(frameA.property.type === frameB.property.type)
         require(frameA.property === frameB.property)
@@ -194,7 +220,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
 
     private fun refreshFrameAnimation() {
         val model = animateModel ?: return
-        val node = node ?: return
+        val node = node
         model.nodes.forEach {
             it.properties.forEach {
                 val before = it.getFrameFor(frameView.currentFrame)
@@ -276,6 +302,15 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
 
 
     init {
+
+        propertyView.addMouseListener(object : MouseListenerImpl {
+            override fun mouseReleased(e: MouseEvent) {
+                if (e.isPopupTrigger) {
+                    val menu = AnimatePopupMenu.create(animateModel!!, propertyView.selectedLines)
+                    menu.show(e.component, e.x, e.y)
+                }
+            }
+        })
         node.files.map {
             editor.file!!.findFileByRelativePath(it)
         }

@@ -139,6 +139,66 @@ class Vector2fmDelegator(val vector: Vector2fm, val updateEvent: () -> Unit) : V
     }
 }
 
+class Vector3fmDelegator(val vector: Vector3fm, val updateEvent: () -> Unit) : Vector3fm {
+    override var x: Float
+        get() = vector.x
+        set(value) {
+            vector.x = value
+            updateEvent()
+        }
+    override var y: Float
+        get() = vector.y
+        set(value) {
+            vector.y = value
+            updateEvent()
+        }
+    override var z: Float
+        get() = vector.z
+        set(value) {
+            vector.z = value
+            updateEvent()
+        }
+
+    override fun set(x: Float, y: Float, z: Float): Vector3fm {
+        vector.set(x, y, z)
+        updateEvent()
+        return this
+    }
+}
+
+class QuaternionfmDelegator(val vector: Quaternionfm, val updateEvent: () -> Unit) : Quaternionfm {
+    override var x: Float
+        get() = vector.x
+        set(value) {
+            vector.x = value
+            updateEvent()
+        }
+    override var y: Float
+        get() = vector.y
+        set(value) {
+            vector.y = value
+            updateEvent()
+        }
+    override var z: Float
+        get() = vector.z
+        set(value) {
+            vector.z = value
+            updateEvent()
+        }
+
+    override var w: Float
+        get() = vector.w
+        set(value) {
+            vector.w = value
+            updateEvent()
+        }
+
+    override fun set(x: Float, y: Float, z: Float, w: Float) {
+        vector.set(x, y, z, z)
+        updateEvent()
+    }
+}
+
 fun executeOnUiThread(func: () -> Unit) {
     if (SwingUtilities.isEventDispatchThread()) {
         println("Execute in UI")
@@ -208,4 +268,27 @@ fun Node.relativePath(otherNode: Node): String? {
         sb.append(otherPath[it].id ?: return null)
     }
     return sb.toString()
+}
+
+class Vector3mDegrees(val vector: Vector3fm) : Vector3fm {
+    override var x: Float
+        get() = toDegrees(vector.x)
+        set(value) {
+            vector.x = toRadians(value)
+        }
+    override var y: Float
+        get() = toDegrees(vector.y)
+        set(value) {
+            vector.y = toRadians(value)
+        }
+    override var z: Float
+        get() = toDegrees(vector.z)
+        set(value) {
+            vector.z = toRadians(value)
+        }
+
+    override fun set(x: Float, y: Float, z: Float): Vector3fm {
+        vector.set(toRadians(x), toRadians(y), toRadians(z))
+        return this
+    }
 }

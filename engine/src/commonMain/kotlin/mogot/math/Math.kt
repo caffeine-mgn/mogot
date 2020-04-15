@@ -33,3 +33,4 @@ fun toDegrees(value: Float): Float = value * RADIANS_TO_DEGREESf
 inline val Float.isPositive
     get() = this > 0f
 val MATRIX4_ONE: Matrix4fc = Matrix4f().identity()
+fun Float.lerp(to: Float, cof: Float) = this + cof * (to - this)
