@@ -1,6 +1,8 @@
 package mogot
 
 import mogot.gl.flip2
+import pw.binom.FeaturePromise
+import pw.binom.await
 import pw.binom.io.*
 import pw.binom.io.file.File
 import pw.binom.io.file.FileInputStream

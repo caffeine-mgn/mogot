@@ -2,9 +2,11 @@ package pw.binom.animation
 
 import mogot.ANIMATION_MAGIC_BYTES
 import mogot.Field
+import mogot.math.Vector2fc
+import mogot.math.Vector3fc
+import mogot.math.Vector4fc
 import pw.binom.DesktopAssertTask
 import pw.binom.io.*
-import mogot.math.*
 import java.io.File
 import java.io.OutputStream as JOutputStream
 
@@ -27,9 +29,17 @@ private class PropertyVisitorBinary(private val type: Field.Type, private val st
                 stream.writeFloat(value.y)
             }
             Field.Type.VEC3 -> {
-                value as Vector2fc
+                value as Vector3fc
                 stream.writeFloat(value.x)
                 stream.writeFloat(value.y)
+                stream.writeFloat(value.z)
+            }
+            Field.Type.VEC4 -> {
+                value as Vector4fc
+                stream.writeFloat(value.x)
+                stream.writeFloat(value.y)
+                stream.writeFloat(value.z)
+                stream.writeFloat(value.w)
             }
             Field.Type.BOOL -> stream.write(if (value as Boolean) 1.toByte() else 0.toByte())
         }

@@ -136,6 +136,14 @@
                                        implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
     </extensions>
 
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <gradleProjectImportHandler implementation="pw.binom.ide.MogotGradleProjectImportHandler"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <projectResolve implementation="pw.binom.ide.MogotProjectResolverExtension" order="last"/>
+    </extensions>
+
     <actions>
         <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">
             <add-to-group group-id="MainMenu" anchor="last"/>

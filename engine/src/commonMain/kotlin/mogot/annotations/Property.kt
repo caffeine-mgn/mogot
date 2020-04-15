@@ -1,7 +1,7 @@
 package mogot.annotations
 
 //@Retention(AnnotationRetention.RUNTIME)
-@Target(allowedTargets = [AnnotationTarget.PROPERTY_GETTER])
+@Target(allowedTargets = [AnnotationTarget.PROPERTY])
 annotation class Property(val display: String = "")
 
 //@Retention(AnnotationRetention.RUNTIME)

@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import mogot.Field
-import mogot.math.Vector2f
-import mogot.math.Vector2fc
-import mogot.math.Vector3f
-import mogot.math.Vector3fc
+import mogot.math.*
 import pw.binom.array
 import pw.binom.obj
 import java.io.Reader
@@ -41,6 +38,7 @@ object Animation {
                 Field.Type.FLOAT -> value.toFloatOrNull() ?: 0f
                 Field.Type.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
                 Field.Type.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
+                Field.Type.VEC4 -> value.split(';').let { Vector4f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat(), it[3].toFloat()) }
                 Field.Type.INT -> value.toIntOrNull() ?: 0
                 Field.Type.STRING -> value
                 Field.Type.BOOL -> value.toInt() > 0
@@ -51,6 +49,7 @@ object Animation {
                 Field.Type.FLOAT -> (value as Float?)?.toString()
                 Field.Type.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
                 Field.Type.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
+                Field.Type.VEC4 -> (value as Vector4fc?)?.let { "${it.x};${it.y};${it.z};${it.w}" }
                 Field.Type.STRING -> value as String?
                 Field.Type.INT -> (value as Int).toString()
                 Field.Type.BOOL -> if (value as Boolean) "1" else "0"

@@ -63,10 +63,6 @@ jar {
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-
     archiveName = "plugin.jar"
 }
 

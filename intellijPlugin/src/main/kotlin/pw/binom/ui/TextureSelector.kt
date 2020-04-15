@@ -4,11 +4,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.ide.util.TreeFileChooserFactory
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.impl.ActionButton
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import mogot.EventDispatcher
 import pw.binom.FlexLayout
 import pw.binom.appendTo
+import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.properties.Panel
 import java.awt.Image
 import javax.imageio.ImageIO
@@ -17,17 +18,24 @@ import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JLabel
 
-class TextureSelector(project: Project) : Panel() {
+class TextureSelector(val sceneEditor: SceneEditor) : Panel() {
 
     private inner class SelectImage : AnAction() {
         override fun actionPerformed(e: AnActionEvent) {
-            selected?.navigate(false)
+            psi?.navigate(false)
         }
     }
 
-    val selectedChangeEvent = EventDispatcher()
+    val eventChange = EventDispatcher()
 
-    var selected: PsiFile? = null
+    var value: String
+        get() = psi?.virtualFile?.let { sceneEditor.getRelativePath(it) } ?: ""
+        set(value) {
+            val psiManager = PsiManager.getInstance(sceneEditor.project)
+            psi = value.takeIf { it.isNotEmpty() }?.let { sceneEditor.findFileByRelativePath(it) }?.let { psiManager.findFile(it) }
+        }
+
+    var psi: PsiFile? = null
         set(value) {
             field = value
             if (value == null) {
@@ -35,7 +43,7 @@ class TextureSelector(project: Project) : Panel() {
                 this.icon.isVisible = false
                 selectBtn.text = "No Image"
                 goto.isEnabled = false
-                selectedChangeEvent.dispatch()
+                eventChange.dispatch()
             } else {
                 selectBtn.text = value.virtualFile.name
                 var image = value.virtualFile.inputStream.use {
@@ -59,7 +67,7 @@ class TextureSelector(project: Project) : Panel() {
                 this.icon.icon = icon
                 this.icon.isVisible = true
                 goto.isEnabled = true
-                selectedChangeEvent.dispatch()
+                eventChange.dispatch()
             }
         }
     private val flex = FlexLayout(this)
@@ -72,10 +80,10 @@ class TextureSelector(project: Project) : Panel() {
         isOpaque = false
         selectBtn.addActionListener {
             val chooser = TreeFileChooserFactory
-                    .getInstance(project)
+                    .getInstance(sceneEditor.project)
                     .createFileChooser(
                             "Select Texture",
-                            selected,
+                            psi,
                             null
                     ) {
                         it.virtualFile.extension?.toLowerCase() == "png"
@@ -83,9 +91,9 @@ class TextureSelector(project: Project) : Panel() {
             chooser.showDialog()
             val file = chooser.selectedFile
             if (file != null)
-                selected = file
+                psi = file
         }
 
-        selected = null
+        psi = null
     }
 }

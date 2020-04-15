@@ -1,8 +1,145 @@
 package pw.binom.sceneEditor.nodeController
 
 import mogot.MaterialNode
+import mogot.VisualInstance
 import mogot.math.*
 import pw.binom.sceneEditor.*
+import pw.binom.sceneEditor.properties.MaterialFieldEditor
+import pw.binom.sceneEditor.properties.TextureFieldEditor
+import pw.binom.ui.AbstractEditor
+
+class MaterialField(val view: SceneEditorView, override val node: VisualInstance) : NodeService.FieldString() {
+
+    override val subFieldsEventChange = mogot.EventDispatcher()
+
+    private val materialNode = node as MaterialNode
+    private val material: MaterialInstance?
+        get() = materialNode.material.value as? MaterialInstance?
+
+    private var originalValue: String? = null
+    override val id: Int
+        get() = MaterialField::class.java.hashCode()
+    override val groupName: String
+        get() = "Material"
+    override var currentValue: String
+        get() = material?.root?.file?.let { view.editor1.getRelativePath(it) } ?: ""
+        set(value) {
+            if (value == currentValue)
+                return
+            println("Reset Material Files: $value")
+            val file = if (value == "") null else view.editor1.findFileByRelativePath(value)
+            materialNode.material.value = if (file == null) {
+                view.default3DMaterial.instance(Vector4f(1f, 1f, 1f, 1f))
+            } else {
+                view.engine.resources.loadMaterial(file)
+            }
+            rebuildUniforms()
+        }
+    override val value: String
+        get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "material"
+    override val displayName: String
+        get() = "Material"
+
+    override fun setTempValue(value: String) {
+        if (originalValue == null)
+            originalValue = currentValue
+        currentValue = value
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            currentValue = originalValue!!
+            originalValue = null
+        }
+    }
+
+    private val uniforms = ArrayList<NodeService.Field<out Any>>()
+
+    override fun getSubFields(): List<NodeService.Field<out Any>> = uniforms
+
+    private fun rebuildUniforms() {
+        uniforms.clear()
+        material?.uniforms?.forEach {
+            when (it.type) {
+                MaterialInstance.Type.Texture -> uniforms.add(TextureUniformField(view, node, it))
+            }
+        }
+        subFieldsEventChange.dispatch()
+    }
+
+    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<String>>): AbstractEditor<String> {
+        if (!updated) {
+            rebuildUniforms()
+            updated = true
+        }
+        return MaterialFieldEditor(sceneEditor, fields)
+    }
+
+    private var updated = false
+}
+
+class TextureUniformField(val view: SceneEditorView, override val node: VisualInstance, val uniform: MaterialInstance.Uniform) : NodeService.FieldString() {
+    override val subFieldsEventChange = mogot.EventDispatcher()
+
+    init {
+        require(uniform.type == MaterialInstance.Type.Texture)
+    }
+
+    private var originalValue: String? = null
+    override val id: Int
+        get() = TextureUniformField::class.java.hashCode() + uniform.name.hashCode() + uniform.type.hashCode()
+    override val groupName: String
+        get() = ""
+
+    override var currentValue: String
+        get() = (uniform.materialInstance.get(uniform) as ExternalTextureFS?)?.file?.let { view.editor1.getRelativePath(it) }
+                ?: ""
+        set(value) {
+            if (value.isEmpty()) {
+                uniform.materialInstance.set(uniform, null)
+            } else {
+                view.editor1.findFileByRelativePath(value)
+                        ?.let { view.engine.resources.loadTexture(it) }
+                        ?.let {
+                            uniform.materialInstance.set(uniform, it)
+                        }
+            }
+        }
+    override val value: String
+        get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = uniform.name
+    override val displayName: String
+        get() = uniform.title
+
+    override fun setTempValue(value: String) {
+        if (originalValue == null)
+            originalValue = currentValue
+        currentValue = value
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            currentValue = originalValue!!
+            originalValue = null
+        }
+    }
+
+    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<String>>): AbstractEditor<String> =
+            TextureFieldEditor(sceneEditor, fields)
+}
 
 object MaterialNodeUtils {
 
