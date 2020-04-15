@@ -1,7 +1,10 @@
 package mogot.gl
 
 import mogot.*
-import mogot.math.*
+import mogot.math.Matrix4f
+import mogot.math.Matrix4fc
+import mogot.math.Vector2i
+import mogot.math.Vector2ic
 import mogot.rendering.Display
 import org.khronos.webgl.WebGLRenderingContext
 import org.w3c.dom.events.KeyboardEvent
@@ -10,7 +13,7 @@ import pw.binom.io.FileSystem
 import kotlin.browser.document
 import kotlin.browser.window
 
-open class GLView(val display: Display,val fileSystem: FileSystem<Unit>) : AbstractGLView() {
+open class GLView(val display: Display, val fileSystem: FileSystem<Unit>) : AbstractGLView() {
     open var camera: Camera? = null
     protected open val root
         get() = camera?.asUpSequence()?.last()
@@ -46,16 +49,7 @@ open class GLView(val display: Display,val fileSystem: FileSystem<Unit>) : Abstr
         }
 
         if (root != null) {
-//            update(root!!, viewMatrix)
-//            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, renderContext)
-            update(dt, root!!, camModel = viewMatrix, ortoModel = MATRIX4_ONE)
-            renderNode3D(root!!, viewMatrix, camera!!.projectionMatrix, display.context)
-
-            gl.ctx.disable(WebGLRenderingContext.DEPTH_TEST)
-            gl.ctx.disable(WebGLRenderingContext.CULL_FACE)
-
-            viewMatrix.identity().ortho2D(0f, size.x.toFloat(), size.y.toFloat(), 0f)
-            renderNode2D(root!!, viewMatrix, display.context)
+            display.render(gl, root!!)
         }
 
 
@@ -166,30 +160,6 @@ open class GLView(val display: Display,val fileSystem: FileSystem<Unit>) : Abstr
 
         node.childs.forEach {
             update(dt, it, camModel = pos, ortoModel = ortoModel)
-        }
-    }
-
-    private fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        var pos = model
-        if (node is VisualInstance) {
-//            pos = node.apply(model)
-            pos = node.matrix
-            node.render(node.matrix, projection, context)
-        }
-
-        node.childs.forEach {
-            renderNode3D(it, pos, projection, context)
-        }
-    }
-
-    private fun renderNode2D(node: Node, projection: Matrix4fc, context: Display.Context) {
-        if (node is VisualInstance2D) {
-            node.render(node.matrix, projection, context)
-        }
-
-
-        node.childs.forEach {
-            renderNode2D(it, projection, context)
         }
     }
 }
