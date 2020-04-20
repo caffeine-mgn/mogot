@@ -1,14 +1,20 @@
 package pw.binom.sceneEditor.nodeController
 
 import mogot.MaterialNode
+import mogot.Node
 import mogot.VisualInstance
+import mogot.VisualInstance2D
 import mogot.math.*
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.MaterialFieldEditor
 import pw.binom.sceneEditor.properties.TextureFieldEditor
 import pw.binom.ui.AbstractEditor
 
-class MaterialField(val view: SceneEditorView, override val node: VisualInstance) : NodeService.FieldString() {
+class MaterialField(val view: SceneEditorView, override val node: Node) : NodeService.FieldString() {
+
+    init {
+        require(node is VisualInstance || node is VisualInstance2D)
+    }
 
     override val subFieldsEventChange = mogot.EventDispatcher()
 
@@ -86,12 +92,14 @@ class MaterialField(val view: SceneEditorView, override val node: VisualInstance
     private var updated = false
 }
 
-class TextureUniformField(val view: SceneEditorView, override val node: VisualInstance, val uniform: MaterialInstance.Uniform) : NodeService.FieldString() {
-    override val subFieldsEventChange = mogot.EventDispatcher()
+class TextureUniformField(val view: SceneEditorView, override val node: Node, val uniform: MaterialInstance.Uniform) : NodeService.FieldString() {
 
     init {
+        require(node is VisualInstance || node is VisualInstance2D)
         require(uniform.type == MaterialInstance.Type.Texture)
     }
+
+    override val subFieldsEventChange = mogot.EventDispatcher()
 
     private var originalValue: String? = null
     override val id: Int
@@ -124,6 +132,59 @@ class TextureUniformField(val view: SceneEditorView, override val node: VisualIn
         get() = uniform.name
     override val displayName: String
         get() = uniform.title
+
+    override fun setTempValue(value: String) {
+        if (originalValue == null)
+            originalValue = currentValue
+        currentValue = value
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            currentValue = originalValue!!
+            originalValue = null
+        }
+    }
+
+    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<String>>): AbstractEditor<String> =
+            TextureFieldEditor(sceneEditor, fields)
+}
+
+class TextureSpriteField(val view: SceneEditorView, override val node: EditableSprite) : NodeService.FieldString() {
+
+    override val subFieldsEventChange = mogot.EventDispatcher()
+
+    private var originalValue: String? = null
+    override val id: Int
+        get() = TextureSpriteField::class.java.hashCode()
+    override val groupName: String
+        get() = "Sprite"
+
+    override var currentValue: String
+        get() = node.textureFile?.file?.let { view.editor1.getRelativePath(it) }
+                ?: ""
+        set(value) {
+            if (value.isEmpty()) {
+                node.textureFile = null
+            } else {
+                view.editor1.findFileByRelativePath(value)
+                        ?.let { view.engine.resources.loadTexture(it) }
+                        ?.let {
+                            node.textureFile = it
+                        }
+            }
+        }
+    override val value: String
+        get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "texture"
+    override val displayName: String
+        get() = "Texture"
 
     override fun setTempValue(value: String) {
         if (originalValue == null)

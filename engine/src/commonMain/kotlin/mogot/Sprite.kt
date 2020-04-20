@@ -4,7 +4,6 @@ import mogot.material.DEFAULT_MATERIAL_2D_FILE
 import mogot.material.MaterialInstance
 import mogot.material.loadMaterial
 import mogot.math.*
-import pw.binom.IntDataBuffer
 import pw.binom.async
 
 abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
@@ -19,82 +18,65 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
             }
             return Earcut.earcut(array, null, 2)
         }
+    }
 
-        fun calcPolygonTriangulationIndexSize(vertex: List<Vector2fc>): Int {
-            check(vertex.size >= 3)
-            return (vertex.size - 3) * 3 + 3
-        }
+    private var currentFile: String? = null
 
-        fun calcPolygonTriangulation(vertex: List<Vector2fc>, dest: IntDataBuffer) {
-            fun Array<*>.index(index: Int): Int {
-                check(size > 0)
-                if (index == 0)
-                    return 0
-                return if (index > 0) {
-                    index % size
+    private class TextureFileField(val sprite: AbstractSprite) : Field {
+        override val name: String
+            get() = "texture"
+        override val type: Field.Type
+            get() = Field.Type.STRING
+        override var value: Any
+            get() = sprite.currentFile ?: ""
+            set(value) {
+                value as String
+                if (sprite.currentFile == value.takeIf { it.isNotBlank() })
+                    return
+                if (value.isEmpty()) {
+                    sprite.texture = null
                 } else {
-                    (size - (index % -size))
-                }
-            }
-
-            fun Array<Boolean>.nextFree(index: Int): Int {
-                val i = index(index)
-                (i until i + size).forEach {
-                    if (this[it])
-                        return it
-                }
-                return -1
-            }
-
-            if (dest.size != calcPolygonTriangulationIndexSize(vertex))
-                throw IllegalArgumentException("Invalid dest buffer size.")
-            check(vertex.size >= 3)
-            if (vertex.size == 3) {
-                dest[0] = 0
-                dest[1] = 1
-                dest[2] = 2
-                return
-            }
-            val set = Array(vertex.size) { true }
-            var resultIndex = 0
-            var i = 0
-            do {
-                var skip = false
-                while (i < set.size) {
-                    val first = set.index(i)
-                    i = first
-                    val middle = set.nextFree(first + 1)
-                    val end = set.nextFree(middle + 1)
-                    val angle = vertexAngle(
-                            vertex[first],
-                            vertex[middle],
-                            vertex[end]
-                    )
-                    if (angle > 0) {
-                        dest[resultIndex++] = first
-                        dest[resultIndex++] = middle
-                        dest[resultIndex++] = end
-                        set[middle] = false
-                        i += 2
-                    } else {
-                        skip = true
-                        i++
+                    async {
+                        sprite.texture = sprite.engine.resources.createTexture2D(value)
                     }
                 }
-            } while (skip)
-            return
-        }
+            }
 
     }
 
-    val size = Vector2f()
-    private var geom by ResourceHolder<Rect2D>()
+    private class SizeField(val sprite: AbstractSprite) : Field {
+        override val name: String
+            get() = "size"
+        override val type: Field.Type
+            get() = Field.Type.VEC2
+        override var value: Any
+            get() = sprite.size
+            set(value) {
+                value as Vector2fc
+                sprite.size.set(value)
+            }
 
-    private val oldSize = Vector2f(size)
+    }
+
+
+    private var geom by ResourceHolder<Rect2D>()
+    private val textureField = TextureFileField(this)
+    private val sizeField = SizeField(this)
+    open val size: Vector2fm = Vector2f()
+
+    override fun getField(name: String): Field? =
+            when (name) {
+                textureField.name -> textureField
+                sizeField.name -> sizeField
+                else -> super.getField(name)
+            }
+
+    private var oldSize: Vector2f? = null
 
     protected abstract val material: Material
 
     protected abstract val isReady: Boolean
+    abstract var texture: Texture2D?
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {
         if (!isReady)
@@ -104,9 +86,13 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
             geom = Rect2D(engine.gl, size)
         }
 
+        if (oldSize==null) {
+            oldSize=Vector2f(size)
+        }
+
         if (size != oldSize) {
             geom!!.size.set(size)
-            oldSize.set(size)
+            oldSize!!.set(size)
         }
         super.render(model, projection, renderContext)
         val mat = material
@@ -123,7 +109,7 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 }
 
 open class Sprite(engine: Engine) : AbstractSprite(engine) {
-    var texture: Texture2D? = null
+    override var texture: Texture2D? = null
         set(value) {
             if (value === field)
                 return

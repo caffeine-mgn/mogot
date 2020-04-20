@@ -84,7 +84,7 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
             texture.isEnabled = true
             sizeEditor.value.set(nodes.map { it.size }.common)
             if (nodes.map { it.texture }.equalsAll()) {
-                val texture = nodes.first().texture
+                val texture = nodes.first().textureFile
                 this.texture.psi = if (texture == null) null else PsiManager.getInstance(view.project).findFile(texture.file)
                 if (texture != null)
                     sizeTitle.resetVisible = sizeEditor.value.x != texture.gl.width.toFloat() || sizeEditor.value.y != texture.gl.height.toFloat()
@@ -122,7 +122,7 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
             if (changeEventEnabled) {
                 nodes?.asSequence()
                         ?.forEach {
-                            it.texture = texture.psi?.virtualFile?.let { view.engine.resources.loadTexture(it) }
+                            it.textureFile = texture.psi?.virtualFile?.let { view.engine.resources.loadTexture(it) }
                         }
                 view.repaint()
             }
