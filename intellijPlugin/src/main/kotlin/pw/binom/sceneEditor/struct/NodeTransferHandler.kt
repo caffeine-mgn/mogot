@@ -1,13 +1,15 @@
 package pw.binom.sceneEditor.struct
 
-import mogot.*
-import mogot.math.*
+import mogot.Node
+import mogot.Spatial
+import mogot.Spatial2D
+import mogot.isChild
+import mogot.math.Matrix4f
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import javax.swing.JComponent
 import javax.swing.JTree
 import javax.swing.TransferHandler
-import javax.swing.tree.TreePath
 
 class TreeTransferHandler : TransferHandler() {
     companion object {
@@ -37,8 +39,8 @@ class TreeTransferHandler : TransferHandler() {
             return false
         }
         // Do not allow a drop on the drag source selections.
-        val dl = support.dropLocation as JTree.DropLocation
-        val dropTarget = dl.path.lastPathComponent as Node?
+//        val dl = support.dropLocation as JTree.DropLocation
+        //val dropTarget = dl.path?.lastPathComponent as Node?
         //println("dropTarget=${dropTarget}")
         return true
     }

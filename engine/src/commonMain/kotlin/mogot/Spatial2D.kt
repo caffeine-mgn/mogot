@@ -4,7 +4,57 @@ import mogot.math.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
+private class PositionField(val node: Spatial2D) : Field {
+    override val type: Field.Type
+        get() = Field.Type.VEC2
+
+    override var value: Any
+        get() = node.position
+        set(value) {
+            node.position.set(value as Vector2fc)
+        }
+    override val name: String
+        get() = "position"
+}
+
+private class ScaleField(val node: Spatial2D) : Field {
+    override val type: Field.Type
+        get() = Field.Type.VEC2
+
+    override var value: Any
+        get() = node.scale
+        set(value) {
+            node.scale.set(value as Vector2fc)
+        }
+    override val name: String
+        get() = "scale"
+}
+
+private class RotationField(val node: Spatial2D) : Field {
+    override val type: Field.Type
+        get() = Field.Type.FLOAT
+
+    override var value: Any
+        get() = toDegrees(node.rotation)
+        set(value) {
+            node.rotation = toRadians(value as Float)
+        }
+    override val name: String
+        get() = "rotation"
+}
+
 open class Spatial2D(val engine: Engine) : Node() {
+    private val positionField = PositionField(this)
+    private val scaleField = ScaleField(this)
+    private val rotationField = RotationField(this)
+    override fun getField(name: String): Field? =
+            when (name) {
+                positionField.name -> positionField
+                scaleField.name -> scaleField
+                rotationField.name -> rotationField
+                else -> super.getField(name)
+            }
+
     private val p = Vector2fProperty()
     private val s = Vector2fProperty(1f, 1f)
     open val position: Vector2fm

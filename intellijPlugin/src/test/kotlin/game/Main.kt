@@ -6,18 +6,24 @@ import mogot.math.MATRIX4_ONE
 import mogot.math.Matrix4f
 import mogot.math.Vector2f
 import mogot.math.Vector3f
+import pw.binom.ComponentListenerImpl
 import pw.binom.MockFileSystem
 import pw.binom.sceneEditor.Default3DMaterial
 import pw.binom.sceneEditor.Grid3D
 import pw.binom.sceneEditor.GuideLine
 import pw.binom.sceneEditor.SimpleMaterial
+import pw.binom.ui.AnimateFrameView
+import pw.binom.ui.AnimatePropertyView
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.event.ComponentEvent
+import java.awt.event.ComponentListener
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
-import javax.swing.JFrame
-import javax.swing.JPanel
+import java.util.*
+import javax.swing.*
+import kotlin.collections.ArrayList
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -129,7 +135,7 @@ object Main {
             }
         })
         p.addMouseWheelListener {
-//            gTop.scale -= it.wheelRotation / 5f
+            //            gTop.scale -= it.wheelRotation / 5f
 //            gLeft.scale -= it.wheelRotation / 5f
             println("g.scale=${gTop.scale}")
         }
@@ -141,5 +147,151 @@ object Main {
 //        view.startRender()
         f.isVisible = true
         view.startRender()
+    }
+}
+
+
+class FrameLine : AnimateFrameView.FrameLine {
+    inner class FrameImpl(override val color: Color, time: Int) : AnimateFrameView.Frame {
+        override var time: Int = time
+            set(value) {
+                if (value == field)
+                    return
+                frames.remove(field)
+                field = value
+                frames[value] = this
+            }
+    }
+
+    fun add(color: Color,time: Int) {
+        frames[time] = FrameImpl(color, time)
+    }
+
+    val frames = TreeMap<Int, AnimateFrameView.Frame>()
+    override fun iterator(): Iterator<AnimateFrameView.Frame> {
+        return frames.values.iterator()
+    }
+
+    override fun frame(time: Int): AnimateFrameView.Frame? = frames[time]
+
+    override fun floorFrame(time: Int): AnimateFrameView.Frame? = frames.floorEntry(time)?.value
+
+    override fun ceilingFrame(time: Int): AnimateFrameView.Frame? = frames.ceilingEntry(time)?.value
+
+    override fun remove(frame: AnimateFrameView.Frame) {
+        frames.remove(frame.time)
+    }
+}
+
+class AnimateModel : AnimateFrameView.Model {
+    val frameLines = ArrayList<AnimateFrameView.FrameLine>()
+    override val frameCount: Int
+        get() = 50
+    override val frameInSeconds: Int
+        get() = 24
+    override val lineCount: Int
+        get() = frameLines.size
+
+    override fun line(index: Int): AnimateFrameView.FrameLine = frameLines[index]
+}
+
+class AnimateNode(override val icon: Icon?, override val text: String, override val properties: List<AnimatePropertyView.Property>) : AnimatePropertyView.Node {
+    override var lock: Boolean = false
+    override var visible: Boolean = false
+}
+
+class AnimateProperty(override val text: String) : AnimatePropertyView.Property {
+    override var lock: Boolean = false
+}
+
+class PropertyModel(override val nodes: List<AnimatePropertyView.Node>) : AnimatePropertyView.Model
+
+object Main2 {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        val propertiesModel = PropertyModel(listOf(
+                AnimateNode(null, "AnimateSprite", listOf(
+                        AnimateProperty("Position"),
+                        AnimateProperty("Rotation")
+                ))
+        ))
+
+        val model = AnimateModel()
+        model.frameLines.add(FrameLine().also {
+            it.add(Color.YELLOW, 0)
+            it.add(Color.YELLOW, 10)
+            it.add(Color.GREEN, 20)
+            it.add(Color.GREEN, 25)
+        })
+
+        model.frameLines.add(FrameLine().also {
+            it.add(Color.BLUE, 0)
+            it.add(Color.BLUE, 15)
+            it.add(Color.GREEN, 21)
+            it.add(Color.BLUE, 30)
+        })
+
+        (0 until 10).forEach {
+            model.frameLines.add(FrameLine())
+        }
+
+        model.frameLines.add(FrameLine().also {
+            it.add(Color.BLUE, 0)
+            it.add(Color.BLUE, 15)
+            it.add(Color.GREEN, 21)
+            it.add(Color.BLUE, 30)
+        })
+
+        val f = JFrame()
+//        val hScroll = JScrollBar(JScrollBar.HORIZONTAL)
+//        val vScroll = JScrollBar()
+
+
+        f.size = Dimension(1000, 200)
+        f.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+
+
+        val pan = JPanel()
+
+
+        val propertyView = AnimatePropertyView()
+        propertyView.model = propertiesModel
+
+        val view = AnimateFrameView()
+        view.model = model
+        pan.layout = BorderLayout()
+        val scrollPanel = JScrollPane(view)
+        pan.add(scrollPanel, BorderLayout.CENTER)
+//        pan.add(vScroll, BorderLayout.EAST)
+//        pan.add(hScroll, BorderLayout.SOUTH)
+        val split = JSplitPane()
+        split.leftComponent = propertyView
+        split.rightComponent = pan
+        split.resizeWeight = 0.2
+        f.add(split)
+
+//        hScroll.addAdjustmentListener {
+//            view.scrollX = maxOf(0, hScroll.value)
+//        }
+        scrollPanel.verticalScrollBar.addAdjustmentListener {
+            //view.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
+            propertyView.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
+        }
+
+//        hScroll.minimum = 0
+//        hScroll.maximum = view.preferredSize.width - view.size.width
+
+//        view.addComponentListener(object : ComponentListenerImpl {
+//            override fun componentResized(e: ComponentEvent) {
+//                hScroll.minimum = 0
+//                hScroll.maximum = view.preferredSize.width - view.size.width
+//
+//                vScroll.minimum = 0
+//                vScroll.maximum = view.preferredSize.height - view.size.height
+//            }
+//        })
+
+        f.isVisible = true
     }
 }

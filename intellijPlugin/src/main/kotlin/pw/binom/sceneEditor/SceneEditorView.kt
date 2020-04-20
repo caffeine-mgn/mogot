@@ -13,11 +13,14 @@ import pw.binom.io.Closeable
 import pw.binom.sceneEditor.dragdrop.SceneDropTarget
 import pw.binom.sceneEditor.editors.EditActionFactory
 import pw.binom.sceneEditor.editors.Keys
+import pw.binom.sceneEditor.nodeController.EditAnimateNode
 import pw.binom.sceneEditor.struct.makeTreePath
+import java.awt.Color
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.swing.BorderFactory
 import javax.swing.tree.TreePath
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -37,6 +40,19 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         D2,
         D3
     }
+
+    val changeAnimationModeEvent = EventDispatcher()
+
+    var animateNode: EditAnimateNode? = null
+        set(value) {
+            field = value
+            changeAnimationModeEvent.dispatch()
+            border = if (value != null) {
+                BorderFactory.createLineBorder(Color.RED, 2)
+            } else {
+                null
+            }
+        }
 
     interface RenderCallback {
         val node: Node

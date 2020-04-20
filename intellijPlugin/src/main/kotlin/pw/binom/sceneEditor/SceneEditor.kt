@@ -16,6 +16,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import pw.binom.sceneEditor.animate.AnimateTab
+import pw.binom.sceneEditor.nodeController.EditAnimateNode
 import pw.binom.sceneEditor.properties.Property
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.struct.SceneStruct
@@ -35,11 +37,13 @@ class SceneEditor(val project: Project,
 
     private val SCENE_TOOL_WINDOW = "Scene"
     private val PROPERTIES_TOOL_WINDOW = "Properties"
+    private val ANIMATION_TOOL_WINDOW = "Animation"
 
     private val undoManager = UndoManager.getInstance(project)
 
     val structToolWindow: ToolWindow
     val propertyToolWindow: ToolWindow
+    val animationToolWindow: ToolWindow
 
     private val properties = HashMap<PropertyFactory, Property>()
 
@@ -98,7 +102,14 @@ class SceneEditor(val project: Project,
                 ?: ToolWindowManager.getInstance(project).registerToolWindow(
                         PROPERTIES_TOOL_WINDOW,
                         false,
-                        ToolWindowAnchor.RIGHT
+                        ToolWindowAnchor.RIGHT,
+                        true
+                )
+        animationToolWindow = ToolWindowManager.getInstance(project).getToolWindow(ANIMATION_TOOL_WINDOW)
+                ?: ToolWindowManager.getInstance(project).registerToolWindow(
+                        ANIMATION_TOOL_WINDOW,
+                        false,
+                        ToolWindowAnchor.BOTTOM
                 )
     }
 
@@ -108,6 +119,7 @@ class SceneEditor(val project: Project,
         get() = _viewer!!
     lateinit var sceneStruct: SceneStruct
     val propertyTool = PropertyToolWindow(this)
+    var animationTool: AnimateTab? = null
 
 
     init {
@@ -120,6 +132,22 @@ class SceneEditor(val project: Project,
                 propertyTool.setNodes(viewer.view.selected)
             }
         }
+
+        viewer.view.changeAnimationModeEvent.on {
+            if (privateCurrentEditor !== this)
+                return@on
+            if (viewer.view.animateNode != null) {
+                animationTool = AnimateTab(this, viewer.view.animateNode!!)
+                animationToolWindow.useContent(animationTool!!)
+                animationToolWindow.setAvailable(true, null)
+                animationToolWindow.show(null)
+            } else {
+                animationTool?.close()
+                animationToolWindow.contentManager.removeAllContents(true)
+                animationToolWindow.setAvailable(false, null)
+            }
+        }
+
     }
 
     private val component: JComponent = _viewer ?: JButton("Scene must be inside some resource folder")
@@ -154,21 +182,31 @@ class SceneEditor(val project: Project,
     override fun selectNotify() {
         privateCurrentEditor = this
         viewer.view.startRender()
-        println("selectNotify")
         structToolWindow.useContent(sceneStruct)
         propertyToolWindow.useContent(propertyTool)
-//        structToolWindow.setAvailable(true, null)
-//        propertyToolWindow.setAvailable(true, null)
+        if (animationTool != null)
+            animationToolWindow.useContent(animationTool!!)
+        structToolWindow.setAvailable(true, null)
+        propertyToolWindow.setAvailable(true, null)
+        structToolWindow.show(null)
+        propertyToolWindow.show(null)
+        if (viewer.view.animateNode == null) {
+            animationToolWindow.setAvailable(false, null)
+        } else {
+            animationToolWindow.setAvailable(true, null)
+            animationToolWindow.show(null)
+        }
     }
 
     override fun deselectNotify() {
         structToolWindow.contentManager.removeAllContents(true)
         propertyToolWindow.contentManager.removeAllContents(true)
+        animationToolWindow.contentManager.removeAllContents(true)
         privateCurrentEditor = null
         viewer.view.stopRender()
-//        println("deselectNotify")
-//        structToolWindow.setAvailable(false, null)
-//        propertyToolWindow.setAvailable(false, null)
+        animationToolWindow.setAvailable(false, null)
+        structToolWindow.setAvailable(false, null)
+        propertyToolWindow.setAvailable(false, null)
     }
 
     override fun <T : Any?> putUserData(key: Key<T>, value: T?) {

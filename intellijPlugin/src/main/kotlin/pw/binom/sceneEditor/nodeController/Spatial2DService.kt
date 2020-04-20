@@ -1,17 +1,130 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
+import mogot.Engine
 import mogot.Node
 import mogot.Spatial2D
-import mogot.Engine
+import mogot.math.Vector2f
+import mogot.math.Vector2fc
 import mogot.math.*
-import pw.binom.sceneEditor.CenterNode2D
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
-import java.io.Closeable
+import kotlin.collections.set
+
+class PositionField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
+    private var originalValue: Vector2fc? = null
+    override val id: Int
+        get() = PositionField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+    override var currentValue: Vector2fc
+        get() = node.position
+        set(value) {
+            node.position.set(value)
+        }
+    override val value: Vector2fc
+        get() = originalValue ?: currentValue
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "position"
+    override val displayName: String
+        get() = "Position"
+
+    override fun setTempValue(value: Vector2fc) {
+        if (originalValue == null)
+            originalValue = Vector2f(node.position)
+        node.position.set(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.position.set(originalValue!!)
+            originalValue = null
+        }
+    }
+}
+
+class ScaleField2D(override val node: Spatial2D) : NodeService.FieldVec2() {
+    override val id: Int
+        get() = ScaleField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+    private var originalValue: Vector2fc? = null
+    override var currentValue: Vector2fc
+        get() = node.scale
+        set(value) {
+            node.scale.set(value)
+        }
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val value: Vector2fc
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "scale"
+    override val displayName: String
+        get() = "Scale"
+
+    override fun setTempValue(value: Vector2fc) {
+        if (originalValue == null)
+            originalValue = Vector2f(node.scale)
+        node.scale.set(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.position.set(originalValue!!)
+            originalValue = null
+        }
+    }
+}
+
+class RotationField2D(override val node: Spatial2D) : NodeService.FieldFloat() {
+    override val id: Int
+        get() = RotationField2D::class.java.hashCode()
+    override val groupName: String
+        get() = "Transform"
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    private var originalValue: Float? = null
+    override var currentValue: Float
+        get() = toDegrees(node.rotation)
+        set(value) {
+            node.rotation = toRadians(value)
+        }
+    override val value: Float
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "rotation"
+    override val displayName: String
+        get() = "Rotation"
+
+
+    override fun setTempValue(value: Float) {
+        if (originalValue == null)
+            originalValue = node.rotation
+        node.rotation = toRadians(value)
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.rotation = toRadians(originalValue!!)
+            originalValue = null
+        }
+    }
+}
 
 object Spatial2DService : NodeService {
 

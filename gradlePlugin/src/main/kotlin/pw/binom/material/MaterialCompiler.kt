@@ -42,7 +42,7 @@ object MaterialCompiler {
 
     @JvmStatic
     fun compile(file: File, outputFile: File) {
-        if (!DesktopAssertTask.checkChanges(file, outputFile)) {
+        if (!DesktopAssertTask.isFileChanged(file, outputFile)) {
             println("$file: UP-TO-DATE")
             return
         }

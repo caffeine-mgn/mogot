@@ -3,11 +3,16 @@
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'maven-publish'
 
 apply plugin: "org.xbib.gradle.plugin.jflex"
 intellij {
     version '193.6494.35'
     type 'IC'
+}
+
+compileKotlin{
+    kotlinOptions.jvmTarget = "11"
 }
 
 sourceSets {
@@ -23,7 +28,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "http://repo.maven.apache.org/maven2" }
+    //maven { url "http://repo.maven.apache.org/maven2" }
 }
 
 
@@ -75,3 +80,14 @@ task bnfGenerator {
     }
 }
 */
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "pw.binom.mogot"
+            artifactId 'tools'
+            version "0.1"
+            from components.java
+        }
+    }
+}

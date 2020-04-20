@@ -17,6 +17,8 @@ class Starter : ApplicationLoadListener {
     }
 
     fun reg() {
+        Services.reg(AnimateNodeCreator)
+        Services.reg(AnimateNodeService)
         Services.reg(CircleShapeNodeCreator)
         Services.reg(CircleShapeService)
         Services.reg(Camera2DCreator)

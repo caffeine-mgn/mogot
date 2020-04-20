@@ -2,7 +2,6 @@ package pw.binom.material
 
 import mogot.PNGDecoder
 import mogot.Resources
-import mogot.SourceImage
 import mogot.gl.flip2
 import pw.binom.DesktopAssertTask
 import pw.binom.io.wrap
@@ -17,7 +16,7 @@ import java.nio.channels.Channels
 object ImageCompiler {
 
     fun compile(file: File, outputFile: File) {
-        if (!DesktopAssertTask.checkChanges(file, outputFile)) {
+        if (!DesktopAssertTask.isFileChanged(file, outputFile)) {
             println("$file: UP-TO-DATE")
             return
         }

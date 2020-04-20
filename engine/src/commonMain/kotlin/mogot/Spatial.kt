@@ -95,9 +95,9 @@ open class Spatial : Node() {
             }
     }
 
-    val position: Vector3fm = Vector3fWithChangeCounter(0f, 0f, 0f)
-    val quaternion: Quaternionfm = QuaternionfProperty()
-    val scale: Vector3fm = Vector3fWithChangeCounter(1f, 1f, 1f)
+    open val position: Vector3fm = Vector3fWithChangeCounter(0f, 0f, 0f)
+    open val quaternion: Quaternionfm = QuaternionfProperty()
+    open val scale: Vector3fm = Vector3fWithChangeCounter(1f, 1f, 1f)
     private val _transform = Matrix4f()
 
     fun setGlobalTransform(matrix: Matrix4fc) {

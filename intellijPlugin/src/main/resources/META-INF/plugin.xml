@@ -12,10 +12,43 @@
     <idea-version since-build="191"/>
 
     <actions>
+        <group id="AnimationMogotGroup" popup="true" text="Animation">
+            <action id="pw.binom.sceneEditor.action.NextFrameAction"
+                    class="pw.binom.sceneEditor.action.NextFrameAction"
+                    text="Next Frame" description="Switch to next Frame">
+                <keyboard-shortcut first-keystroke="." keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.PreviousFrameAction"
+                    class="pw.binom.sceneEditor.action.PreviousFrameAction"
+                    text="Previous Frame" description="Switch to previous Frame">
+                <keyboard-shortcut first-keystroke="COMMA" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    class="pw.binom.sceneEditor.action.AddAnimateFrameAction"
+                    text="Add Animate Frame" description="Add new Animate Frame for current Animation Frame">
+                <keyboard-shortcut first-keystroke="F7" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.DeleteFrameAction"
+                    class="pw.binom.sceneEditor.action.DeleteFrameAction"
+                    text="Delete Animate Frame" description="Delete Animate Frame from Animation">
+                <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
+                    class="pw.binom.sceneEditor.action.EnterAnimationEditModeAction"
+                    text="Enter Animate Mode" description="Enter to Animate Mode">
+                <keyboard-shortcut first-keystroke="F8" keymap="$default"/>
+            </action>
+            <action id="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
+                    class="pw.binom.sceneEditor.action.LeaveAnimationEditModeAction"
+                    text="Leave Animate Mode" description="Leave from Animate Mode">
+                <keyboard-shortcut first-keystroke="F8" keymap="$default"/>
+            </action>
+            <add-to-group group-id="EditMenu" anchor="last"/>
+        </group>
         <group id="EditMogotGroup" popup="false">
             <action id="pw.binom.sceneEditor.action.DuplicateNode" class="pw.binom.sceneEditor.action.DuplicateNode"
                     text="Duplicate Node" description="Duplicate selected Node">
-                <keyboard-shortcut first-keystroke="control D" keymap="$default"/>
+                <keyboard-shortcut first-keystroke="control D" second-keystroke="alt D" keymap="$default"/>
             </action>
             <action id="pw.binom.sceneEditor.action.AddPolygonAction"
                     class="pw.binom.sceneEditor.action.AddPolygonAction"
@@ -32,6 +65,12 @@
         <action id="pw.binom.sceneEditor.action.CreateSceneFileAction"
                 class="pw.binom.sceneEditor.action.CreateSceneFileAction"
                 text="Scene" description="Create new Scene file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
+
+        <action id="pw.binom.sceneEditor.action.CreateAnimationFile"
+                class="pw.binom.sceneEditor.action.CreateAnimationFile"
+                text="Animation" description="Create new Animation file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
 
@@ -53,6 +92,10 @@
                       topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
         </projectListeners>
         <ApplicationLoadListener implementation="pw.binom.Starter"></ApplicationLoadListener>
+
+        <fileType name="ANIMATION" implementationClass="pw.binom.sceneEditor.AnimationFileType" fieldName="INSTANCE"
+                  language="Animation" extensions="anim"/>
+
         <!-- SceneEditor -->
         <fileType name="SCENE" implementationClass="pw.binom.sceneEditor.SceneFileType" fieldName="INSTANCE"
                   language="Scene" extensions="scene"/>
@@ -91,6 +134,14 @@
         <lang.braceMatcher language="Material" implementationClass="pw.binom.glsl.GLSLPairedBraceMatcher"/>
         <lang.syntaxHighlighterFactory language="Material"
                                        implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <gradleProjectImportHandler implementation="pw.binom.ide.MogotGradleProjectImportHandler"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <projectResolve implementation="pw.binom.ide.MogotProjectResolverExtension" order="last"/>
     </extensions>
 
     <actions>
