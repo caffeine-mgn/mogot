@@ -186,10 +186,11 @@ class AnimationFile(val frameInSecond: Int, val frameCount: Int, val objects: Mu
                             check(time >= 0) { "Invalid frame time in file \"$path\"" }
                             check(time > lastTime) { "Invalid Frame Order in file \"$path\"" }
                             lastTime = time
-                            val value = when (lastProperty!!.type) {
+                            val value:Any = when (lastProperty!!.type) {
                                 Field.Type.INT -> stream.readInt()
                                 Field.Type.FLOAT -> stream.readFloat()
                                 Field.Type.STRING -> stream.readUTF8String()
+                                Field.Type.FILE -> stream.readUTF8String()
                                 Field.Type.VEC2 -> Vector2f(stream.readFloat(), stream.readFloat())
                                 Field.Type.VEC3 -> Vector3f(stream.readFloat(), stream.readFloat(), stream.readFloat())
                                 Field.Type.BOOL -> stream.read() > 1

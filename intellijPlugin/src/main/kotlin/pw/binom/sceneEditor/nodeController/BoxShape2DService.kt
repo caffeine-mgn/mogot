@@ -43,29 +43,6 @@ object BoxShape2DService : NodeService {
     override fun getClassName(node: Node): String =
             BoxShape2D::class.java.name
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != BoxShape2D::class.java.name)
-            return null
-        val node = BoxShape2DView(view)
-        Spatial2DService.load(view.engine, node, properties)
-        node.size.set(
-                properties["size.x"]?.toFloatOrNull() ?: 0f,
-                properties["size.y"]?.toFloatOrNull() ?: 0f
-        )
-        PhysicsShapeUtils.load(node, properties)
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is BoxShape2DView) return null
-        val out = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, out)
-        out["size.x"] = node.size.x.toString()
-        out["size.y"] = node.size.y.toString()
-        PhysicsShapeUtils.save(node, out)
-        return out
-    }
-
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         if (node !is BoxShape2DView) return
         node.selected = selected
@@ -75,6 +52,11 @@ object BoxShape2DService : NodeService {
         if (node !is BoxShape2DView) return
         node.hover = hover
     }
+
+    override val nodeClass: String
+        get() = BoxShape2D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = BoxShape2DView(view)
 
     override fun isEditor(node: Node): Boolean = node::class.java === BoxShape2DView::class.java
 
@@ -161,5 +143,5 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
     override var sensor: Boolean = false
     override var density: Float = 1f
     override var friction: Float = 0.5f
-    override var restitution: Float=0.2f
+    override var restitution: Float = 0.2f
 }

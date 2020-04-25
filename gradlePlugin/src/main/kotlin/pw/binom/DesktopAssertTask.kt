@@ -26,12 +26,12 @@ open class DesktopAssertTask : DefaultTask() {
         }
     }
 
-    private fun processDirectory(assetsDirectory: File, file: File, outputDir: File, behavioursGenerator: BehavioursGenerator?) {
+    private fun processDirectory(assetsDirectory: File, file: File, outputDir: File, nodes: MutableSet<String>) {
         when (file.extension.toLowerCase()) {
-            "png" -> ImageCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "mat" -> MaterialCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "anim" -> AnimationCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "scene" -> SceneCompiler.compile(assetsDirectory, file, File(outputDir, file.name + ".bin"), behavioursGenerator)
+            "png" -> ImageCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "mat" -> MaterialCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "anim" -> AnimationCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "scene" -> SceneCompiler.compile(assetsDirectory, file, File(outputDir, "${file.name}.bin"), nodes)
         }
 
 //        inputDir.listFiles()?.asSequence()?.filter { it.isFile }?.forEach {
@@ -53,17 +53,18 @@ open class DesktopAssertTask : DefaultTask() {
                 MaterialCompiler.compile(Default2DMaterial.SOURCE, it)
             }
         }
+        val nodes = HashSet<String>()
         assertPath.walkTopDown().onEnter {
             true
         }.forEach {
             val file = if (it.isAbsolute) it else it.absoluteFile
             val outDir = File(outputPath, file.path.removePrefix(assertPath.path)).parentFile
-            processDirectory(assertPath, file, outDir, behavioursGenerator)
+            processDirectory(assertPath, file, outDir, nodes)
         }
-        val genDir = File(project.buildDir, "mogotGen/BehavioursCreator.kt")
+        val genDir = File(project.buildDir, "mogotGen/mogot/SceneLoader.kt")
         genDir.parentFile.mkdirs()
         genDir.outputStream().bufferedWriter().use {
-            behavioursGenerator.generate("BehavioursCreator", it)
+            SceneLoadGenerator.generate(nodes, it)
             it.flush()
         }
     }

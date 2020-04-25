@@ -3,7 +3,6 @@ package mogot
 import mogot.math.Matrix4fc
 import pw.binom.io.Closeable
 
-
 open class Node : Closeable {
     open val type
         get() = 0

@@ -15,6 +15,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.polygonEditor.PolygonEditor
 import pw.binom.sceneEditor.properties.*
+import pw.binom.utils.Vector2fmDelegator
 import javax.swing.Icon
 import kotlin.collections.set
 
@@ -65,41 +66,9 @@ object PolygonShape2DService : NodeService {
 
     override fun getClassName(node: Node): String = PolygonShape2D::class.java.name
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != PolygonShape2D::class.java.name)
-            return null
-        val vertex = properties["vertex"]?.split('|')?.map {
-            val items = it.split('+')
-            Vector2f(
-                    items.getOrNull(0)?.toFloatOrNull() ?: 0f,
-                    items.getOrNull(1)?.toFloatOrNull() ?: 0f
-            )
-        } ?: emptyList()
-        val node = PolygonShape2DViwer(view)
-        Spatial2DService.load(view.engine, node, properties)
-        PhysicsShapeUtils.load(node, properties)
-        node.vertexs = vertex
-        node.material.value = view.default3DMaterial.instance(SHAPE_VIEW_COLOR)
-
-
-        view.nodesMeta[node] = createMeta(view, node)
-
-
-        return node
-    }
-
     fun getEditor(view: SceneEditorView, node: PolygonShape2DViwer): PolygonEditor? {
         val meta = view.nodesMeta[node] as PolygonShape2DMeta
         return meta.polygonEditor
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is PolygonShape2DViwer) return null
-        val out = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, out)
-        PhysicsShapeUtils.save(node, out)
-        out["vertex"] = node.vertexs.map { "${it.x}+${it.y}" }.joinToString("|")
-        return out
     }
 
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
@@ -135,6 +104,15 @@ object PolygonShape2DService : NodeService {
         return meta.polygon2DCollider
     }
 
+    override val nodeClass: String
+        get() = PolygonShape2D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node {
+        val node = PolygonShape2DViwer(view)
+        view.nodesMeta[node] = createMeta(view, node)
+        return node
+    }
+
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is PolygonShape2DViwer) return
         view.engine.waitFrame {
@@ -146,7 +124,28 @@ object PolygonShape2DService : NodeService {
     }
 }
 
-class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode, MaterialNode by MaterialNodeImpl() {
+class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode, MaterialNode by MaterialNodeImpl(), EditableNode {
+
+    val transformField = PositionField2D(this)
+    val rotationField = RotationField2D(this)
+    val densityEditableField = DensityEditableField(this, this)
+    val frictionEditableField = FrictionEditableField(this, this)
+    val restitutionEditableField = RestitutionEditableField(this, this)
+    val sensorEditableField = SensorEditableField(this, this)
+
+    private val fields = listOf(transformField, rotationField, densityEditableField, frictionEditableField, restitutionEditableField, sensorEditableField)
+    override fun getEditableFields(): List<NodeService.Field> = fields
+
+    override var rotation: Float
+        get() = super.rotation
+        set(value) {
+            super.rotation = value
+            rotationField.eventChange.dispatch()
+        }
+    override val position: Vector2fm = Vector2fmDelegator(super.position) {
+        transformField.eventChange.dispatch()
+    }
+
     var vertexs: List<Vector2f> = emptyList()
         set(value) {
             field = value

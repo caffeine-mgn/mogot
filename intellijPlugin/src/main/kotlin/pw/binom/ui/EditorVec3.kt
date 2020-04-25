@@ -12,7 +12,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.dnd.*
 import java.io.Closeable
 
-class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector3fc>>) : AbstractEditor<Vector3fc>(sceneEditor, fields) {
+class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
@@ -23,7 +23,7 @@ class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector
 
     private fun refreshValues() {
         enableEvents = false
-        editor.value.set(fields.asSequence().map { it.currentValue }.common)
+        editor.value.set(fields.asSequence().map { it.currentValue as Vector3fc }.common)
         enableEvents = true
     }
 
@@ -51,10 +51,11 @@ class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector
 
                 } else {
                     fields.forEach {
+                        val currentValue = it.currentValue as Vector3fc
                         Vector3f(
-                                x.takeIf { !it.isNaN() } ?: it.currentValue.x,
-                                y.takeIf { !it.isNaN() } ?: it.currentValue.y,
-                                z.takeIf { !it.isNaN() } ?: it.currentValue.z
+                                x.takeIf { !it.isNaN() } ?: currentValue.x,
+                                y.takeIf { !it.isNaN() } ?: currentValue.y,
+                                z.takeIf { !it.isNaN() } ?: currentValue.z
                         )
                     }
                 }

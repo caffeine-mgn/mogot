@@ -51,7 +51,7 @@ object InjectSceneNodeService : NodeService {
             }
 
     override fun isInternalChilds(node: Node): Boolean = node is InjectedScene
-
+/*
     override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
         if (clazz != InjectSceneLoader.nodeClass) {
             return null
@@ -82,7 +82,7 @@ object InjectSceneNodeService : NodeService {
         }
         return out
     }
-
+*/
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node.childs.forEach {
             it.walk {
@@ -146,4 +146,9 @@ object InjectSceneNodeService : NodeService {
             }
         }
     }
+
+    override val nodeClass: String
+        get() = InjectedScene3D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = InjectedScene3D(view,TODO())
 }

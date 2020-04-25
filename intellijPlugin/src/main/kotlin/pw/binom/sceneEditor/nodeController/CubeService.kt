@@ -43,7 +43,7 @@ class EditableCSGBox(view: SceneEditorView) : CSGBox(view.engine), EditableNode 
     val materialField = MaterialField(view, this)
 
     private val fields = listOf(positionField, rotationField, scaleField, materialField)
-    override fun getEditableFields(): List<NodeService.Field<out Any>> = fields
+    override fun getEditableFields(): List<NodeService.Field> = fields
 }
 
 object CubeNodeCreator : NodeCreator {
@@ -88,26 +88,6 @@ object CubeService : NodeService {
         return true
     }
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != EditableCSGBox::class.java.name)
-            return null
-        val node = EditableCSGBox(view)
-        SpatialService.loadSpatial(view.engine, node, properties)
-        MaterialNodeUtils.load(view, node, properties)
-        if (node.material.value == null)
-            node.material.value = view.default3DMaterial.instance(Vector4f(1f))
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is EditableCSGBox)
-            return null
-        val out = HashMap<String, String>()
-        SpatialService.saveSpatial(view.engine, node, out)
-        MaterialNodeUtils.save(view, node, out)
-        return out
-    }
-
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node as MaterialNode
         val m = node.material.value as? MaterialInstance?
@@ -119,4 +99,9 @@ object CubeService : NodeService {
         val m = node.material.value as? MaterialInstance?
         m?.hover = hover
     }
+
+    override val nodeClass: String
+        get() = CSGBox::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = EditableCSGBox(view)
 }

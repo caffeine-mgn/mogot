@@ -1,11 +1,12 @@
 package pw.binom.sceneEditor
 
-import com.intellij.openapi.vfs.VirtualFile
 import mogot.EventDispatcher
 import mogot.Node
 import mogot.collider.Collider
 import mogot.collider.Collider2D
-import mogot.math.*
+import mogot.math.AABBm
+import mogot.math.Vector2fc
+import mogot.math.Vector3fc
 import pw.binom.Services
 import pw.binom.sceneEditor.nodeController.EditableNode
 import pw.binom.sceneEditor.nodeController.EmptyNodeService
@@ -14,176 +15,181 @@ import pw.binom.ui.*
 
 interface NodeService {
 
-//    enum class FieldType {
-//        VEC3, VEC2, FLOAT, STRING, INT
-//    }
-
-    interface Field<T : Any> {
+    interface Field {
         val id: Int
         val groupName: String
-        var currentValue: T
-        val value: T
-        val isEmpty: Boolean
+        var currentValue: Any
+        val value: Any
         fun clearTempValue()
-        fun saveAsString(): String
-        fun loadFromString(value: String)
         val name: String
         val displayName: String
-        fun setTempValue(value: T)
+        fun setTempValue(value: Any)
         fun resetValue()
         val fieldType: mogot.Field.Type
         val node: Node
         val eventChange: EventDispatcher
         val subFieldsEventChange: EventDispatcher
-        fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<T>>): AbstractEditor<T>
-        fun getSubFields(): List<Field<out Any>> = emptyList()
-        fun isEquals(field: Field<T>): Boolean
+        fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor
+        fun getSubFields(): List<Field> = emptyList()
+        fun isEquals(field: Field): Boolean
     }
 
-    abstract class FieldVec3 : Field<Vector3fc> {
+    abstract class AbstractField : Field {
+        protected abstract var realValue: Any
+        protected abstract fun cloneRealValue(): Any
+        private var originalValue: Any? = null
+        override val id: Int
+            get() = this::class.java.hashCode()
+
+        override var currentValue: Any
+            get() = realValue
+            set(value) {
+                realValue = value
+            }
+        override val value: Any
+            get() = originalValue ?: currentValue
+
+        override fun clearTempValue() {
+            originalValue = null
+        }
+
+
+        override fun setTempValue(value: Any) {
+            if (originalValue == null)
+                originalValue = cloneRealValue()
+            realValue = value
+        }
+
+        override fun resetValue() {
+            if (originalValue != null) {
+                realValue = originalValue!!
+                originalValue = null
+            }
+        }
+
+        override val eventChange = EventDispatcher()
+        override fun getSubFields(): List<Field> = emptyList()
+        override val subFieldsEventChange = EventDispatcher()
+        override fun isEquals(field: Field): Boolean = TODO()
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor =
+                when (fieldType) {
+                    mogot.Field.Type.VEC3 -> EditorVec3(sceneEditor, fields)
+                    mogot.Field.Type.INT -> EditorInt(sceneEditor, fields)
+                    mogot.Field.Type.FLOAT -> EditorFloat(sceneEditor, fields)
+                    mogot.Field.Type.BOOL -> TODO()
+                    mogot.Field.Type.VEC2 -> EditorVec2(sceneEditor, fields)
+                    mogot.Field.Type.VEC4 -> TODO()
+                    mogot.Field.Type.STRING -> EditorString(sceneEditor, fields)
+                    mogot.Field.Type.FILE -> EditorString(sceneEditor, fields)
+                }
+    }
+
+    abstract class FieldVec3 : Field {
         override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
-        override fun saveAsString(): String {
-            val value = currentValue
-            return "VEC3 ${value.x};${value.y};${value.z}"
+
+        override fun isEquals(field: Field): Boolean {
+            val currentValue = currentValue as Vector3fc
+            val field_currentValue = field.currentValue as Vector3fc
+            return currentValue.x == field_currentValue.x
+                    && currentValue.y == field_currentValue.y
+                    && currentValue.z == field_currentValue.z
         }
 
-        override fun isEquals(field: Field<Vector3fc>): Boolean =
-                currentValue.x == field.currentValue.x
-                        && currentValue.y == field.currentValue.y
-                        && currentValue.z == field.currentValue.z
-
-        override fun loadFromString(value: String) {
-            check(value.startsWith("VEC3 "))
-            val items = value.substring(5).split(';')
-            val x = items[0].toFloatOrNull() ?: 0f
-            val y = items[0].toFloatOrNull() ?: 0f
-            val z = items[0].toFloatOrNull() ?: 0f
-            this.currentValue = Vector3f(x, y, z)
-        }
-
-        override val isEmpty: Boolean = false
         override val fieldType: mogot.Field.Type
             get() = mogot.Field.Type.VEC3
 
-        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector3fc>>): AbstractEditor<Vector3fc> {
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
             return EditorVec3(sceneEditor, fields)
         }
     }
 
-    abstract class FieldInt : Field<Int> {
-        override val subFieldsEventChange = mogot.EventDispatcher()
+    abstract class FieldInt : Field {
+        override val subFieldsEventChange = EventDispatcher()
         override val eventChange = EventDispatcher()
-        override fun saveAsString(): String {
-            val value = currentValue
-            return "INT $value"
-        }
 
-        override fun isEquals(field: Field<Int>): Boolean =
+        override fun isEquals(field: Field): Boolean =
                 currentValue == field.currentValue
 
-        override fun loadFromString(value: String) {
-            check(value.startsWith("INT "))
-            this.currentValue = value.substring(4).toInt()
-        }
-
-        override val isEmpty: Boolean = false
         override val fieldType: mogot.Field.Type
             get() = mogot.Field.Type.INT
 
-        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Int>>): AbstractEditor<Int> {
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
             return EditorInt(sceneEditor, fields)
         }
     }
 
-    abstract class FieldVec2 : Field<Vector2fc> {
-        override val subFieldsEventChange = mogot.EventDispatcher()
+    abstract class FieldVec2 : Field {
+        override val subFieldsEventChange = EventDispatcher()
         override val eventChange = EventDispatcher()
-        override fun saveAsString(): String {
-            val value = currentValue
-            return "VEC2 ${value.x};${value.y}"
+
+        override fun isEquals(field: Field): Boolean {
+            val currentValue = currentValue as Vector2fc
+            val field_currentValue = field.currentValue as Vector2fc
+            return currentValue.x == field_currentValue.x
+                    && currentValue.y == field_currentValue.y
         }
 
-        override fun isEquals(field: Field<Vector2fc>): Boolean =
-                currentValue.x == field.currentValue.x
-                        && currentValue.y == field.currentValue.y
-
-        override fun loadFromString(value: String) {
-            check(value.startsWith("VEC2 "))
-            val items = value.substring(5).split(';')
-            val x = items[0].toFloatOrNull() ?: 0f
-            val y = items[0].toFloatOrNull() ?: 0f
-            this.currentValue = Vector2f(x, y)
-        }
-
-        override val isEmpty: Boolean = false
         override val fieldType: mogot.Field.Type
             get() = mogot.Field.Type.VEC2
 
-        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Vector2fc>>): AbstractEditor<Vector2fc> {
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
             return EditorVec2(sceneEditor, fields)
         }
     }
 
-    abstract class FieldFloat : Field<Float> {
-        override val subFieldsEventChange = mogot.EventDispatcher()
+    abstract class FieldFloat : Field {
+        override val subFieldsEventChange = EventDispatcher()
         override val eventChange = EventDispatcher()
-        override fun saveAsString(): String {
-            val value = currentValue
-            return "FLOAT $value"
-        }
 
-        override fun isEquals(field: Field<Float>): Boolean =
+        override fun isEquals(field: Field): Boolean =
                 currentValue == field.currentValue
 
-        override fun loadFromString(value: String) {
-            check(value.startsWith("FLOAT "))
-            this.currentValue = value.substring(6).toFloatOrNull() ?: 0f
-        }
-
-        override val isEmpty: Boolean = false
         override val fieldType: mogot.Field.Type
             get() = mogot.Field.Type.FLOAT
 
-        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<Float>>): AbstractEditor<Float> {
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
             return EditorFloat(sceneEditor, fields)
         }
     }
 
-    abstract class FieldString : Field<String> {
+    abstract class FieldString : Field {
         override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()
-        override fun saveAsString(): String {
-            val value = currentValue
-            return "STR $value"
-        }
 
-        override fun isEquals(field: Field<String>): Boolean =
+        override fun isEquals(field: Field): Boolean =
                 currentValue == field.currentValue
 
-        override fun loadFromString(value: String) {
-            check(value.startsWith("STR "))
-            this.currentValue = value.substring(4)
-        }
-
-        override val isEmpty: Boolean = false
         override val fieldType: mogot.Field.Type
             get() = mogot.Field.Type.STRING
 
-        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field<String>>): AbstractEditor<String> {
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
             return EditorString(sceneEditor, fields)
         }
     }
 
-    fun getFields(view: SceneEditorView, node: Node): List<Field<out Any>> {
+    abstract class FieldFile : Field {
+        override val subFieldsEventChange = mogot.EventDispatcher()
+        override val eventChange = EventDispatcher()
+
+        override fun isEquals(field: Field): Boolean =
+                currentValue == field.currentValue
+
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.STRING
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
+            return EditorString(sceneEditor, fields)
+        }
+    }
+
+    fun getFields(view: SceneEditorView, node: Node): List<Field> {
         if (node is EditableNode)
             return node.getEditableFields()
         return emptyList()
     }
 
-    fun getClassName(node: Node): String = node::class.java.name
-    fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node?
-    fun save(view: SceneEditorView, node: Node): Map<String, String>?
+    fun getClassName(node: Node): String = nodeClass
     fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         //NOP
     }
@@ -212,4 +218,7 @@ interface NodeService {
         }
         return clone
     }
+
+    val nodeClass: String
+    fun newInstance(view: SceneEditorView): Node
 }

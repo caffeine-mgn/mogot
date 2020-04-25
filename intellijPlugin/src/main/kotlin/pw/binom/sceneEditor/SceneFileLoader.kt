@@ -6,19 +6,30 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import pw.binom.Services
 import pw.binom.scene.Scene
+import pw.binom.sceneEditor.nodeController.EditableNode
 
 object SceneFileLoader {
     private val mapper = ObjectMapper()
     private val services by Services.byClassSequence(NodeService::class.java)
 
     fun loadNode(view: SceneEditorView, file: VirtualFile, node: Scene.Node): Node? {
-        val out = services.map { it.load(view, file, node.className, node.properties) }
-                .filterNotNull()
+//        val out = services.map { it.load(view, file, node.className, node.properties) }
+        val out = services.filter { it.nodeClass == node.className }
+                .map { it.newInstance(view) }
                 .firstOrNull()
                 ?: run {
                     println("Can't load ${node.className}")
                     return null
                 }
+        out.id = node.id
+        node.properties.forEach { (k, v) ->
+            println("${node.className} -> $k")
+            out as EditableNode
+            val field = out.getEditableFields().find { it.name == k } ?: return@forEach
+            if (v.isNotEmpty()) {
+                field.currentValue = mogot.Field.Type.fromText(v)
+            }
+        }
         if (view.getService(out)?.isInternalChilds(out) != true)
             node.childs.forEach {
                 loadNode(view, file, it)?.parent = out
@@ -40,7 +51,10 @@ object SceneFileLoader {
     fun save(view: SceneEditorView, file: VirtualFile) {
 
         fun saveNode(node: Node): Scene.Node? {
-            val properties = services.asSequence().mapNotNull { it.save(view, node) }.firstOrNull() ?: return null
+            val editable = node as EditableNode
+            val properties = editable.getEditableFields().asSequence().map {
+                it.name to it.fieldType.toString(it.value)
+            }.toMap()
             val childs = if (view.getService(node)?.isInternalChilds(node) != true) {
                 node.childs.mapNotNull {
                     saveNode(it)
@@ -49,7 +63,7 @@ object SceneFileLoader {
                 emptyList()
             }
             val className = view.getService(node)?.getClassName(node) ?: node::class.java.name
-            return Scene.Node(className = className, properties = properties, childs = childs)
+            return Scene.Node(id = node.id, className = className, properties = properties, childs = childs)
         }
 
         ApplicationManager.getApplication().runWriteAction {

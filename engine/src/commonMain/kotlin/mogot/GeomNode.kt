@@ -3,7 +3,7 @@ package mogot
 import mogot.math.Matrix4fc
 
 
-class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
+open class GeomNode : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     val geom = ResourceHolder<Geometry>()
 
     override fun render(model: Matrix4fc, projection: Matrix4fc, renderContext: RenderContext) {

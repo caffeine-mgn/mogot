@@ -13,7 +13,7 @@ object NodeFieldDataFlavor : DataFlavor("x-mogot/node-field") {
     val array: Array<DataFlavor> = arrayOf(NodeFieldDataFlavor)
 }
 
-class FieldTransferable(val fields: List<NodeService.Field<*>>) : Transferable {
+class FieldTransferable(val fields: List<NodeService.Field>) : Transferable {
     override fun getTransferData(flavor: DataFlavor?): Any? {
         if (flavor !== NodeFieldDataFlavor)
             return null
@@ -28,7 +28,7 @@ class FieldTransferable(val fields: List<NodeService.Field<*>>) : Transferable {
 
 }
 
-class AnimateTransferHandler(val fields: List<NodeService.Field<*>>) : DragGestureListener, DragSourceListener {
+class AnimateTransferHandler(val fields: List<NodeService.Field>) : DragGestureListener, DragSourceListener {
     override fun dragGestureRecognized(dge: DragGestureEvent) {
         val ds = dge.dragSource
         val transferable: Transferable = FieldTransferable(fields)
@@ -51,7 +51,7 @@ class AnimateTransferHandler(val fields: List<NodeService.Field<*>>) : DragGestu
     }
 }
 
-abstract class AbstractEditor<T:Any>(val sceneEditor: SceneEditor, val fields: List<NodeService.Field<T>>):Panel(), Closeable {
+abstract class AbstractEditor(val sceneEditor: SceneEditor, val fields: List<NodeService.Field>):Panel(), Closeable {
     private val animateTransferHandler = AnimateTransferHandler(fields)
     private val dgr = DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, animateTransferHandler)
     protected val closable = ArrayList<pw.binom.io.Closeable>()

@@ -169,6 +169,7 @@ class AnimateNode(val engine: Engine) : Node() {
                             Field.Type.VEC3 -> AnimatedProperty.Vec3(field, animProp as AnimationFile.Property<Vector3fc>)
                             Field.Type.VEC2 -> AnimatedProperty.Vec2(field, animProp as AnimationFile.Property<Vector2fc>)
                             Field.Type.STRING -> AnimatedProperty.String(field, animProp as AnimationFile.Property<String>)
+                            Field.Type.FILE -> AnimatedProperty.String(field, animProp as AnimationFile.Property<String>)
                             Field.Type.INT -> AnimatedProperty.Int(field, animProp as AnimationFile.Property<Int>)
                             Field.Type.BOOL -> AnimatedProperty.Bool(field, animProp as AnimationFile.Property<Boolean>)
                             Field.Type.FLOAT -> AnimatedProperty.Float(field, animProp as AnimationFile.Property<Float>)

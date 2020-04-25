@@ -4,7 +4,7 @@ import mogot.gl.PostEffectPipeline
 import mogot.math.*
 
 
-class Camera : Spatial() {
+open class Camera : Spatial() {
     private var _postEffectPipeline by ResourceHolder<PostEffectPipeline>()
     var postEffectPipeline: PostEffectPipeline?
         set(value) {
@@ -20,19 +20,19 @@ class Camera : Spatial() {
     var height = 0
         private set
 
-    var near = 0.3f
+    open var near = 0.3f
         set(value) {
             field = value
             resize(width, height)
         }
 
-    var fieldOfView = 60f
+    open var fieldOfView = 60f
         set(value) {
             field = value
             resize(width, height)
         }
 
-    var far = 1000f
+    open var far = 1000f
         set(value) {
             field = value
             resize(width, height)
@@ -53,15 +53,6 @@ class Camera : Spatial() {
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
-        /*
-        parent?.currentToRoot {
-            if (it.isSpatial) {
-                it as Spatial
-                viewMatrix4f.set(it.apply(viewMatrix4f))
-            }
-            true
-        }
-        */
         globalToLocalMatrix(viewMatrix4f)
         return
         this.asUpSequence().mapNotNull { it as? Spatial }.forEach {

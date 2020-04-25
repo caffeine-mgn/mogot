@@ -1,6 +1,5 @@
 package pw.binom.sceneEditor.nodeController
 
-import com.intellij.openapi.vfs.VirtualFile
 import mogot.AbstractSprite
 import mogot.Node
 import mogot.Sprite
@@ -21,7 +20,7 @@ import java.io.Closeable
 import javax.swing.Icon
 import kotlin.collections.set
 
-object Sprite2DCreator : NodeCreator {
+object Sprite2DCreator: NodeCreator {
     override val name: String
         get() = "Sprite2D"
     override val icon: Icon?
@@ -36,15 +35,9 @@ object Sprite2DCreator : NodeCreator {
 }
 
 private class SpriteMeta(view: SceneEditorView, node: EditableSprite) : Closeable {
-    val center = CenterNode2D(node, view)
-
-    init {
-        center.parent = view.editorRoot
-        center.visible = false
-    }
 
     override fun close() {
-        center.free()
+
     }
 }
 
@@ -56,22 +49,6 @@ object Sprite2DService : NodeService {
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             props
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != Sprite::class.java.name)
-            return null
-        val node = EditableSprite(view)
-        Spatial2DService.load(view.engine, node, properties)
-        node.size.set(
-                properties["size.x"]?.toFloat() ?: 0f,
-                properties["size.y"]?.toFloat() ?: 0f
-        )
-        val texture = properties["texture"]?.let {
-            view.editor1.findFileByRelativePath(it)
-        }?.let { view.engine.resources.loadTexture(it) }
-        node.textureFile = texture
-        view.nodesMeta[node] = SpriteMeta(view, node)
-        return node
-    }
 
     override fun delete(view: SceneEditorView, node: Node) {
         super.delete(view, node)
@@ -79,27 +56,12 @@ object Sprite2DService : NodeService {
         (view.nodesMeta.remove(node) as SpriteMeta).close()
     }
 
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node::class.java !== EditableSprite::class.java)
-            return null
-        node as EditableSprite
-        val out = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, out)
-
-        out["size.x"] = node.size.x.toString()
-        out["size.y"] = node.size.y.toString()
-        val textureFile = node.textureFile?.file?.let { view.editor1.getRelativePath(it) }
-        if (textureFile != null)
-            out["texture"] = textureFile
-        return out
-    }
-
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
         node as EditableSprite
         val material = node.material
         material.selected = selected
         val meta = view.nodesMeta[node] as? SpriteMeta
-        meta?.center?.visible = selected
+        node.center.visible = selected
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == EditableSprite::class.java
@@ -119,6 +81,15 @@ object Sprite2DService : NodeService {
         m.hover = hover
     }
 
+    override val nodeClass: String
+        get() = Sprite::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node {
+        val node = EditableSprite(view)
+        view.nodesMeta[node] = SpriteMeta(view, node)
+        return node
+    }
+
     override fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? {
         node as EditableSprite
         val c = Panel2DCollider()
@@ -133,10 +104,10 @@ class SpriteSizeField(override val node: EditableSprite) : NodeService.FieldVec2
         get() = SpriteSizeField::class.java.hashCode()
     override val groupName: String
         get() = "Sprite"
-    override var currentValue: Vector2fc
+    override var currentValue: Any
         get() = node.size
         set(value) {
-            node.size.set(value)
+            node.size.set(value as Vector2fc)
         }
     override val value: Vector2fc
         get() = node.size
@@ -150,9 +121,9 @@ class SpriteSizeField(override val node: EditableSprite) : NodeService.FieldVec2
     override val displayName: String
         get() = "Size"
 
-    override fun setTempValue(value: Vector2fc) {
+    override fun setTempValue(value: Any) {
         if (originalValue == null)
-            originalValue = Vector2f(currentValue)
+            originalValue = Vector2f(currentValue as Vector2fc)
         currentValue = value
     }
 
@@ -162,15 +133,14 @@ class SpriteSizeField(override val node: EditableSprite) : NodeService.FieldVec2
             originalValue = null
         }
     }
-
 }
 
 
 class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine), EditableNode {
 
     val transformField = PositionField2D(this)
-    val scaleField = ScaleField2D(this)
     val rotationField = RotationField2D(this)
+    val scaleField = ScaleField2D(this)
     val textureField = TextureSpriteField(view, this)
     val sizeField = SpriteSizeField(this)
 
@@ -207,12 +177,21 @@ class EditableSprite(view: SceneEditorView) : AbstractSprite(view.engine), Edita
     public override val material = view.default2DMaterial.instance()
 
     override fun close() {
+        center.free()
         texture = null
         material.dec()
         super.close()
     }
 
     private val fields = listOf(transformField, rotationField, scaleField, sizeField, textureField)
-    override fun getEditableFields(): List<NodeService.Field<out Any>> = fields
+    override fun getEditableFields(): List<NodeService.Field> = fields
+
+    var selected: Boolean = false
+    val center = CenterNode2D(this, view)
+
+    init {
+        center.parent = view.editorRoot
+        center.visible = false
+    }
 }
 

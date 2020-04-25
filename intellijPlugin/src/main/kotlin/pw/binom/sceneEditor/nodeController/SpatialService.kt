@@ -18,12 +18,12 @@ class PositionField3D(override val node: Spatial) : NodeService.FieldVec3() {
         get() = PositionField2D::class.java.hashCode()
     override val groupName: String
         get() = "Transform"
-    override var currentValue: Vector3fc
+    override var currentValue: Any
         get() = node.position
         set(value) {
-            node.position.set(value)
+            node.position.set(value as Vector3fc)
         }
-    override val value: Vector3fc
+    override val value: Any
         get() = originalValue ?: currentValue
 
     override fun clearTempValue() {
@@ -35,10 +35,10 @@ class PositionField3D(override val node: Spatial) : NodeService.FieldVec3() {
     override val displayName: String
         get() = "Position"
 
-    override fun setTempValue(value: Vector3fc) {
+    override fun setTempValue(value: Any) {
         if (originalValue == null)
             originalValue = Vector3f(node.position)
-        node.position.set(value)
+        node.position.set(value as Vector3fc)
     }
 
     override fun resetValue() {
@@ -55,27 +55,27 @@ class ScaleField3D(override val node: Spatial) : NodeService.FieldVec3() {
     override val groupName: String
         get() = "Transform"
     private var originalValue: Vector3fc? = null
-    override var currentValue: Vector3fc
+    override var currentValue: Any
         get() = node.scale
         set(value) {
-            node.scale.set(value)
+            node.scale.set(value as Vector3fc)
         }
 
     override fun clearTempValue() {
         originalValue = null
     }
 
-    override val value: Vector3fc
+    override val value: Any
         get() = originalValue ?: currentValue
     override val name: String
         get() = "scale"
     override val displayName: String
         get() = "Scale"
 
-    override fun setTempValue(value: Vector3fc) {
+    override fun setTempValue(value: Any) {
         if (originalValue == null)
             originalValue = Vector3f(node.scale)
-        node.scale.set(value)
+        node.scale.set(value as Vector3fc)
     }
 
     override fun resetValue() {
@@ -93,27 +93,27 @@ class RotateField3D(override val node: Spatial) : NodeService.FieldVec3() {
         get() = "Transform"
     private var originalValue: Vector3fc? = null
     private val internalValue = Vector3mDegrees(RotationVector(node.quaternion))
-    override var currentValue: Vector3fc
+    override var currentValue: Any
         get() = internalValue
         set(value) {
-            internalValue.set(value)
+            internalValue.set(value as Vector3fc)
         }
 
     override fun clearTempValue() {
         originalValue = null
     }
 
-    override val value: Vector3fc
+    override val value: Any
         get() = originalValue ?: currentValue
     override val name: String
         get() = "rotate"
     override val displayName: String
         get() = "Rotation"
 
-    override fun setTempValue(value: Vector3fc) {
+    override fun setTempValue(value: Any) {
         if (originalValue == null)
             originalValue = Vector3f(internalValue)
-        internalValue.set(value)
+        internalValue.set(value as Vector3fc)
     }
 
     override fun resetValue() {
@@ -130,6 +130,10 @@ object SpatialService : NodeService {
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+    override val nodeClass: String
+        get() = Spatial::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = Spatial()
 
     fun saveSpatial(engine: Engine, spatial: Spatial, output: MutableMap<String, String>) {
         EmptyNodeService.saveNode(engine, spatial, output)
@@ -174,22 +178,6 @@ object SpatialService : NodeService {
                 data["rotation.y"]?.toFloat() ?: 0f,
                 data["rotation.z"]?.toFloat() ?: 0f
         )
-    }
-
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != Spatial::class.java.name)
-            return null
-        val node = Spatial()
-        loadSpatial(view.engine, node, properties)
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node::class.java !== Spatial::class.java)
-            return null
-        val out = HashMap<String, String>()
-        saveSpatial(view.engine, node as Spatial, out)
-        return out
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java === Spatial::class.java

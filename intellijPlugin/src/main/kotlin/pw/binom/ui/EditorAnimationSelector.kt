@@ -7,7 +7,7 @@ import pw.binom.sceneEditor.nodeController.EditAnimateNode
 import pw.binom.utils.common
 import pw.binom.io.Closeable
 
-class EditorAnimationSelector(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>) : AbstractEditor<Int>(sceneEditor, fields) {
+class EditorAnimationSelector(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
     private val nodes = fields.asSequence().map { it.node }.mapNotNull { it as? EditAnimateNode }.toList()
     private var common: String? = null
     private lateinit var animations: List<String>

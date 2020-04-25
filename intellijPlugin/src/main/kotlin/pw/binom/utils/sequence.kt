@@ -9,6 +9,7 @@ import mogot.fullPath
 import mogot.math.*
 import org.jbox2d.dynamics.BodyType
 import javax.swing.SwingUtilities
+import kotlin.reflect.KProperty
 
 
 fun <T> Sequence<T>.equalsAll(): Boolean {

@@ -1,8 +1,8 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
+import mogot.Field
 import mogot.Node
-import mogot.math.AABBm
 import mogot.physics.box2d.dynamics.BodyType
 import mogot.physics.d2.PhysicsBody2D
 import pw.binom.sceneEditor.NodeCreator
@@ -22,30 +22,42 @@ object Body2DCreator : NodeCreator {
 
     override fun create(view: SceneEditorView): Node? =
             PhysicsBody2D(view.engine)
+}
 
+class PhysicsBody2DTypeEditableField(override val node: EditablePhysicsBody2D) : NodeService.AbstractField() {
+    override var realValue: Any
+        get() = node.bodyType.toString()
+        set(value) {
+            node.bodyType = BodyType.valueOf(value as String)
+        }
+
+    override fun cloneRealValue(): Any = node.bodyType.toString()
+
+    override val groupName: String
+        get() = "Physics"
+
+    override val name: String
+        get() = "type"
+
+    override val displayName: String
+        get() = "Type"
+
+    override val fieldType: Field.Type
+        get() = Field.Type.STRING
+}
+
+class EditablePhysicsBody2D(view: SceneEditorView) : PhysicsBody2D(view.engine), EditableNode {
+    val transformField = PositionField2D(this)
+    val rotationField = RotationField2D(this)
+    val physicsBody2DTypeEditableField = PhysicsBody2DTypeEditableField(this)
+    private val fields = listOf(transformField, rotationField, physicsBody2DTypeEditableField)
+    override fun getEditableFields(): List<NodeService.Field> = fields
 }
 
 object Body2DService : NodeService {
     private val properties = listOf(Transform2DPropertyFactory, PhysicsBody2DPropertyPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> =
             properties
-
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != PhysicsBody2D::class.java.name)
-            return null
-        val node = PhysicsBody2D(view.engine)
-        Spatial2DService.load(view.engine, node, properties)
-        node.bodyType = properties["type"]?.let { BodyType.valueOf(it) } ?: BodyType.STATIC
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is PhysicsBody2D) return null
-        val out = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, out)
-        out["type"] = node.bodyType.name
-        return out
-    }
 
     override fun isEditor(node: Node): Boolean = node::class.java == PhysicsBody2D::class.java
 
@@ -56,4 +68,9 @@ object Body2DService : NodeService {
         Spatial2DService.cloneSpatial2D(node, out)
         return out
     }
+
+    override val nodeClass: String
+        get() = PhysicsBody2D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = PhysicsBody2D(view.engine)
 }

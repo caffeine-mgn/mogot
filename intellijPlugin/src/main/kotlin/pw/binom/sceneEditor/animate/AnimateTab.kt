@@ -85,7 +85,7 @@ private class AddFrameLineDropListener(val tab: AnimateTab) : DropTargetListener
 
     override fun drop(dtde: DropTargetDropEvent) {
         val model = tab.animateModel ?: return
-        val fields = dtde.transferable.getTransferData(NodeFieldDataFlavor) as List<NodeService.Field<*>>
+        val fields = dtde.transferable.getTransferData(NodeFieldDataFlavor) as List<NodeService.Field>
         val animNode = tab.editor.viewer.view.animateNode!!
         fields.forEach { field ->
             val relativePath = animNode.relativePath(field.node) ?: return@forEach
@@ -225,7 +225,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             it.properties.forEach {
                 val before = it.getFrameFor(frameView.currentFrame)
                 val after = it.getNextFrameFor(frameView.currentFrame + 1)
-                val field = it.getField(editor.viewer.view, node) as NodeService.Field<Any>? ?: return@forEach
+                val field = it.getField(editor.viewer.view, node) as NodeService.Field? ?: return@forEach
                 when {
                     before == null && after != null -> field.setTempValue(after.data)
                     before != null && after == null -> field.setTempValue(before.data)

@@ -1,6 +1,9 @@
 package mogot.scene
 
 import mogot.*
+import mogot.math.Vector2f
+import mogot.math.Vector3f
+import mogot.math.Vector4f
 import pw.binom.io.*
 
 object SceneLoader {
@@ -19,6 +22,10 @@ object SceneLoader {
             Spatial2D(engine)
         loadChilds(root, engine, stream, loaderContext)
         return root
+    }
+
+    private suspend fun loadNode(stream: AsyncInputStream, loader: Loader) {
+
     }
 
     private suspend fun loadChilds(root: Node, engine: Engine, stream: AsyncInputStream, loaderContext: LoaderContext) {
