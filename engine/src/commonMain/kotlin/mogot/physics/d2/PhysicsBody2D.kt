@@ -7,7 +7,7 @@ import mogot.physics.box2d.common.Vec2
 import mogot.physics.box2d.dynamics.*
 
 
-class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
+open class PhysicsBody2D(engine: Engine) : Spatial2D(engine) {
     val boxBody: Body
 
     var bodyType: BodyType

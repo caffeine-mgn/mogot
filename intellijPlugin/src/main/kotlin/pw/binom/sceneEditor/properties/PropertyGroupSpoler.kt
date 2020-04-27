@@ -13,13 +13,13 @@ interface Properties : Closeable {
     val component: JComponent
 }
 
-private class FieldControl(val sceneEditor: SceneEditor, val layout: FlexLayout, val list: List<NodeService.Field<out Any>>) : Closeable {
+private class FieldControl(val sceneEditor: SceneEditor, val layout: FlexLayout, val list: List<NodeService.Field>) : Closeable {
     private val closable = ArrayList<Closeable>()
     private val closable2 = ArrayList<pw.binom.io.Closeable>()
-    private val subPanels = HashMap<NodeService.Field<*>, ArrayList<Properties>>()
-    private val editors = HashMap<NodeService.Field<*>, AbstractEditor<*>>()
+    private val subPanels = HashMap<NodeService.Field, ArrayList<Properties>>()
+    private val editors = HashMap<NodeService.Field, AbstractEditor>()
 
-    private fun updateSubFields(field: NodeService.Field<*>) {
+    private fun updateSubFields(field: NodeService.Field) {
         val editor = editors[field]!!
         subPanels[field]?.forEach {
             layout.componentPlace.remove(it.component)
@@ -43,7 +43,6 @@ private class FieldControl(val sceneEditor: SceneEditor, val layout: FlexLayout,
 
     init {
         list.groupBy { it.id }.values.forEach {
-            it as List<NodeService.Field<Any>>
             val field = it.first()
             val editor = field.makeEditor(sceneEditor, it).appendTo(layout, grow = 0)
             editors[field] = editor
@@ -67,7 +66,7 @@ private class FieldControl(val sceneEditor: SceneEditor, val layout: FlexLayout,
     }
 }
 
-class PropertyGroup(val sceneEditor: SceneEditor, list: List<NodeService.Field<out Any>>) : JPanel(), Closeable, Properties {
+class PropertyGroup(val sceneEditor: SceneEditor, list: List<NodeService.Field>) : JPanel(), Closeable, Properties {
     private val layout = FlexLayout(this, FlexLayout.Direction.COLUMN)
     private val fc = FieldControl(sceneEditor, layout, list)
     override val component: JComponent
@@ -78,7 +77,7 @@ class PropertyGroup(val sceneEditor: SceneEditor, list: List<NodeService.Field<o
     }
 }
 
-class PropertyGroupSpoler(val sceneEditor: SceneEditor, title: String, list: List<NodeService.Field<out Any>>) : Spoler(title), Closeable, Properties {
+class PropertyGroupSpoler(val sceneEditor: SceneEditor, title: String, list: List<NodeService.Field>) : Spoler(title), Closeable, Properties {
     private val layout = FlexLayout(stage, FlexLayout.Direction.COLUMN)
     private val fc = FieldControl(sceneEditor, layout, list)
     override val component: JComponent

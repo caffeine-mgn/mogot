@@ -26,15 +26,17 @@ class AddAnimateFrameAction : AnAction() {
         e.presentation.isEnabled = editor.animationTool?.animateModel != null && editor.viewer.view.selected.isNotEmpty()
     }
 
-    private fun cloneValue(field: NodeService.Field<*>) =
+    private fun cloneValue(field: NodeService.Field) =
             when (field.fieldType) {
                 Field.Type.FLOAT -> field.currentValue
                 Field.Type.VEC2 -> field.currentValue.let { it as Vector2fc }.let { Vector2f(it.x, it.y) }
                 Field.Type.VEC3 -> field.currentValue.let { it as Vector3fc }.let { Vector3f(it.x, it.y, it.z) }
                 Field.Type.STRING -> field.currentValue.let { it as String }
+                Field.Type.FILE -> field.currentValue.let { it as String }
                 Field.Type.INT -> field.currentValue.let { it as Int }
                 Field.Type.BOOL -> field.currentValue.let { it as Boolean }
                 Field.Type.VEC4 -> field.currentValue.let { it as Vector4fc }.let { Vector4f(it.x, it.y, it.z, it.w) }
+                Field.Type.QUATERNION -> field.currentValue.let { it as Quaternionfc }.let { Quaternionf(it.x, it.y, it.z, it.w) }
             }
 
     override fun actionPerformed(e: AnActionEvent) {

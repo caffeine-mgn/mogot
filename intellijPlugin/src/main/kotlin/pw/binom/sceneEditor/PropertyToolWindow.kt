@@ -38,7 +38,7 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
         idEditor.isEnabled = nodes.size == 1
 
         val fields = nodes.asSequence().flatMap {
-            val service = editor.viewer.view.getService(it) ?: return@flatMap emptySequence<NodeService.Field<Any>>()
+            val service = editor.viewer.view.getService(it) ?: return@flatMap emptySequence<NodeService.Field>()
             val f = service.getFields(editor.viewer.view, it)
             f.asSequence()
         }

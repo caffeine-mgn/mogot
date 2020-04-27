@@ -5,7 +5,7 @@ import pw.binom.sceneEditor.SceneEditor
 import pw.binom.ui.*
 import pw.binom.utils.common
 
-class MaterialFieldEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<String>>) : AbstractEditor<String>(sceneEditor, fields) {
+class MaterialFieldEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
     private val editor = MaterialEditor(sceneEditor).appendTo(layout, 1, 0)
@@ -14,7 +14,7 @@ class MaterialFieldEditor(sceneEditor: SceneEditor, fields: List<NodeService.Fie
     private var enableEvents2 = true
 
     private fun refreshValues() {
-        val common = fields.asSequence().map { it.currentValue }.common ?: ""
+        val common = fields.asSequence().map { it.currentValue as String }.common ?: ""
         println("Material path: $common [${fields.map { it.displayName }}]")
         enableEvents = false
         editor.value = common

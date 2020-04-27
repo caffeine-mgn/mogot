@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
-import mogot.math.Vector2f
-import mogot.math.Vector2fc
-import mogot.math.Vector3f
-import mogot.math.Vector3fc
 import pw.binom.animation.Animation
 import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
@@ -22,18 +18,7 @@ import java.io.StringReader
 import java.util.*
 import javax.swing.Icon
 import kotlin.collections.ArrayList
-import kotlin.collections.Iterator
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.find
-import kotlin.collections.forEach
-import kotlin.collections.joinToString
-import kotlin.collections.listOf
-import kotlin.collections.plusAssign
 import kotlin.collections.set
-import kotlin.collections.sumBy
 
 object AnimateNodeCreator : NodeCreator {
     override val name: String
@@ -48,49 +33,21 @@ object AnimateNodeCreator : NodeCreator {
 object AnimateNodeService : NodeService {
     override fun getClassName(node: Node): String = AnimateNode::class.java.name
 
-    override fun getFields(view: SceneEditorView, node: Node): List<NodeService.Field<Any>> {
-        node as EditAnimateNode
-        return listOf(node.currentAnimationField as NodeService.Field<Any>)
-    }
-
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != AnimateNode::class.java.name)
-            return null
-        val node = EditAnimateNode()
-        properties.asSequence().filter { it.key.startsWith("files.") }.forEach {
-            node.add(it.value.removePrefix("FILE "))
-        }
-        properties["animationIndex"]?.toIntOrNull()?.also {
-            node.currentAnimation = it
-        }
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node::class.java != EditAnimateNode::class.java)
-            return null
-        node as EditAnimateNode
-        val out = HashMap<String, String>()
-        node.files.forEachIndexed { index, s ->
-            out["files.$index"] = "FILE $s"
-        }
-        node.currentAnimation.takeIf { it >= 0 }.also {
-            out["animationIndex"] = it.toString()
-        }
-
-        return out
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java == EditAnimateNode::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        node as EditAnimateNode
-        val out = EditAnimateNode()
-        node.files.forEach {
-            out.add(it)
-        }
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        node as EditAnimateNode
+//        val out = EditAnimateNode()
+//        node.files.forEach {
+//            out.add(it)
+//        }
+//        return out
+//    }
+
+    override val nodeClass: String
+        get() = AnimateNode::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = EditAnimateNode()
 }
 
 class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFrameView.Model {
@@ -180,13 +137,7 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
                     val l = o.property(
                             display = it.text,
                             name = it.name,
-                            type = it.type/*when (it.type) {
-                                NodeService.FieldType.FLOAT -> Animation.PropertyType.FLOAT
-                                NodeService.FieldType.INT -> Animation.PropertyType.INT
-                                NodeService.FieldType.STRING -> Animation.PropertyType.STRING
-                                NodeService.FieldType.VEC2 -> Animation.PropertyType.VEC2
-                                NodeService.FieldType.VEC3 -> Animation.PropertyType.VEC3
-                            }*/
+                            type = it.type
                     )
                     if (l != null)
                         it.iterator().forEach { f ->
@@ -197,29 +148,6 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
         r.end()
 
         doc.setText(sb.toString())
-//        val root = json(
-//                "frameInSecond" to frameInSeconds.json(),
-//                "frameCount" to frameCount.json(),
-//                "objects" to nodes.map { node ->
-//                    json(
-//                            "path" to node.nodePath.json(),
-//                            "properties" to node.properties.map { property ->
-//                                json(
-//                                        "type" to property.type.name.json(),
-//                                        "text" to property.text.json(),
-//                                        "name" to property.name.json(),
-//                                        "frames" to property.iterator().map { frame ->
-//                                            json(
-//                                                    "time" to frame.time.json(),
-//                                                    "val" to frame.data.let { toString(property.type, it) }?.json()
-//                                            )
-//                                        }.json()
-//                                )
-//                            }.json()
-//                    )
-//                }.json()
-//        )
-//        doc.setText(mapper.writeValueAsString(root))
     }
 
     class AnimateProperty(val node: AnimateNode, override val text: String, val name: String, val type: Field.Type) : AnimatePropertyView.Property, AnimateFrameView.FrameLine {
@@ -316,31 +244,31 @@ class AnimateFile(val file: VirtualFile) : AnimatePropertyView.Model, AnimateFra
 
 class CurrentAnimationField(override val node: EditAnimateNode) : NodeService.FieldInt() {
     override val id: Int
-        get() = ScaleField2D::class.java.hashCode()
+        get() = CurrentAnimationField::class.java.hashCode()
     override val groupName: String
         get() = "Animation"
     private var originalValue: Int? = null
-    override var currentValue: Int
+    override var currentValue: Any
         get() = node.currentAnimation
         set(value) {
-            node.currentAnimation = value
+            node.currentAnimation = value as Int
         }
 
     override fun clearTempValue() {
         originalValue = null
     }
 
-    override val value: Int
+    override val value: Any
         get() = originalValue ?: currentValue
     override val name: String
         get() = "animationIndex"
     override val displayName: String
-        get() = "Animation"
+        get() = "Current Animation"
 
-    override fun setTempValue(value: Int) {
+    override fun setTempValue(value: Any) {
         if (originalValue == null)
             originalValue = node.currentAnimation
-        node.currentAnimation = value
+        node.currentAnimation = value as Int
     }
 
     override fun resetValue() {
@@ -350,23 +278,72 @@ class CurrentAnimationField(override val node: EditAnimateNode) : NodeService.Fi
         }
     }
 
-    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>): AbstractEditor<Int> {
+    override fun makeEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field>): AbstractEditor {
         return EditorAnimationSelector(sceneEditor, fields)
     }
 }
 
-class EditAnimateNode : Node() {
-    private val filePaths = ArrayList<String>()
+class CurrentAnimationListField(override val node: EditAnimateNode) : NodeService.FieldFile() {
+    override val id: Int
+        get() = CurrentAnimationListField::class.java.hashCode()
+    override val groupName: String
+        get() = "Animation"
+    private var originalValue: String? = null
+    override var currentValue: Any
+        get() = node.filePaths.joinToString("|")
+        set(value) {
+            node.filePaths.clear()
+            (value as String).split('|').forEach {
+                node.filePaths.add(it)
+            }
+            node.fileChangedEvent.dispatch()
+        }
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    val currentAnimationField = CurrentAnimationField(node)
+
+    override fun getSubFields(): List<NodeService.Field> = listOf(currentAnimationField)
+
+    override val value: Any
+        get() = originalValue ?: currentValue
+    override val name: String
+        get() = "animationList"
+    override val displayName: String
+        get() = "Animations"
+
+    override fun setTempValue(value: Any) {
+        if (originalValue == null)
+            originalValue = node.filePaths.joinToString("|")
+        node.currentAnimation = value as Int
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.filePaths.clear()
+            originalValue!!.split('|').forEach {
+                node.filePaths.add(it)
+            }
+            node.fileChangedEvent.dispatch()
+            originalValue = null
+        }
+    }
+}
+
+class EditAnimateNode : Node(), EditableNode {
+    val filePaths = ArrayList<String>()
     val fileChangedEvent = EventDispatcher()
     val files: List<String>
         get() = filePaths
 
-    val currentAnimationField = CurrentAnimationField(this)
+    val animationListField = CurrentAnimationListField(this)
 
     var currentAnimation = -1
         set(value) {
             field = value
-            currentAnimationField.eventChange.dispatch()
+            animationListField.currentAnimationField.eventChange.dispatch()
         }
 
     fun add(file: String) {
@@ -380,9 +357,13 @@ class EditAnimateNode : Node() {
         if (filePaths.remove(file))
             fileChangedEvent.dispatch()
     }
+
+    private val field = listOf(animationListField)
+
+    override fun getEditableFields(): List<NodeService.Field> = field
 }
 
-fun AnimateFile.AnimateProperty.getField(view: SceneEditorView, node: EditAnimateNode): NodeService.Field<*>? {
+fun AnimateFile.AnimateProperty.getField(view: SceneEditorView, node: EditAnimateNode): NodeService.Field? {
     val currentNode = node.findByRelative(this.node.nodePath) ?: return null
     val service = view.getService(currentNode) ?: return null
     return service.getFields(view, currentNode)

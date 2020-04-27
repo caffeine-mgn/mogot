@@ -7,7 +7,7 @@ import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.utils.common
 
-class EditorInt(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>) : AbstractEditor<Int>(sceneEditor, fields) {
+class EditorInt(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
@@ -18,7 +18,7 @@ class EditorInt(sceneEditor: SceneEditor, fields: List<NodeService.Field<Int>>) 
 
     private fun refreshValues() {
         enableEvents = false
-        val common = fields.asSequence().map { it.currentValue }.common
+        val common = fields.asSequence().map { it.currentValue as Int }.common
         editor.value = common ?: 0
         editor.valid = common != null
         enableEvents = true

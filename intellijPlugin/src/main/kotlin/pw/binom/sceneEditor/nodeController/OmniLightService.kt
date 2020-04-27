@@ -14,12 +14,41 @@ import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import javax.swing.Icon
 import javax.swing.ImageIcon
-import kotlin.collections.HashMap
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.get
-import kotlin.collections.listOf
 import kotlin.collections.set
+
+class SpecularEditableField(override val node: mogot.Light) : NodeService.FieldFloat() {
+    override val id: Int
+        get() = SpecularEditableField::class.java.hashCode()
+    override val groupName: String
+        get() = "Light"
+    override var currentValue: Any
+        get() = node.specular
+        set(value) {
+            node.specular = value as Float
+        }
+
+    private var originalValue: Float? = null
+
+    override val value: Any
+        get() = originalValue ?: node.specular
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "specular"
+    override val displayName: String
+        get() = "Specular"
+
+    override fun setTempValue(value: Any) {
+        TODO("Not yet implemented")
+    }
+
+    override fun resetValue() {
+        TODO("Not yet implemented")
+    }
+}
 
 object OmniNodeCreator : NodeCreator {
     override val name: String
@@ -70,16 +99,33 @@ private fun createStub(view: SceneEditorView, light: PointLight) {
     }
 }
 
+class EditablePointLight : PointLight(), EditableNode {
+    val specularEditableField = SpecularEditableField(this);
+    val positionField = PositionField3D(this)
+    val rotationField = RotateField3D(this)
+
+    private val fields = listOf(positionField, rotationField, specularEditableField)
+    override fun getEditableFields(): List<NodeService.Field> = fields
+}
+
 object OmniLightService : NodeService {
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+    override val nodeClass: String
+        get() = PointLight::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node {
+        val node = EditablePointLight()
+        createStub(view, node)
+        return node;
+    }
 
     private val props = listOf(Transform3DPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node is PointLight
     override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is PointLight) return null
-        val out = PointLight()
+        val out = EditablePointLight()
         out.specular = node.specular
         out.diffuse.set(node.diffuse)
         SpatialService.cloneSpatial(node, out)
@@ -102,22 +148,5 @@ object OmniLightService : NodeService {
             material.diffuseColor.set(0.5f, 0.5f, 0.5f, 0f)
         else
             material.diffuseColor.set(0f, 0f, 0f, 0f)
-    }
-
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != PointLight::class.java.name)
-            return null
-        val node = PointLight()
-        createStub(view, node)
-        SpatialService.loadSpatial(view.engine, node, properties)
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is PointLight) return null
-        val out = HashMap<String, String>()
-        SpatialService.saveSpatial(view.engine, node, out)
-        out["specular"] = node.specular.toString()
-        return out
     }
 }

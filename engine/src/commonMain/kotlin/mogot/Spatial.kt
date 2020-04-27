@@ -4,10 +4,60 @@ import mogot.math.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
+private object PositionField3D : AbstractField<Spatial, Vector3fc>() {
+    override val type: Field.Type
+        get() = Field.Type.VEC3
+
+    override val name: String
+        get() = "position"
+
+    override suspend fun setValue(engine: Engine, node: Spatial, value: Vector3fc) {
+        node.position.set(value)
+    }
+
+    override fun currentValue(node: Spatial): Vector3fc = node.position
+}
+
+private object ScaleField3D : AbstractField<Spatial, Vector3fc>() {
+    override val type: Field.Type
+        get() = Field.Type.VEC3
+
+    override val name: String
+        get() = "scale"
+
+    override suspend fun setValue(engine: Engine, node: Spatial, value: Vector3fc) {
+        node.scale.set(value)
+    }
+
+    override fun currentValue(node: Spatial): Vector3fc = node.scale
+}
+
+private object RotationField3D : AbstractField<Spatial, Quaternionfc>() {
+    override val type: Field.Type
+        get() = Field.Type.QUATERNION
+
+    override val name: String
+        get() = "rotate"
+
+    override suspend fun setValue(engine: Engine, node: Spatial, value: Quaternionfc) {
+        node.quaternion.set(value)
+    }
+
+    override fun currentValue(node: Spatial): Quaternionfc = node.quaternion
+}
+
 open class Spatial : Node() {
 
     override val type: Int
         get() = SPATIAL_TYPE
+
+    override fun getField(name: String): Field? =
+            when (name) {
+                PositionField3D.name -> PositionField3D
+                RotationField3D.name -> RotationField3D
+                ScaleField3D.name -> ScaleField3D
+                else -> super.getField(name)
+            }
 
     private var updateMatrix = false
     private val tmpMatrix = Matrix4f()
@@ -139,6 +189,7 @@ open class Spatial : Node() {
         get() = _matrix
 
     override fun apply(matrix: Matrix4fc): Matrix4fc {
+        transform
         this._matrix.set(matrix)
                 //.translationRotateScale(position,quaternion,scale)
                 .translate(position)

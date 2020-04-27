@@ -1,10 +1,42 @@
 package mogot
 
-import mogot.math.Vector2f
-import mogot.math.Vector2fc
-import mogot.math.Vector3fc
-import mogot.math.Vector4fc
-import mogot.math.lerp
+import mogot.math.*
+
+private object AnimationListField3D : AbstractField<AnimateNode, String>() {
+    override val type: Field.Type
+        get() = Field.Type.FILE
+
+    override val name: String
+        get() = "animationList"
+
+    override suspend fun setValue(engine: Engine, node: AnimateNode, value: String) {
+        node.animations.clear()
+        node.animations.addAll(value.split(Field.Type.LIST_SPLITOR))
+    }
+
+    override fun currentValue(node: AnimateNode): String = node.animations.joinToString(Field.Type.LIST_SPLITOR.toString())
+
+    override suspend fun setSubFields(engine: Engine, node: Node, data: Map<String, Any>) {
+        (data["animationIndex"] as Int?)?.let {
+            node as AnimateNode
+            node.setAnimation(it)
+        }
+    }
+}
+
+private object AnimationIndexListField3D : AbstractField<AnimateNode, Int>() {
+    override val type: Field.Type
+        get() = Field.Type.INT
+
+    override val name: String
+        get() = "animationIndex"
+
+    override suspend fun setValue(engine: Engine, node: AnimateNode, value: Int) {
+        node.setAnimation(value)
+    }
+
+    override fun currentValue(node: AnimateNode): Int = node.animationIndex
+}
 
 fun <T : Any> AnimationFile.Frame<T>.lerp(frameCount: Int, currentFrame: Float, next: AnimationFile.Frame<T>, lerpFunc: (T, T, Float) -> Unit) {
     if (next.time > time) {
@@ -86,56 +118,68 @@ open class FrameHolder<T : Any>(val animation: AnimationFile.Property<T>) {
 class AnimateNode(val engine: Engine) : Node() {
     val animations = ArrayList<String>()
 
-    sealed class AnimatedProperty<T : Any>(val field: Field, animation: AnimationFile.Property<T>) : FrameHolder<T>(animation) {
+    override fun getField(name: String): Field? =
+            when (name) {
+                AnimationListField3D.name -> AnimationListField3D
+                AnimationIndexListField3D.name -> AnimationIndexListField3D
+                else -> super.getField(name)
+            }
 
-        class Vec4(field: Field, animation: AnimationFile.Property<Vector4fc>) : AnimatedProperty<Vector4fc>(field, animation) {
+    sealed class AnimatedProperty<T : Any>(val animateNode: AnimateNode, val node: Node, val field: Field, animation: AnimationFile.Property<T>) : FrameHolder<T>(animation) {
+
+        class Vec4(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<Vector4fc>) : AnimatedProperty<Vector4fc>(animateNode, node, field, animation) {
+            override fun playNext(frame: kotlin.Float, revers: Boolean) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        class QuaternionfProp(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<Quaternionfc>) : AnimatedProperty<Quaternionfc>(animateNode, node, field, animation) {
+            override fun playNext(frame: kotlin.Float, revers: Boolean) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        class Vec3(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<Vector3fc>) : AnimatedProperty<Vector3fc>(animateNode, node, field, animation) {
 
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 TODO("Not yet implemented")
             }
         }
 
-        class Vec3(field: Field, animation: AnimationFile.Property<Vector3fc>) : AnimatedProperty<Vector3fc>(field, animation) {
-
-            override fun playNext(frame: kotlin.Float, revers: Boolean) {
-                TODO("Not yet implemented")
-            }
-        }
-
-        class Vec2(field: Field, animation: AnimationFile.Property<Vector2fc>) : AnimatedProperty<Vector2fc>(field, animation) {
-            var currentValue = Vector2f(field.value as Vector2fc)
+        class Vec2(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<Vector2fc>) : AnimatedProperty<Vector2fc>(animateNode, node, field, animation) {
+            var currentValue = Vector2f(field.get(node) as Vector2fc)
             var frame = animation.frames[0]
             var nextFrame = animation.frames[1]
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 lerp(frame, revers) { current, next, cof ->
                     current.lerp(next, cof, currentValue)
                 }
-                field.value = currentValue
+                field.set(animateNode.engine, node, currentValue)
             }
         }
 
-        class Int(field: Field, animation: AnimationFile.Property<kotlin.Int>) : AnimatedProperty<kotlin.Int>(field, animation) {
+        class Int(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<kotlin.Int>) : AnimatedProperty<kotlin.Int>(animateNode, node, field, animation) {
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 TODO("Not yet implemented")
             }
         }
 
-        class Float(field: Field, animation: AnimationFile.Property<kotlin.Float>) : AnimatedProperty<kotlin.Float>(field, animation) {
+        class Float(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<kotlin.Float>) : AnimatedProperty<kotlin.Float>(animateNode, node, field, animation) {
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 lerp(frame, revers) { current, next, cof ->
                     val v = current.lerp(next, cof)
-                    field.value = v
+                    field.set(animateNode.engine, node, v)
                 }
             }
         }
 
-        class String(field: Field, animation: AnimationFile.Property<kotlin.String>) : AnimatedProperty<kotlin.String>(field, animation) {
+        class String(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<kotlin.String>) : AnimatedProperty<kotlin.String>(animateNode, node, field, animation) {
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 TODO("Not yet implemented")
             }
         }
 
-        class Bool(field: Field, animation: AnimationFile.Property<Boolean>) : AnimatedProperty<Boolean>(field, animation) {
+        class Bool(animateNode: AnimateNode, node: Node, field: Field, animation: AnimationFile.Property<Boolean>) : AnimatedProperty<Boolean>(animateNode, node, field, animation) {
             override fun playNext(frame: kotlin.Float, revers: Boolean) {
                 TODO("Not yet implemented")
             }
@@ -166,13 +210,15 @@ class AnimateNode(val engine: Engine) : Node() {
                             return@forEach
                         }
                         val v = when (field.type) {
-                            Field.Type.VEC3 -> AnimatedProperty.Vec3(field, animProp as AnimationFile.Property<Vector3fc>)
-                            Field.Type.VEC2 -> AnimatedProperty.Vec2(field, animProp as AnimationFile.Property<Vector2fc>)
-                            Field.Type.STRING -> AnimatedProperty.String(field, animProp as AnimationFile.Property<String>)
-                            Field.Type.INT -> AnimatedProperty.Int(field, animProp as AnimationFile.Property<Int>)
-                            Field.Type.BOOL -> AnimatedProperty.Bool(field, animProp as AnimationFile.Property<Boolean>)
-                            Field.Type.FLOAT -> AnimatedProperty.Float(field, animProp as AnimationFile.Property<Float>)
-                            Field.Type.VEC4 -> AnimatedProperty.Vec4(field, animProp as AnimationFile.Property<Vector4fc>)
+                            Field.Type.VEC3 -> AnimatedProperty.Vec3(this, node, field, animProp as AnimationFile.Property<Vector3fc>)
+                            Field.Type.VEC2 -> AnimatedProperty.Vec2(this, node, field, animProp as AnimationFile.Property<Vector2fc>)
+                            Field.Type.STRING -> AnimatedProperty.String(this, node, field, animProp as AnimationFile.Property<String>)
+                            Field.Type.FILE -> AnimatedProperty.String(this, node, field, animProp as AnimationFile.Property<String>)
+                            Field.Type.INT -> AnimatedProperty.Int(this, node, field, animProp as AnimationFile.Property<Int>)
+                            Field.Type.BOOL -> AnimatedProperty.Bool(this, node, field, animProp as AnimationFile.Property<Boolean>)
+                            Field.Type.FLOAT -> AnimatedProperty.Float(this, node, field, animProp as AnimationFile.Property<Float>)
+                            Field.Type.VEC4 -> AnimatedProperty.Vec4(this, node, field, animProp as AnimationFile.Property<Vector4fc>)
+                            Field.Type.QUATERNION -> AnimatedProperty.QuaternionfProp(this, node, field, animProp as AnimationFile.Property<Quaternionfc>)
                         }
                         animProperties += v
                     }
@@ -205,8 +251,11 @@ class AnimateNode(val engine: Engine) : Node() {
         }
     }
 
+    internal var animationIndex = -1
+
     suspend fun setAnimation(index: Int) {
         require(index >= 0 && index < animations.size)
+        animationIndex = index
         currentAnimation = engine.resources.loadAnimation(animations[index])
     }
 }

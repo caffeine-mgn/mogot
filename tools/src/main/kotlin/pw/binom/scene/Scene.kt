@@ -14,7 +14,7 @@ class Scene(val childs: List<Node>, val type: Type) {
         D3
     }
 
-    class Node(val className: String, val properties: Map<String, String>, val childs: List<Node>)
+    class Node(val id: String?, val className: String, val properties: Map<String, String>, val childs: List<Node>)
 
     fun save(stream: OutputStream) {
         val root = JsonNodeFactory.instance.objectNode()
@@ -34,8 +34,12 @@ class Scene(val childs: List<Node>, val type: Type) {
     private fun Node.toObject(): ObjectNode {
         val root = JsonNodeFactory.instance.objectNode()
         root.set<JsonNode>("class", JsonNodeFactory.instance.textNode(className))
-        if (properties.isNotEmpty())
+        if (id != null) {
+            root.set<JsonNode>("id", JsonNodeFactory.instance.textNode(id))
+        }
+        if (properties.isNotEmpty()) {
             root.set<JsonNode>("properties", properties.toObject())
+        }
 
         if (childs.isNotEmpty()) {
             val array = JsonNodeFactory.instance.arrayNode()
@@ -66,7 +70,7 @@ class Scene(val childs: List<Node>, val type: Type) {
                 readNode(it.obj)
             } ?: emptyList()
 
-            return Node(className, properties, childs)
+            return Node(className = className, properties = properties, childs = childs, id = node["id"]?.string)
         }
     }
 }

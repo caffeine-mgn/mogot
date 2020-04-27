@@ -12,7 +12,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.dnd.*
 import java.io.Closeable
 
-class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector2fc>>) : AbstractEditor<Vector2fc>(sceneEditor, fields) {
+class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
@@ -23,7 +23,7 @@ class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector
 
     private fun refreshValues() {
         enableEvents = false
-        editor.value.set(fields.asSequence().map { it.currentValue }.common)
+        editor.value.set(fields.asSequence().map { it.currentValue as Vector2fc }.common)
         enableEvents = true
     }
 
@@ -49,14 +49,17 @@ class EditorVec2(sceneEditor: SceneEditor, fields: List<NodeService.Field<Vector
                         }
                     }
                     !editor.value.x.isNaN() ->
+
                         fields.forEach {
+                            val currentValue = it.currentValue as Vector2fc
                             it.clearTempValue()
-                            it.currentValue = Vector2f(x, it.currentValue.y)
+                            it.currentValue = Vector2f(x, currentValue.y)
                         }
                     !editor.value.y.isNaN() ->
                         fields.forEach {
+                            val currentValue = it.currentValue as Vector2fc
                             it.clearTempValue()
-                            it.currentValue = Vector2f(it.currentValue.x, y)
+                            it.currentValue = Vector2f(currentValue.x, y)
                         }
 
                 }

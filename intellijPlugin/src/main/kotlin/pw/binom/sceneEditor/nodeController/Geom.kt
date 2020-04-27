@@ -6,6 +6,8 @@ import mogot.GeomNode
 import mogot.Node
 import mogot.Spatial
 import mogot.math.AABBm
+import mogot.math.Quaternionfm
+import mogot.math.Vector3fm
 import mogot.math.Vector4f
 import pw.binom.ExternalFbx
 import pw.binom.FbxGeom
@@ -18,8 +20,66 @@ import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.MaterialPropertyFactory
 import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.utils.QuaternionfmDelegator
+import pw.binom.utils.Vector3fmDelegator
 import javax.swing.Icon
 
+class FbxModelEditableField(var view: SceneEditorView, override val node: EditableGeomNode) : NodeService.FieldFile() {
+    override val id: Int
+        get() = FbxModelEditableField::class.java.hashCode()
+    override val groupName: String
+        get() = "Geometry"
+    override var currentValue: Any
+        get() = file
+        set(value) {
+            file = value as String
+        }
+    var file = ""
+        set(value) {
+            if (value.isEmpty()) {
+                field = value
+                return
+            }
+            val items = value.split(mogot.Field.Type.INTERNAL_SPLITOR)
+            val filePath = items[0]
+            val internal = items[1]
+            val file = view.editor1.findFileByRelativePath(filePath)
+            if (file == null) {
+                field = ""
+                node.geom.value = null
+                return
+            }
+            field = value
+            val fbx = view.engine.resources.loadFbx(file)
+            node.geom.value = fbx.getGeom(internal)
+            fbx.dec()
+        }
+    private var originalValue: String? = null
+    override val value: Any
+        get() = originalValue ?: file
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "file"
+    override val displayName: String
+        get() = "Model"
+
+    override fun setTempValue(value: Any) {
+        if (originalValue == null)
+            originalValue = file
+        file = value as String
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            file = originalValue!!
+            originalValue = null
+        }
+    }
+}
 
 object FbxModelNodeCreator : NodeCreator {
     override val name: String
@@ -43,13 +103,32 @@ object FbxModelNodeCreator : NodeCreator {
     }
 }
 
+class EditableGeomNode(view: SceneEditorView) : GeomNode(), EditableNode {
+    val file = FbxModelEditableField(view, this)
+    override val position: Vector3fm = Vector3fmDelegator(super.position) {
+        positionField.eventChange.dispatch()
+    }
+    override val scale: Vector3fm = Vector3fmDelegator(super.scale) {
+        positionField.eventChange.dispatch()
+    }
+    override val quaternion: Quaternionfm = QuaternionfmDelegator(super.quaternion) {
+        rotationField.eventChange.dispatch()
+    }
+    val positionField = PositionField3D(this)
+    val scaleField = ScaleField3D(this)
+    val rotationField = RotateField3D(this)
+    val materialField = MaterialField(view, this)
+    val fields = listOf(positionField, rotationField, scaleField, materialField, file)
+    override fun getEditableFields(): List<NodeService.Field> = fields
+}
+
 private fun makeFbxScene(view: SceneEditorView, fbx: ExternalFbx): Spatial {
     val root = Spatial()
     val meta = fbx.meta ?: TODO()
 
     fun buildNode(model: FbxModel2, parent: Node) {
         val node = if (model.geometry != null) {
-            val node = GeomNode()
+            val node = EditableGeomNode(view)
             node.geom.value = fbx.getGeom(model.geometry!!.name)
             node.parent = parent
             node.material.value = view.default3DMaterial.instance(Vector4f(1f))
@@ -76,42 +155,19 @@ object GeomService : NodeService {
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
 
     override fun getAABB(node: Node, aabb: AABBm): Boolean = false
+    override val nodeClass: String
+        get() = GeomNode::class.java.name
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is GeomNode) return null
-        val out = GeomNode()
-        out.geom.value = node.geom.value
-        SpatialService.cloneSpatial(node, out)
-        MaterialNodeUtils.clone(node, out)
-        return out
-    }
+    override fun newInstance(view: SceneEditorView): Node = EditableGeomNode(view)
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != GeomNode::class.java.name) return null
-        val node = GeomNode()
-        node.material.value = view.default3DMaterial.instance(Vector4f(1f))
-        SpatialService.loadSpatial(view.engine, node, properties)
-        val virtualFile = properties["file"]?.let { view.editor1.findFileByRelativePath(it) }
-        virtualFile ?: return null
-        val fbx = view.engine.resources.loadFbx(virtualFile)
-        node.geom.value = properties["geom"]?.let { fbx.getGeom(it) } ?: return null
-        node.material.value = view.default3DMaterial.instance(Vector4f(1f))
-        MaterialNodeUtils.load(view, node, properties)
-        return node
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        if (node !is EditableGeomNode) return null
+//        val out = EditableGeomNode(view)
+//        out.geom.value = node.geom.value
+//        SpatialService.cloneSpatial(node, out)
+//        MaterialNodeUtils.clone(node, out)
+//        return out
+//    }
 
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is GeomNode) return null
-        val out = HashMap<String, String>()
-        SpatialService.saveSpatial(view.engine, node, out)
-        val geom = node.geom.value as FbxGeom
-        if (geom.fbx.file.isInLocalFileSystem) {
-            out["file"] = view.editor1.getRelativePath(geom.fbx.file)
-        }
-        out["geom"] = geom.name
-
-        return out
-    }
-
-    override fun isEditor(node: Node): Boolean = node::class.java === GeomNode::class.java
+    override fun isEditor(node: Node): Boolean = node::class.java === EditableGeomNode::class.java
 }

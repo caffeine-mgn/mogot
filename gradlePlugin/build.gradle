@@ -14,8 +14,8 @@ dependencies {
 
 
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compileOnly project(':tools')
-    compileOnly project(':engine')
+    api project(':tools')
+    api project(':engine')
 //    api fileTree(file("${project(':engine').buildDir}/libs"))
 //    file("${project(':tools').buildDir}/libs").listFiles().collect{
 //        api(zipTree(it))
@@ -32,6 +32,7 @@ compileKotlin {
     dependsOn ":tools:jar"
 }
 jar {
+    /*
     from {
         def list = fileTree(file("${project(':tools').buildDir}/libs")).findAll {
             it.name.toLowerCase().endsWith(".jar")
@@ -44,6 +45,8 @@ jar {
         }.collect{zipTree(it)}
         list
     }
+    */
+    /*
     from {
         configurations.forEach {
             println("config->$it")
@@ -61,7 +64,7 @@ jar {
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
-
+*/
     archiveName = "gradlePlugin.jar"
 }
 

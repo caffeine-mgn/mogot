@@ -3,8 +3,49 @@ package mogot
 import mogot.gl.PostEffectPipeline
 import mogot.math.*
 
+private object FarField2D : AbstractField<Camera, Float>() {
+    override val type: Field.Type
+        get() = Field.Type.FLOAT
 
-class Camera : Spatial() {
+    override val name: String
+        get() = "far"
+
+    override suspend fun setValue(engine: Engine, node: Camera, value: Float) {
+        node.far = value
+    }
+
+    override fun currentValue(node: Camera): Float = node.far
+}
+
+private object NearField2D : AbstractField<Camera, Float>() {
+    override val type: Field.Type
+        get() = Field.Type.FLOAT
+
+    override val name: String
+        get() = "near"
+
+    override suspend fun setValue(engine: Engine, node: Camera, value: Float) {
+        node.near = value
+    }
+
+    override fun currentValue(node: Camera): Float = node.near
+}
+
+private object FieldOfViewField2D : AbstractField<Camera, Float>() {
+    override val type: Field.Type
+        get() = Field.Type.FLOAT
+
+    override val name: String
+        get() = "fieldOfView"
+
+    override suspend fun setValue(engine: Engine, node: Camera, value: Float) {
+        node.fieldOfView = value
+    }
+
+    override fun currentValue(node: Camera): Float = node.fieldOfView
+}
+
+open class Camera(engine: Engine) : Spatial() {
     private var _postEffectPipeline by ResourceHolder<PostEffectPipeline>()
     var postEffectPipeline: PostEffectPipeline?
         set(value) {
@@ -15,24 +56,33 @@ class Camera : Spatial() {
 
     val projectionMatrix = Matrix4f()
 
+    override fun getField(name: String): Field? =
+            when (name) {
+                FarField2D.name -> FarField2D
+                NearField2D.name -> NearField2D
+                FieldOfViewField2D.name -> FieldOfViewField2D
+                else -> super.getField(name)
+            }
+
     var width = 0
         private set
+
     var height = 0
         private set
 
-    var near = 0.3f
+    open var near = 0.3f
         set(value) {
             field = value
             resize(width, height)
         }
 
-    var fieldOfView = 60f
+    open var fieldOfView = 60f
         set(value) {
             field = value
             resize(width, height)
         }
 
-    var far = 1000f
+    open var far = 1000f
         set(value) {
             field = value
             resize(width, height)
@@ -53,15 +103,6 @@ class Camera : Spatial() {
     }
 
     fun applyMatrix(viewMatrix4f: Matrix4f) {
-        /*
-        parent?.currentToRoot {
-            if (it.isSpatial) {
-                it as Spatial
-                viewMatrix4f.set(it.apply(viewMatrix4f))
-            }
-            true
-        }
-        */
         globalToLocalMatrix(viewMatrix4f)
         return
         this.asUpSequence().mapNotNull { it as? Spatial }.forEach {

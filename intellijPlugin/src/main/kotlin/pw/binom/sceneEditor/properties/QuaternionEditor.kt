@@ -1,18 +1,14 @@
-package pw.binom.ui
+package pw.binom.sceneEditor.properties
 
-import mogot.math.Vector2f
 import mogot.math.*
+import mogot.math.set
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditor
-import pw.binom.sceneEditor.properties.Panel
+import pw.binom.ui.*
+import pw.binom.utils.Vector3mDegrees
 import pw.binom.utils.common
-import java.awt.Cursor
-import java.awt.datatransfer.DataFlavor
-import java.awt.datatransfer.Transferable
-import java.awt.dnd.*
-import java.io.Closeable
 
-class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
+class QuaternionEditor(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : AbstractEditor(sceneEditor, fields) {
 
     private val layout = gridBagLayout()
     private val title = PropertyName(fields.first().displayName).appendTo(layout, 0, 0)
@@ -23,7 +19,7 @@ class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : Ab
 
     private fun refreshValues() {
         enableEvents = false
-        editor.value.set(fields.asSequence().map { it.currentValue as Vector3fc }.common)
+        editor.value.set(fields.asSequence().map { it.currentValue as Quaternionfc }.map { Vector3mDegrees(RotationVector(Quaternionf(it))) }.common)
         enableEvents = true
     }
 
@@ -37,13 +33,15 @@ class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : Ab
         }
         editor.eventChange.on {
             enableEvents2 = false
-            val x = editor.value.x
-            val y = editor.value.y
-            val z = editor.value.z
+            val x = toRadians(editor.value.x)
+            val y = toRadians(editor.value.y)
+            val z = toRadians(editor.value.z)
             if (enableEvents && (!x.isNaN() || !y.isNaN() || !z.isNaN())) {
 
                 if (!x.isNaN() && !y.isNaN() && !z.isNaN()) {
-                    val v = Vector3f(x, y, z)
+                    val v = Quaternionf()
+                    v.setRotation(z, y, x)
+                    println("v=$v")
                     fields.forEach {
                         it.clearTempValue()
                         it.currentValue = v
@@ -51,12 +49,14 @@ class EditorVec3(sceneEditor: SceneEditor, fields: List<NodeService.Field>) : Ab
 
                 } else {
                     fields.forEach {
-                        val currentValue = it.currentValue as Vector3fc
-                        it.currentValue = Vector3f(
-                                x.takeIf { !it.isNaN() } ?: currentValue.x,
-                                y.takeIf { !it.isNaN() } ?: currentValue.y,
-                                z.takeIf { !it.isNaN() } ?: currentValue.z
+                        val currentValue = it.currentValue as Quaternionfc
+                        val q = Quaternionf()
+                        q.setRotation(
+                                z.takeIf { !it.isNaN() } ?: currentValue.yaw,
+                                y.takeIf { !it.isNaN() } ?: currentValue.pitch,
+                                x.takeIf { !it.isNaN() } ?: currentValue.roll
                         )
+                        it.currentValue = q
                     }
                 }
             }
