@@ -19,11 +19,17 @@ abstract class View3D : GLView(MockFileSystem()) {
     private var v = 0f
     private var d = 6f
 
-    override var camera: Camera? = Camera()
+    override var camera: Camera? =null
 
     init {
+
+    }
+
+    override fun init() {
+        super.init()
         val root = Spatial()
         camera!!.parent = root
+        camera=Camera(engine)
     }
 
     protected fun resetCam() {

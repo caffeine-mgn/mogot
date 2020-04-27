@@ -11,6 +11,7 @@ import pw.binom.Services
 import pw.binom.sceneEditor.nodeController.EditableNode
 import pw.binom.sceneEditor.nodeController.EmptyNodeService
 import pw.binom.sceneEditor.properties.PropertyFactory
+import pw.binom.sceneEditor.properties.QuaternionEditor
 import pw.binom.ui.*
 
 interface NodeService {
@@ -81,6 +82,7 @@ interface NodeService {
                     mogot.Field.Type.VEC4 -> TODO()
                     mogot.Field.Type.STRING -> EditorString(sceneEditor, fields)
                     mogot.Field.Type.FILE -> EditorString(sceneEditor, fields)
+                    mogot.Field.Type.QUATERNION -> QuaternionEditor(sceneEditor, fields)
                 }
     }
 
@@ -196,7 +198,25 @@ interface NodeService {
 
     fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = emptyList()
     fun isEditor(node: Node): Boolean
-    fun clone(view: SceneEditorView, node: Node): Node?
+    fun clone(view: SceneEditorView, node: Node): Node? {
+        if (!isEditor(node))
+            return null
+        val newInstance = newInstance(view)
+        newInstance as EditableNode
+        node as EditableNode
+        newInstance.id = node.id
+        node.getEditableFields().forEach { from ->
+            val to = newInstance.getEditableFields().find { it.name == from.name }!!
+            to.currentValue = from.currentValue
+
+            to.getSubFields().forEach { fromSub ->
+                val toSub = to.getSubFields().find { it.name == fromSub.name }!!
+                toSub.currentValue = fromSub.currentValue
+            }
+        }
+        return newInstance
+    }
+
     fun delete(view: SceneEditorView, node: Node) {
         EmptyNodeService.nodeDeleted(view.engine, node)
     }

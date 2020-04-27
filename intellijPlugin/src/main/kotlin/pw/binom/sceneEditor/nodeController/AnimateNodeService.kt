@@ -35,14 +35,14 @@ object AnimateNodeService : NodeService {
 
     override fun isEditor(node: Node): Boolean = node::class.java == EditAnimateNode::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        node as EditAnimateNode
-        val out = EditAnimateNode()
-        node.files.forEach {
-            out.add(it)
-        }
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        node as EditAnimateNode
+//        val out = EditAnimateNode()
+//        node.files.forEach {
+//            out.add(it)
+//        }
+//        return out
+//    }
 
     override val nodeClass: String
         get() = AnimateNode::class.java.name
@@ -303,6 +303,10 @@ class CurrentAnimationListField(override val node: EditAnimateNode) : NodeServic
         originalValue = null
     }
 
+    val currentAnimationField = CurrentAnimationField(node)
+
+    override fun getSubFields(): List<NodeService.Field> = listOf(currentAnimationField)
+
     override val value: Any
         get() = originalValue ?: currentValue
     override val name: String
@@ -334,13 +338,12 @@ class EditAnimateNode : Node(), EditableNode {
     val files: List<String>
         get() = filePaths
 
-    val currentAnimationField = CurrentAnimationField(this)
     val animationListField = CurrentAnimationListField(this)
 
     var currentAnimation = -1
         set(value) {
             field = value
-            currentAnimationField.eventChange.dispatch()
+            animationListField.currentAnimationField.eventChange.dispatch()
         }
 
     fun add(file: String) {
@@ -355,7 +358,7 @@ class EditAnimateNode : Node(), EditableNode {
             fileChangedEvent.dispatch()
     }
 
-    private val field = listOf(animationListField, currentAnimationField)
+    private val field = listOf(animationListField)
 
     override fun getEditableFields(): List<NodeService.Field> = field
 }

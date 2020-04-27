@@ -22,6 +22,7 @@ private class PropertyVisitorBinary(private val type: Field.Type, private val st
         val r = when (type) {
             Field.Type.FLOAT -> stream.writeFloat(value as Float)
             Field.Type.INT -> stream.writeInt(value as Int)
+            Field.Type.FILE,
             Field.Type.STRING -> stream.writeUTF8String(value as String)
             Field.Type.VEC2 -> {
                 value as Vector2fc
@@ -35,6 +36,13 @@ private class PropertyVisitorBinary(private val type: Field.Type, private val st
                 stream.writeFloat(value.z)
             }
             Field.Type.VEC4 -> {
+                value as Vector4fc
+                stream.writeFloat(value.x)
+                stream.writeFloat(value.y)
+                stream.writeFloat(value.z)
+                stream.writeFloat(value.w)
+            }
+            Field.Type.QUATERNION -> {
                 value as Vector4fc
                 stream.writeFloat(value.x)
                 stream.writeFloat(value.y)

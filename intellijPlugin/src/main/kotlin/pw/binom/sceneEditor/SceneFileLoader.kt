@@ -34,12 +34,12 @@ object SceneFileLoader {
             node.childs.forEach {
                 loadNode(view, file, it)?.parent = out
             }
+        out as EditableNode
+        out.afterInit()
         return out
     }
 
     fun load(view: SceneEditorView, file: VirtualFile) {
-
-
         val scene = file.inputStream.use {
             Scene.load(it)
         }
@@ -52,9 +52,13 @@ object SceneFileLoader {
 
         fun saveNode(node: Node): Scene.Node? {
             val editable = node as EditableNode
-            val properties = editable.getEditableFields().asSequence().map {
-                it.name to it.fieldType.toString(it.value)
-            }.toMap()
+            val properties = HashMap<String, String>();
+            editable.getEditableFields().forEach {
+                properties[it.name] = it.fieldType.toString(it.value)
+                it.getSubFields().forEach { subField ->
+                    properties["${it.name}>${subField.name}"] = subField.fieldType.toString(subField.value)
+                }
+            }
             val childs = if (view.getService(node)?.isInternalChilds(node) != true) {
                 node.childs.mapNotNull {
                     saveNode(it)

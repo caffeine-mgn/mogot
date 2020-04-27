@@ -113,13 +113,13 @@ object Camera2DService : NodeService {
 
     override fun isEditor(node: Node): Boolean = node::class.java == CameraSprite::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        node as CameraSprite
-        val cam = CameraSprite(view)
-        Spatial2DService.cloneSpatial2D(node, cam)
-        Camera2DMeta(cam, view)
-        return cam
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        node as CameraSprite
+//        val cam = CameraSprite(view)
+//        Spatial2DService.cloneSpatial2D(node, cam)
+//        Camera2DMeta(cam, view)
+//        return cam
+//    }
 
     override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         if (node !is CameraSprite) return

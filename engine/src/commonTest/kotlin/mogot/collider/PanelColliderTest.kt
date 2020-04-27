@@ -5,14 +5,17 @@ import mogot.Spatial
 import mogot.eq
 import mogot.math.MutableRay
 import mogot.math.Vector3f
+import mogot.mockEngine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PanelColliderTest {
 
+    val engine = mockEngine()
+
     @Test
     fun vec0_0_0() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(800, 600)
         cam.position.set(10f, 10f, 10f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
@@ -31,7 +34,7 @@ class PanelColliderTest {
 
     @Test
     fun vec0_1_0() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(800, 600)
         cam.near = 0.1f
         cam.position.set(10f, 10f, 10f)

@@ -1,5 +1,6 @@
 package mogot
 
+import mogot.math.Quaternionf
 import mogot.math.Vector2f
 import mogot.math.Vector3f
 import mogot.math.Vector4f
@@ -195,6 +196,7 @@ class AnimationFile(val frameInSecond: Int, val frameCount: Int, val objects: Mu
                                 Field.Type.VEC3 -> Vector3f(stream.readFloat(), stream.readFloat(), stream.readFloat())
                                 Field.Type.BOOL -> stream.read() > 1
                                 Field.Type.VEC4 -> Vector4f(stream.readFloat(), stream.readFloat(), stream.readFloat(), stream.readFloat())
+                                Field.Type.QUATERNION -> Quaternionf(stream.readFloat(), stream.readFloat(), stream.readFloat(), stream.readFloat())
                             }
                             lastProperty.frames += Frame(time, value)
                         }

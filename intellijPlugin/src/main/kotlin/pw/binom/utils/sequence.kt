@@ -119,6 +119,23 @@ val <T : Vector3fc> Sequence<T>.common: Vector3f
         return vec
     }
 
+val <T : Quaternionfc> Sequence<T>.common: Quaternionf
+    get() {
+        if (isEmpty)
+            return Quaternionf(Float.NaN, Float.NaN, Float.NaN)
+
+        val it = iterator()
+        val vec = Quaternionf(it.next())
+        while (it.hasNext()) {
+            val p = it.next()
+            vec.x = if (!vec.x.isNaN() && p.x == vec.x) vec.x else Float.NaN
+            vec.y = if (!vec.y.isNaN() && p.y == vec.y) vec.y else Float.NaN
+            vec.z = if (!vec.z.isNaN() && p.z == vec.z) vec.z else Float.NaN
+            vec.w = if (!vec.w.isNaN() && p.w == vec.w) vec.w else Float.NaN
+        }
+        return vec
+    }
+
 class Vector2fmDelegator(val vector: Vector2fm, val updateEvent: () -> Unit) : Vector2fm {
     override var x: Float
         get() = vector.x
@@ -195,7 +212,7 @@ class QuaternionfmDelegator(val vector: Quaternionfm, val updateEvent: () -> Uni
         }
 
     override fun set(x: Float, y: Float, z: Float, w: Float) {
-        vector.set(x, y, z, z)
+        vector.set(x, y, z, w)
         updateEvent()
     }
 }

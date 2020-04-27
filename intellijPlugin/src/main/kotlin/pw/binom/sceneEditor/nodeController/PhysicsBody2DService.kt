@@ -61,13 +61,13 @@ object Body2DService : NodeService {
 
     override fun isEditor(node: Node): Boolean = node::class.java == PhysicsBody2D::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is PhysicsBody2D) return null
-        val out = PhysicsBody2D(node.engine)
-        out.bodyType = node.bodyType
-        Spatial2DService.cloneSpatial2D(node, out)
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        if (node !is PhysicsBody2D) return null
+//        val out = PhysicsBody2D(node.engine)
+//        out.bodyType = node.bodyType
+//        Spatial2DService.cloneSpatial2D(node, out)
+//        return out
+//    }
 
     override val nodeClass: String
         get() = PhysicsBody2D::class.java.name

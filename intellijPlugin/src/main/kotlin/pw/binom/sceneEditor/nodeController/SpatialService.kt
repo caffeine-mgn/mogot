@@ -1,7 +1,7 @@
 package pw.binom.sceneEditor.nodeController
 
-import com.intellij.openapi.vfs.VirtualFile
 import mogot.Engine
+import mogot.Field
 import mogot.Node
 import mogot.Spatial
 import mogot.math.*
@@ -10,7 +10,6 @@ import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
-import pw.binom.utils.Vector3mDegrees
 
 class PositionField3D(override val node: Spatial) : NodeService.FieldVec3() {
     private var originalValue: Vector3fc? = null
@@ -86,42 +85,23 @@ class ScaleField3D(override val node: Spatial) : NodeService.FieldVec3() {
     }
 }
 
-class RotateField3D(override val node: Spatial) : NodeService.FieldVec3() {
-    override val id: Int
-        get() = RotateField3D::class.java.hashCode()
-    override val groupName: String
-        get() = "Transform"
-    private var originalValue: Vector3fc? = null
-    private val internalValue = Vector3mDegrees(RotationVector(node.quaternion))
-    override var currentValue: Any
-        get() = internalValue
+class RotateField3D(override val node: Spatial) : NodeService.AbstractField() {
+    override var realValue: Any
+        get() = node.quaternion
         set(value) {
-            internalValue.set(value as Vector3fc)
+            node.quaternion.set(value as Quaternionfc)
         }
 
-    override fun clearTempValue() {
-        originalValue = null
-    }
+    override fun cloneRealValue(): Any = Quaternionf(node.quaternion)
 
-    override val value: Any
-        get() = originalValue ?: currentValue
+    override val groupName: String
+        get() = "Transform"
     override val name: String
         get() = "rotate"
     override val displayName: String
         get() = "Rotation"
-
-    override fun setTempValue(value: Any) {
-        if (originalValue == null)
-            originalValue = Vector3f(internalValue)
-        internalValue.set(value as Vector3fc)
-    }
-
-    override fun resetValue() {
-        if (originalValue != null) {
-            internalValue.set(originalValue!!)
-            originalValue = null
-        }
-    }
+    override val fieldType: Field.Type
+        get() = Field.Type.QUATERNION
 }
 
 object SpatialService : NodeService {

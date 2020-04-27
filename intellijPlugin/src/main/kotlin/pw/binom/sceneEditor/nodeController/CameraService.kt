@@ -165,7 +165,7 @@ object CameraNodeCreator : NodeCreator {
     }
 }
 
-class EditableCamera(val view: SceneEditorView) : Camera(), EditableNode {
+class EditableCamera(val view: SceneEditorView) : Camera(view.engine), EditableNode {
     override val position: Vector3fm = Vector3fmDelegator(super.position) {
         positionField.eventChange.dispatch()
     }
@@ -253,17 +253,17 @@ object CameraService : NodeService {
     }
 
     override fun isEditor(node: Node): Boolean = node::class.java == EditableCamera::class.java
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is EditableCamera) return null
-        val out = EditableCamera(view)
-        out.resize(node.width, node.height)
-        out.near = node.near
-        out.far = node.far
-        out.fieldOfView = node.fieldOfView
-        out.id = node.id
-        SpatialService.cloneSpatial(node, out)
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        if (node !is EditableCamera) return null
+//        val out = EditableCamera(view)
+//        out.resize(node.width, node.height)
+//        out.near = node.near
+//        out.far = node.far
+//        out.fieldOfView = node.fieldOfView
+//        out.id = node.id
+//        SpatialService.cloneSpatial(node, out)
+//        return out
+//    }
 
     override fun delete(view: SceneEditorView, node: Node) {
         if (node !is EditableCamera) return

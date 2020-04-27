@@ -1,13 +1,9 @@
 package pw.binom.sceneEditor.nodeController
 
-import com.intellij.openapi.vfs.VirtualFile
-import mogot.CSGBox
-import mogot.Engine
-import mogot.MaterialNode
-import mogot.Node
+import mogot.*
 import mogot.collider.BoxCollider
 import mogot.collider.Collider
-import mogot.math.AABBm
+import mogot.math.*
 import mogot.math.Quaternionfm
 import mogot.math.Vector3fm
 import mogot.math.Vector4f
@@ -42,8 +38,15 @@ class EditableCSGBox(view: SceneEditorView) : CSGBox(view.engine), EditableNode 
     val rotationField = RotateField3D(this)
     val materialField = MaterialField(view, this)
 
-    private val fields = listOf(positionField, rotationField, scaleField, materialField)
+    private val fields = listOf(scaleField, rotationField, positionField, materialField)
     override fun getEditableFields(): List<NodeService.Field> = fields
+    override fun afterInit() {
+        println("After init q=${quaternion.x} ${quaternion.y} ${quaternion.z} ${quaternion.w}")
+    }
+
+    override fun apply(matrix: Matrix4fc): Matrix4fc {
+        return super.apply(matrix)
+    }
 }
 
 object CubeNodeCreator : NodeCreator {
@@ -62,16 +65,18 @@ object CubeService : NodeService {
     private val props = listOf(Transform3DPropertyFactory, MaterialPropertyFactory, BehaviourPropertyFactory)
     override fun getProperties(view: SceneEditorView, node: Node): List<PropertyFactory> = props
     override fun isEditor(node: Node): Boolean = node::class.java == EditableCSGBox::class.java
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is EditableCSGBox) return null
-        val out = EditableCSGBox(view)
-        out.width = node.width
-        out.height = node.height
-        out.depth = node.depth
-        SpatialService.cloneSpatial(node, out)
-        MaterialNodeUtils.clone(node, out)
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        val vv = newInstance(view)
+//        return vv
+//        if (node !is EditableCSGBox) return null
+//        val out = EditableCSGBox(view)
+//        out.width = node.width
+//        out.height = node.height
+//        out.depth = node.depth
+//        SpatialService.cloneSpatial(node, out)
+//        MaterialNodeUtils.clone(node, out)
+//        return out
+//    }
 
     override fun getCollider(node: Node): Collider? {
         node as EditableCSGBox
@@ -103,5 +108,9 @@ object CubeService : NodeService {
     override val nodeClass: String
         get() = CSGBox::class.java.name
 
-    override fun newInstance(view: SceneEditorView): Node = EditableCSGBox(view)
+    override fun newInstance(view: SceneEditorView): Node {
+        val vv = EditableCSGBox(view)
+        vv.material.value = view.default3DMaterial.instance(Vector4f(1f))
+        return vv
+    }
 }

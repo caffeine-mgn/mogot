@@ -1,6 +1,7 @@
 package mogot
 
 import mogot.math.*
+import pw.binom.async
 
 interface Field {
     enum class Type(val prefix: String, val type: Byte) {
@@ -10,13 +11,14 @@ interface Field {
         VEC2("v2", 3),
         VEC3("v3", 4),
         VEC4("v4", 5),
-        STRING("s", 6),
+        QUATERNION("q", 6),
+        STRING("s", 7),
 
         /**
          * String with a path to file. Can contain list of file separated "|". Also after file path can be path to
          * some entity inside file separated ">". For Example "models/hero.fbx>Body".
          */
-        FILE("l", 7);
+        FILE("l", 8);
 
         fun toString(value: Any) =
                 when (this) {
@@ -34,6 +36,10 @@ interface Field {
                     VEC4 -> {
                         value as Vector4fc
                         "${VEC4.prefix} ${value.x};${value.y};${value.z};${value.w}"
+                    }
+                    QUATERNION -> {
+                        value as Quaternionfc
+                        "${QUATERNION.prefix} ${value.x};${value.y};${value.z};${value.w}"
                     }
                     STRING -> "${STRING.prefix} $value"
                     FILE -> "${FILE.prefix} $value"
@@ -80,6 +86,16 @@ interface Field {
                                 it.next().toFloat()
                         )
                     }
+                    QUATERNION -> {
+                        val it = str.splitToSequence(';').iterator()
+                        val v = Quaternionf(
+                                it.next().toFloat(),
+                                it.next().toFloat(),
+                                it.next().toFloat(),
+                                it.next().toFloat()
+                        )
+                        v
+                    }
                     STRING -> str
                     FILE -> str
                 }
@@ -89,9 +105,24 @@ interface Field {
 
     val name: String
     val type: Type
-    var value: Any
+    fun get(node: Node): Any
+    fun set(engine: Engine, node: Node, value: Any) {
+        async {
+            setAsync(engine, node, value)
+        }
+    }
 
-    suspend fun setAsync(value: Any) {
-        this.value = value
+    suspend fun setAsync(engine: Engine, node: Node, value: Any)
+    suspend fun setSubFields(engine: Engine, node: Node, data: Map<String, Any>) {
+        throw RuntimeException("Not supported")
+    }
+}
+
+abstract class AbstractField<T : Node, V : Any> : Field {
+    protected abstract suspend fun setValue(engine: Engine, node: T, value: V)
+    protected abstract fun currentValue(node: T): V
+    override fun get(node: Node): Any = currentValue(node as T)
+    override suspend fun setAsync(engine: Engine, node: Node, value: Any) {
+        setValue(engine, node as T, value as V)
     }
 }

@@ -6,6 +6,35 @@ import mogot.material.loadMaterial
 import mogot.math.*
 import pw.binom.async
 
+private object SizeField : AbstractField<Sprite, Vector2fc>() {
+    override val name: String
+        get() = "size"
+
+    override val type: Field.Type
+        get() = Field.Type.VEC2
+
+    override suspend fun setValue(engine: Engine, node: Sprite, value: Vector2fc) {
+        node.size.set(value)
+    }
+
+    override fun currentValue(node: Sprite): Vector2fc = node.size
+}
+
+private object TextureFileField : AbstractField<Sprite, String>() {
+    override val name: String
+        get() = "texture"
+
+    override val type: Field.Type
+        get() = Field.Type.STRING
+
+    override suspend fun setValue(engine: Engine, node: Sprite, value: String) {
+        node.texture = if (value.isEmpty()) null else node.engine.resources.createTexture2D(value)
+        node.currentFile = value
+    }
+
+    override fun currentValue(node: Sprite): String = node.currentFile ?: ""
+}
+
 abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
 
     companion object {
@@ -20,54 +49,15 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
         }
     }
 
-    private var currentFile: String? = null
-
-    private class TextureFileField(val sprite: AbstractSprite) : Field {
-        override val name: String
-            get() = "texture"
-        override val type: Field.Type
-            get() = Field.Type.STRING
-        override var value: Any
-            get() = sprite.currentFile ?: ""
-            set(value) {
-                value as String
-                if (sprite.currentFile == value.takeIf { it.isNotBlank() })
-                    return
-                if (value.isEmpty()) {
-                    sprite.texture = null
-                } else {
-                    async {
-                        sprite.texture = sprite.engine.resources.createTexture2D(value)
-                    }
-                }
-            }
-
-    }
-
-    private class SizeField(val sprite: AbstractSprite) : Field {
-        override val name: String
-            get() = "size"
-        override val type: Field.Type
-            get() = Field.Type.VEC2
-        override var value: Any
-            get() = sprite.size
-            set(value) {
-                value as Vector2fc
-                sprite.size.set(value)
-            }
-
-    }
-
+    internal var currentFile: String? = null
 
     private var geom by ResourceHolder<Rect2D>()
-    private val textureField = TextureFileField(this)
-    private val sizeField = SizeField(this)
     open val size: Vector2fm = Vector2f()
 
     override fun getField(name: String): Field? =
             when (name) {
-                textureField.name -> textureField
-                sizeField.name -> sizeField
+                SizeField.name -> SizeField
+                TextureFileField.name -> TextureFileField
                 else -> super.getField(name)
             }
 
@@ -86,8 +76,8 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
             geom = Rect2D(engine.gl, size)
         }
 
-        if (oldSize==null) {
-            oldSize=Vector2f(size)
+        if (oldSize == null) {
+            oldSize = Vector2f(size)
         }
 
         if (size != oldSize) {

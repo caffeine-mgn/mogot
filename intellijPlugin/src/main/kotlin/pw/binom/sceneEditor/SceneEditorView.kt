@@ -117,7 +117,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
-    val editorCamera = Camera()
+    lateinit var editorCamera: Camera
     lateinit var editorCamera2D: Camera2D
     val eventSelectChanged = EventDispatcher()
     private var closed = false
@@ -223,11 +223,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         sceneRoot.parent = editorRoot
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
-        editorCamera.parent = editorRoot
-        camera = editorCamera
-
-        editorCamera.position.set(3f, 3f, 3f)
-        editorCamera.lookTo(Vector3f(0f, 0f, 0f))
 
         addMouseWheelListener {
             if (mode == Mode.D2) {
@@ -559,9 +554,18 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         default2DMaterial = Default2DMaterial(engine)
         default2DMaterial.inc()
 
+        editorCamera = Camera(engine)
+
+        editorCamera.parent = editorRoot
+        camera = editorCamera
+
+        editorCamera.position.set(3f, 3f, 3f)
+        editorCamera.lookTo(Vector3f(0f, 0f, 0f))
+
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot
         camera2D = editorCamera2D
+
 
         grid2d = Grid2D(this)
         grid2d.parent = root

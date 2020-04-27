@@ -39,6 +39,7 @@ object Animation {
                 Field.Type.VEC2 -> value.split(';').let { Vector2f(it[0].toFloat(), it[1].toFloat()) }
                 Field.Type.VEC3 -> value.split(';').let { Vector3f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat()) }
                 Field.Type.VEC4 -> value.split(';').let { Vector4f(it[0].toFloat(), it[1].toFloat(), it[2].toFloat(), it[3].toFloat()) }
+                Field.Type.QUATERNION -> value.split(';').let { Quaternionf(it[0].toFloat(), it[1].toFloat(), it[2].toFloat(), it[3].toFloat()) }
                 Field.Type.INT -> value.toIntOrNull() ?: 0
                 Field.Type.STRING -> value
                 Field.Type.FILE -> value
@@ -51,6 +52,7 @@ object Animation {
                 Field.Type.VEC2 -> (value as Vector2fc?)?.let { "${it.x};${it.y}" }
                 Field.Type.VEC3 -> (value as Vector3fc?)?.let { "${it.x};${it.y};${it.z}" }
                 Field.Type.VEC4 -> (value as Vector4fc?)?.let { "${it.x};${it.y};${it.z};${it.w}" }
+                Field.Type.QUATERNION -> (value as Quaternionfc?)?.let { "${it.x};${it.y};${it.z};${it.w}" }
                 Field.Type.STRING -> value as String?
                 Field.Type.FILE -> value as String?
                 Field.Type.INT -> (value as Int).toString()

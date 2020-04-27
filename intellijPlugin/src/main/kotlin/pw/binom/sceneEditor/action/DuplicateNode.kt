@@ -37,18 +37,35 @@ class DuplicateNode : AnAction() {
 
         if (nodes.isEmpty())
             return
-        val createdNodes = ArrayList<Node>()
-        view.engine.waitFrame {
-            nodes.forEach { node ->
-                val service = view.getService(node) ?: return@forEach
-                val clone = service.deepClone(editor.viewer.view, node) ?: return@forEach
-                clone.parent = node.parent
-                createdNodes += clone
-                editor.sceneStruct.model.created(editor.sceneStruct.tree, clone)
+        try {
+            println("Start clone...")
+            view.engine.waitFrame {
+                val createdNodes = ArrayList<Node>()
+                println("Try to clone  ${nodes.size}")
+                nodes.forEach { node ->
+                    println("Search service...")
+                    val service = view.getService(node)
+                    if (service == null) {
+                        println("Can't find service for $node")
+                        return@forEach
+                    }
+                    println("Service founded")
+                    val clone = service.deepClone(editor.viewer.view, node)
+                    if (clone == null) {
+                        println("Clone not supported")
+                        return@forEach
+                    }
+                    clone.parent = node.parent
+                    createdNodes += clone
+                    editor.sceneStruct.model.created(editor.sceneStruct.tree, clone)
+                }
+                println("createdNodes.size=${createdNodes.size}  ${createdNodes[0].parent}")
+                editor.sceneStruct.tree.selectionPaths = createdNodes.map {
+                    it.makeTreePath()
+                }.toTypedArray()
             }
-            editor.sceneStruct.tree.selectionPaths = createdNodes.map {
-                it.makeTreePath()
-            }.toTypedArray()
+        } catch (e: Throwable) {
+            e.printStackTrace()
         }
     }
 

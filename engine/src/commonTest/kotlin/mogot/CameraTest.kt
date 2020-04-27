@@ -5,9 +5,11 @@ import kotlin.test.Test
 
 class CameraTest {
 
+    val engine = mockEngine()
+
     @Test
     fun screenPointToRayNoParent() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(200, 100)
         cam.position.set(0f, 0f, -1f)
         cam.lookTo(Vector3f(0f, 0f, 1f))
@@ -23,7 +25,7 @@ class CameraTest {
 
     @Test
     fun screenProjection() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(200, 200)
         cam.position.set(3f, 3f, 3f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
@@ -36,7 +38,7 @@ class CameraTest {
     @Test
     fun screenPointToRayWithParent() {
         val root = Spatial()
-        val cam = Camera()
+        val cam = Camera(engine)
         root.position.set(0f, 0f, -1f)
         cam.position.set(0f, 0f, 0f)
         cam.parent = root
@@ -56,7 +58,7 @@ class CameraTest {
 
     @Test
     fun test2() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(200, 200)
         cam.position.set(10f, 10f, 10f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
@@ -78,7 +80,7 @@ class CameraTest {
 
     @Test
     fun test3() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(1113, 561)
         cam.position.set(1f, 10f, 0f)
         cam.lookTo(Vector3f(0f, 0f, 0f))
@@ -100,7 +102,7 @@ class CameraTest {
 
     @Test
     fun test4() {
-        val cam = Camera()
+        val cam = Camera(engine)
         cam.resize(200, 100)
         cam.position.set(0f, 0f, 2f)
         cam.lookTo(Vector3f(0f, 0f, -2f))

@@ -4,7 +4,7 @@ import mogot.math.*
 import mogot.math.set
 import mogot.physics.d2.Contact2D
 import kotlin.reflect.KProperty
-
+/*
 private class Vec3Property(override val name: String) : Behaviour.PropertyRef<Vector3fm> {
     val vec3 = Vector3f()
     override fun getValue(thisRef: Behaviour, property: KProperty<*>): Vector3fm = vec3
@@ -60,11 +60,7 @@ private class FloatProperty(override val name: String) : Behaviour.PropertyValue
         float = value
     }
 }
-
-class AAA:Behaviour(){
-    val power by propertyVec3(name="power")
-}
-
+*/
 abstract class Behaviour {
 
     interface PropertyRef<T> : Field {
@@ -91,7 +87,7 @@ abstract class Behaviour {
     protected open fun checkNode(node: Node?) {
         //
     }
-
+/*
     protected fun propertyVec3(name: String, x: Float = 0f, y: Float = 0f, z: Float = 0f): PropertyRef<Vector3fm> {
         val property = Vec3Property(name)
         property.vec3.set(x, y, z)
@@ -121,7 +117,7 @@ abstract class Behaviour {
     }
 
     fun getField(name: String): Field? = _properties[name]
-
+*/
     open fun onStart() {
         //
     }

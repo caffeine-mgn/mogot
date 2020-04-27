@@ -160,14 +160,14 @@ object GeomService : NodeService {
 
     override fun newInstance(view: SceneEditorView): Node = EditableGeomNode(view)
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is EditableGeomNode) return null
-        val out = EditableGeomNode(view)
-        out.geom.value = node.geom.value
-        SpatialService.cloneSpatial(node, out)
-        MaterialNodeUtils.clone(node, out)
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        if (node !is EditableGeomNode) return null
+//        val out = EditableGeomNode(view)
+//        out.geom.value = node.geom.value
+//        SpatialService.cloneSpatial(node, out)
+//        MaterialNodeUtils.clone(node, out)
+//        return out
+//    }
 
     override fun isEditor(node: Node): Boolean = node::class.java === EditableGeomNode::class.java
 }

@@ -36,6 +36,7 @@ class AddAnimateFrameAction : AnAction() {
                 Field.Type.INT -> field.currentValue.let { it as Int }
                 Field.Type.BOOL -> field.currentValue.let { it as Boolean }
                 Field.Type.VEC4 -> field.currentValue.let { it as Vector4fc }.let { Vector4f(it.x, it.y, it.z, it.w) }
+                Field.Type.QUATERNION -> field.currentValue.let { it as Quaternionfc }.let { Quaternionf(it.x, it.y, it.z, it.w) }
             }
 
     override fun actionPerformed(e: AnActionEvent) {

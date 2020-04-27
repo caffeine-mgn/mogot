@@ -75,7 +75,6 @@ object PolygonShape2DService : NodeService {
         node as PolygonShape2DViwer
         val meta = view.nodesMeta[node] as PolygonShape2DMeta
         meta.centerNode2D.visible = selected
-        println("selected: $selected")
         if (selected) {
             val editor = PolygonShapeEditor(node, view)
             editor.parent = view.editorRoot

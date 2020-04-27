@@ -60,14 +60,14 @@ object BoxShape2DService : NodeService {
 
     override fun isEditor(node: Node): Boolean = node::class.java === BoxShape2DView::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        if (node !is BoxShape2DView) return null
-        val out = BoxShape2DView(view)
-        PhysicsShapeUtils.clone(node, out)
-        Spatial2DService.cloneSpatial2D(node, out)
-        out.size.set(node.size)
-        return out
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        if (node !is BoxShape2DView) return null
+//        val out = BoxShape2DView(view)
+//        PhysicsShapeUtils.clone(node, out)
+//        Spatial2DService.cloneSpatial2D(node, out)
+//        out.size.set(node.size)
+//        return out
+//    }
 
     override fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? {
         node as BoxShape2DView

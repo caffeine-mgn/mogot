@@ -266,8 +266,8 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             chooser.showDialog()
             val file = chooser.selectedFile
             if (file != null) {
-                val relativePath = VfsUtilCore.findRelativePath(editor.file!!, file.virtualFile, '/')
-                node!!.add(relativePath ?: file.virtualFile.path)
+                val path = editor.getRelativePath(file.virtualFile)
+                node.add(path)
             }
         }
     }
@@ -312,7 +312,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
             }
         })
         node.files.map {
-            editor.file!!.findFileByRelativePath(it)
+            editor.findFileByRelativePath(it)
         }
         animationSelector.model = AnimationComboBoxModel(editor, node)
         animationSelector.addActionListener {
@@ -323,7 +323,7 @@ class AnimateTab(val editor: SceneEditor, val node: EditAnimateNode) : Panel(), 
                 }
                 return@addActionListener
             }
-            val file = editor.file!!.parent.findFileByRelativePath(animationFile) ?: return@addActionListener
+            val file = editor.findFileByRelativePath(animationFile) ?: return@addActionListener
             animateModel = AnimateFile(file)
             frameView.model = animateModel
             propertyView.model = animateModel
