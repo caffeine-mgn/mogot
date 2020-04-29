@@ -9,11 +9,12 @@ object CameraLoader : SceneLoader.NodeLoader {
         get() = "mogot.Camera"
 
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
-        val node = Camera(engine)
+        val node = Camera()
         SpatialLoader.load(engine, node, loaderContext, props)
         props["near"]?.toFloatOrNull()?.let { node.near = it }
         props["far"]?.toFloatOrNull()?.let { node.far = it }
         props["fieldOfView"]?.toFloatOrNull()?.let { node.fieldOfView = it }
+        props["enabled"]?.toBoolean()?.let { node.enabled = it }
         //TODO("Add posteffects loading")
         return node
     }

@@ -155,6 +155,21 @@ interface NodeService {
         }
     }
 
+    abstract class FieldBoolean : Field {
+        override val subFieldsEventChange = EventDispatcher()
+        override val eventChange = EventDispatcher()
+
+        override fun isEquals(field: Field): Boolean =
+                currentValue == field.currentValue
+
+        override val fieldType: mogot.Field.Type
+            get() = mogot.Field.Type.BOOL
+
+        override fun makeEditor(sceneEditor: SceneEditor, fields: List<Field>): AbstractEditor {
+            return EditorFloat(sceneEditor, fields)
+        }
+    }
+
     abstract class FieldString : Field {
         override val subFieldsEventChange = mogot.EventDispatcher()
         override val eventChange = EventDispatcher()

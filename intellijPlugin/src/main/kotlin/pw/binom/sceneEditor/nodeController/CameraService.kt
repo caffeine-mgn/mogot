@@ -1,9 +1,7 @@
 package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
-import mogot.Camera
-import mogot.Engine
-import mogot.Node
+import mogot.*
 import mogot.math.Quaternionfm
 import mogot.math.Vector3fm
 import mogot.math.Vector4f
@@ -97,6 +95,45 @@ class FarEditableField(override val node: Camera) : NodeService.FieldFloat() {
     }
 }
 
+class EnabledEditableField(override val node: Camera) : NodeService.FieldBoolean(){
+    override val id: Int
+        get() = FieldOfViewEditableField::class.java.hashCode()
+    override val groupName: String
+        get() = "Camera"
+    override var currentValue: Any
+        get() = node.enabled
+        set(value) {
+            node.enabled = value as Boolean
+        }
+    private var originalValue: Boolean? = null
+    override val value: Any
+        get() = originalValue ?: node.enabled
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "enabled"
+    override val displayName: String
+        get() = "Enabled"
+
+    override fun setTempValue(value: Any) {
+        if (originalValue == null) {
+            originalValue = node.enabled
+        }
+        node.fieldOfView = value as Float
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.enabled = originalValue!!
+            originalValue = null
+        }
+    }
+
+}
+
 class FieldOfViewEditableField(override val node: Camera) : NodeService.FieldFloat() {
     override val id: Int
         get() = FieldOfViewEditableField::class.java.hashCode()
@@ -165,7 +202,7 @@ object CameraNodeCreator : NodeCreator {
     }
 }
 
-class EditableCamera(val view: SceneEditorView) : Camera(view.engine), EditableNode {
+class EditableCamera(val view: SceneEditorView) : Camera(), EditableNode {
     override val position: Vector3fm = Vector3fmDelegator(super.position) {
         positionField.eventChange.dispatch()
     }
@@ -188,13 +225,18 @@ class EditableCamera(val view: SceneEditorView) : Camera(view.engine), EditableN
         super.fieldOfView = new
     }
 
+    override var enabled: Boolean by Delegates.observable(super.enabled) {_,_, new ->
+        enabledEditableField.eventChange.dispatch()
+        super.enabled = new
+    }
 
     val positionField = PositionField3D(this)
     val rotationField = RotateField3D(this)
     val nearEditableField = NearEditableField(this)
     val farEditableField = FarEditableField(this)
     val fieldOfViewEditableField = FieldOfViewEditableField(this)
-    private val fields = listOf(positionField, rotationField, nearEditableField, farEditableField, fieldOfViewEditableField)
+    val enabledEditableField =EnabledEditableField(this)
+    private val fields = listOf(positionField, rotationField, nearEditableField, farEditableField, fieldOfViewEditableField, enabledEditableField)
     override fun getEditableFields(): List<NodeService.Field> = fields
 
     val s = SpriteFor3D(view)

@@ -44,10 +44,10 @@ private object FieldOfViewField2D : AbstractField<Camera, Float>() {
     override fun currentValue(node: Camera): Float = node.fieldOfView
 }
 
-open class Camera(engine: Engine) : Spatial() {
+open class Camera() : Spatial() {
     val projectionMatrix = Matrix4f()
 
-    var enabled = false
+    open var enabled = false
 
     override fun getField(name: String): Field? =
             when (name) {

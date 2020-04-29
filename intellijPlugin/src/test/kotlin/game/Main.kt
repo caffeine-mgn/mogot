@@ -8,15 +8,13 @@ import mogot.math.Vector2f
 import mogot.math.Vector3f
 import pw.binom.ComponentListenerImpl
 import pw.binom.MockFileSystem
-import pw.binom.sceneEditor.Default3DMaterial
-import pw.binom.sceneEditor.Grid3D
-import pw.binom.sceneEditor.GuideLine
-import pw.binom.sceneEditor.SimpleMaterial
+import pw.binom.sceneEditor.*
 import pw.binom.ui.AnimateFrameView
 import pw.binom.ui.AnimatePropertyView
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.DisplayMode
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.awt.event.MouseEvent
@@ -27,18 +25,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.cos
 import kotlin.math.sin
 
-class FullScreenSprite(engine: Engine) {
-    var material: Material? = null
-    private val rect = Rect2D(engine.gl, Vector2f(16f, 16f))
-    private val projection = Matrix4f().ortho2D(0f, 16f, 16f, 0f)
 
-    fun draw(renderContext: RenderContext) {
-        val mat = material ?: return
-        mat.use(MATRIX4_ONE, this.projection, renderContext)
-        rect.draw()
-        mat.unuse()
-    }
-}
 
 /*
 class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
@@ -68,11 +55,10 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(MockFileSystem()) {
+class DDD : GLView(mogot.rendering.Display(listOf(mogot.rendering.SceneToTextureRenderPass(),mogot.rendering.CanvasFinalRenderPass())),MockFileSystem()) {
 
     private var closed = false
     private var inited = false
-    override val root: Node = Node()
     var cam = Camera()
 
     override var camera: Camera? = cam
@@ -80,8 +66,8 @@ class DDD : GLView(MockFileSystem()) {
     override fun init() {
         backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
-        val gg = Grid3D(engine)
-        gg.material.value = Default3DMaterial(engine)
+        val gg = Grid3D(engine.gl)
+        gg.material.value = Default3DMaterial(engine.gl)
         gg.parent = root
         inited = true
         cam.parent = root
@@ -89,7 +75,7 @@ class DDD : GLView(MockFileSystem()) {
         //cam.lookTo(Vector3f(6f, 6f, 6f))
         cam.behaviour = FpsCamB(engine)
         val box = CSGBox(engine)
-        box.material.value = SimpleMaterial(engine)
+        box.material.value = SimpleMaterial(engine.gl)
         box.parent = root
         cam.lookTo(Vector3f(0f, 0f, 0f))
     }
@@ -181,6 +167,10 @@ class FrameLine : AnimateFrameView.FrameLine {
     override fun remove(frame: AnimateFrameView.Frame) {
         frames.remove(frame.time)
     }
+
+    override fun remove(time: Int) {
+        TODO("Not yet implemented")
+    }
 }
 
 class AnimateModel : AnimateFrameView.Model {
@@ -198,13 +188,20 @@ class AnimateModel : AnimateFrameView.Model {
 class AnimateNode(override val icon: Icon?, override val text: String, override val properties: List<AnimatePropertyView.Property>) : AnimatePropertyView.Node {
     override var lock: Boolean = false
     override var visible: Boolean = false
+    override fun remove(property: AnimatePropertyView.Property) {
+        TODO("Not yet implemented")
+    }
 }
 
 class AnimateProperty(override val text: String) : AnimatePropertyView.Property {
     override var lock: Boolean = false
 }
 
-class PropertyModel(override val nodes: List<AnimatePropertyView.Node>) : AnimatePropertyView.Model
+class PropertyModel(override val nodes: List<AnimatePropertyView.Node>) : AnimatePropertyView.Model {
+    override fun remove(node: AnimatePropertyView.Node) {
+        TODO("Not yet implemented")
+    }
+}
 
 object Main2 {
     @JvmStatic
