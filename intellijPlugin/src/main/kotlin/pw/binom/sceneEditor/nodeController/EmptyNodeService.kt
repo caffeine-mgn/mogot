@@ -44,22 +44,15 @@ object EmptyNodeService : NodeService {
         }
     }
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        val node = Node()
-        loadNode(view.engine, node, properties)
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        val out = HashMap<String, String>()
-        saveNode(view.engine, node, out)
-        return out
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java == Node::class.java
     override fun clone(view: SceneEditorView, node: Node): Node? {
         val out = Node()
         cloneNode(node, out)
         return out
     }
+
+    override val nodeClass: String
+        get() = Node::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = Node()
 }

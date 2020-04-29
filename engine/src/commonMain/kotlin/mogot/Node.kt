@@ -3,7 +3,6 @@ package mogot
 import mogot.math.Matrix4fc
 import pw.binom.io.Closeable
 
-
 open class Node : Closeable {
     open val type
         get() = 0
@@ -12,6 +11,8 @@ open class Node : Closeable {
     private val _childs = ArrayList<Node>()
     val childs: List<Node>
         get() = _childs
+
+    open fun getField(name: String): Field? = null
 
     var behaviour: Behaviour? = null
         set(value) {
@@ -196,3 +197,18 @@ fun <T : Node> T.parent(parent: Node): T {
     this.parent = parent
     return this
 }
+
+fun Node.findByRelative(path: String): Node? {
+    var node = this
+    path.splitToSequence('/').forEach {
+        if (it == ".")
+            return@forEach
+        if (it == "..") {
+            node = node.parent ?: return null
+            return@forEach
+        }
+        node = node.findNode(it) ?: return null
+    }
+    return node
+}
+

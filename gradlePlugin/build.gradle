@@ -1,31 +1,113 @@
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: "kotlin-kapt"
+
+configurations {
+    compileOnly.extendsFrom inject
+}
 
 dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlin_version"
+//    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+
+
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api project(':tools')
     api project(':engine')
-    api "pw.binom.io:json:$binom_io_version"
-    api "pw.binom.io:file:$binom_io_version"
+//    api fileTree(file("${project(':engine').buildDir}/libs"))
+//    file("${project(':tools').buildDir}/libs").listFiles().collect{
+//        api(zipTree(it))
+//    }
+//    api(project(':tools').buildDir.tasks.getByName("jar").archivePath)
+//    api(project(':engine'))
+//    api("pw.binom.io:json:$binom_io_version")
+//    api("pw.binom.io:file:$binom_io_version")
     compileOnly gradleApi()
     testImplementation 'junit:junit:4.12'
 }
 
-
+compileKotlin {
+    dependsOn ":tools:jar"
+}
 jar {
+    /*
     from {
-        configurations.forEach{
+        def list = fileTree(file("${project(':tools').buildDir}/libs")).findAll {
+            it.name.toLowerCase().endsWith(".jar")
+        }.collect{
+            zipTree(it)
+        }
+
+        list+=fileTree(file("${project(':engine').buildDir}/libs")).findAll {
+            it.name.toLowerCase().endsWith(".jar") && it.name.contains("jvm") && !it.name.contains("sources")
+        }.collect{zipTree(it)}
+        list
+    }
+    */
+    /*
+    from {
+        configurations.forEach {
             println("config->$it")
         }
-        (configurations.runtimeClasspath).collect {
-            println("dep->$it")
+//        (configurations.inject).collect {
+//            it.isDirectory() ? it : zipTree(it)
+//        }
+
+        def list = (configurations.runtimeClasspath).collect {
             it.isDirectory() ? it : zipTree(it)
         }
+        list
     } {
         exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
-
+*/
     archiveName = "gradlePlugin.jar"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "pw.binom.mogot"
+            artifactId 'gradle-plugin'
+            version "0.1"
+            from components.java
+
+//            pom.withXml {
+//                asNode().dependencies.dependency.each { dep ->
+//                    String groupId = dep.groupId.last().value()
+//                    if (groupId == "pw.binom.io" || groupId == "pw.binom.mogot") {
+//                        dep.parent().remove(dep)
+//                    } else
+//                        println("dep->${dep.groupId.last().value()}")
+//                }
+//            }
+
+//            pom.whenConfigured {
+//                p -> p.dependencies = p.dependencies.findAll {
+//                    dep -> dep.groupId != "pw.binom.io" && dep.groupId!="pw.binom.mogot"
+//                }
+//            }
+
+//            pom.withXml {
+//                asNode().dependencies.dependency.each { dep ->
+//                    if(dep.groupId.last().value().last() in ["pw.binom.io", "pw.binom.mogot"]) {
+//                        assert dep.parent().remove(dep)
+//                    }
+//                }
+//            }
+        }
+    }
+}
+
+//pluginBundle {
+//    plugins {
+//        kotlinNoargPlugin {
+//            id = 'pw.binom.mogot'
+//            description = displayName = 'Mogot Compiler Plugin'
+//        }
+//    }
+//}

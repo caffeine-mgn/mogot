@@ -4,7 +4,57 @@ import mogot.math.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
+private object PositionField2D : AbstractField<Spatial2D, Vector2fc>() {
+    override val type: Field.Type
+        get() = Field.Type.VEC2
+
+    override val name: String
+        get() = "position"
+
+    override suspend fun setValue(engine: Engine, node: Spatial2D, value: Vector2fc) {
+        node.position.set(value)
+    }
+
+    override fun currentValue(node: Spatial2D): Vector2fc = node.position
+}
+
+private object ScaleField2D : AbstractField<Spatial2D, Vector2fc>() {
+    override val type: Field.Type
+        get() = Field.Type.VEC2
+
+    override val name: String
+        get() = "scale"
+
+    override suspend fun setValue(engine: Engine, node: Spatial2D, value: Vector2fc) {
+        node.scale.set(value)
+    }
+
+    override fun currentValue(node: Spatial2D): Vector2fc = node.scale
+}
+
+private object RotationField2D : AbstractField<Spatial2D, Float>() {
+    override val type: Field.Type
+        get() = Field.Type.FLOAT
+
+    override val name: String
+        get() = "rotation"
+
+    override suspend fun setValue(engine: Engine, node: Spatial2D, value: Float) {
+        node.rotation = toRadians(value)
+    }
+
+    override fun currentValue(node: Spatial2D): Float = node.rotation
+}
+
 open class Spatial2D(val engine: Engine) : Node() {
+    override fun getField(name: String): Field? =
+            when (name) {
+                PositionField2D.name -> PositionField2D
+                ScaleField2D.name -> ScaleField2D
+                RotationField2D.name -> RotationField2D
+                else -> super.getField(name)
+            }
+
     private val p = Vector2fProperty()
     private val s = Vector2fProperty(1f, 1f)
     open val position: Vector2fm

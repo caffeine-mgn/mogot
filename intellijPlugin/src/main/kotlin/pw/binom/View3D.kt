@@ -21,13 +21,15 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
     private var v = 0.01f//1.0E-4f
     private var d = 6f
 
-    override var camera: Camera? = Camera()
+    override var camera: Camera? =null
 
-    init {
-        root = Spatial()
+    override fun init() {
+        super.init()
+        val root = Spatial()
         camera!!.parent = root
         camera!!.enabled = true
         resetCam()
+        camera=Camera(engine)
     }
 
     protected fun resetCam() {

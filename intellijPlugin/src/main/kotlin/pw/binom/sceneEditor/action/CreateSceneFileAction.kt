@@ -25,7 +25,7 @@ class CreateSceneFileAction : CreateFileFromTemplateAction("Scene", "Create new 
         if (templateName != TEMPLATE_SCENE_3D)
             return null
         val text = "{\"scene\":[]}"
-        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.scene", SceneFileType, text)
+        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.${SceneFileType.defaultExtension}", SceneFileType, text)
         dir.add(file)
         val virtualFile = file.virtualFile
         if (virtualFile != null)

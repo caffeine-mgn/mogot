@@ -1,6 +1,7 @@
 package mogot.math
 
 import mogot.Camera
+import mogot.mockEngine
 import org.junit.Assert
 import org.junit.Test
 import org.joml.Matrix4f as OMatrix4f
@@ -14,7 +15,7 @@ class Matrix4fTest {
 
     @Test
     fun test2() {
-        val cam = Camera()
+        val cam = Camera(mockEngine())
         cam.resize(200, 100)
         cam.position.set(0f, 1f, 1f)
         cam.lookTo(Vector3f(0f, 0f, -1f))

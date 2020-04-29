@@ -4,11 +4,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.collider.Collider2D
 import mogot.collider.Panel2DCollider
-import mogot.math.Matrix4fc
-import mogot.math.Vector2fProperty
-import mogot.math.Vector4f
-import mogot.math.set
 import mogot.rendering.Display
+import mogot.math.*
 import pw.binom.FloatDataBuffer
 import pw.binom.IntDataBuffer
 import pw.binom.sceneEditor.CenterNode2D
@@ -18,6 +15,7 @@ import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform2DPropertyFactory
+import pw.binom.utils.Vector2fmDelegator
 import java.io.Closeable
 import javax.swing.Icon
 import javax.swing.ImageIcon
@@ -55,16 +53,6 @@ private class Camera2DMeta(val camera: CameraSprite, val view: SceneEditorView) 
     init {
         center.parent = view.editorRoot
         view.nodesMeta[camera] = this
-//        s.size.set(40f, 32f)
-//        view.engine.waitFrame {
-//            s.internalMaterial = SolidTextureMaterial(view.engine).apply {
-//                diffuseColor.set(0f, 0f, 0f, 0f)
-//                tex = engine.resources.loadTextureResource("/camera-icon.png").gl
-//            }
-//        }
-//        val b = FlatScreenBehaviour2D(camera)
-//        s.behaviour = b
-//        s.parent = view.editorRoot
         camera.size.set(800f, 600f)
         selected = false
         hover = false
@@ -77,6 +65,44 @@ private class Camera2DMeta(val camera: CameraSprite, val view: SceneEditorView) 
     }
 }
 
+class ZoomEditableField(override val node: CameraSprite) : NodeService.FieldFloat() {
+    override val id: Int
+        get() = ZoomEditableField::class.java.hashCode()
+    override val groupName: String
+        get() = "Camera"
+    override var currentValue: Any
+        get() = node.zoom
+        set(value) {
+            node.zoom = value as Float
+        }
+    private var originalValue: Float? = null
+    override val value: Any
+        get() = originalValue ?: node.zoom
+
+    override fun clearTempValue() {
+        originalValue = null
+    }
+
+    override val name: String
+        get() = "zoom"
+    override val displayName: String
+        get() = "Zoom"
+
+    override fun setTempValue(value: Any) {
+        if (originalValue == null) {
+            originalValue = node.zoom
+        }
+        node.zoom = value as Float
+    }
+
+    override fun resetValue() {
+        if (originalValue != null) {
+            node.zoom = originalValue!!
+            originalValue = null
+        }
+    }
+}
+
 object Camera2DService : NodeService {
 
     private val properties = listOf(Transform2DPropertyFactory, BehaviourPropertyFactory)
@@ -86,37 +112,29 @@ object Camera2DService : NodeService {
     override fun getClassName(node: Node): String =
             Camera2D::class.java.name
 
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != Camera2D::class.java.name)
-            return null
-
-        val cam = CameraSprite(view)
-        Spatial2DService.load(view.engine, cam, properties)
-        Camera2DMeta(cam, view)
-        return cam
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is CameraSprite) return null
-        val data = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, data)
-        return data
-    }
-
     override fun isEditor(node: Node): Boolean = node::class.java == CameraSprite::class.java
 
-    override fun clone(view: SceneEditorView, node: Node): Node? {
-        node as CameraSprite
-        val cam = CameraSprite(view)
-        Spatial2DService.cloneSpatial2D(node, cam)
-        Camera2DMeta(cam, view)
-        return cam
-    }
+//    override fun clone(view: SceneEditorView, node: Node): Node? {
+//        node as CameraSprite
+//        val cam = CameraSprite(view)
+//        Spatial2DService.cloneSpatial2D(node, cam)
+//        Camera2DMeta(cam, view)
+//        return cam
+//    }
 
     override fun hover(view: SceneEditorView, node: Node, hover: Boolean) {
         if (node !is CameraSprite) return
         val meta = view.nodesMeta[node] as Camera2DMeta
         meta.hover = hover
+    }
+
+    override val nodeClass: String
+        get() = Camera2D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node {
+        val cam = CameraSprite(view)
+        Camera2DMeta(cam, view)
+        return cam
     }
 
     override fun selected(view: SceneEditorView, node: Node, selected: Boolean) {
@@ -134,7 +152,29 @@ object Camera2DService : NodeService {
     }
 }
 
-class CameraSprite(view: SceneEditorView) : VisualInstance2D(view.engine) {
+class CameraSprite(view: SceneEditorView) : VisualInstance2D(view.engine), EditableNode {
+
+
+    val transformField = PositionField2D(this)
+    val rotationField = RotationField2D(this)
+    val zoomEditableField = ZoomEditableField(this)
+
+    var zoom: Float = 1f
+        set(value) {
+            field = value
+            zoomEditableField.eventChange.dispatch()
+        }
+
+    override val position: Vector2fm = Vector2fmDelegator(super.position) {
+        transformField.eventChange.dispatch()
+    }
+
+    override var rotation: Float
+        get() = super.rotation
+        set(value) {
+            super.rotation = value
+            rotationField.eventChange.dispatch()
+        }
 
     private var geom by ResourceHolder<Geom2D>()
     val size = Vector2fProperty()
@@ -207,4 +247,7 @@ class CameraSprite(view: SceneEditorView) : VisualInstance2D(view.engine) {
         index.close()
         super.close()
     }
+
+    private val fields = listOf(transformField, rotationField)
+    override fun getEditableFields(): List<NodeService.Field> = fields
 }

@@ -301,15 +301,29 @@ val Quaternionfc.forward: Vector3fc
 
 
 val Quaternionfc.roll: Float
-    get() = atan2(2.0f * (y * z + w * x), (w * w - x * x - y * y + z * z))//atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z)
+    get(){
+        val sinr_cosp = 2f * (w * x + y * z)
+        val cosr_cosp = 1f - 2f * (x * x + y * y)
+        return atan2(sinr_cosp, cosr_cosp)
+    }// = atan2(2.0f * (y * z + w * x), (w * w - x * x - y * y + z * z))//atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z)
 
 val Quaternionfc.pitch: Float
-    get() = asin(-2.0f * (x * z - w * y))//atan2(2*x*w - 2*y*z, 1 - 2*x*x - 2*z*z)
+    get() {
+        val sinp = 2f * (w * y - z * x)
+        return if (sinp >= 1f)
+            PIHalf
+        else
+            asin(sinp)
+    }//atan2(2*x*w + 2*y*z, 1 - 2*x*x - 2*z*z)//asin(-2.0f * (x * z - w * y))//atan2(2*x*w - 2*y*z, 1 - 2*x*x - 2*z*z)
 
 val Quaternionfc.yaw: Float
-    get() = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))//asin(2*x*y + 2*z*w)
+    get(){
+        val siny_cosp = 2f * (w * z + x * y)
+        val cosy_cosp = 1f - 2f * (y * y + z * z)
+        return atan2(siny_cosp, cosy_cosp)
+    }// = atan2(2.0f * (x * y + w * z), (w * w + x * x - y * y - z * z))//asin(2*x*y + 2*z*w)
 
-fun Quaternionfm.setRotation(yaw: Float, pitch: Float, roll: Float): Quaternionfm =
+fun Quaternionfm.setRotation(yaw: Float = this.yaw, pitch: Float = this.pitch, roll: Float = this.roll): Quaternionfm =
         setRotation(yaw, pitch, roll, this)
 
 class RotationVector(val quaternion: Quaternionfm) : Vector3fm {

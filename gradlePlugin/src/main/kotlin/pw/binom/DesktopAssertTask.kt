@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import pw.binom.animation.AnimationCompiler
 import pw.binom.material.Default2DMaterial
 import pw.binom.material.ImageCompiler
 import pw.binom.material.MaterialCompiler
@@ -18,18 +19,19 @@ open class DesktopAssertTask : DefaultTask() {
     var outputPath: File? = null
 
     companion object {
-        fun checkChanges(src: File, dest: File): Boolean {
+        fun isFileChanged(src: File, dest: File): Boolean {
             if (!dest.exists() || !dest.isFile)
                 return true
             return src.lastModified() > dest.lastModified()
         }
     }
 
-    private fun processDirectory(file: File, outputDir: File, behavioursGenerator: BehavioursGenerator?) {
+    private fun processDirectory(assetsDirectory: File, file: File, outputDir: File, nodes: MutableSet<String>) {
         when (file.extension.toLowerCase()) {
-            "png" -> ImageCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "mat" -> MaterialCompiler.compile(file, File(outputDir, file.name + ".bin"))
-            "scene" -> SceneCompiler.compile(file, File(outputDir, file.name + ".bin"), behavioursGenerator)
+            "png" -> ImageCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "mat" -> MaterialCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "anim" -> AnimationCompiler.compile(file, File(outputDir, "${file.name}.bin"))
+            "scene" -> SceneCompiler.compile(assetsDirectory, file, File(outputDir, "${file.name}.bin"), nodes)
         }
 
 //        inputDir.listFiles()?.asSequence()?.filter { it.isFile }?.forEach {
@@ -51,17 +53,18 @@ open class DesktopAssertTask : DefaultTask() {
                 MaterialCompiler.compile(Default2DMaterial.SOURCE, it)
             }
         }
+        val nodes = HashSet<String>()
         assertPath.walkTopDown().onEnter {
             true
         }.forEach {
             val file = if (it.isAbsolute) it else it.absoluteFile
             val outDir = File(outputPath, file.path.removePrefix(assertPath.path)).parentFile
-            processDirectory(file, outDir, behavioursGenerator)
+            processDirectory(assertPath, file, outDir, nodes)
         }
-        val genDir = File(project.buildDir, "mogotGen/BehavioursCreator.kt")
+        val genDir = File(project.buildDir, "mogotGen/mogot/SceneLoader.kt")
         genDir.parentFile.mkdirs()
         genDir.outputStream().bufferedWriter().use {
-            behavioursGenerator.generate("BehavioursCreator", it)
+            SceneLoadGenerator.generate(nodes, it)
             it.flush()
         }
     }

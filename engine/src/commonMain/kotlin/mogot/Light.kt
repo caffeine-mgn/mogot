@@ -13,7 +13,7 @@ abstract class Light : Spatial() {
     abstract var specular: Float
 }
 
-class PointLight : Light() {
+open class PointLight : Light() {
     override var diffuse: Vector3fm = Vector3f(1f, 1f, 1f)
     override var specular: Float = 1f
     override val type: Int

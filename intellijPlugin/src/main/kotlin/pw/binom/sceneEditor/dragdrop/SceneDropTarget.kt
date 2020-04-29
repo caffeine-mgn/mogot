@@ -49,7 +49,7 @@ class SceneDropTarget(val view: SceneEditorView) : DropTarget() {
             val texFile = LocalFileSystem.getInstance().findFileByIoFile(file)!!
             view.engine.waitFrame {
                 val tex = view.engine.resources.loadTexture(texFile)
-                currentSprite!!.texture = tex
+                currentSprite!!.textureFile = tex
                 currentSprite!!.size.set(tex.gl.width.toFloat(), tex.gl.height.toFloat())
             }
             currentFile = file

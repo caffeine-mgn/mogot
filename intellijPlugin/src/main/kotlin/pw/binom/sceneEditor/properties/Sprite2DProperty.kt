@@ -32,10 +32,10 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
 
     private val textureTitle = PropertyName("Texture").appendTo(layout, 0, 1)
 
-    private val texture = TextureSelector(view.project).appendTo(layout, 1, 1)
+    private val texture = TextureSelector(view.editor1).appendTo(layout, 1, 1)
 
     private fun perfectSize(): Vector2fc {
-        val texFile = texture.selected?.virtualFile
+        val texFile = texture.psi?.virtualFile
         if (texFile != null) {
             val img = texFile.inputStream.use {
                 ImageIO.read(it)
@@ -57,11 +57,11 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
         }
 
 
-        texture.selectedChangeEvent.on {
-            textureTitle.resetVisible = texture.selected != null
+        texture.eventChange.on {
+            textureTitle.resetVisible = texture.psi != null
         }
         textureTitle.resetAction {
-            texture.selected = null
+            texture.psi = null
             val perfectSize = perfectSize()
             sizeTitle.resetVisible = sizeEditor.value.x != perfectSize.x || sizeEditor.value.y != perfectSize.y
         }
@@ -84,14 +84,14 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
             texture.isEnabled = true
             sizeEditor.value.set(nodes.map { it.size }.common)
             if (nodes.map { it.texture }.equalsAll()) {
-                val texture = nodes.first().texture
-                this.texture.selected = if (texture == null) null else PsiManager.getInstance(view.project).findFile(texture.file)
+                val texture = nodes.first().textureFile
+                this.texture.psi = if (texture == null) null else PsiManager.getInstance(view.project).findFile(texture.file)
                 if (texture != null)
                     sizeTitle.resetVisible = sizeEditor.value.x != texture.gl.width.toFloat() || sizeEditor.value.y != texture.gl.height.toFloat()
                 else
                     sizeTitle.resetVisible = sizeEditor.value.x != 0f || sizeEditor.value.y != 0f
             } else {
-                texture.selected = null
+                texture.psi = null
                 sizeTitle.resetVisible = sizeEditor.value.x != 0f || sizeEditor.value.y != 0f
             }
         }
@@ -118,11 +118,11 @@ class Sprite2DProperty(val view: SceneEditorView) : Property, Spoler("Sprite2D")
             }
         }
 
-        texture.selectedChangeEvent.on {
+        texture.eventChange.on {
             if (changeEventEnabled) {
                 nodes?.asSequence()
                         ?.forEach {
-                            it.texture = texture.selected?.virtualFile?.let { view.engine.resources.loadTexture(it) }
+                            it.textureFile = texture.psi?.virtualFile?.let { view.engine.resources.loadTexture(it) }
                         }
                 view.repaint()
             }

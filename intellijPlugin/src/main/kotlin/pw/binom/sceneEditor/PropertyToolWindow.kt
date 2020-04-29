@@ -6,7 +6,9 @@ import pw.binom.FlexLayout
 import pw.binom.appendTo
 import pw.binom.sceneEditor.properties.Panel
 import pw.binom.sceneEditor.properties.Property
+import pw.binom.sceneEditor.properties.PropertyGroupSpoler
 import pw.binom.ui.StringValue
+import pw.binom.utils.executeOnUiThread
 
 class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
     private val panel = Panel()
@@ -29,14 +31,38 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
         nodes?.takeIf { it.size == 1 }?.first()?.id = idEditor.value.takeIf { it.isNotBlank() }
     }
 
+    private val groups = ArrayList<PropertyGroupSpoler>()
+
     fun setNodes(nodes: List<Node>) {
         this.nodes = nodes
         idEditor.isEnabled = nodes.size == 1
+
+        val fields = nodes.asSequence().flatMap {
+            val service = editor.viewer.view.getService(it) ?: return@flatMap emptySequence<NodeService.Field>()
+            val f = service.getFields(editor.viewer.view, it)
+            f.asSequence()
+        }
+
+        groups.forEach {
+            it.close()
+            layout.remove(it)
+        }
+        groups.clear()
+
+        fields
+                .groupBy { it.groupName }
+                .forEach { title, fields ->
+                    groups += PropertyGroupSpoler(editor, title, fields).appendTo(layout) {
+                        grow = 0f
+                    }
+                }
+
         if (idEditor.isEnabled) {
             enabkeChangeDispatcher = false
             idEditor.value = nodes.first().id ?: ""
             enabkeChangeDispatcher = true
         }
+        /*
         val nodes = nodes.asSequence()
                 .map { it to editor.viewer.view.getService(it) }
                 .filter {
@@ -67,8 +93,9 @@ class PropertyToolWindow(val editor: SceneEditor) : JBScrollPane() {
         _properties.forEach {
             it.setNodes(nodes.map { it.first })
         }
-
+*/
 //        repaint()
-        panel.repaint()
+        revalidate()
+        repaint()
     }
 }

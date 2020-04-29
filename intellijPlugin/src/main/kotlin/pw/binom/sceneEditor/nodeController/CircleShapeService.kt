@@ -1,10 +1,10 @@
 package pw.binom.sceneEditor.nodeController
 
-import com.intellij.openapi.vfs.VirtualFile
 import mogot.*
 import mogot.collider.Circle2DCollider
 import mogot.collider.Collider2D
 import mogot.math.Matrix4fc
+import mogot.math.Vector2fm
 import mogot.math.Vector4f
 import mogot.math.set
 import mogot.physics.d2.PhysicsBody2D
@@ -15,7 +15,9 @@ import pw.binom.sceneEditor.NodeCreator
 import pw.binom.sceneEditor.NodeService
 import pw.binom.sceneEditor.SceneEditorView
 import pw.binom.sceneEditor.properties.*
+import pw.binom.utils.Vector2fmDelegator
 import javax.swing.Icon
+import mogot.physics.d2.shapes.Shape2D
 
 object CircleShapeNodeCreator : NodeCreator {
     override val name: String
@@ -29,6 +31,106 @@ object CircleShapeNodeCreator : NodeCreator {
 
 }
 
+class RadiusEditableField(override val node: Node, val shape: CircleShape2DView) : NodeService.AbstractField() {
+    override val groupName: String
+        get() = "Shape"
+
+    override var realValue: Any
+        get() = shape.radius
+        set(value) {
+            shape.radius = value as Float
+        }
+
+    override fun cloneRealValue(): Any = shape.radius
+
+    override val name: String
+        get() = "raduis"
+    override val displayName: String
+        get() = "Radius"
+    override val fieldType: Field.Type
+        get() = Field.Type.FLOAT
+}
+
+class DensityEditableField(override val node: Node, val shape: ShapeEditorNode) : NodeService.AbstractField() {
+    override val groupName: String
+        get() = "Shape"
+
+    override var realValue: Any
+        get() = shape.density
+        set(value) {
+            shape.density = value as Float
+        }
+
+    override fun cloneRealValue(): Any = shape.density
+
+    override val name: String
+        get() = "density"
+    override val displayName: String
+        get() = "Density"
+    override val fieldType: Field.Type
+        get() = Field.Type.FLOAT
+}
+
+class FrictionEditableField(override val node: Node, val shape: ShapeEditorNode) : NodeService.AbstractField() {
+    override val groupName: String
+        get() = "Shape"
+
+    override var realValue: Any
+        get() = shape.friction
+        set(value) {
+            shape.friction = value as Float
+        }
+
+    override fun cloneRealValue(): Any = shape.density
+
+    override val name: String
+        get() = "friction"
+    override val displayName: String
+        get() = "Friction"
+    override val fieldType: Field.Type
+        get() = Field.Type.FLOAT
+}
+
+class RestitutionEditableField(override val node: Node, val shape: ShapeEditorNode) : NodeService.AbstractField() {
+    override val groupName: String
+        get() = "Shape"
+
+    override var realValue: Any
+        get() = shape.restitution
+        set(value) {
+            shape.restitution = value as Float
+        }
+
+    override fun cloneRealValue(): Any = shape.density
+
+    override val name: String
+        get() = "restitution"
+    override val displayName: String
+        get() = "Restitution"
+    override val fieldType: Field.Type
+        get() = Field.Type.FLOAT
+}
+
+class SensorEditableField(override val node: Node, val shape: ShapeEditorNode) : NodeService.AbstractField() {
+    override val groupName: String
+        get() = "Shape"
+
+    override var realValue: Any
+        get() = shape.sensor
+        set(value) {
+            shape.sensor = value as Boolean
+        }
+
+    override fun cloneRealValue(): Any = shape.density
+
+    override val name: String
+        get() = "sensor"
+    override val displayName: String
+        get() = "Sensor"
+    override val fieldType: Field.Type
+        get() = Field.Type.BOOL
+}
+
 object CircleShapeService : NodeService {
 
     private val properties = listOf(Transform2DPropertyFactory, CircleShape2DPropertyFactory, PhysicsShapePropertyFactory, BehaviourPropertyFactory)
@@ -37,25 +139,6 @@ object CircleShapeService : NodeService {
 
     override fun getClassName(node: Node): String =
             CircleShape2D::class.java.name
-
-    override fun load(view: SceneEditorView, file: VirtualFile, clazz: String, properties: Map<String, String>): Node? {
-        if (clazz != CircleShape2D::class.java.name)
-            return null
-        val node = CircleShape2DView(view)
-        Spatial2DService.load(view.engine, node, properties)
-        node.radius = properties["radius"]?.toFloatOrNull() ?: 50f
-        PhysicsShapeUtils.load(node, properties)
-        return node
-    }
-
-    override fun save(view: SceneEditorView, node: Node): Map<String, String>? {
-        if (node !is CircleShape2DView) return null
-        val out = HashMap<String, String>()
-        Spatial2DService.save(view.engine, node, out)
-        out["radius"] = node.radius.toString()
-        PhysicsShapeUtils.save(node, out)
-        return out
-    }
 
     override fun isEditor(node: Node): Boolean = node::class.java === CircleShape2DView::class.java
 
@@ -78,23 +161,51 @@ object CircleShapeService : NodeService {
         node.hover = hover
     }
 
+    override val nodeClass: String
+        get() = CircleShape2D::class.java.name
+
+    override fun newInstance(view: SceneEditorView): Node = CircleShape2DView(view)
+
     override fun getCollider2D(view: SceneEditorView, node: Node): Collider2D? {
         if (node !is CircleShape2DView) return null
         return node.collider
     }
 }
 
-class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode {
+class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine), ShapeEditorNode, EditableNode {
     private var geom by ResourceHolder<Geom2D>()
     private var material by ResourceHolder(view.default3DMaterial.instance(Vector4f()))
     private var center: CenterNode2D? = null
     val collider = Circle2DCollider().also {
         it.node = this
     }
+
+    val transformField = PositionField2D(this)
+    val radiusEditableField = RadiusEditableField(this, this)
+    val rotationField = RotationField2D(this)
+    val densityEditableField = DensityEditableField(this, this)
+    val frictionEditableField = FrictionEditableField(this, this)
+    val restitutionEditableField = RestitutionEditableField(this, this)
+    val sensorEditableField = SensorEditableField(this, this)
+
+    override var rotation: Float
+        get() = super.rotation
+        set(value) {
+            super.rotation = value
+            rotationField.eventChange.dispatch()
+        }
+    override val position: Vector2fm = Vector2fmDelegator(super.position) {
+        transformField.eventChange.dispatch()
+    }
+
+    private val fields = listOf(transformField, rotationField, densityEditableField, frictionEditableField, restitutionEditableField, sensorEditableField, radiusEditableField)
+    override fun getEditableFields(): List<NodeService.Field> = fields
+
     var radius = 50f
         set(value) {
             field = value
             collider.radius = value
+            radiusEditableField.eventChange.dispatch()
         }
 
 

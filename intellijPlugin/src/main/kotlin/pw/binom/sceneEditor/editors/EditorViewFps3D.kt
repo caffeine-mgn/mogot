@@ -132,8 +132,10 @@ class FpsCam(val view: SceneEditorView) : EditAction {
         val centerY = view.size.y / 2
 
 
-        manager.x += (centerX - view.mousePosition.x) * 0.005f
-        manager.y += (centerY - view.mousePosition.y) * 0.005f
+        val dx = centerX - view.mousePosition.x
+        val dy = centerY - view.mousePosition.y
+        manager.x += (dx) * 0.005f
+        manager.y += (dy) * 0.005f
 
         if (manager.y < -PIf / 2) manager.y = -PIf / 2
         if (manager.y > PIf / 2) manager.y = PIf / 2
@@ -149,8 +151,8 @@ class FpsCam(val view: SceneEditorView) : EditAction {
 //        node.quaternion.mul(q,node.quaternion)
 //        node.quaternion.rotateZYX(0f, x, y)
 //        println("-->${view.editorCamera.quaternion.yaw}             ${view.editorCamera.quaternion.pitch} $y")
-
-        node.quaternion.setRotation(0f, manager.x, manager.y)
+        if (dx != 0 || dy != 0)
+            node.quaternion.setRotation(0f, manager.x, manager.y)
 //            node.quaternion.rotateXYZ(x,y,0f)
 //            node.rotation2.y += (Input.mousePosition.x - oldMousePosition.x) * dt / 10f
 //            node.rotation2.x += (Input.mousePosition.y - oldMousePosition.y) * dt / 10f
