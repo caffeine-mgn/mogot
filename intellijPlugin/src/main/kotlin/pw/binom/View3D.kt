@@ -29,7 +29,7 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
         camera!!.parent = root
         camera!!.enabled = true
         resetCam()
-        camera=Camera(engine)
+        camera=Camera()
     }
 
     protected fun resetCam() {
