@@ -208,7 +208,7 @@ class EditableCamera(val view: SceneEditorView) : Camera(view.engine), EditableN
 
         s.size.set(40f, 32f)
         view.engine.editor.renderThread {
-            s.internalMaterial = SolidTextureMaterial(view.engine).apply {
+            s.internalMaterial = SolidTextureMaterial(view.engine.gl).apply {
                 diffuseColor.set(0f, 0f, 0f, 0f)
                 tex = view.engine.camerasManager.cameraLightTexture.gl
             }

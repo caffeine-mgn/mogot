@@ -20,8 +20,6 @@ private object NearField2D : AbstractField<Camera, Float>() {
     override val type: Field.Type
         get() = Field.Type.FLOAT
 
-class Camera : Spatial() {
-    var enabled = false
     override val name: String
         get() = "near"
 
@@ -48,6 +46,8 @@ private object FieldOfViewField2D : AbstractField<Camera, Float>() {
 
 open class Camera(engine: Engine) : Spatial() {
     val projectionMatrix = Matrix4f()
+
+    var enabled = false
 
     override fun getField(name: String): Field? =
             when (name) {
@@ -102,7 +102,6 @@ open class Camera(engine: Engine) : Spatial() {
         viewMatrix4f.translate(-position)
     }
 
-
     fun worldToScreenPoint(position: Vector3fc): Vector2i? {
         val out = Vector2i()
         if (!worldToScreenPoint(position, out))
@@ -150,6 +149,7 @@ open class Camera(engine: Engine) : Spatial() {
         dest.direction.normalize()
         return dest
     }
+
 }
 
 val TEMP_VEC_2F = Vector2f()
