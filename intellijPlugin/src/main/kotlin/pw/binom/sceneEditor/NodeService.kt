@@ -77,7 +77,7 @@ interface NodeService {
                     mogot.Field.Type.VEC3 -> EditorVec3(sceneEditor, fields)
                     mogot.Field.Type.INT -> EditorInt(sceneEditor, fields)
                     mogot.Field.Type.FLOAT -> EditorFloat(sceneEditor, fields)
-                    mogot.Field.Type.BOOL -> TODO()
+                    mogot.Field.Type.BOOL -> EditorBoolean(sceneEditor, fields)
                     mogot.Field.Type.VEC2 -> EditorVec2(sceneEditor, fields)
                     mogot.Field.Type.VEC4 -> TODO()
                     mogot.Field.Type.STRING -> EditorString(sceneEditor, fields)

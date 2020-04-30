@@ -44,6 +44,20 @@ private object FieldOfViewField2D : AbstractField<Camera, Float>() {
     override fun currentValue(node: Camera): Float = node.fieldOfView
 }
 
+private object EnableField : AbstractField<Camera, Boolean>() {
+    override val type: Field.Type
+        get() = Field.Type.BOOL
+
+    override val name: String
+        get() = "enabled"
+
+    override suspend fun setValue(engine: Engine, node: Camera, value: Boolean) {
+        node.enabled = value
+    }
+
+    override fun currentValue(node: Camera): Boolean = node.enabled
+}
+
 open class Camera() : Spatial() {
     val projectionMatrix = Matrix4f()
 
@@ -54,6 +68,7 @@ open class Camera() : Spatial() {
                 FarField2D.name -> FarField2D
                 NearField2D.name -> NearField2D
                 FieldOfViewField2D.name -> FieldOfViewField2D
+                EnableField.name -> EnableField
                 else -> super.getField(name)
             }
 

@@ -95,42 +95,23 @@ class FarEditableField(override val node: Camera) : NodeService.FieldFloat() {
     }
 }
 
-class EnabledEditableField(override val node: Camera) : NodeService.FieldBoolean(){
-    override val id: Int
-        get() = FieldOfViewEditableField::class.java.hashCode()
-    override val groupName: String
-        get() = "Camera"
-    override var currentValue: Any
+class EnabledEditableField(override val node: Camera) : NodeService.AbstractField() {
+    override var realValue: Any
         get() = node.enabled
         set(value) {
             node.enabled = value as Boolean
         }
-    private var originalValue: Boolean? = null
-    override val value: Any
-        get() = originalValue ?: node.enabled
 
-    override fun clearTempValue() {
-        originalValue = null
-    }
+    override fun cloneRealValue(): Any = node.enabled
 
+    override val groupName: String
+        get() = "Camera"
     override val name: String
         get() = "enabled"
     override val displayName: String
         get() = "Enabled"
-
-    override fun setTempValue(value: Any) {
-        if (originalValue == null) {
-            originalValue = node.enabled
-        }
-        node.fieldOfView = value as Float
-    }
-
-    override fun resetValue() {
-        if (originalValue != null) {
-            node.enabled = originalValue!!
-            originalValue = null
-        }
-    }
+    override val fieldType: Field.Type
+        get() = Field.Type.BOOL
 
 }
 
@@ -225,7 +206,7 @@ class EditableCamera(val view: SceneEditorView) : Camera(), EditableNode {
         super.fieldOfView = new
     }
 
-    override var enabled: Boolean by Delegates.observable(super.enabled) {_,_, new ->
+    override var enabled: Boolean by Delegates.observable(super.enabled) { _, _, new ->
         enabledEditableField.eventChange.dispatch()
         super.enabled = new
     }
@@ -235,8 +216,8 @@ class EditableCamera(val view: SceneEditorView) : Camera(), EditableNode {
     val nearEditableField = NearEditableField(this)
     val farEditableField = FarEditableField(this)
     val fieldOfViewEditableField = FieldOfViewEditableField(this)
-    val enabledEditableField =EnabledEditableField(this)
-    private val fields = listOf(positionField, rotationField, nearEditableField, farEditableField, fieldOfViewEditableField, enabledEditableField)
+    val enabledEditableField = EnabledEditableField(this)
+    private val fields = listOf(positionField, rotationField, enabledEditableField, nearEditableField, farEditableField, fieldOfViewEditableField)
     override fun getEditableFields(): List<NodeService.Field> = fields
 
     val s = SpriteFor3D(view)
