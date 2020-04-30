@@ -123,7 +123,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
-    lateinit var editorCamera: Camera
+    val editorCamera = Camera()
     lateinit var editorCamera2D: Camera2D
     val eventSelectChanged = EventDispatcher()
     private var closed = false
