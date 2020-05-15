@@ -5,10 +5,12 @@ import mogot.Material
 import mogot.ResourceImpl
 import mogot.math.*
 import mogot.rendering.Display
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.compiler.SingleType
+import pw.binom.material.property
 
-class MaterialInstance(val engine: Engine,val root: ExternalMaterial) : Material, ResourceImpl() {
+class MaterialInstance(val engine: Engine, val root: ExternalMaterial) : Material, ResourceImpl() {
 
     var selected = false
     var hover = false
@@ -46,10 +48,12 @@ class MaterialInstance(val engine: Engine,val root: ExternalMaterial) : Material
 
     private val _uniforms = ArrayList<Uniform>()
 
-    private var oldCompiler: Compiler? = null
+    private var oldCompiler: SourceModule? = null
     private fun update() {
         _uniforms.clear()
-        root.compiler.properties.forEach { (key, value) ->
+        root.compiler.properties.forEach {
+            val key = it
+            val prop = it.property!!
             val type = when {
                 key.type is SingleType && key.type.clazz.name == "sampler2D" -> Type.Texture
                 key.type is SingleType && key.type.clazz.name == "int" -> Type.Int
@@ -63,12 +67,12 @@ class MaterialInstance(val engine: Engine,val root: ExternalMaterial) : Material
 
             _uniforms += Uniform(
                     name = key.name,
-                    title = value["title"] ?: key.name,
+                    title = prop.title?: key.name,
                     type = type,
-                    value = value["value"],
-                    min = value["min"],
-                    max = value["max"],
-                    step = value["step"]
+                    value = prop.value,
+                    min = prop.min?.toString(),
+                    max = prop.max?.toString(),
+                    step = prop.step?.toString()
             )
         }
         val names = _uniforms.map { it.name }
@@ -141,8 +145,8 @@ class MaterialInstance(val engine: Engine,val root: ExternalMaterial) : Material
 
     fun get(uniform: Uniform) = values[uniform.name]
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        root.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        root.use(model, modelView, projection, context)
         root.shader.uniform("selected", selected)
         root.shader.uniform("hover", hover)
         values.forEach { (name, value) ->

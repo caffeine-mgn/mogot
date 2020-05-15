@@ -5,6 +5,6 @@ import pw.binom.material.MaterialLanguage
 
 class GLSLTokenType(debugName: String) : IElementType(debugName, MaterialLanguage) {
     override fun toString(): String {
-        return "GLSLTokenType.${super.toString()}"
+        return "GLSLTokenType(${super.toString()})"
     }
 }

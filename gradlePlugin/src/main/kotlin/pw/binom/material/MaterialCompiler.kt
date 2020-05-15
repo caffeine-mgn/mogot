@@ -8,7 +8,7 @@ import pw.binom.io.writeInt
 import pw.binom.io.writeUTF8String
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
+import pw.binom.material.lex.Parser
 import java.io.File
 import java.io.OutputStream
 import java.io.StringReader
@@ -42,6 +42,7 @@ object MaterialCompiler {
 
     @JvmStatic
     fun compile(file: File, outputFile: File) {
+        outputFile.parentFile.mkdirs()
         if (!DesktopAssertTask.isFileChanged(file, outputFile)) {
             println("$file: UP-TO-DATE")
             return

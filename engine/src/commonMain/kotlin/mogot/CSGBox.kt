@@ -61,13 +61,13 @@ open class CSGBox(val engine: Engine) : CSGPrimitive(), MaterialNode by Material
         rebuild()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (geomNode3D2 == null)
             rebuild()
-        super.render(model, projection, context)
+        super.render(model, modelView, projection, context)
         val material = material
         val geom = geomNode3D2
-        material.value?.use(model, projection, context)
+        material.value?.use(model, modelView, projection, context)
         geom!!.draw()
         material.value?.unuse()
     }

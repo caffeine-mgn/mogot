@@ -14,9 +14,9 @@ class SpriteFor3D(val view: SceneEditorView) : AbstractSprite(view.engine) {
         get() = TODO("Not yet implemented")
         set(value) {}
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!view.render3D)
             return
-        super.render(model, projection, context)
+        super.render(model, modelView, projection, context)
     }
 }

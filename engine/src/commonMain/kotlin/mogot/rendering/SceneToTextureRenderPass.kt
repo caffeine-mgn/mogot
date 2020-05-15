@@ -20,7 +20,7 @@ open class SceneToTextureRenderPass() : ToTextureRenderPass() {
             if (context.camera != null)
                 if(!bypass) {
                     customPreDraw3D(context.camera!!.transform, context.camera!!.projectionMatrix, context)
-                    context.renderNode3D(root, context.camera!!.transform, context.camera!!.projectionMatrix, context)
+                    context.renderNode3D(root)
                 }
             gl.disable(gl.DEPTH_TEST)
             gl.disable(gl.CULL_FACE)

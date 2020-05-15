@@ -11,8 +11,9 @@ import pw.binom.material.MaterialFileType
 import pw.binom.sceneEditor.SceneFileType
 
 const val TEMPLATE_MATERIAL = "MaterialTemplate"
+const val TEMPLATE_MATERIAL_MODULE = "MaterialModuleTemplate"
 
-private const val TEMPILE_TEXT="""@vertex
+private const val TEMPILE_TEXT = """@vertex
 vec3 vertexPos
 
 @normal
@@ -60,12 +61,18 @@ class CreateMaterialFileAction : CreateFileFromTemplateAction("Material", "Creat
     override fun buildDialog(project: Project?, directory: PsiDirectory?, builder: CreateFileFromTemplateDialog.Builder) {
         builder.setTitle("Create new Material file")
         builder.addKind("Material", MaterialFileType.icon, TEMPLATE_MATERIAL)
+        builder.addKind("Module", MaterialFileType.icon, TEMPLATE_MATERIAL_MODULE)
     }
 
     override fun createFile(name: String, templateName: String, dir: PsiDirectory): PsiFile? {
-        if (templateName != TEMPLATE_MATERIAL)
-            return null
-        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.mat", SceneFileType, TEMPILE_TEXT)
+        val module = when (templateName) {
+            TEMPLATE_MATERIAL -> false
+            TEMPLATE_MATERIAL_MODULE -> true
+            else -> return null
+        }
+        val ext = if (module) "shr" else "mat"
+        val body = if (module) "" else TEMPILE_TEXT
+        val file = PsiFileFactory.getInstance(dir.project).createFileFromText("$name.$ext", SceneFileType, body)
         dir.add(file)
         val virtualFile = file.virtualFile
         if (virtualFile != null)

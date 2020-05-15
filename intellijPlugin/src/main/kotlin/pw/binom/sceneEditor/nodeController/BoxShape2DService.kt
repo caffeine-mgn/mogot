@@ -116,7 +116,7 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
             refreshColor()
         }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (center == null) {
             center = CenterNode2D(this, view)
             center!!.parent = view.editorRoot
@@ -129,7 +129,7 @@ class BoxShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engine),
         if (size.resetChangeFlag()) {
             rect2D!!.size.set(size)
         }
-        material!!.use(model, projection, context)
+        material!!.use(model, modelView, projection, context)
         rect2D!!.draw()
         material!!.unuse()
     }

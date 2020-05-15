@@ -16,7 +16,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 
 
-open class GLView(val display: Display, val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
+open class GLView(open val display: Display, val fileSystem: FileSystem<Unit>, fps: Int? = 60) : Stage, GLJPanel(GLCapabilities(GLProfile.getDefault())) {
     override lateinit var gl: GL
     override val mouseDown = EventValueDispatcher<Int>()
     override val mouseUp = EventValueDispatcher<Int>()

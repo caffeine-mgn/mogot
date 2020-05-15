@@ -1,9 +1,10 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.TokenType
-import pw.binom.material.psi.TypePromitive
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.TokenType
+import pw.binom.material.lex.TypePromitive
 
-class NumberExpressionDesc(val scope: Scope, val value: Double, val type: Type) : ExpressionDesc() {
+class NumberExpressionDesc(val scope: Scope, val value: Double, val type: Type, source: SourcePoint) : ExpressionDesc(source) {
     enum class Type {
         INT, FLOAT, DOUBLE
     }
@@ -16,4 +17,6 @@ class NumberExpressionDesc(val scope: Scope, val value: Double, val type: Type) 
             },
             emptyList()
     ))!!
+    override val childs: Sequence<SourceElement>
+        get() = emptySequence()
 }

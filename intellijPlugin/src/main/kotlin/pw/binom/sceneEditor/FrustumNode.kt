@@ -135,8 +135,8 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.render(model, projection, context)
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, modelView, projection, context)
         val mat = material.value ?: return
         if (near != camera.near ||
                 far != camera.far ||
@@ -147,7 +147,7 @@ class FrustumNode(val engine: Engine, val camera: Camera) : VisualInstance(), Ma
         if (geom == null)
             update()
         engine.gl.checkError { "Before Material" }
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         engine.gl.checkError { "After Material" }
         geom!!.draw()
         mat.unuse()

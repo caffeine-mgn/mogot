@@ -2,45 +2,45 @@ package pw.binom.material.generator
 
 import pw.binom.material.DCE
 import pw.binom.material.MaterialVisiter
+import pw.binom.material.RootModule
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.*
-import pw.binom.material.psi.Global
-import pw.binom.material.psi.GlobalMethod
-import pw.binom.material.psi.OperationExpression
+import pw.binom.material.lex.GlobalMethod
 
 object GLSLFixVarPassLayout {
-    fun fix(compiler: Compiler) {
-        val vertexMethod = compiler.rootMethods.find { it.name == "vertex" }
+    fun fix(module: SourceModule) {
+        val vertexMethod = module.globalMethods.find { it.name == "vertex" }
 
-        val c = DCE(compiler)
+        val c = DCE(module)
         val vertex = c.fieldsFP.find {
-            compiler.vertex == it
+            module.vertex == it
         }
 
         val uv = c.fieldsFP.find {
-            compiler.uv == it
+            module.uv == it
         }
         val normal = c.fieldsFP.find {
-            compiler.normal == it
+            module.normal == it
         }
         if (vertex != null) {
-            val replace = GlobalFieldDesc(null, "${vertex.name}_inout", vertex.type, vertex.source)
-            FieldReplaceVisiter(vertex, replace).visit(compiler)
-            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(vertex, null))
-            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null), FieldAccessExpressionDesc(vertex, null), null))
+            val replace = GlobalFieldDesc(null, "${vertex.name}_inout", vertex.type, source=vertex.source)
+            FieldReplaceVisiter(vertex, replace).visit(module)
+            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(vertex, null, RootModule.zeroSource), RootModule.zeroSource)
+            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null, RootModule.zeroSource), FieldAccessExpressionDesc(vertex, null, RootModule.zeroSource), null, RootModule.zeroSource))
         }
 
         if (normal != null) {
-            val replace = GlobalFieldDesc(null, "${normal.name}_inout", normal.type, normal.source)
-            FieldReplaceVisiter(normal, replace).visit(compiler)
-            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(normal, null))
-            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null), FieldAccessExpressionDesc(normal, null), null))
+            val replace = GlobalFieldDesc(null, "${normal.name}_inout", normal.type, source=normal.source)
+            FieldReplaceVisiter(normal, replace).visit(module)
+            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(normal, null, RootModule.zeroSource), RootModule.zeroSource)
+            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null, RootModule.zeroSource), FieldAccessExpressionDesc(normal, null, RootModule.zeroSource), null, RootModule.zeroSource))
         }
 
         if (uv != null) {
-            val replace = GlobalFieldDesc(null, "${uv.name}_inout", uv.type, uv.source)
-            FieldReplaceVisiter(uv, replace).visit(compiler)
-            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(uv, null))
-            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null), FieldAccessExpressionDesc(uv, null), null))
+            val replace = GlobalFieldDesc(null, "${uv.name}_inout", uv.type, source=uv.source)
+            FieldReplaceVisiter(uv, replace).visit(module)
+            FieldAccessExpressionDesc(replace, FieldAccessExpressionDesc(uv, null, RootModule.zeroSource), RootModule.zeroSource)
+            vertexMethod!!.statementBlock!!.statements.add(0, AssignStatementDesc(FieldAccessExpressionDesc(replace, null, RootModule.zeroSource), FieldAccessExpressionDesc(uv, null, RootModule.zeroSource), null, RootModule.zeroSource))
         }
     }
 }

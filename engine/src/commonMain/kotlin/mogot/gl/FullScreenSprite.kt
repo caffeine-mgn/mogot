@@ -13,7 +13,7 @@ class FullScreenSprite(gl: GL): ResourceImpl() {
 
     fun draw(context: Display.Context) {
         val mat = material ?: TODO()
-        mat.use(MATRIX4_ONE, Matrix4f().identity(), context)
+        mat.use(MATRIX4_ONE, MATRIX4_ONE, Matrix4f().identity(), context)
         rect.draw()
         mat.unuse()
     }

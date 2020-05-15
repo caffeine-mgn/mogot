@@ -70,7 +70,7 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
     protected abstract val isReady: Boolean
     abstract var texture: Texture2D?
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!isReady)
             return
 
@@ -86,10 +86,10 @@ abstract class AbstractSprite(engine: Engine) : VisualInstance2D(engine) {
             geom!!.size.set(size)
             oldSize!!.set(size)
         }
-        super.render(model, projection, context)
+        super.render(model, modelView, projection, context)
         val mat = material
 
-        mat.use(model, projection, context)
+        mat.use(model, projection, modelView, context)
         geom!!.draw()
         mat.unuse()
     }

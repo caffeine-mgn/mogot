@@ -2,7 +2,7 @@ package pw.binom.material
 
 import pw.binom.material.compiler.*
 
-class DCE(val compiler: Compiler) {
+class DCE(val module: SourceModule) {
     val methodsVP = LinkedHashSet<MethodDesc>()
     val methodsFP = LinkedHashSet<MethodDesc>()
     val fieldsVP = LinkedHashSet<GlobalFieldDesc>()
@@ -14,8 +14,8 @@ class DCE(val compiler: Compiler) {
     private var visitVP = true
 
     init {
-        val vertexMethod = compiler.rootMethods.find { it.name == "vertex" }
-        val fragmentMethod = compiler.rootMethods.find { it.name == "fragment" }
+        val vertexMethod = module.globalMethods.find { it.name == "vertex" }
+        val fragmentMethod = module.globalMethods.find { it.name == "fragment" }
         if (vertexMethod != null) {
             visitVP = true
             visit(vertexMethod.statementBlock!!)
@@ -31,7 +31,7 @@ class DCE(val compiler: Compiler) {
 
 
     private fun useClass(clazz: ClassDesc) {
-        if (clazz !in compiler.rootClasses)
+        if (clazz !in module.globalClasses.values)
             return
         if (visitVP) {
             classesVP += clazz

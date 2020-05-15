@@ -1,8 +1,12 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.Type
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.Type
 
-class ClassDesc(val name: String) : Scope {
+class ClassDesc(val name: String, override val source: SourcePoint) : Scope, SourceElement {
+
+    override val childs: Sequence<SourceElement>
+        get() = emptySequence()
 
     override val parentScope: Scope?
         get() = null

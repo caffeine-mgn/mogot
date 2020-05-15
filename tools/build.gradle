@@ -48,7 +48,7 @@ dependencies {
 }
 
 jflex {
-    generateDir = file("$project.buildDir/generated-src/jflex/pw/binom/material/psi")
+    generateDir = file("$project.buildDir/generated-src/jflex/pw/binom/material/lex")
 }
 
 classes {

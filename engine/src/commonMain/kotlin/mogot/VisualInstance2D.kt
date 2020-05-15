@@ -18,7 +18,7 @@ abstract class VisualInstance2D(engine: Engine): Spatial2D(engine) {
     override val type: Int
         get() = VISUAL_INSTANCE2D_TYPE
 
-    open fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    open fun render(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         //NOP
     }
 }

@@ -14,7 +14,7 @@ class CenterNode2D(val node: Spatial2D, val view: SceneEditorView) : VisualInsta
     private var innerMat by ResourceHolder<MInstance>()
     private var outterMat by ResourceHolder<MInstance>()
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!visible)
             return
         if (node.isVisualInstance2D() && !node.visible)
@@ -57,12 +57,12 @@ class CenterNode2D(val node: Spatial2D, val view: SceneEditorView) : VisualInsta
         mat.scale(1f / view.editorCamera2D.zoom, 1f / view.editorCamera2D.zoom, 1f)
 
         engine.gl.gl.glLineWidth(3f)
-        outterMat!!.use(mat, projection, context)
+        outterMat!!.use(mat, modelView, projection, context)
         geom!!.draw()
         outterMat!!.unuse()
 
         engine.gl.gl.glLineWidth(1f)
-        innerMat!!.use(mat, projection, context)
+        innerMat!!.use(mat, modelView, projection, context)
         geom!!.draw()
         innerMat!!.unuse()
         engine.mathPool.mat4f.push(mat)

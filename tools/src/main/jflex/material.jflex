@@ -1,7 +1,7 @@
-package pw.binom.material.psi;
+package pw.binom.material.lex;
 
-import pw.binom.material.psi.TokenType;
-import pw.binom.material.psi.IElementType;
+import pw.binom.material.lex.TokenType;
+import pw.binom.material.lex.IElementType;
 
 
 %%
@@ -39,7 +39,7 @@ public String getText(){return yytext(); }
 
 CRLF=[\r\n]
 WHITE_SPACE=[\ \t\f]
-FIRST_VALUE_CHARACTER=[^ '\"\r\n\f\\{};\/\d\(\)=\+\-*\/\^%,!<>\.\[\]]|[a-zA-Z]
+FIRST_VALUE_CHARACTER=[^ '\"\r\n\f\\{};\/\d\(\)=\+\-*\/\^%,!<>\.\[\]@]|[a-zA-Z]
 VALUE_CHARACTER=[^ '\"\r\n\f\\{};\/\(\)=\+\-*\/\^%,!<>\.\[\]]|[a-zA-Z0-9]
 END_OF_LINE_COMMENT=("//")[^\r\n]*
 DERECTIVE=("#")[^\r\n]*
@@ -55,6 +55,7 @@ mDOUBLE_SUFFIX = d | D
 mNUM_FLOAT = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mFLOAT_SUFFIX}
 mNUM_DOUBLE = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mDOUBLE_SUFFIX}
 mNUM_ALL = ((\d+)(\.\d+)?[fd]?)|((\.\d+)[fd]?)
+ANNOTATION=@{ID}
 QUOTE = \"
 %state WAITING_VALUE
 DOT = \.
@@ -67,6 +68,8 @@ DOT = \.
 <YYINITIAL> {mNUM_ALL} { return TokenType.NUMBER; }
 //<YYINITIAL> {KEY_CHARACTER}+                                { yybegin(YYINITIAL); return TokenType.KEY; }
 {DERECTIVE} { return TokenType.DERECTIVE; }
+{ANNOTATION} { return TokenType.ANNOTATION; }
+"null" { return TokenType.NULL; }
 "vec3" { return TokenType.VEC3; }
 "mat3" { return TokenType.MAT3; }
 "mat4" { return TokenType.MAT4; }
@@ -114,12 +117,6 @@ DOT = \.
 ">=" {return TokenType.OP_GE;}
 "out" {return TokenType.OUT;}
 "for" {return TokenType.FOR;}
-"@property" {return TokenType.PROPERTY;}
-"@vertex" {return TokenType.VERTEX;}
-"@normal" {return TokenType.NORMAL;}
-"@uv" {return TokenType.UV;}
-"@model" {return TokenType.MODEL;}
-"@projection" {return TokenType.PROJECTION;}
 "uniform" {return TokenType.UNIFORM;}
 {END_OF_LINE_COMMENT} { return TokenType.COMMENT_LINE; }
 {COMMENT_BLOCK} { return TokenType.COMMENT_BLOCK; }

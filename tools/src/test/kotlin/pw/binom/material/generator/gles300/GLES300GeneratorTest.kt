@@ -1,8 +1,10 @@
 package pw.binom.material.generator.gles300
 
 import org.junit.Test
+import pw.binom.material.EmptyModuleResolver
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.Compiler
-import pw.binom.material.psi.Parser
+import pw.binom.material.lex.Parser
 import java.io.StringReader
 
 class GLES300GeneratorTest {
@@ -46,8 +48,8 @@ class GLES300GeneratorTest {
             }
         """
 
-        val sh1 = Parser(StringReader(shader1)).let { Compiler(it) }
-        val sh2 = Parser(StringReader(shader2)).let { Compiler(it) }
+        val sh1 = Parser(StringReader(shader1)).let { Compiler(it, SourceModule(), EmptyModuleResolver) }
+        val sh2 = Parser(StringReader(shader2)).let { Compiler(it, SourceModule(), EmptyModuleResolver) }
 
         val result = GLES300Generator.mix(listOf(sh1, sh2))
         println("FP:\n${result.fp}")

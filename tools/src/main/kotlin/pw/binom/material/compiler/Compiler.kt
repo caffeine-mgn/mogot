@@ -1,243 +1,115 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.*
+import pw.binom.material.ModuleResolver
+import pw.binom.material.RootModule
+import pw.binom.material.SourceModule
+import pw.binom.material.lex.*
 
-class Compiler(val parser: Parser) : Scope {
+class Compiler(val parser: Parser, val module: SourceModule, val resolver: ModuleResolver) {
     private val global
         get() = parser.global
-    private val floatClass = ClassDesc("float")
-    private val intClass = ClassDesc("int")
-    private val boolClass = ClassDesc("bool")
-    val vec4Class = ClassDesc("vec4")
-    val gvec4Class = ClassDesc("gvec4")
-    private val vec3Class = ClassDesc("vec3")
-    private val vec2Class = ClassDesc("vec2")
-    private val mat4Class = ClassDesc("mat4")
-    private val mat3Class = ClassDesc("mat3")
-    private val sampler2DClass = ClassDesc("sampler2D")
+
     private val classes = ArrayList<ClassDesc>()
     private val singleTypes = HashMap<ClassDesc, SingleType>()
     private val arrayTypes = HashMap<ClassDesc, MutableSet<ArrayType>>()
-    val rootFields = ArrayList<GlobalFieldDesc>()
-    val rootMethods = ArrayList<MethodDesc>()
-    val rootClasses = ArrayList<ClassDesc>()
 
-    init {
-        classes += floatClass
-        classes += vec4Class
-        classes += vec3Class
-        classes += vec2Class
-        classes += mat3Class
-        classes += mat4Class
-        classes += boolClass
-        classes += intClass
-        classes += sampler2DClass
-        classes += gvec4Class
-    }
-
-    val floatType = findType(TypePromitive(TokenType.FLOAT, emptyList())) as SingleType
-    val vec3Type = findType(TypePromitive(TokenType.VEC3, emptyList())) as SingleType
-    val mat4Type = findType(TypePromitive(TokenType.MAT4, emptyList())) as SingleType
-    val mat3Type = findType(TypePromitive(TokenType.MAT3, emptyList())) as SingleType
-    val vec4Type = findType(TypePromitive(TokenType.VEC4, emptyList())) as SingleType
-    val gvec4Type = findType(TypeId("gvec4", emptyList())) as SingleType
-    val vec2Type = findType(TypePromitive(TokenType.VEC2, emptyList())) as SingleType
-    val intType = findType(TypePromitive(TokenType.INT, emptyList())) as SingleType
-    val sampler2DType = findType(TypeId("sampler2D", emptyList())) as SingleType
+//    val properties = HashMap<GlobalFieldDesc, Map<String, String>>()
 
     init {
 
-        intType.methods += MethodDesc(this, null, "unarMinus", intType, listOf(), false)
-        floatType.methods += MethodDesc(this, null, "unarMinus", floatType, listOf(), false)
-        vec2Type.methods += MethodDesc(this, null, "unarMinus", vec2Type, listOf(), false)
-        vec3Type.methods += MethodDesc(this, null, "unarMinus", vec3Type, listOf(), false)
-        vec4Type.methods += MethodDesc(this, null, "unarMinus", vec4Type, listOf(), false)
-
-
-        rootMethods += MethodDesc(this, null, "clamp", floatType, listOf(
-                MethodDesc.Argument("a", floatType),
-                MethodDesc.Argument("a", floatType),
-                MethodDesc.Argument("b", floatType)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "max", floatType, listOf(
-                MethodDesc.Argument("a", floatType),
-                MethodDesc.Argument("b", floatType)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "pow", floatType, listOf(
-                MethodDesc.Argument("a", floatType),
-                MethodDesc.Argument("b", floatType)
-        ), false)
-
-
-        rootMethods += MethodDesc(this, null, "normalize", vec3Type, listOf(
-                MethodDesc.Argument("vector", vec3Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "length", floatType, listOf(
-                MethodDesc.Argument("vector", vec3Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "dot", floatType, listOf(
-                MethodDesc.Argument("a", vec3Type),
-                MethodDesc.Argument("b", vec3Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "reflect", vec3Type, listOf(
-                MethodDesc.Argument("a", vec3Type),
-                MethodDesc.Argument("b", vec3Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec3", vec3Type, listOf(
-                MethodDesc.Argument("x", floatType),
-                MethodDesc.Argument("y", floatType),
-                MethodDesc.Argument("z", floatType)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec3", vec3Type, listOf(
-                MethodDesc.Argument("matrix", mat3Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec3", vec3Type, listOf(
-                MethodDesc.Argument("matrix", mat4Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec4", vec4Type, listOf(
-                MethodDesc.Argument("matrix", mat4Type)
-        ), false)
-
-
-
-        rootMethods += MethodDesc(this, null, "texture", gvec4Type, listOf(
-                MethodDesc.Argument("texture", sampler2DType),
-                MethodDesc.Argument("uv", vec2Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec4", vec4Type, listOf(
-                MethodDesc.Argument("x", floatType),
-                MethodDesc.Argument("y", floatType),
-                MethodDesc.Argument("z", floatType),
-                MethodDesc.Argument("w", floatType)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "vec4", vec4Type, listOf(
-                MethodDesc.Argument("vector", vec3Type),
-                MethodDesc.Argument("w", floatType)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "inverse", mat4Type, listOf(
-                MethodDesc.Argument("matrix", mat4Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "transpose", mat4Type, listOf(
-                MethodDesc.Argument("matrix", mat4Type)
-        ), false)
-
-        rootMethods += MethodDesc(this, null, "mat3", mat3Type, listOf(
-                MethodDesc.Argument("matrix", mat4Type)
-        ), false)
-
-        mat3Type.methods += MethodDesc(this, null, "times", mat3Type, listOf(
-                MethodDesc.Argument("vec", vec3Type)
-        ), false)
-
-        mat4Type.methods += MethodDesc(this, null, "times", mat4Type, listOf(
-                MethodDesc.Argument("vec", vec4Type)
-        ), false)
-
-        intType.methods += MethodDesc(this, null, "plus", mat4Type, listOf(
-                MethodDesc.Argument("value", floatType)
-        ), false)
-
-        vec4Type.methods += MethodDesc(this, null, "times", vec4Type, listOf(
-                MethodDesc.Argument("value", floatType)
-        ), false)
-
-        gvec4Type.fields += GlobalFieldDesc(gvec4Type, "rgba", vec4Type, SourceExp(0, 0))
-        vec4Type.fields += GlobalFieldDesc(gvec4Type, "x", floatType, SourceExp(0, 0))
-        vec4Type.fields += GlobalFieldDesc(gvec4Type, "y", floatType, SourceExp(0, 0))
-        vec4Type.fields += GlobalFieldDesc(gvec4Type, "z", floatType, SourceExp(0, 0))
-        vec4Type.fields += GlobalFieldDesc(gvec4Type, "w", floatType, SourceExp(0, 0))
-
-        vec3Type.fields += GlobalFieldDesc(gvec4Type, "x", floatType, SourceExp(0, 0))
-        vec3Type.fields += GlobalFieldDesc(gvec4Type, "y", floatType, SourceExp(0, 0))
-        vec3Type.fields += GlobalFieldDesc(gvec4Type, "z", floatType, SourceExp(0, 0))
-    }
-
-    override fun findType(type: Type): TypeDesc {
-        val name = when (type) {
-            is TypePromitive -> type.type.name.toLowerCase()
-            is TypeId -> type.type
-            else -> TODO()
-        }
-        val index = when (type) {
-            is TypePromitive -> type.index
-            is TypeId -> type.index
-            else -> TODO()
-        }
-        val clazz = classes.find { it.name == name }
-                ?: rootClasses.find { it.name == name }
-                ?: throw CompileException("Undefined class $name", type.position, type.length)
-        return if (index.isEmpty()) {
-            singleTypes.getOrPut(clazz) { SingleType(clazz) }
-        } else {
-            val set = arrayTypes.getOrPut(clazz) { HashSet() }
-            var v = set.find {
-                it.size.size == index.size
-                it.size.forEachIndexed { index1, i -> if (index[index1] != i) return@find false }
-                true
-            }
-            if (v == null) {
-                v = ArrayType(this, clazz, index)
-                set += v
-            }
-            v
-        }
-    }
-
-    override fun findType(clazz: ClassDesc, array: List<Int>): TypeDesc? {
-        if (array.isEmpty()) {
-            return singleTypes.getOrPut(clazz) { SingleType(clazz) }
-        } else {
-            val set = arrayTypes.getOrPut(clazz) { HashSet() }
-            var v = set.find {
-                it.size.size == array.size
-                it.size.forEachIndexed { index1, i -> if (array[index1] != i) return@find false }
-                true
-            }
-            if (v == null) {
-                v = ArrayType(this, clazz, array)
-                set += v
-            }
-            return v
-        }
-    }
-
-    val properties = HashMap<GlobalFieldDesc, Map<String, String>>()
-    var model: GlobalFieldDesc? = null
-    var vertex: GlobalFieldDesc? = null
-    var normal: GlobalFieldDesc? = null
-    var uv: GlobalFieldDesc? = null
-    var projection: GlobalFieldDesc? = null
-
-    fun isProperty(field: GlobalFieldDesc) = properties.containsKey(field)
-    fun isExternal(field: GlobalFieldDesc) =
-            field == model || field == vertex || field == normal || field == uv || field == projection
-
-    init {
-        global.forEach {
+//        parser.imports.forEach {
+//            module.addModule(resolver.getModule(currentFilePath, it)
+//                    ?: throw RuntimeException("Can't find module \"$it\""))
+//        }
+        val e = global.iterator()
+        while (e.hasNext()) {
+            val it = e.next()
             when (it) {
-                is GlobalVar -> rootFields += compile(null, it)
-                is GlobalMethod -> rootMethods += compile(null, it)
-                is ClassDef -> rootClasses += compile(it)
+                is GlobalVar -> module.defineField(compile(null, it))
+                is GlobalMethod -> module.defineMethod(compile(null, it))
+                is AnnotationExp -> {
+                    val ann = compile(it)
+                    when (ann.clazz) {
+                        RootModule.importType -> {
+                            val fileName = (it.body["file"] as StringExpression).string
+                            module.addModule(
+                                    resolver.getModule(module.currentFilePath, fileName)
+                                            ?: throw CompileException("Can't find module \"$it\"", it.source)
+                            )
+                        }
+                        RootModule.vertexType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.vertex = field
+                            module.defineField(field)
+                        }
+                        RootModule.normalType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.normal = field
+                            module.defineField(field)
+                        }
+                        RootModule.uvType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.uv = field
+                            module.defineField(field)
+                        }
+                        RootModule.cameraPositionType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.camera = field
+                            module.defineField(field)
+                        }
+                        RootModule.projectionType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.projection = field
+                            module.defineField(field)
+                        }
+                        RootModule.modelViewType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.modelView = field
+                            module.defineField(field)
+                        }
+                        RootModule.modelType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            module.model = field
+                            module.defineField(field)
+                        }
+                        RootModule.propertyType -> {
+                            val f = e.next() as GlobalVar
+                            val field = compile(null, f)
+                            field.annotations += ann
+                            module.defineField(field)
+                        }
+                    }
+                }
+                is ClassDef -> compile(it)
                 else -> TODO("Unknown element: ${it::class.java.name}")
             }
         }
     }
 
+    private fun compile(exp: AnnotationExp): AnnotationDesc {
+        val type = findType(exp.type) as SingleType
+        return AnnotationDesc(
+                clazz = type,
+                properties = exp.body.asSequence().map {
+                    val field = type.findField(it.key)
+                            ?: throw CompileException("Can't find field \"${it.key}\" in class ${type.clazz.name}", it.value.source)
+                    val value = compile(module, null, it.value)
+                    field to value
+                }.toMap(),
+                source = exp.source
+        )
+    }
+
     private fun compile(clazz: ClassDef): ClassDesc {
-        val out = ClassDesc(clazz.name)
+        val out = ClassDesc(clazz.name, clazz.source)
+        module.defineClass(out)
         val type = findType(out, emptyList()) as SingleType
         clazz.methods.forEach {
             type.methods += compile(out, it)
@@ -249,50 +121,78 @@ class Compiler(val parser: Parser) : Scope {
         return out
     }
 
+    private fun findType(clazz: ClassDesc, array: List<Int>) = module.findType(clazz, array)
+            ?: throw RuntimeException("Can't find class ${clazz.name}")
+
     private fun compile(clazz: ClassDesc?, globalVar: GlobalVar): GlobalFieldDesc {
         val g = GlobalFieldDesc(
                 name = globalVar.name,
                 type = findType(globalVar.type),
-                parent = clazz?.let { findType(it, emptyList()) },
-                source = SourceExp(globalVar.position, globalVar.length)
+                parent = clazz?.let { module.findType(it, emptyList()) },
+                source = globalVar.source,
+                initValue = globalVar.initValue?.let { compile(module, null, it) }
         )
+        /*
         parser.properties[globalVar]?.let {
-            properties[g] = it.properties
+            properties[g] = it
         }
         if (parser.model == globalVar)
-            model = g
+            module.model = g
+        if (parser.modelView == globalVar)
+            module.modelView = g
         if (parser.vertex == globalVar)
-            vertex = g
+            module.vertex = g
 
         if (parser.normal == globalVar)
-            normal = g
+            module.normal = g
         if (parser.uv == globalVar)
-            uv = g
+            module.uv = g
         if (parser.projection == globalVar)
-            projection = g
+            module.projection = g
+        if (parser.camera == globalVar)
+            module.camera = g
+         */
         return g
     }
 
+
+    private fun findType(type: Type): TypeDesc {
+        val result = module.findType(type)
+        if (result == null) {
+            val name = when (type) {
+                is TypePromitive -> type.type.name.toLowerCase()
+                is TypeId -> type.type
+                else -> TODO()
+            }
+            throw CompileException("Undefined class $name", type.position, type.length)
+        }
+        return result
+    }
+
     private fun compile(clazz: ClassDesc?, method: GlobalMethod): MethodDesc {
+        if (method.name == "makeIt")
+            println()
         val out = MethodDesc(
-                scope = this,
+                scope = module,
                 name = method.name,
                 returnType = findType(method.returnType),
                 args = method.args.map {
                     MethodDesc.Argument(
                             it.name,
-                            findType(it.type)
+                            findType(it.type),
+                            it.source
                     )
                 },
                 parent = clazz?.let { findType(it, emptyList()) },
-                external = false
+                external = false,
+                source = method.source
         )
         out.statementBlock = compile(out, method.statement)
         return out
     }
 
     private fun compile(scope: Scope, statement: StatementBlock): StatementBlockDesc {
-        val out = StatementBlockDesc(scope)
+        val out = StatementBlockDesc(scope, statement.source)
         statement.statements.forEach {
             out.statements += compile(out, it)
         }
@@ -302,15 +202,15 @@ class Compiler(val parser: Parser) : Scope {
     private fun compile(scope: Scope, statement: ReturnStatement): ReturnStatementDest {
         val exp = statement.exp?.let { compile(scope, null, it) }
         val method = scope.findMethod()
-                ?: throw CompileException("Return statement must be use only inside method", statement.position, statement.length)
+                ?: throw CompileException("Return statement must be use only inside method", statement.source)
         if (exp == null) {
             if (method.returnType != scope.findType(TypePromitive(TokenType.VOID, emptyList()))!!)
-                throw CompileException("Function ${method.name} must return ${method.returnType}", statement.position, statement.length)
+                throw CompileException("Function ${method.name} must return ${method.returnType}", statement.source)
         } else {
             if (method.returnType != exp.resultType)
-                throw CompileException("Not compatible return type. Expected ${method.returnType} but factual ${exp.resultType}", statement.position, statement.length)
+                throw CompileException("Not compatible return type. Expected ${method.returnType} but factual ${exp.resultType}", statement.source)
         }
-        return ReturnStatementDest(exp)
+        return ReturnStatementDest(exp, statement.source)
     }
 
     private fun compile(scope: Scope, expression: MethodCallExpression): MethodCallExpressionDesc {
@@ -320,11 +220,18 @@ class Compiler(val parser: Parser) : Scope {
         val exp = expression.exp?.let { compile(scope, null, it) }
         val method = (exp?.resultType ?: scope).findMethod(expression.method, args.map { it.resultType })
                 ?: if (exp == null)
-                    throw CompileException("Undefined Method ${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.position, expression.length)
+                    throw CompileException("Undefined Method ${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.source)
                 else
-                    throw CompileException("Undefined Method ${exp.resultType}.${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.position, expression.length)
-        return MethodCallExpressionDesc(method, args, exp)
+                    throw CompileException("Undefined Method ${exp.resultType}.${expression.method}(${args.map { it.resultType }.joinToString(", ")})", expression.source)
+        return MethodCallExpressionDesc(method, args, exp, expression.source)
     }
+
+    private fun compile(scope: Scope, expression: StringExpression) =
+            StringExpressionDesc(
+                    origenal = expression.text,
+                    text = expression.string,
+                    source = expression.source
+            )
 
     private fun compile(scope: Scope, expression: NumberExpression): NumberExpressionDesc {
         val type = when {
@@ -332,7 +239,7 @@ class Compiler(val parser: Parser) : Scope {
             "." in expression.value -> NumberExpressionDesc.Type.DOUBLE
             else -> NumberExpressionDesc.Type.INT
         }
-        return NumberExpressionDesc(scope, expression.value.toDouble(), type)
+        return NumberExpressionDesc(scope, expression.value.toDouble(), type, expression.source)
     }
 
     private fun compile(scope: Scope, expression: OperationExpression): ExpressionDesc {
@@ -340,34 +247,36 @@ class Compiler(val parser: Parser) : Scope {
         val right = compile(scope, null, expression.right)
         if (left.resultType !== right.resultType) {
             val method = left.findMethod(expression.operator.innerMethod, listOf(right.resultType))
-                    ?: throw CompileException("Undefined Operation Method for convert ${left.resultType} to ${right.resultType}", expression.position, expression.length)
-            return MethodCallExpressionDesc(method, listOf(right), left)
+                    ?: throw CompileException("Can't find method ${left.resultType}::${expression.operator.innerMethod}(${right.resultType})", expression.source)
+            return MethodCallExpressionDesc(method, listOf(right), left, expression.source)
         }
         return OperationExpressionDesc(
                 left = left,
                 right = right,
-                operator = expression.operator
+                operator = expression.operator,
+                source = expression.source
         )
     }
 
     private fun compile(scope: Scope, expression: IdAccessExpression): FieldAccessExpressionDesc {
         val ss = expression.exp?.let { compile(scope, null, it) } ?: scope
         val field = ss.findField(expression.id)
-                ?: throw CompileException("Undefined variable ${expression.id}", expression.position, expression.length)
-        return FieldAccessExpressionDesc(field, ss as? ExpressionDesc)
+                ?: throw CompileException("Undefined variable ${expression.id}", expression.source)
+        return FieldAccessExpressionDesc(field, ss as? ExpressionDesc, expression.source)
     }
 
     private fun compile(scope: Scope, expression: IncDecExpression): IncDecExpressionDesc {
         val exp = compile(scope, null, expression.exp)
         if (exp.resultType !is SingleType)
-            throw CompileException("Can't apply increment to non single type", expression.position, expression.length)
+            throw CompileException("Can't apply increment to non single type", expression.source)
         val type = exp.resultType as SingleType
-        if (type != intType)
-            throw CompileException("Can't apply increment to non int type", expression.position, expression.length)
+        if (type != RootModule.intType)
+            throw CompileException("Can't apply increment to non int type", expression.source)
         return IncDecExpressionDesc(
                 exp,
                 expression.operator,
-                expression.prefix
+                expression.prefix,
+                expression.source
         )
     }
 
@@ -376,21 +285,22 @@ class Compiler(val parser: Parser) : Scope {
                     expression.exp,
                     "get",
                     listOf(expression.index),
-                    expression.position, expression.length
+                    expression.source
             ))
 
     private fun compile(scope: Scope, expression: InvertExpression): MethodCallExpressionDesc {
-        val exp = MethodCallExpression(expression.exp, "unarMinus", listOf(), expression.position, expression.length)
+        val exp = MethodCallExpression(expression.exp, "unarMinus", listOf(), expression.source)
         return compile(scope, exp)
     }
 
     private fun compile(scope: Scope, expression: ExpParenthesis): ExpParenthesisDest =
-            ExpParenthesisDest(compile(scope, null, expression.exp))
+            ExpParenthesisDest(compile(scope, null, expression.exp), expression.source)
 
     private fun compile(scope: Scope, from: ExpressionDesc?, expression: Expression): ExpressionDesc =
             when (expression) {
                 is MethodCallExpression -> compile(scope, expression)
                 is NumberExpression -> compile(scope, expression)
+                is StringExpression -> compile(scope, expression)
                 is OperationExpression -> compile(scope, expression)
                 is IdAccessExpression -> compile(scope, expression)
                 is BooleanExpression -> compile(scope, expression)
@@ -402,35 +312,38 @@ class Compiler(val parser: Parser) : Scope {
             }
 
     private fun compile(scope: Scope, expression: BooleanExpression): BooleanExpressionDesc =
-            BooleanExpressionDesc(scope, expression.value)
+            BooleanExpressionDesc(scope, expression.value, expression.source)
 
     private fun compile(scope: Scope, statement: LocalDefineAssignStatement): AssignStatementDesc {
         val block = scope.findBlock() ?: TODO()
-        val local = LocalFieldDesc(statement.name, scope.findType(statement.type)!!)
+        val local = LocalFieldDesc(statement.name, scope.findType(statement.type)!!, statement.fieldSource)
         block.fields += local
         return AssignStatementDesc(
-                FieldAccessExpressionDesc(local, null),
-                compile(scope, null, statement.exp),
-                null
+                field = FieldAccessExpressionDesc(local, null, statement.fieldSource),
+                exp = compile(scope, null, statement.exp),
+                operator = null,
+                source = statement.source
+
         )
     }
 
     private fun compile(scope: Scope, statement: AssignStatement): AssignStatementDesc {
         val left = compile(scope, null, statement.subject) as FieldAccessExpressionDesc
         val right = compile(scope, null, statement.exp)
-        return AssignStatementDesc(left, right, statement.operator)
+        return AssignStatementDesc(left, right, statement.operator, statement.source)
     }
 
     private fun compile(scope: Scope, statement: IfStatement): IfStatementDesc {
         return IfStatementDesc(
                 condition = compile(scope, null, statement.condition),
                 thenBlock = compile(scope, statement.thenBlock),
-                elseBlock = statement?.elseBlock?.let { compile(scope, it) }
+                elseBlock = statement.elseBlock?.let { compile(scope, it) },
+                source = statement.source
         )
     }
 
     private fun compile(scope: Scope, statement: ForStatement): StatementBlockDesc {
-        val block = StatementBlockDesc(scope)
+        val block = StatementBlockDesc(scope, statement.source)
         statement.init?.let { compile(block, it) }?.let { block.statements += it }
         var bb = compile(block, statement.statement)
 
@@ -438,21 +351,23 @@ class Compiler(val parser: Parser) : Scope {
             if (bb is StatementBlockDesc) {
                 bb.statements += compile(block, statement.step)
             } else {
-                val v = StatementBlockDesc(block)
+                val v = StatementBlockDesc(block, bb.source)
                 v.statements += bb
                 v.statements += compile(block, statement.step)
                 bb = v
             }
         }
         block.statements += WhileDesc(
-                statement.end?.let { compile(block, null, it) } ?: BooleanExpressionDesc(block, true),
-                bb
+                condition = statement.end?.let { compile(block, null, it) }
+                        ?: BooleanExpressionDesc(block, true, RootModule.zeroSource),
+                statement = bb,
+                source = statement.source
         )
         return block
     }
 
     private fun compile(scope: Scope, statement: ExpStatement): StatementExprDesc {
-        return StatementExprDesc(compile(scope, null, statement.exp))
+        return StatementExprDesc(compile(scope, null, statement.exp), statement.source)
     }
 
     private fun compile(scope: Scope, statement: Statement): StatementDesc =
@@ -464,17 +379,8 @@ class Compiler(val parser: Parser) : Scope {
                 is ForStatement -> compile(scope, statement)
                 is IfStatement -> compile(scope, statement)
                 is ExpStatement -> compile(scope, statement)
-                else -> throw CompileException("Unknown type: ${statement::class.java.name}", statement.position, statement.length)
+                else -> throw CompileException("Unknown type: ${statement::class.java.name}", statement.source)
             }
-
-    override val parentScope: Scope?
-        get() = null
-
-    override fun findMethod(name: String, args: List<TypeDesc>): MethodDesc? =
-            rootMethods.find { it.canCall(name, args) }
-
-    override fun findField(name: String): FieldDesc? =
-            rootFields.find { it.name == name }?.let { return it }
 }
 
 interface Scope {

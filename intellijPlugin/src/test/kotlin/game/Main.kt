@@ -26,7 +26,6 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-
 /*
 class DDShaderMaterial(gl: GL, vp: String, fp: String) : MaterialGLSL(gl) {
     override val shader: Shader = Shader(gl, vp, fp)
@@ -55,29 +54,30 @@ class FFF : Behaviour() {
     }
 }
 
-class DDD : GLView(mogot.rendering.Display(listOf(mogot.rendering.SceneToTextureRenderPass(),mogot.rendering.CanvasFinalRenderPass())),MockFileSystem()) {
+class DDD : GLView(mogot.rendering.Display(listOf(mogot.rendering.SceneToTextureRenderPass(), mogot.rendering.CanvasFinalRenderPass())), MockFileSystem()) {
 
     private var closed = false
     private var inited = false
-    var cam = Camera()
 
-    override var camera: Camera? = cam
 
     override fun init() {
-        backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
         super.init()
+        root = Spatial()
+        display.context.camera = Camera(engine)
+        backgroundColor.set(0.5f, 0.5f, 0.5f, 1f)
+
         val gg = Grid3D(engine.gl)
         gg.material.value = Default3DMaterial(engine.gl)
         gg.parent = root
         inited = true
-        cam.parent = root
-        cam.position.set(5f, 5f, 5f)
+        camera!!.parent = root
+        camera!!.position.set(5f, 5f, 5f)
         //cam.lookTo(Vector3f(6f, 6f, 6f))
-        cam.behaviour = FpsCamB(engine)
+        camera!!.behaviour = FpsCamB(engine)
         val box = CSGBox(engine)
         box.material.value = SimpleMaterial(engine.gl)
         box.parent = root
-        cam.lookTo(Vector3f(0f, 0f, 0f))
+        camera!!.lookTo(Vector3f(0f, 0f, 0f))
     }
 
     override fun dispose() {
@@ -149,7 +149,7 @@ class FrameLine : AnimateFrameView.FrameLine {
             }
     }
 
-    fun add(color: Color,time: Int) {
+    fun add(color: Color, time: Int) {
         frames[time] = FrameImpl(color, time)
     }
 
@@ -204,8 +204,18 @@ class PropertyModel(override val nodes: List<AnimatePropertyView.Node>) : Animat
 }
 
 object Main2 {
+
     @JvmStatic
     fun main(args: Array<String>) {
+        val f = JFrame()
+        f.setSize(800, 600)
+
+        f.add(DDD())
+        f.isVisible = true
+    }
+
+    @JvmStatic
+    fun main1(args: Array<String>) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         val propertiesModel = PropertyModel(listOf(
                 AnimateNode(null, "AnimateSprite", listOf(
@@ -275,20 +285,6 @@ object Main2 {
             //view.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
             propertyView.scrollY = maxOf(0, scrollPanel.verticalScrollBar.value)
         }
-
-//        hScroll.minimum = 0
-//        hScroll.maximum = view.preferredSize.width - view.size.width
-
-//        view.addComponentListener(object : ComponentListenerImpl {
-//            override fun componentResized(e: ComponentEvent) {
-//                hScroll.minimum = 0
-//                hScroll.maximum = view.preferredSize.width - view.size.width
-//
-//                vScroll.minimum = 0
-//                vScroll.maximum = view.preferredSize.height - view.size.height
-//            }
-//        })
-
         f.isVisible = true
     }
 }

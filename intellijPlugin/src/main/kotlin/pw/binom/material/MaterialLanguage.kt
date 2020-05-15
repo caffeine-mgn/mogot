@@ -1,38 +1,17 @@
 package pw.binom.material
 
-import com.intellij.codeHighlighting.BackgroundEditorHighlighter
-import com.intellij.codeInsight.hint.HintManager
 import com.intellij.lang.Language
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.event.DocumentEvent
-import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.fileEditor.*
+import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.PsiManager
 import com.intellij.psi.tree.IElementType
-import mogot.math.Vector4f
-import org.joml.Vector3f
-import pw.binom.material.compiler.Compiler
-import pw.binom.material.compiler.SingleType
-import pw.binom.material.compiler.TypeDesc
-import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
-import pw.binom.material.uniformEditor.UniformEditor
-import pw.binom.sceneEditor.loadTexture
-import java.beans.PropertyChangeListener
-import java.io.StringReader
 import javax.swing.Icon
-import javax.swing.JComponent
 
 object MaterialLanguage : Language("Material") {
     val ICON = IconLoader.getIcon("/fbx.png")
@@ -61,11 +40,24 @@ class MaterialFileEditorProvider : FileEditorProvider, DumbAware {
     override fun getEditorTypeId(): String = "MaterialEditor"
 
     override fun accept(project: Project, file: VirtualFile): Boolean {
-        println("accept  ${file.extension}   $file")
-        return file.extension?.toLowerCase() == "mat"
+
+        val r = when (file.extension?.toLowerCase()) {
+            "mat", "shr" -> true
+            else -> false
+        }
+        println("MaterialFileEditorProvider accept  ${file.extension}   $file -> $r")
+        return r
     }
 
-    override fun createEditor(project: Project, file: VirtualFile): FileEditor = MaterialFileEditor(project, file)
+    override fun createEditor(project: Project, file: VirtualFile): FileEditor {
+        val textEditor = TextEditorProvider().createEditor(project, file) as TextEditor
+        val editor = when (file.extension?.toLowerCase()) {
+            "mat" -> MaterialFileEditor2(project, textEditor)
+            else -> textEditor
+        }
+        println("Create Editor for: ${file.extension?.toLowerCase()} -> ${editor::class.java.name}")
+        return editor
+    }
 
     override fun getPolicy(): FileEditorPolicy = FileEditorPolicy.HIDE_DEFAULT_EDITOR
 }
@@ -73,9 +65,53 @@ class MaterialFileEditorProvider : FileEditorProvider, DumbAware {
 private val MATIREAL_VIEW_TOOL_WINDOW = "MatirealView"
 private val MATIREAL_PROPERTIES_TOOL_WINDOW = "MatirealProperties"
 
+private class MaterialFileEditor2(val project: Project, val fileEditor: TextEditor) : TextEditor by fileEditor {
+
+    companion object {
+        private var viewer: MaterialViewer? = null
+        fun viewer(project: Project): MaterialViewer {
+            if (viewer == null)
+                viewer = MaterialViewer(project)
+            return viewer!!
+        }
+    }
+
+    var shaderEditViewer = ToolWindowManager.getInstance(project).getToolWindow(MATIREAL_VIEW_TOOL_WINDOW)
+            ?: run {
+                val toolWin = ToolWindowManager.getInstance(project).registerToolWindow(
+                        MATIREAL_VIEW_TOOL_WINDOW,
+                        false,
+                        ToolWindowAnchor.RIGHT
+                )
+                val content = toolWin.contentManager.factory.createContent(viewer(project), "", false)
+                toolWin.contentManager.addContent(content)
+                toolWin
+            }
+
+    //    val document = FileDocumentManager.getInstance().getDocument(fileEditor.file!!)!!
+    override fun deselectNotify() {
+        viewer(project).file = null
+        fileEditor.deselectNotify()
+    }
+
+    override fun selectNotify() {
+        fileEditor.selectNotify()
+        viewer(project).file = fileEditor.file
+    }
+}
+/*
 class MaterialFileEditor(val project: Project,
                          private val sourceFile: VirtualFile) : FileEditor {
+
     override fun isModified(): Boolean = true
+    private val _module
+        get() = ModuleUtil.findModuleForFile(sourceFile, project)
+
+    val resolver: ModuleResolver
+        get() = ModuleHolder.getInstance(ModuleUtil.findModuleForFile(sourceFile, project)!!).resolver
+
+    val holder = ModuleHolder.getInstance(_module!!)
+
     val document = FileDocumentManager.getInstance().getDocument(sourceFile)!!
     var shaderEditViewer = ToolWindowManager.getInstance(project).getToolWindow(MATIREAL_VIEW_TOOL_WINDOW)
             ?: ToolWindowManager.getInstance(project).registerToolWindow(
@@ -83,18 +119,10 @@ class MaterialFileEditor(val project: Project,
                     false,
                     ToolWindowAnchor.RIGHT
             )
-    /*
-        var propertiesEditViewer = ToolWindowManager.getInstance(project).getToolWindow(MATIREAL_PROPERTIES_TOOL_WINDOW)
-                ?: ToolWindowManager.getInstance(project).registerToolWindow(
-                        MATIREAL_PROPERTIES_TOOL_WINDOW,
-                        false,
-                        ToolWindowAnchor.RIGHT
-                )
-    */
+
     val materialViewer = MaterialViewer(this)
     val uniformEditor = UniformEditor(this)
     val psifile = PsiManager.getInstance(project).findFile(sourceFile)!!
-    private val splitSize = Key<Int>("SPLIT")
 
     override fun getFile(): VirtualFile? = sourceFile
     private val propertyChangeListeners = ArrayList<PropertyChangeListener>()
@@ -113,60 +141,10 @@ class MaterialFileEditor(val project: Project,
 
     val editor = EditorFactory.getInstance().createEditor(document, project, sourceFile, false) as EditorImpl
     private val component = run {
-        /*
-        val file = PsiManager.getInstance(project).findFile(sourceFile)!!
-//        val file = PsiFileFactory.getInstance(project).createFileFromText(ShaderLanguage, sourceFile.name)
-        val document = FileDocumentManager.getInstance().getDocument(sourceFile)!!
-
-        val language = MaterialLanguage//Language.findLanguageByID("HTML");
-        val fileType = language.associatedFileType
-        val myTextViewer = EditorFactory.getInstance().createEditor(document, project, sourceFile, false) as EditorImpl
-        if (fileType != null)
-            myTextViewer.highlighter = EditorHighlighterFactory.getInstance().createEditorHighlighter(project, fileType)
-        myTextViewer.component
-        //val scrollPane = JBScrollPane(myTextViewer.component)
-
-//        val panel = JPanel()
-        val viewer = view
-        val splitPane = JBSplitter()
-//        val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, viewer)
-//        splitPane.dividerLocation = document.getUserData(splitSize) ?: 150
-        val splitPane2 = JBSplitter(true)
-        splitPane2.firstComponent = viewer
-        val uniformEditor = UniformEditor(document, viewer, file)
-        splitPane2.secondComponent = uniformEditor
-        splitPane2.splitterProportionKey = "SPLIT2"
-        splitPane.firstComponent = myTextViewer.component//scrollPane
-        splitPane.secondComponent = splitPane2
-        splitPane.splitterProportionKey = "SPLIT"
-        document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                viewer.setShader(VP, document.text)
-            }
-        })
-
-        viewer.addRenderListener {
-            uniformEditor.apply(viewer.engine)
-        }
-
-        viewer.addInitListener {
-            uniformEditor.reinit()
-        }
-
-
-        viewer.setShader(VP, document.text)
-        viewer.repaint()
-        val panel = JPanel()
-        panel.layout = BorderLayout()
-        panel.add(splitPane, BorderLayout.CENTER)
-        panel*/
         editor.component
     }
 
-    //val hintManager = project.getComponent(HintManager::class.java)
-
     fun refresh() {
-
         fun setUniform(type: TypeDesc, name: String, value: String?) {
             if (type is SingleType && type.clazz.name == "sampler2D") {
                 val texture = value
@@ -178,7 +156,7 @@ class MaterialFileEditor(val project: Project,
             }
 
             if (type is SingleType && type.clazz.name == "float") {
-                materialViewer.set(name, value?.toFloat())
+                materialViewer.set(name, value?.removeSuffix("f")?.toFloat())
             }
 
             if (type is SingleType && type.clazz.name == "int") {
@@ -214,14 +192,16 @@ class MaterialFileEditor(val project: Project,
         }
 
         try {
-            val parser = Parser(StringReader(document.text))
-            val compiler = Compiler(parser)
+            val module = SourceModule(holder.getRelativePath(sourceFile))
+            val parser = Parser(module, StringReader(document.text))
+            val compiler = Compiler(parser, module, resolver)
             uniformEditor.update(compiler)
             val gen = GLES300Generator.mix(listOf(compiler))
             materialViewer.setShader(gen.vp, gen.fp)
-            compiler.properties.asSequence()
+            compiler.module.properties.asSequence()
                     .mapNotNull {
-                        it.key to it.value["value"]
+                        val prop = it.property ?: return@mapNotNull null
+                        it to prop.value
                     }
                     .forEach {
                         setUniform(it.first.type, it.first.name, it.second)
@@ -270,8 +250,6 @@ class MaterialFileEditor(val project: Project,
 
     override fun deselectNotify() {
         shaderEditViewer.contentManager.removeAllContents(true)
-//        shaderEditViewer.setAvailable(false, null)
-//        propertiesEditViewer.setAvailable(false, null)
     }
 
     private val userData = HashMap<Key<*>, Any?>()
@@ -300,3 +278,4 @@ class MaterialFileEditor(val project: Project,
     }
 
 }
+*/

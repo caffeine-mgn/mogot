@@ -74,13 +74,13 @@ open class Spatial : Node() {
         return dest
     }
 
-    fun globalToLocalMatrix(dest: Matrix4f): Matrix4f {
+    open fun globalToLocalMatrix(dest: Matrix4f): Matrix4f {
         localToGlobalMatrix(dest)
         dest.invert(dest)
         return dest
     }
 
-    fun localToGlobalMatrix(dest: Matrix4f): Matrix4f {
+    open fun localToGlobalMatrix(dest: Matrix4f): Matrix4f {
         val parent = parentSpatial?.transform
         if (parent == null)
             dest.set(transform)

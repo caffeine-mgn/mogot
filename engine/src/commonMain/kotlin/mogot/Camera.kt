@@ -58,7 +58,7 @@ private object EnableField : AbstractField<Camera, Boolean>() {
     override fun currentValue(node: Camera): Boolean = node.enabled
 }
 
-open class Camera() : Spatial() {
+open class Camera(engine: Engine) : Spatial() {
     val projectionMatrix = Matrix4f()
 
     open var enabled = false

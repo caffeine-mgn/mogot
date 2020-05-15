@@ -1,8 +1,9 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.Type
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.Type
 
-class FieldAccessExpressionDesc(var field: FieldDesc, val from: ExpressionDesc?) : ExpressionDesc(), Scope {
+class FieldAccessExpressionDesc(var field: FieldDesc, val from: ExpressionDesc?, source: SourcePoint) : ExpressionDesc(source), Scope {
     override val resultType: TypeDesc
         get() = this.field.type
 
@@ -15,6 +16,9 @@ class FieldAccessExpressionDesc(var field: FieldDesc, val from: ExpressionDesc?)
     override fun findType(type: Type): TypeDesc? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override val childs: Sequence<SourceElement>
+        get() = sequenceOf(from).filterNotNull()
 
 
 }

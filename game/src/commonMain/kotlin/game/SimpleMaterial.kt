@@ -2,13 +2,14 @@ package game
 
 import mogot.Engine
 import mogot.Texture2D
+import mogot.gl.GL
 import mogot.gl.MaterialGLSL
 import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 import mogot.rendering.Display
 
-/*internal */class SimpleMaterial(engine: Engine) : MaterialGLSL(engine) {
+/*internal */class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
     override fun dispose() {
         shader.close()
         super.dispose()
@@ -16,7 +17,7 @@ import mogot.rendering.Display
 
     //    var image: Image? = null
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
-    override val shader: Shader = Shader(engine.gl,
+    override val shader: Shader = Shader(gl,
             vertex = """#version 300 es
 
 #ifdef GL_ES
@@ -28,17 +29,17 @@ layout(location = 1) in vec3 normalList;
 layout(location = 2) in vec2 vertexUV;
 
 uniform mat4 ${PROJECTION};
-uniform mat4 ${MODEL};
+uniform mat4 ${MODEL_VIEW};
 
 out mediump vec2 UV;
 out mediump vec3 normal;
 out mediump vec3 vVertex;
 
 void main() {
-    mat3 normalMatrix = mat3(transpose(inverse($MODEL)));
+    mat3 normalMatrix = mat3(transpose(inverse($MODEL_VIEW)));
     normal = vec3(normalMatrix * normalList);
-    gl_Position = $PROJECTION * $MODEL * vec4(vertexPos, 1.0f);
-    vVertex = vec3($MODEL * vec4(vertexPos, 1.0f));
+    gl_Position = $PROJECTION * $MODEL_VIEW * vec4(vertexPos, 1.0f);
+    vVertex = vec3($MODEL_VIEW * vec4(vertexPos, 1.0f));
     UV = vertexUV;
 }""",
             fragment = """#version 300 es
@@ -53,7 +54,7 @@ in lowp vec2 UV;
 in vec3 normal;
 out vec4 color;
 uniform mat4 $PROJECTION;
-uniform mat4 $MODEL;
+uniform mat4 $MODEL_VIEW;
 in vec3 vVertex;
 
 struct Light {
@@ -117,26 +118,26 @@ void main() {
             field = value
             shader.use()
             if (tex != null) {
-                gl.gl.activeTexture(gl.gl.TEXTURE0)
-                gl.gl.bindTexture(gl.gl.TEXTURE_2D, tex!!.gl)
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
                 shader.uniform("tex", 0)
             } else {
-                gl.gl.activeTexture(gl.gl.TEXTURE0)
-                gl.gl.bindTexture(gl.gl.TEXTURE_2D, null)
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, null)
             }
         }
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, modelView, projection, context)
         if (tex != null) {
-            gl.gl.bindTexture(gl.gl.TEXTURE_2D, tex!!.gl)
+            gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
         }
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }
 
     override fun unuse() {
 //        if (tex != null)
-        gl.gl.bindTexture(gl.gl.TEXTURE_2D, null)
+        gl.bindTexture(gl.TEXTURE_2D, null)
         super.unuse()
     }
 }

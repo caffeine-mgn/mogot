@@ -15,14 +15,14 @@ class AddPolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engine) 
     private var outterMat by ResourceHolder<MInstance>()
 
 
-    fun render(x: Float, y: Float, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    fun render(x: Float, y: Float, model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val pos = engine.mathPool.vec3f.poll()
         _matrix.identity()
         model.getTranslation(pos)
         _matrix.scale(1f / view.editorCamera2D.zoom, 1f / view.editorCamera2D.zoom, 1f)
         _matrix.translate(pos)
         _matrix.translate(-x, -y, 0f)
-        render(matrix, projection, context)
+        render(matrix, modelView, projection, context)
     }
 
     override fun close() {
@@ -32,7 +32,7 @@ class AddPolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engine) 
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (innerMat == null) {
             innerMat = view.default3DMaterial.instance(Vector4f.fromColor(255, 0, 255, 0))
         }
@@ -67,12 +67,12 @@ class AddPolygonNode(val view: SceneEditorView) : VisualInstance2D(view.engine) 
 
 
         engine.gl.gl.glLineWidth(3f)
-        outterMat!!.use(model, projection, context)
+        outterMat!!.use(model, modelView, projection, context)
         addGeom!!.draw()
         outterMat!!.unuse()
 
         engine.gl.gl.glLineWidth(1f)
-        innerMat!!.use(model, projection, context)
+        innerMat!!.use(model, modelView, projection, context)
         addGeom!!.draw()
         innerMat!!.unuse()
     }

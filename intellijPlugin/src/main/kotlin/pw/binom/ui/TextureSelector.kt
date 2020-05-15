@@ -12,11 +12,14 @@ import pw.binom.appendTo
 import pw.binom.sceneEditor.SceneEditor
 import pw.binom.sceneEditor.properties.Panel
 import java.awt.Image
+import java.util.concurrent.Executors
 import javax.imageio.ImageIO
 import javax.swing.Icon
 import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JLabel
+
+private val executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
 class TextureSelector(val sceneEditor: SceneEditor) : Panel() {
 
@@ -46,25 +49,27 @@ class TextureSelector(val sceneEditor: SceneEditor) : Panel() {
                 eventChange.dispatch()
             } else {
                 selectBtn.text = value.virtualFile.name
-                var image = value.virtualFile.inputStream.use {
-                    ImageIO.read(it)
-                }
-                var icon: Icon
-                if (image.width > 100 || image.height > 100) {
-                    var w: Int
-                    var h: Int
-                    if (image.width > image.height) {
-                        w = 100
-                        h = (image.height.toFloat() / image.width.toFloat() * w.toFloat()).toInt()
-                    } else {
-                        h = 100
-                        w = (image.width.toFloat() / image.height.toFloat() * h.toFloat()).toInt()
+                executor.submit {
+                    var image = value.virtualFile.inputStream.use {
+                        ImageIO.read(it)
                     }
-                    icon = ImageIcon(image.getScaledInstance(w, h, Image.SCALE_SMOOTH))
-                } else {
-                    icon = ImageIcon(image)
+                    var icon: Icon
+                    if (image.width > 100 || image.height > 100) {
+                        var w: Int
+                        var h: Int
+                        if (image.width > image.height) {
+                            w = 100
+                            h = (image.height.toFloat() / image.width.toFloat() * w.toFloat()).toInt()
+                        } else {
+                            h = 100
+                            w = (image.width.toFloat() / image.height.toFloat() * h.toFloat()).toInt()
+                        }
+                        icon = ImageIcon(image.getScaledInstance(w, h, Image.SCALE_SMOOTH))
+                    } else {
+                        icon = ImageIcon(image)
+                    }
+                    this.icon.icon = icon
                 }
-                this.icon.icon = icon
                 this.icon.isVisible = true
                 goto.isEnabled = true
                 eventChange.dispatch()

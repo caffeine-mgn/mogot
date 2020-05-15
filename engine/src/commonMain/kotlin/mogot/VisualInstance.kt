@@ -11,7 +11,7 @@ open class VisualInstance : Spatial() {
     override val type: Int
         get() = VISUAL_INSTANCE3D_TYPE
 
-    open fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    open fun render(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         //NOP
     }
 }

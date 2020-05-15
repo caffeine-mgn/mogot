@@ -1,8 +1,9 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.Type
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.Type
 
-abstract class ExpressionDesc : Scope {
+abstract class ExpressionDesc(override val source: SourcePoint) : Scope, SourceElement {
     abstract val resultType: TypeDesc
 
     override fun findMethod(name: String, args: List<TypeDesc>): MethodDesc? =
