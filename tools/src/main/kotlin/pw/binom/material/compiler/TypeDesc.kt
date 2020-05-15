@@ -1,9 +1,9 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.SourceExp
-import pw.binom.material.psi.TokenType
-import pw.binom.material.psi.Type
-import pw.binom.material.psi.TypePromitive
+import pw.binom.material.RootModule
+import pw.binom.material.lex.TokenType
+import pw.binom.material.lex.Type
+import pw.binom.material.lex.TypePromitive
 
 abstract class TypeDesc(val clazz: ClassDesc) : Scope
 class SingleType(clazz: ClassDesc) : TypeDesc(clazz) {
@@ -30,7 +30,12 @@ class ArrayType(scope: Scope, clazz: ClassDesc, val size: List<Int>) : TypeDesc(
     override val parentScope: Scope?
         get() = null
 
-    val sizeMethod = GlobalFieldDesc(this, "size", scope.findType(TypePromitive(TokenType.INT, emptyList()))!!, SourceExp(0, 0))
+    val sizeMethod = GlobalFieldDesc(
+            parent = this,
+            name = "size",
+            type = scope.findType(TypePromitive(TokenType.INT, emptyList()))!!,
+            source = RootModule.zeroSource
+    )
     val getMethod = run {
         val type = if (size.size == 1)
             scope.findType(clazz, emptyList())!!
@@ -38,9 +43,16 @@ class ArrayType(scope: Scope, clazz: ClassDesc, val size: List<Int>) : TypeDesc(
             scope.findType(clazz, size.subList(0, size.lastIndex - 1))!!
         }
         MethodDesc(
-                scope, this, "get", type, listOf(
-                MethodDesc.Argument("index", scope.findType(TypePromitive(TokenType.INT, emptyList()))!!)
-        ), false)
+                scope, this, "get", type,
+                listOf(
+                        MethodDesc.Argument(
+                                "index",
+                                scope.findType(TypePromitive(TokenType.INT, emptyList()))!!,
+                                RootModule.zeroSource
+                        )
+                ),
+                false,
+                RootModule.zeroSource)
     }
 
     override fun findMethod(name: String, args: List<TypeDesc>): MethodDesc? =

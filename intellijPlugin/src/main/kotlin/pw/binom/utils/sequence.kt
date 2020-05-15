@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.intellij.openapi.module.Module
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.vfs.VirtualFile
 import mogot.Node
 import mogot.fullPath
 import mogot.math.*
 import org.jbox2d.dynamics.BodyType
 import javax.swing.SwingUtilities
-import kotlin.reflect.KProperty
 
 
 fun <T> Sequence<T>.equalsAll(): Boolean {
@@ -324,4 +326,14 @@ class Vector3mDegrees(val vector: Vector3fm) : Vector3fm {
         vector.set(toRadians(x), toRadians(y), toRadians(z))
         return this
     }
+}
+
+fun Module.relativePath(file: VirtualFile): String? {
+    val com = ModuleRootManager.getInstance(this)
+    return com.contentRoots.asSequence()
+            .map {
+                if (!file.path.startsWith(it.path))
+                    return@map null
+                file.path.removePrefix(it.path).removePrefix("/").removePrefix("\\")
+            }.filterNotNull().firstOrNull()
 }

@@ -73,8 +73,8 @@ interface MaterialVisiter {
         statement.elseBlock?.let { visit(it) }
     }
 
-    fun visit(compiler: Compiler) {
-        compiler.rootMethods.forEach {
+    fun visit(module: SourceModule) {
+        module.globalMethods.forEach {
             it.statementBlock?.let { visit(it) }
         }
     }

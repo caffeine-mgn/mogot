@@ -1,3 +1,5 @@
 package pw.binom.material.compiler
 
-abstract class StatementDesc
+import pw.binom.material.SourcePoint
+
+abstract class StatementDesc(override val source: SourcePoint):SourceElement

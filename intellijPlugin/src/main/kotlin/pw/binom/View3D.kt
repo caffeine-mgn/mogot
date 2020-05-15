@@ -2,18 +2,20 @@ package pw.binom
 
 
 import mogot.Camera
+import mogot.Node
 import mogot.Spatial
 import mogot.gl.GLView
 import mogot.math.*
 import mogot.rendering.Display
 import mogot.rendering.SceneFinalRenderPass
+import pw.binom.sceneEditor.EditorDisplay
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 
 private const val MIN_E = 0.0001f;
 
-abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileSystem()) {
+abstract class View3D : GLView(EditorDisplay(),MockFileSystem()) {
 
     private var _x = 0
     private var _y = 0
@@ -21,15 +23,21 @@ abstract class View3D : GLView(Display(listOf(SceneFinalRenderPass())),MockFileS
     private var v = 0.01f//1.0E-4f
     private var d = 6f
 
-    override var camera: Camera? =null
+    //override var camera: Camera? =null
+
+    override val display: EditorDisplay
+        get() = super.display as EditorDisplay
+
+    override var root: Node? = null
 
     override fun init() {
         super.init()
-        val root = Spatial()
+        root = Spatial()
+        display.setCamera(Camera(engine))
         camera!!.parent = root
         camera!!.enabled = true
         resetCam()
-        camera=Camera()
+
     }
 
     protected fun resetCam() {

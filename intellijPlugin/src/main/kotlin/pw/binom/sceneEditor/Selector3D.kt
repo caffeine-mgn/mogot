@@ -18,6 +18,14 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
         return matrix
     }
 
+    override fun globalToLocalMatrix(dest: Matrix4f): Matrix4f {
+        return node.globalToLocalMatrix(dest)
+    }
+
+    override fun localToGlobalMatrix(dest: Matrix4f): Matrix4f {
+        return node.localToGlobalMatrix(dest)
+    }
+
     override fun close() {
         geom = null
 
@@ -89,12 +97,12 @@ class Selector3D(val engine: Engine, val node: Spatial) : VisualInstance(), Mate
 
     //override fun apply(matrix: Matrix4fc): Matrix4fc = node.matrix
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val mat = material.value ?: return
         if (geom == null || size.resetChangeFlag()) {
             rebuildGeom()
         }
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         geom!!.draw()
         mat.unuse()
     }

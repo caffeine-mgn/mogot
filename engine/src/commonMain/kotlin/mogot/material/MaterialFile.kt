@@ -62,8 +62,8 @@ class MaterialInstance(val material: ExternalMaterialGLSL) : Material, ResourceI
         get() = material.gl
 
     private val params = HashMap<String, Any>()
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        material.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        material.use(model, modelView, projection, context)
         params.forEach { (k, v) ->
             when (v) {
                 is Vector3fc -> material.shader.uniform(k, v)

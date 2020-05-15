@@ -183,7 +183,7 @@ object CameraNodeCreator : NodeCreator {
     }
 }
 
-class EditableCamera(val view: SceneEditorView) : Camera(), EditableNode {
+class EditableCamera(val view: SceneEditorView) : Camera(view.engine), EditableNode {
     override val position: Vector3fm = Vector3fmDelegator(super.position) {
         positionField.eventChange.dispatch()
     }

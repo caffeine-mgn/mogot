@@ -72,12 +72,12 @@ class Line(val engine: Engine) : VisualInstance(), MaterialNode by MaterialNodeI
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.render(model, projection, context)
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, modelView, projection, context)
         val mat = material
         if (geom == null || needUpdate)
             update()
-        mat.value?.use(model, projection, context)
+        mat.value?.use(model, modelView, projection, context)
         geom!!.draw()
         mat.value?.unuse()
     }

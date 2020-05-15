@@ -239,7 +239,7 @@ class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engin
             refreshColor()
         }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (center == null) {
             center = CenterNode2D(this, view)
             center!!.parent = view.editorRoot
@@ -252,7 +252,7 @@ class CircleShape2DView(val view: SceneEditorView) : VisualInstance2D(view.engin
         val mat = engine.mathPool.mat4f.poll()
         mat.set(model)
         mat.scale(radius * 2f, radius * 2f, 1f)
-        material!!.use(mat, projection, context)
+        material!!.use(mat, modelView, projection, context)
         engine.mathPool.mat4f.push(mat)
         geom!!.draw()
         material!!.unuse()

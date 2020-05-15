@@ -287,7 +287,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
         super.update(delta)
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (lineMat == null) {
             lineMat = view.default3DMaterial.instance(Vector4f.fromColor(255, 255, 102, 0))
             circleMat = view.default3DMaterial.instance(circleOut)
@@ -307,7 +307,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
         }
 
         engine.gl.gl.glLineWidth(1.5f)
-        lineMat!!.use(model, projection, context)
+        lineMat!!.use(model, modelView, projection, context)
         geom!!.draw()
         engine.gl.gl.glLineWidth(1f)
         lineMat!!.unuse()
@@ -319,7 +319,7 @@ open class PolygonEditor(val view: SceneEditorView) : VisualInstance2D(view.engi
             mat.translate(it.x, it.y, 0f)
             mat.scale(zoomScale, zoomScale, 1f)
             circleMat!!.color.set(if (index == selectedPoint) circleHover else circleOut)
-            circleMat!!.use(mat, projection, context)
+            circleMat!!.use(mat, modelView, projection, context)
             circleGeom!!.draw()
             engine.gl.gl.glLineWidth(1f)
             circleMat!!.unuse()

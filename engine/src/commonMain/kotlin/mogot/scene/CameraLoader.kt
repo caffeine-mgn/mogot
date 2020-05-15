@@ -9,7 +9,7 @@ object CameraLoader : SceneLoader.NodeLoader {
         get() = "mogot.Camera"
 
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
-        val node = Camera()
+        val node = Camera(engine)
         SpatialLoader.load(engine, node, loaderContext, props)
         props["near"]?.toFloatOrNull()?.let { node.near = it }
         props["far"]?.toFloatOrNull()?.let { node.far = it }

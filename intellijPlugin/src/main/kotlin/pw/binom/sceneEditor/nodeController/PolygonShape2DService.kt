@@ -217,11 +217,11 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
     }
 
     fun render(callback: SceneEditorView.RenderCallback) {
-        render(callback.model, callback.projection, callback.context)
+        render(callback.model, callback.modelView, callback.projection, callback.context)
     }
 
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         val mat = material.value ?: run {
             println("Material not set")
             return
@@ -234,7 +234,7 @@ class PolygonShape2DViwer(view: SceneEditorView) : VisualInstance2D(view.engine)
             checkGeom()
             needCheckGeom = false
         }
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         geom!!.draw()
         mat.unuse()
     }

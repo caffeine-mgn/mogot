@@ -48,7 +48,7 @@ class MaterialProperty(val view: SceneEditorView) : Property, Spoler("Material")
             if (value == null)
                 this.material.value = view.default3DMaterial.instance(Vector4f(1f))
             else
-                this.material.value = view.engine.resources.loadMaterial(value)
+                this.material.value = view.engine.resources.loadMaterial(view.project, value)
         }
 
     private var materialProperties = MaterialProperties(this).appendTo(flex, grow = 0)

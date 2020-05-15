@@ -53,14 +53,11 @@ class GLSLSyntaxHighlighter : SyntaxHighlighterBase() {
                 GLSLTypes.VOID,
                 GLSLTypes.RETURN,
                 GLSLTypes.FOR,
+                GLSLTypes.IF,
+                GLSLTypes.ELSE,
                 GLSLTypes.CLASS, GLSLTypes.TRUE, GLSLTypes.FALSE -> KEY_KEYS
                 GLSLTypes.STRING -> STRING_KEYS
-                GLSLTypes.ANN_VERTEX,
-                GLSLTypes.ANN_MODEL,
-                GLSLTypes.ANN_NORMAL,
-                GLSLTypes.ANN_PROPERTY,
-                GLSLTypes.ANN_PROJECTION,
-                GLSLTypes.ANN_UV -> META_DATE_KEYS
+                GLSLTypes.USE_ANNOTATION -> META_DATE_KEYS
 
                 GLSLTypes.ID -> ID_KEYS
 

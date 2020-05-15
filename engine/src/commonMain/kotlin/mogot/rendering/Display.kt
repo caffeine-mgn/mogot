@@ -21,11 +21,16 @@ open class Display(private val renderPassChain: List<RenderPass>, private val st
         var deltaTime: Float = Float.MAX_VALUE
         private val cameraModel3DMatrix = Matrix4f()
         private val cameraModel2DMatrix = Matrix4f()
-        fun calcModels(){
+        fun calcModels() {
             camera?.globalToLocalMatrix(cameraModel3DMatrix.identity())
             camera2D?.globalToLocalMatrix(cameraModel2DMatrix.identity())
         }
-        fun update( node: Node) {
+
+        private val TMP_MODEL_MATRIX = Matrix4f()
+        private val TMP_MODEL_VIEW_MATRIX = Matrix4f()
+        private val TMP_VIEW_MATRIX = Matrix4f()
+
+        fun update(node: Node) {
             node.update(deltaTime)
             var mat3d = cameraModel3DMatrix as Matrix4fc
             var mat2d = cameraModel2DMatrix as Matrix4fc
@@ -42,18 +47,24 @@ open class Display(private val renderPassChain: List<RenderPass>, private val st
             }
         }
 
-        fun renderNode3D(node: Node, model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-            var pos = model
+        fun renderNode3D(node: Node) {
+            camera!!.globalToLocalMatrix(TMP_VIEW_MATRIX)
+            renderNode3D(node, TMP_VIEW_MATRIX, camera!!.projectionMatrix, this)
+        }
+
+        fun renderNode3D(node: Node, view: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+            //var pos = model
             if (node.isVisualInstance) {
                 node as VisualInstance
                 if (!node.visible)
                     return
-                pos = node.matrix
-                node.render(node.matrix, projection, context)
+                node.localToGlobalMatrix(TMP_MODEL_MATRIX)
+                view.mul(TMP_MODEL_MATRIX, TMP_MODEL_VIEW_MATRIX)
+                node.render(TMP_MODEL_MATRIX, TMP_MODEL_VIEW_MATRIX, projection, context)
             }
 
             node.childs.forEach {
-                renderNode3D(it, pos, projection, context)
+                renderNode3D(it, view, projection, context)
             }
         }
 
@@ -61,7 +72,7 @@ open class Display(private val renderPassChain: List<RenderPass>, private val st
             if (node.isVisualInstance2D()) {
                 if (!node.visible)
                     return
-                node.render(node.matrix, projection, context)
+                node.render(node.matrix, node.matrix, projection, context)
             }
             node.childs.forEach {
                 renderNode2D(it, projection, context)
@@ -74,50 +85,48 @@ open class Display(private val renderPassChain: List<RenderPass>, private val st
     private var time = CurrentTime.getNano()
 
 
-
     fun setup(gl: GL, x: Int, y: Int, width: Int, height: Int) {
-        if(width!=0)
+        if (width != 0)
             context.width = width
-        if(height!=0)
+        if (height != 0)
             context.height = height
         context.x = x
         context.y = y
-        gl.checkError{""}
+        gl.checkError { "" }
         gl.viewport(x, y, width, height)
-        gl.checkError{""}
+        gl.checkError { "" }
         gl.clearColor(context.backgroundColor.x, context.backgroundColor.y, context.backgroundColor.z, context.backgroundColor.w)
-        gl.checkError{""}
+        gl.checkError { "" }
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-        gl.checkError{""}
+        gl.checkError { "" }
         gl.enable(gl.BLEND)
-        gl.checkError{""}
+        gl.checkError { "" }
         gl.disable(gl.MULTISAMPLE)
-        gl.checkError{""}
-        context.camera?.resize(width,height)
-        context.camera2D?.resize(width,height)
+        gl.checkError { "" }
+        context.camera?.resize(width, height)
+        context.camera2D?.resize(width, height)
 
         renderPassChain.forEach {
             it.setup(context, gl, TextureObject.MSAALevels.Disable)
         }
     }
 
-    protected open fun process(root: Node){
+    protected open fun process(root: Node) {
         context.lights.clear()
         root.walk {
-            if (it is Light){
+            if (it is Light) {
                 context.lights += it
-            }
-            else if (it is Camera) {
+            } else if (it is Camera) {
                 if (it.enabled) {
-                    if(context.camera!=it) {
+                    if (context.camera != it) {
                         context.camera?.enabled = false
                         context.camera = it
                         context.camera?.resize(context.width, context.height)
                     }
                 }
-            }else if(it is Camera2D){
+            } else if (it is Camera2D) {
                 if (it.enabled) {
-                    if(context.camera2D!=it) {
+                    if (context.camera2D != it) {
                         context.camera2D?.enabled = false
                         context.camera2D = it
                         context.camera2D?.resize(context.width, context.height)
@@ -135,12 +144,12 @@ open class Display(private val renderPassChain: List<RenderPass>, private val st
         context.update(root)
         time = CurrentTime.getNano()
         context.deltaTime = (time - lastFrameTime) / 1e+9f
-        gl.checkError{""}
+        gl.checkError { "" }
         var data = startRenderPassData
         renderPassChain.forEach {
             data = it.render(context, gl, root, context.deltaTime, data)
         }
-        gl.checkError{""}
+        gl.checkError { "" }
         lastFrameTime = time
     }
 

@@ -28,7 +28,7 @@ WHITE_SPACE=[\ \n\t\f]
 FIRST_VALUE_CHARACTER=[^ \'\"\n\f\\{};\/\d\(\)=\+\-*\/\^%,!<>\.\[\]@]|[a-zA-Z]
 VALUE_CHARACTER=[^ \'\"\n\f\\{};\/\(\)=\+\-*\/\^%,!<>\.\[\]@]|[a-zA-Z0-9]
 END_OF_LINE_COMMENT=("//")[^\r\n]*
-DERECTIVE=("#")[^\r\n]*
+ DERECTIVE=("#")[^\r\n]*
 COMMENT_BLOCK=\/\*[\s\S]*\*\/
 SEPARATOR=[:=]
 KEY_CHARACTER=[^:=\ \n\t\f\\0123456789,\.] | "\\ "
@@ -41,6 +41,7 @@ mDOUBLE_SUFFIX = d | D
 mNUM_FLOAT = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mFLOAT_SUFFIX}
 mNUM_DOUBLE = {mDIGIT} ("." {mDIGIT})? {mEXPONENT}? {mDOUBLE_SUFFIX}
 mNUM_ALL = ((\d+)(\.\d+)?[fd]?)|((\.\d+)[fd]?)
+ANNOTATION=@{ID}
 QUOTE = \"
 %state WAITING_VALUE
 DOT = \.
@@ -52,16 +53,13 @@ DOT = \.
 <YYINITIAL> {mNUM_ALL} { return GLSLTypes.NUMBER; }
 //<YYINITIAL> {KEY_CHARACTER}+                                { yybegin(YYINITIAL); return GLSLTypes.KEY; }
 {DERECTIVE} { return GLSLTypes.DERECTIVE; }
-"@vertex" { return GLSLTypes.ANN_VERTEX; }
-"@normal" { return GLSLTypes.ANN_NORMAL; }
-"@uv" { return GLSLTypes.ANN_UV; }
-"@projection" { return GLSLTypes.ANN_PROJECTION; }
-"@model" { return GLSLTypes.ANN_MODEL; }
-"@property" { return GLSLTypes.ANN_PROPERTY; }
+{ANNOTATION} { return GLSLTypes.ANNOTATION; }
 "vec2" { return GLSLTypes.VEC2; }
 "vec3" { return GLSLTypes.VEC3; }
 "mat3" { return GLSLTypes.MAT3; }
 "mat4" { return GLSLTypes.MAT4; }
+"if" { return GLSLTypes.IF; }
+"else" { return GLSLTypes.ELSE; }
 "float" { return GLSLTypes.FLOAT; }
 "true" { return GLSLTypes.TRUE; }
 "false" { return GLSLTypes.FALSE; }
@@ -80,6 +78,7 @@ DOT = \.
 "&&" {return GLSLTypes.OP_AND;}
 "||" {return GLSLTypes.OP_OR;}
 
+"==" {return GLSLTypes.OP_EQ;}
 "=" {return GLSLTypes.ASSIGN;}
 "+" {return GLSLTypes.OP_PLUS;}
 "++" {return GLSLTypes.UNARY_PLUS;}

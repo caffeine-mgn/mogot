@@ -57,8 +57,8 @@ void main() {
             }
         }
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, modelView, projection, context)
         if (tex != null) {
             gl.bindTexture(gl.TEXTURE_2D, tex!!.gl)
         }

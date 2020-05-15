@@ -20,11 +20,11 @@ internal class SolidMaterial(gl: GL) : MaterialGLSL(gl) {
 
 layout(location = 0) in vec3 vertexPos;
 
-uniform mat4 gles_projection;
-uniform mat4 gles_model;
+uniform mat4 $PROJECTION;
+uniform mat4 $MODEL_VIEW;
 
 void main() {
-    gl_Position = gles_projection * gles_model * vec4(vertexPos, 1.0);
+    gl_Position = $PROJECTION * $MODEL_VIEW * vec4(vertexPos, 1.0);
 }""",
             fragment = """#version 440 core
 
@@ -37,8 +37,8 @@ void main() {
 """
     )
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, modelView, projection, context)
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }
 }

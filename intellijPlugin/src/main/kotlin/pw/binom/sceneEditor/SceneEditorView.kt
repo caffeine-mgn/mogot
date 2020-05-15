@@ -38,7 +38,7 @@ private class EditorHolder(val view: SceneEditorView) : Closeable {
 val Engine.editor: SceneEditorView
     get() = manager<EditorHolder>("Editor") { throw IllegalStateException("View not found") }.view
 
-class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(),MockFileSystem(), fps) {
+class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val project: Project, val file: VirtualFile, fps: Int?) : GLView(EditorDisplay(), MockFileSystem(), fps) {
     enum class Mode {
         D2,
         D3
@@ -60,6 +60,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     interface RenderCallback {
         val node: Node
         val model: Matrix4fc
+        val modelView: Matrix4fc
         val projection: Matrix4fc
         val context: Display.Context
         val view: SceneEditorView
@@ -68,6 +69,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     private inner class RenderCallbackImpl : RenderCallback {
         override lateinit var node: Node
         override lateinit var model: Matrix4fc
+        override lateinit var modelView: Matrix4fc
         override lateinit var projection: Matrix4fc
         override lateinit var context: Display.Context
         override val view: SceneEditorView
@@ -88,13 +90,15 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         viewPlane.guideLeft.position = editorCamera2D.position.y
     }
 
+    override val display: EditorDisplay
+        get() = super.display as EditorDisplay
     var mode = Mode.D2
         set(value) {
             field = value
             when (value) {
                 Mode.D2 -> {
-                    (display as EditorDisplay).setCamera2D(editorCamera2D)
-                    (display as EditorDisplay).setCamera(null)
+                    display.setCamera2D(editorCamera2D)
+                    display.setCamera(null)
                     render3D = false
                     sceneRoot.walk {
                         if (it.isVisualInstance2D()) {
@@ -105,8 +109,8 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
                     viewPlane.guideVisible = true
                 }
                 Mode.D3 -> {
-                    (display as EditorDisplay).setCamera2D(null)
-                    (display as EditorDisplay).setCamera(editorCamera)
+                    display.setCamera2D(null)
+                    display.setCamera(editorCamera)
                     render3D = true
                     sceneRoot.walk {
                         if (it.isVisualInstance2D()) {
@@ -123,7 +127,7 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
     lateinit var grid2d: Grid2D
     val editorRoot = Node()
     val sceneRoot = Node()
-    val editorCamera = Camera()
+    lateinit var editorCamera: Camera
     lateinit var editorCamera2D: Camera2D
     val eventSelectChanged = EventDispatcher()
     private var closed = false
@@ -229,11 +233,6 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         sceneRoot.parent = editorRoot
         sceneRoot.id = "Scene Root"
         updateOnEvent = true
-        editorCamera.parent = editorRoot
-        (display as EditorDisplay).setCamera(editorCamera)
-
-        editorCamera.position.set(3f, 3f, 3f)
-        editorCamera.lookTo(Vector3f(0f, 0f, 0f))
 
         addMouseWheelListener {
             if (mode == Mode.D2) {
@@ -541,6 +540,8 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
         }.toTypedArray()
     }
 
+    private lateinit var grid3d: Grid3D
+
     override fun init() {
         super.init()
         engine.manager("Editor") { EditorHolder(this) }
@@ -549,6 +550,18 @@ class SceneEditorView(val viewPlane: ViewPlane, val editor1: SceneEditor, val pr
 
         default2DMaterial = Default2DMaterial(engine.gl)
         default2DMaterial.inc()
+
+        grid3d = Grid3D(gl)
+        grid3d.parent = editorRoot
+
+        grid3d.material.value = default3DMaterial.instance(Vector4f(1f, 1f, 1f, 1f))
+
+        editorCamera = Camera(engine)
+        editorCamera.parent = editorRoot
+        (display as EditorDisplay).setCamera(editorCamera)
+
+        editorCamera.position.set(3f, 3f, 3f)
+        editorCamera.lookTo(Vector3f(0f, 0f, 0f))
 
         editorCamera2D = Camera2D(engine)
         editorCamera2D.parent = editorRoot

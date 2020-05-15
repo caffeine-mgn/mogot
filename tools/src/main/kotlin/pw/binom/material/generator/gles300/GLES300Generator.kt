@@ -1,13 +1,27 @@
 package pw.binom.material.generator.gles300
 
+import pw.binom.material.RootModule
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.*
 import pw.binom.material.generator.GLESGenerator
-import pw.binom.material.psi.OperationExpression
+import pw.binom.material.lex.OperationExpression
 import java.math.BigInteger
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(compiler) {
+private val MethodDesc.alias
+    get() =
+        if (statementBlock == null)
+            name
+        else
+            if (this.parent == null)
+                "m${name}_${hashCode()}"
+            else
+                "${parent.clazz.name}_${name}_${hashCode()}"
+
+
+class GLES300Generator private constructor(module: SourceModule) : GLESGenerator(module) {
 
     class GeneratedResult(val vp: String, val fp: String)
 
@@ -17,14 +31,27 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
         const val VAR_NORMAL = "gles_normal"
         const val VAR_UV = "gles_uv"
         const val VAR_MODEL = "gles_model"
+        const val VAR_MODEL_VIEW = "gles_model_view"
+        const val VAR_CAMERA_POSITION = "gles_camera_position"
 
-        fun mix(compiler: List<Compiler>): GeneratedResult {
+        fun mix(compiler: List<SourceModule>): GeneratedResult {
             val gens = compiler.map { GLES300Generator(it) }
 
             val sb = StringBuilder()
             sb.append("#version 300 es\n")
             sb.append("precision mediump float;\n")
             sb.append("out vec4 resultColor;\n")
+            if (gens.any { it.isUseModel }) {
+                sb.append("uniform mat4 $VAR_MODEL;\n")
+            }
+
+            if (gens.any { it.isUseModelView }) {
+                sb.append("uniform mat4 $VAR_MODEL_VIEW;\n")
+            }
+
+            if (gens.any { it.isUseCamera }) {
+                sb.append("uniform vec3 $VAR_CAMERA_POSITION;\n")
+            }
             gens.forEach {
                 sb.append(it.fp)
             }
@@ -32,7 +59,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             sb.append("resultColor=vec4(0.0f,0.0f,0.0f,0.0f);\n")
             gens.forEach {
                 if (it.fragmentMethod != null)
-                    sb.append("resultColor = ${it.fragmentMethod.name}(resultColor);\n")
+                    sb.append("resultColor = ${it.fragmentMethod.alias}(resultColor);\n")
             }
             sb.append("}")
             val fp = sb.toString()
@@ -55,6 +82,12 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             if (gens.any { it.isUseModel }) {
                 sb.append("uniform mat4 $VAR_MODEL;\n")
             }
+            if (gens.any { it.isUseModelView }) {
+                sb.append("uniform mat4 $VAR_MODEL_VIEW;\n")
+            }
+            if (gens.any { it.isUseCamera }) {
+                sb.append("uniform vec3 $VAR_CAMERA_POSITION;\n")
+            }
 
             if (gens.any { it.isUseProjection }) {
                 sb.append("uniform mat4 $VAR_PROJECTION;\n")
@@ -64,11 +97,9 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
                 sb.append(it.vp)
             }
             sb.append("void main() {\n\tgl_Position=")
-            sb.append(gens.mapNotNull { it.vertexMethod?.name?.let { "$it()" } }.joinToString("+"))
+            sb.append(gens.mapNotNull { it.vertexMethod?.alias?.let { "$it()" } }.joinToString("+"))
             sb.append(";\n")
             sb.append("}")
-
-            println("Generated:\nVP:\n ${sb}\n\nFP:\n$fp")
 
             return GeneratedResult(
                     vp = sb.toString(),
@@ -95,6 +126,9 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
     val fragmentMethod: MethodDesc?
     val vertexMethod: MethodDesc?
 
+    private val methodNameAliase = HashMap<MethodDesc, String>()
+
+
     //change methodsNames
     init {
         fragmentMethod = dce.methodsFP.find { it.name == "fragment" }
@@ -102,14 +136,12 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
         val changed = HashSet<Any>()
         dce.methodsFP.forEach {
             if (it.statementBlock != null && it !in changed) {
-                it.name = "m$id${it.name}"
                 changed += it
             }
         }
 
         dce.methodsVP.forEach {
             if (it.statementBlock != null && it !in changed) {
-                it.name = "m$id${it.name}"
                 changed += it
             }
         }
@@ -128,13 +160,16 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             }
         }
         */
+        /*
         (dce.fieldsVP.asSequence() + dce.fieldsFP.asSequence()).forEach {
             when (it) {
-                compiler.vertex -> it.name = VAR_VERTEX
-                compiler.normal -> it.name = VAR_NORMAL
-                compiler.projection -> it.name = VAR_PROJECTION
-                compiler.model -> it.name = VAR_MODEL
-                compiler.uv -> it.name = VAR_UV
+                compiler.module.vertex -> it.name = VAR_VERTEX
+                compiler.module.normal -> it.name = VAR_NORMAL
+                compiler.module.projection -> it.name = VAR_PROJECTION
+                compiler.module.model -> it.name = VAR_MODEL
+                compiler.module.modelView -> it.name = VAR_MODEL_VIEW
+                compiler.module.uv -> it.name = VAR_UV
+                compiler.module.camera -> it.name = VAR_CAMERA_POSITION
                 else -> {
                     if (!compiler.isExternal(it) && !compiler.isProperty(it) && it.parent == null && it !in changed) {
                         it.name = "f$id${it.name}"
@@ -142,6 +177,23 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
                     }
                 }
             }
+        }
+        */
+    }
+
+    fun fieldName(field: FieldDesc) = when (field) {
+        module.vertex -> VAR_VERTEX
+        module.normal -> VAR_NORMAL
+        module.projection -> VAR_PROJECTION
+        module.model -> VAR_MODEL
+        module.modelView -> VAR_MODEL_VIEW
+        module.uv -> VAR_UV
+        module.camera -> VAR_CAMERA_POSITION
+        else -> {
+            if (!isExternal(field) && !isProperty(field) && (field as? GlobalFieldDesc)?.parent == null) {
+                "f$id${field.name}"
+            }
+            field.name
         }
     }
 
@@ -157,19 +209,25 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
     */
 
     val isUseVertex
-        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.vertex == it }
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.vertex == it }
 
     val isUseNormal
-        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.normal == it }
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.normal == it }
 
     val isUseProjection
-        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.projection == it }
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.projection == it }
 
     val isUseModel
-        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.model == it }
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.model == it }
+
+    val isUseModelView
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.modelView == it }
 
     val isUseUV
-        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { compiler.uv == it }
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.uv == it }
+
+    val isUseCamera
+        get() = (dce.fieldsFP.asSequence() + dce.fieldsVP.asSequence()).any { module.camera == it }
 
     private fun genFields(vertex: Boolean, fields: Set<GlobalFieldDesc>, sb: Appendable) {
         val classes = if (vertex)
@@ -182,17 +240,19 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
         }
 
 
-        fields.asSequence().filter { it.parent == null }.filter { !compiler.isExternal(it) }.forEach {
+        fields.asSequence().filter { it.parent == null }.filter { !isExternal(it) }.forEach {
 
-            if (compiler.model == it
-                    || compiler.projection == it
-                    || compiler.properties.containsKey(it)) {
+            if (module.model == it
+                    || module.projection == it
+                    || module.camera == it
+                    || module.modelView == it
+                    || isProperty(it)) {
                 sb.append("uniform ")
             }
             when {
-                compiler.vertex == it -> sb.append("layout(location = 0) in ")
-                compiler.normal == it -> sb.append("layout(location = 1) in ")
-                compiler.uv == it -> sb.append("layout(location = 2) in ")
+                module.vertex == it -> sb.append("layout(location = 0) in ")
+                module.normal == it -> sb.append("layout(location = 1) in ")
+                module.uv == it -> sb.append("layout(location = 2) in ")
                 else -> {
                     if (vertex) {
                         if (it in dce.fieldsFP) {
@@ -207,16 +267,22 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             }
 
             val variableName = when {
-                compiler.vertex == it -> VAR_VERTEX
-                compiler.normal == it -> VAR_NORMAL
-                compiler.uv == it -> VAR_UV
-                compiler.projection == it -> VAR_PROJECTION
-                compiler.model == it -> VAR_MODEL
+                module.vertex == it -> VAR_VERTEX
+                module.normal == it -> VAR_NORMAL
+                module.uv == it -> VAR_UV
+                module.projection == it -> VAR_PROJECTION
+                module.model == it -> VAR_MODEL
+                module.modelView == it -> VAR_MODEL_VIEW
+                module.camera == it -> VAR_CAMERA_POSITION
                 else -> it.name
             }
 
             gen(it.type, sb) {
                 sb.append(" ").append(variableName)
+            }
+            if (it.initValue != null) {
+                sb.append("=")
+                gen(it.initValue, sb)
             }
             sb.append(";\n")
         }
@@ -253,7 +319,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
 
     private fun gen(clazz: ClassDesc, sb: Appendable) {
         sb.append("struct ").append(clazz.name).append("{\n")
-        val type = compiler.findType(clazz, emptyList()) as SingleType
+        val type = module.findType(clazz, emptyList()) as SingleType
         type.fields.forEach {
             sb.append("    ")
             gen(it.type, sb) {
@@ -272,7 +338,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
         gen(method.returnType, sb) {
             //NOP
         }
-        sb.append(" ").append(method.glslName).append("(")
+        sb.append(" ").append(method.alias).append("(")
         var first = true
         if (method.parent != null) {
             first = false
@@ -352,7 +418,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             gen(it, sb)
             sb.append(".")
         }
-        sb.append(expression.field.name)
+        sb.append(fieldName(expression.field))
     }
 
     private fun gen(expression: BooleanExpressionDesc, sb: Appendable) {
@@ -442,18 +508,27 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             return true
         }
 
-        if (method.name == "times" && expression.from != null && method.args.size == 1 && !method.external) {
+        if (method.name in OperationExpression.Operator.methods && expression.from != null && method.args.size == 1 && !method.external) {
             val arg = method.args[0].type
             val parent = expression.from.resultType
             when {
-                parent == compiler.vec4Type && arg == compiler.floatType -> {
+                (parent == RootModule.vec4Type && arg == RootModule.floatType)
+                        || parent == RootModule.floatType && arg == RootModule.vec4Type -> {
                     gen(expression.from, sb)
                     sb.append("*")
                     gen(expression.args[0], sb)
                     return true
                 }
 
-                (parent == compiler.mat4Type || parent == compiler.mat3Type) && (arg == compiler.vec4Type || arg == compiler.vec3Type) -> {
+                (parent == RootModule.vec3Type && arg == RootModule.floatType)
+                        || (parent == RootModule.floatType && arg == RootModule.vec3Type) -> {
+                    gen(expression.from, sb)
+                    sb.append("*")
+                    gen(expression.args[0], sb)
+                    return true
+                }
+
+                (parent == RootModule.mat4Type || parent == RootModule.mat3Type) && (arg == RootModule.vec4Type || arg == RootModule.vec3Type) -> {
                     gen(expression.from, sb)
                     sb.append("*")
                     gen(expression.args[0], sb)
@@ -465,11 +540,11 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
         if (method.name == "unarMinus" && expression.args.isEmpty() && expression.from?.resultType != null) {
 
             val fromType = expression.from.resultType
-            if (fromType == compiler.intType
-                    || fromType == compiler.floatType
-                    || fromType == compiler.vec2Type
-                    || fromType == compiler.vec3Type
-                    || fromType == compiler.vec4Type) {
+            if (fromType == RootModule.intType
+                    || fromType == RootModule.floatType
+                    || fromType == RootModule.vec2Type
+                    || fromType == RootModule.vec3Type
+                    || fromType == RootModule.vec4Type) {
                 sb.append("-")
                 gen(expression.from, sb)
                 return true
@@ -490,7 +565,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
                 gen(it, sb)
                 sb.append(".")
             }
-            sb.append(expression.methodDesc.glslName).append("(")
+            sb.append(expression.methodDesc.alias).append("(")
             var first = true
             expression.args.forEach {
                 if (!first)
@@ -500,7 +575,7 @@ class GLES300Generator private constructor(compiler: Compiler) : GLESGenerator(c
             }
             sb.append(")")
         } else {
-            sb.append(expression.methodDesc.glslName).append("(")
+            sb.append(expression.methodDesc.alias).append("(")
             expression.from?.let {
                 gen(it, sb)
             } ?: sb.append("null")

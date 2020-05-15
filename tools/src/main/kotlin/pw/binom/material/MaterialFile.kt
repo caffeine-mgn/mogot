@@ -1,12 +1,5 @@
 package pw.binom.material
 
-import pw.binom.io.OutputStream
-import pw.binom.io.file.FileNotFoundException
-import pw.binom.io.utf8Appendable
-import pw.binom.material.compiler.Compiler
-import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
-import java.io.StringReader
 /*
 object MaterialFile {
     fun parse(resolver: PathResolver, file: String): Parser {

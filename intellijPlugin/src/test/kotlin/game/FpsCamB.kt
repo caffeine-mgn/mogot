@@ -24,18 +24,12 @@ class FpsCamB(val engine: Engine) : Behaviour() {
 //    fun getValue(){
 //
 //    }
-    @get:Property
-    @get:RestrictionMin(0f)
     var normalSpeed = 3f
 
-    @get:Property(display = "Position")
     var startPosition: Vector3f? = null
 
-    @get:Property
-    @get:RestrictionMin(0f)
     var fastSpeed = 6f
 
-    @get:Property(display = "Color of the player")
     var color = Vector3f()
 
     private var x = 0f

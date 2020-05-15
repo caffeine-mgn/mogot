@@ -59,7 +59,7 @@ class BoxShape2D(engine: Engine) : Shape2D(engine), MaterialNode by MaterialNode
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (rect == null)
             rect = Rect2D(engine.gl, null)
         if (size.resetChangeFlag()) {
@@ -68,7 +68,7 @@ class BoxShape2D(engine: Engine) : Shape2D(engine), MaterialNode by MaterialNode
             println("Reset size to ${size.x} x ${size.y}")
         }
         val mat = material.value ?: return
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         rect!!.draw()
         mat.unuse()
     }

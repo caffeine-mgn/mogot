@@ -6,9 +6,11 @@ import mogot.gl.Shader
 import mogot.math.Matrix4fc
 import mogot.math.Vector4f
 import mogot.rendering.Display
+import pw.binom.material.EmptyModuleResolver
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.Parser
+import pw.binom.material.lex.Parser
 import java.io.StringReader
 
 private val shaderText = """
@@ -24,13 +26,13 @@ vec2 vertexUV
 @projection
 mat4 projection
 
-@model
-mat4 model
+@modelView
+mat4 modelView
 vec3 normal
 
 
 vec4 vertex(){
-    return vec4(projection * model * vec4(vertexPos, 1f))
+    return vec4(projection * modelView * vec4(vertexPos, 1f))
 }
 
 vec4 fragment(vec4 color2){
@@ -49,11 +51,13 @@ internal class SimpleMaterial(gl: GL) : MaterialGLSL(gl) {
 
     val diffuseColor = Vector4f(1f, 1f, 1f, 1f)
     override val shader: Shader = run {
-        val gen = Parser(StringReader(shaderText))
-                .let { Compiler(it) }
-                .let { GLES300Generator.mix(listOf(it)) }
-        Shader(gl,gen.vp,gen.fp)
+        val module = SourceModule("")
+        val gen = Parser(module, StringReader(shaderText))
+                .let { Compiler(it, module, EmptyModuleResolver) }
+                .let { GLES300Generator.mix(listOf(module)) }
+        Shader(gl, gen.vp, gen.fp)
     }
+
     /*
     override val shader: Shader = Shader(engile.gl,
             vertex = """#version 440 core
@@ -143,8 +147,8 @@ void main() {
 """
     )
 */
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, modelView, projection, context)
 //        image?.bind()
         shader.uniform("diffuseColor", diffuseColor.x, diffuseColor.y, diffuseColor.z, diffuseColor.w)
     }

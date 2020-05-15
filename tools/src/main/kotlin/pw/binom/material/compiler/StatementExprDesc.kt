@@ -1,3 +1,8 @@
 package pw.binom.material.compiler
 
-class StatementExprDesc(val exp: ExpressionDesc) : StatementDesc()
+import pw.binom.material.SourcePoint
+
+class StatementExprDesc(val exp: ExpressionDesc, source: SourcePoint) : StatementDesc(source) {
+    override val childs: Sequence<SourceElement>
+        get() = sequenceOf(exp)
+}

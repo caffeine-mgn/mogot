@@ -2,19 +2,22 @@ package pw.binom.sceneEditor.nodeController
 
 import com.intellij.openapi.vfs.VirtualFile
 import mogot.Engine
+import mogot.Field
 import mogot.Node
 import mogot.PointLight
-import mogot.math.AABBm
-import mogot.math.set
+import mogot.math.*
 import pw.binom.SolidTextureMaterial
 import pw.binom.io.Closeable
 import pw.binom.sceneEditor.*
 import pw.binom.sceneEditor.properties.BehaviourPropertyFactory
 import pw.binom.sceneEditor.properties.PropertyFactory
 import pw.binom.sceneEditor.properties.Transform3DPropertyFactory
+import pw.binom.utils.QuaternionfmDelegator
+import pw.binom.utils.Vector3fmDelegator
 import javax.swing.Icon
 import javax.swing.ImageIcon
 import kotlin.collections.set
+
 
 class SpecularEditableField(override val node: mogot.Light) : NodeService.FieldFloat() {
     override val id: Int
@@ -56,10 +59,29 @@ object OmniNodeCreator : NodeCreator {
     override val icon: Icon = ImageIcon(this::class.java.classLoader.getResource("/light-icon-16.png"))
 
     override fun create(view: SceneEditorView): Node {
-        val node = PointLight()
+        val node = EditablePointLight(view)
         createStub(view, node)
         return node
     }
+}
+
+class DiffuseField(override val node: mogot.Light) : NodeService.AbstractField() {
+    override var realValue: Any
+        get() = node.diffuse
+        set(value) {
+            node.diffuse.set(value as Vector3fc)
+        }
+
+    override fun cloneRealValue(): Any = Vector3f(node.diffuse)
+
+    override val groupName: String
+        get() = "Light"
+    override val name: String
+        get() = "diffuse"
+    override val displayName: String
+        get() = "Diffuse"
+    override val fieldType: Field.Type
+        get() = Field.Type.VEC3
 }
 
 private class OmniManager(val engine: Engine) : Closeable {
@@ -99,12 +121,13 @@ private fun createStub(view: SceneEditorView, light: PointLight) {
     }
 }
 
-class EditablePointLight : PointLight(), EditableNode {
-    val specularEditableField = SpecularEditableField(this);
+class EditablePointLight(view: SceneEditorView) : PointLight(view.engine), EditableNode {
+    val specularEditableField = SpecularEditableField(this)
+    val diffuseField = DiffuseField(this)
     val positionField = PositionField3D(this)
     val rotationField = RotateField3D(this)
 
-    private val fields = listOf(positionField, rotationField, specularEditableField)
+    private val fields = listOf(positionField, rotationField, diffuseField, specularEditableField)
     override fun getEditableFields(): List<NodeService.Field> = fields
 }
 
@@ -115,7 +138,7 @@ object OmniLightService : NodeService {
         get() = PointLight::class.java.name
 
     override fun newInstance(view: SceneEditorView): Node {
-        val node = EditablePointLight()
+        val node = EditablePointLight(view)
         createStub(view, node)
         return node;
     }
@@ -125,7 +148,7 @@ object OmniLightService : NodeService {
     override fun isEditor(node: Node): Boolean = node is PointLight
     override fun clone(view: SceneEditorView, node: Node): Node? {
         if (node !is PointLight) return null
-        val out = EditablePointLight()
+        val out = EditablePointLight(view)
         out.specular = node.specular
         out.diffuse.set(node.diffuse)
         SpatialService.cloneSpatial(node, out)

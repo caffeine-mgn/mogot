@@ -72,7 +72,7 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (view.mode != SceneEditorView.Mode.D2)
             return
         checkGeoms()
@@ -89,7 +89,7 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
             while (x < right) {
                 val xx = x - camera2D.position.x
                 mat.setTranslation(xx, 0f, 0f)
-                bgColor!!.use(mat, projection, context)
+                bgColor!!.use(mat, modelView, projection, context)
                 vertical!!.draw()
 
                 x += H
@@ -101,7 +101,7 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
             while (x < bottom) {
                 val xx = x - camera2D.position.y
                 mat.setTranslation(0f, xx, 0f)
-                bgColor!!.use(mat, projection, context)
+                bgColor!!.use(mat, modelView, projection, context)
                 horizontal!!.draw()
 
                 x += H
@@ -109,12 +109,12 @@ class Grid2D(val view: SceneEditorView) : VisualInstance2D(view.engine) {
         }
 
         mat.setTranslation(0f, -camera2D.position.y, 0f)
-        xAxisMaterial!!.use(mat, projection, context)
+        xAxisMaterial!!.use(mat, modelView, projection, context)
         horizontal!!.draw()
         xAxisMaterial!!.unuse()
 
         mat.setTranslation(-camera2D.position.x, 0f, 0f)
-        yAxisMaterial!!.use(mat, projection, context)
+        yAxisMaterial!!.use(mat, modelView, projection, context)
         vertical!!.draw()
         yAxisMaterial!!.unuse()
 

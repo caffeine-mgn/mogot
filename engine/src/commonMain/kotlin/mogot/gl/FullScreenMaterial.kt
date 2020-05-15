@@ -31,8 +31,8 @@ class FullScreenMaterial(gl: GL) : MaterialGLSL(gl) {
 
     var texture2D: GLTexture? = null
 
-    override fun use(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.use(model, projection, context)
+    override fun use(model: Matrix4fc, modelView:Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.use(model, modelView, projection, context)
         if (texture2D != null) {
             gl.activeTexture(gl.TEXTURE0)
             gl.bindTexture(gl.TEXTURE_2D, texture2D!!)

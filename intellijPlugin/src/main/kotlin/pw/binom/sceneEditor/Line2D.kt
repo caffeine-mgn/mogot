@@ -13,7 +13,7 @@ class Line2D(engine: Engine) : VisualInstance2D(engine) {
     val lineTo = Vector2fProperty()
     private val data = FloatDataBuffer.alloc(4)
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         if (!visible)
             return
 
@@ -32,7 +32,7 @@ class Line2D(engine: Engine) : VisualInstance2D(engine) {
             geom!!.vertexBuffer.uploadArray(data)
         }
 
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         geom!!.draw()
         mat.unuse()
     }

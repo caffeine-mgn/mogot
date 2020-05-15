@@ -1,10 +1,11 @@
 package pw.binom
 
+import pw.binom.material.SourceModule
 import pw.binom.material.compiler.Compiler
 import pw.binom.material.generator.gles300.GLES300Generator
-import pw.binom.material.psi.LexStream
-import pw.binom.material.psi.Parser
-import pw.binom.material.psi.TokenType
+import pw.binom.material.lex.LexStream
+import pw.binom.material.lex.Parser
+import pw.binom.material.lex.TokenType
 import java.io.StringReader
 
 fun LexStream<TokenType>.checkNext(skipEndLine: Boolean = false): LexStream.Element<TokenType>? {
@@ -87,9 +88,10 @@ object Test {
                 return color2 * specular
             }
         """.trimIndent()
-        val p = Parser(StringReader(program))
-        val compiler = Compiler(p)
-        val vv = GLES300Generator.mix(listOf(compiler))
+        val module = SourceModule("")
+        val p = Parser(module, StringReader(program))
+        val compiler = Compiler(p, module, TODO())
+        val vv = GLES300Generator.mix(listOf(module))
 
         println("vp:\n${vv.vp}\n---------------------\nfp:\n${vv.fp}")
 //        val parser = GLSLParser()

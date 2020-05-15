@@ -9,7 +9,7 @@ object PointLightNodeLoader : SceneLoader.NodeLoader {
         get() = "mogot.PointLight"
 
     override suspend fun load(engine: Engine, loaderContext: LoaderContext, props: Map<String, String>): Node {
-        val node = PointLight()
+        val node = PointLight(engine)
         SpatialLoader.load(engine, node, loaderContext, props)
         return node
     }

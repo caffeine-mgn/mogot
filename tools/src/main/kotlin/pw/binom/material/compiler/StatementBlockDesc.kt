@@ -1,8 +1,9 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.Type
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.Type
 
-class StatementBlockDesc(val scope: Scope?) : StatementDesc(), Scope {
+class StatementBlockDesc(val scope: Scope?,source: SourcePoint) : StatementDesc(source), Scope {
 
     val fields = ArrayList<LocalFieldDesc>()
     val statements = ArrayList<StatementDesc>()
@@ -20,4 +21,7 @@ class StatementBlockDesc(val scope: Scope?) : StatementDesc(), Scope {
 
     override fun findType(clazz: ClassDesc, array: List<Int>): TypeDesc? =
             scope?.findType(clazz, array)
+
+    override val childs: Sequence<SourceElement>
+        get() = statements.asSequence()
 }

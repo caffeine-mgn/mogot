@@ -35,7 +35,6 @@ actual class Texture2D(private val engine: Engine, image: SourceImage) : Resourc
     }
 
     override fun dispose() {
-        println("delete texture")
         engine.gl.deleteTexture(gl)
         super.dispose()
     }

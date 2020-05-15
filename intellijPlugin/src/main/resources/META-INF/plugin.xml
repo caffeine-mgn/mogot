@@ -127,13 +127,16 @@
         <externalAnnotator language="Material"
                            implementationClass="pw.binom.material.ErrorAnnotator"></externalAnnotator>
         <fileType name="MAT" implementationClass="pw.binom.material.MaterialFileType" fieldName="INSTANCE"
-                  language="Material" extensions="mat"/>
+                  language="Material" extensions="mat;shr"/>
         <lang.commenter language="Material" implementationClass="pw.binom.glsl.GLSLCommenter"/>
         <fileEditorProvider implementation="pw.binom.material.MaterialFileEditorProvider"/>
         <lang.parserDefinition language="Material" implementationClass="pw.binom.glsl.GLSLParserDefinition"/>
         <lang.braceMatcher language="Material" implementationClass="pw.binom.glsl.GLSLPairedBraceMatcher"/>
         <lang.syntaxHighlighterFactory language="Material"
                                        implementationClass="pw.binom.glsl.GLSLSyntaxHighlighterFactory"/>
+        <lang.formatter language="Material" implementationClass="pw.binom.glsl.GLSLFormattingModelBuilder"/>
+        <lang.foldingBuilder language="Material" implementationClass="pw.binom.glsl.GLSLFoldingBuilder"/>
+        <codeInsight.parameterInfo language="Material" implementationClass="pw.binom.glsl.GLSLParameterInfoHandler"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">

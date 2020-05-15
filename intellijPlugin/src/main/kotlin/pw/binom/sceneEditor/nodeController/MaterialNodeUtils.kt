@@ -36,7 +36,7 @@ class MaterialField(val view: SceneEditorView, override val node: Node) : NodeSe
             materialNode.material.value = if (file == null) {
                 view.default3DMaterial.instance(Vector4f(1f, 1f, 1f, 1f))
             } else {
-                view.engine.resources.loadMaterial(file)
+                view.engine.resources.loadMaterial(view.project, file)
             }
             rebuildUniforms()
         }

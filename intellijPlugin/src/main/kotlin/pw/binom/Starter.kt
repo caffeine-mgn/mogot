@@ -11,8 +11,16 @@ import com.intellij.openapi.startup.StartupActivity
 import pw.binom.sceneEditor.editors.*
 import pw.binom.sceneEditor.nodeController.*
 
+private lateinit var app: Application
+
 class Starter : ApplicationLoadListener {
+    companion object {
+        val application
+            get() = app
+    }
+
     override fun beforeApplicationLoaded(application: Application, configPath: String) {
+        app = application
         reg()
     }
 

@@ -233,9 +233,9 @@ class CameraSprite(view: SceneEditorView) : VisualInstance2D(view.engine), Edita
         }
 
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
         checkGeom()
-        mat!!.use(model, projection, context)
+        mat!!.use(model, modelView, projection, context)
         geom!!.draw()
         mat!!.unuse()
     }

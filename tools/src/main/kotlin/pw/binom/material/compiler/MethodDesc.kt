@@ -1,14 +1,23 @@
 package pw.binom.material.compiler
 
-import pw.binom.material.psi.Type
+import pw.binom.material.SourcePoint
+import pw.binom.material.lex.Type
 
 class MethodDesc(val scope: Scope,
                  val parent: TypeDesc?,
                  var name: String,
                  val returnType: TypeDesc,
                  val args: List<Argument>,
-                 val external: Boolean) : Scope {
-    class Argument(name: String, type: TypeDesc) : FieldDesc(name, type)
+                 val external: Boolean,
+                 override val source: SourcePoint) : Scope, SourceElement {
+    class Argument(name: String, type: TypeDesc, source:SourcePoint) : FieldDesc(name, type, source) {
+        override val childs: Sequence<SourceElement>
+            get() = emptySequence()
+    }
+
+
+    override val childs: Sequence<SourceElement>
+        get() = args.asSequence()
 
     var statementBlock: StatementBlockDesc? = null
 

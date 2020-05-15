@@ -7,7 +7,7 @@ import mogot.rendering.Display
 import pw.binom.FloatDataBuffer
 import pw.binom.intDataOf
 
-class Grid3D(val gl:GL) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
+class Grid3D(val gl: GL) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
     /**
      * кол-во квадратов
      */
@@ -65,12 +65,12 @@ class Grid3D(val gl:GL) : VisualInstance(), MaterialNode by MaterialNodeImpl() {
         super.close()
     }
 
-    override fun render(model: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
-        super.render(model, projection, context)
+    override fun render(model: Matrix4fc, modelView: Matrix4fc, projection: Matrix4fc, context: Display.Context) {
+        super.render(model, modelView, projection, context)
         val mat = material.value ?: return
         if (geom == null)
             update()
-        mat.use(model, projection, context)
+        mat.use(model, modelView, projection, context)
         geom!!.draw()
         mat.unuse()
     }
