@@ -509,71 +509,71 @@ fun Quaternionfm.fromAxes(xAxis: Vector3fc, yAxis: Vector3fc, zAxis: Vector3fc):
 fun Quaternionfm.fromRotationMatrix(m00: Float, m01: Float, m02: Float,
                                     m10: Float, m11: Float, m12: Float, m20: Float, m21: Float, m22: Float): Quaternionfm { // first normalize the forward (F), up (U) and side (S) vectors of the rotation matrix
 // so that the scale does not affect the rotation
-    var m00 = m00
-    var m01 = m01
-    var m02 = m02
-    var m10 = m10
-    var m11 = m11
-    var m12 = m12
-    var m20 = m20
-    var m21 = m21
-    var m22 = m22
-    var lengthSquared = m00 * m00 + m10 * m10 + m20 * m20
+    var outM00 = m00
+    var outM01 = m01
+    var outM02 = m02
+    var outM10 = m10
+    var outM11 = m11
+    var outM12 = m12
+    var outM20 = m20
+    var outM21 = m21
+    var outM22 = m22
+    var lengthSquared = outM00 * outM00 + outM10 * outM10 + outM20 * outM20
     if (lengthSquared != 1f && lengthSquared != 0f) {
         lengthSquared = 1.0f / sqrt(lengthSquared)
-        m00 *= lengthSquared
-        m10 *= lengthSquared
-        m20 *= lengthSquared
+        outM00 *= lengthSquared
+        outM10 *= lengthSquared
+        outM20 *= lengthSquared
     }
-    lengthSquared = m01 * m01 + m11 * m11 + m21 * m21
+    lengthSquared = outM01 * outM01 + outM11 * outM11 + outM21 * outM21
     if (lengthSquared != 1f && lengthSquared != 0f) {
         lengthSquared = 1.0f / sqrt(lengthSquared)
-        m01 *= lengthSquared
-        m11 *= lengthSquared
-        m21 *= lengthSquared
+        outM01 *= lengthSquared
+        outM11 *= lengthSquared
+        outM21 *= lengthSquared
     }
-    lengthSquared = m02 * m02 + m12 * m12 + m22 * m22
+    lengthSquared = outM02 * outM02 + outM12 * outM12 + outM22 * outM22
     if (lengthSquared != 1f && lengthSquared != 0f) {
         lengthSquared = 1.0f / sqrt(lengthSquared)
-        m02 *= lengthSquared
-        m12 *= lengthSquared
-        m22 *= lengthSquared
+        outM02 *= lengthSquared
+        outM12 *= lengthSquared
+        outM22 *= lengthSquared
     }
     // Use the Graphics Gems code, from
 // ftp://ftp.cis.upenn.edu/pub/graphics/shoemake/quatut.ps.Z
 // *NOT* the "Matrix and Quaternions FAQ", which has errors!
 // the trace is the sum of the diagonal elements; see
 // http://mathworld.wolfram.com/MatrixTrace.html
-    val t = m00 + m11 + m22
+    val t = outM00 + outM11 + outM22
     // we protect the division by s by ensuring that s>=1
     if (t >= 0) { // |w| >= .5
         var s: Float = sqrt(t + 1) // |s|>=1 ...
         w = 0.5f * s
         s = 0.5f / s // so this division isn't bad
-        x = (m21 - m12) * s
-        y = (m02 - m20) * s
-        z = (m10 - m01) * s
-    } else if (m00 > m11 && m00 > m22) {
-        var s: Float = sqrt(1.0f + m00 - m11 - m22) // |s|>=1
+        x = (outM21 - outM12) * s
+        y = (outM02 - outM20) * s
+        z = (outM10 - outM01) * s
+    } else if (outM00 > outM11 && outM00 > outM22) {
+        var s: Float = sqrt(1.0f + outM00 - outM11 - outM22) // |s|>=1
         x = s * 0.5f // |x| >= .5
         s = 0.5f / s
-        y = (m10 + m01) * s
-        z = (m02 + m20) * s
-        w = (m21 - m12) * s
-    } else if (m11 > m22) {
-        var s: Float = sqrt(1.0f + m11 - m00 - m22) // |s|>=1
+        y = (outM10 + outM01) * s
+        z = (outM02 + outM20) * s
+        w = (outM21 - outM12) * s
+    } else if (outM11 > outM22) {
+        var s: Float = sqrt(1.0f + outM11 - outM00 - outM22) // |s|>=1
         y = s * 0.5f // |y| >= .5
         s = 0.5f / s
-        x = (m10 + m01) * s
-        z = (m21 + m12) * s
-        w = (m02 - m20) * s
+        x = (outM10 + outM01) * s
+        z = (outM21 + outM12) * s
+        w = (outM02 - outM20) * s
     } else {
-        var s: Float = sqrt(1.0f + m22 - m00 - m11) // |s|>=1
+        var s: Float = sqrt(1.0f + outM22 - outM00 - outM11) // |s|>=1
         z = s * 0.5f // |z| >= .5
         s = 0.5f / s
-        x = (m02 + m20) * s
-        y = (m21 + m12) * s
-        w = (m10 - m01) * s
+        x = (outM02 + outM20) * s
+        y = (outM21 + outM12) * s
+        w = (outM10 - outM01) * s
     }
     return this
 }

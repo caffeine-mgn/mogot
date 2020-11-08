@@ -27,15 +27,15 @@ fun isPowerOfTwo(n: Int): Boolean {
 }
 
 fun nextPowerOfTwo(n: Int): Int {
-    var n = n
-    n--
-    n = n or (n shr 1)
-    n = n or (n shr 2)
-    n = n or (n shr 4)
-    n = n or (n shr 8)
-    n = n or (n shr 16)
-    n++
-    return n
+    var out = n
+    out--
+    out = out or (out shr 1)
+    out = out or (out shr 2)
+    out = out or (out shr 4)
+    out = out or (out shr 8)
+    out = out or (out shr 16)
+    out++
+    return out
 }
 
 private const val DEGREES_TO_RADIANS = 0.017453292519943295

@@ -1,8 +1,14 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
+apply plugin: 'maven-publish'
 
+def ideaActive = System.getProperty('idea.active') == 'true' && gradle.startParameter.taskNames.isEmpty()
 
 kotlin {
-    /*
+
+    if (ideaActive) {
+        linuxX64("native")
+    }
+
     linuxX64 { // Use your target instead.
         binaries {
             staticLib()
@@ -26,7 +32,7 @@ kotlin {
             staticLib()
         }
     }
-*/
+
     jvm()
     js()
 
@@ -36,7 +42,6 @@ kotlin {
             dependencies {
                 api "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
                 api "pw.binom.io:core:$binom_io_version"
-                api project(":math")
             }
         }
         openGLMain {
@@ -60,7 +65,7 @@ kotlin {
 
         linuxX64Main {
             dependencies {
-//                dependsOn nativeMain
+                dependsOn nativeMain
             }
         }
 
@@ -106,61 +111,6 @@ kotlin {
                 api 'org.joml:joml:1.9.20'
                 implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
                 implementation 'junit:junit:4.12'
-            }
-        }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "BinomRepository"
-            def repoUser = System.getenv("REPO_USER")
-            def repoPassword = System.getenv("REPO_PASSWORD")
-            def repoUrl = System.getenv("REPO_URL")
-
-            url repoUrl
-
-            credentials {
-                username = repoUser
-                password = repoPassword
-            }
-        }
-    }
-
-    publications.all {
-        def repoName = ""
-        if (it.name == "kotlinMultiplatform") {
-            repoName = project.name
-        } else {
-            repoName = "${project.name}-${it.name}"
-        }
-        it.groupId = project.group
-        it.artifactId = repoName
-        it.version = project.version
-
-        pom {
-            scm {
-                connection = "https://github.com/caffeine-mgn/mogot.git"
-                url = "https://github.com/caffeine-mgn/mogot"
-            }
-            developers {
-                developer {
-                    id = 'subochev'
-                    name = 'Anton Subochev'
-                    email = 'caffeine.mgn@gmail.com'
-                }
-
-                developer {
-                    id = 'disnatten'
-                    name = 'Igor Yermakov'
-                }
-            }
-            licenses {
-                license {
-                    name = 'The Apache License, Version 2.0'
-                    url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                }
             }
         }
     }

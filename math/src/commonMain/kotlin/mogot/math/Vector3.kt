@@ -6,44 +6,6 @@ import kotlin.jvm.JvmName
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-/*
-expect interface Vector3fc {
-    @JsName("getX")
-    fun x(): Float
-
-    @JsName("getY")
-    fun y(): Float
-
-    @JsName("getZ")
-    fun z(): Float
-}
-
-object Vec3f {
-    val UP = Vector3f(0f, 1f, 0f)
-}
-
-//val Vector3fc.Companion.
-
-expect class Vector3f : Vector3fc {
-    constructor(x: Float, y: Float, z: Float)
-    constructor()
-
-    @JvmField
-    var x: Float
-
-    @JvmField
-    var y: Float
-
-    @JvmField
-    var z: Float
-
-    fun add(other: Vector3fc): Vector3f
-    fun set(other: Vector3fc): Vector3f
-    fun set(x: Float, y: Float, z: Float): Vector3f
-    fun negate(): Vector3f
-}
-*/
-
 interface Vector3fc {
     val x: Float
 

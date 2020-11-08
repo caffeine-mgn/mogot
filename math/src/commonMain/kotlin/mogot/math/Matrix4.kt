@@ -783,7 +783,7 @@ class Matrix4f : Matrix4fc {
     fun ortho3D(left: Float, right: Float, bottom: Float, top: Float, zNear: Float, zFar: Float): Matrix4f =
             ortho3D(left, right, bottom, top,zNear,zFar,this)
 
-    internal fun setOrtho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f {
+    fun setOrtho2D(left: Float, right: Float, bottom: Float, top: Float): Matrix4f {
         if (properties and PROPERTY_IDENTITY == 0) identity()
         this.m00 = (2.0f / (right - left))
         this.m11 = (2.0f / (top - bottom))

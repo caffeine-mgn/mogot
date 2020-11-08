@@ -25,9 +25,9 @@ class Vector2i(override var x: Int = 0, override var y: Int = 0) : Vector2im {
 }
 
 fun Vector2fc.distanceSquaredTo(x: Float, y: Float): Float {
-    val x = this.x - x
-    val y = this.y - y
-    return x * x + y * y
+    val newX = this.x - x
+    val newY = this.y - y
+    return newX * newX + newY * newY
 }
 
 fun Vector2fc.distanceSquaredTo(point: Vector2fc) = distanceSquaredTo(point.x, point.y)
@@ -80,24 +80,24 @@ fun Vector2fc.sub(x: Float, y: Float, dest: Vector2fm): Vector2fm {
 }
 
 fun Vector2fm.add(x: Float, y: Float) = add(x, y, this)
-inline fun Vector2fm.sub(x: Float, y: Float) = sub(x, y, this)
-inline fun Vector2fm.sub(other: Vector2fc) = sub(other.x, other.y, this)
+fun Vector2fm.sub(x: Float, y: Float) = sub(x, y, this)
+fun Vector2fm.sub(other: Vector2fc) = sub(other.x, other.y, this)
 fun Vector2fm.mul(value: Float) = set(x * value, y * value)
 fun Vector2fm.add(other: Vector2fc) = add(other.x, other.y, this)
 
 /**
  * dot product
  */
-inline fun Vector2fm.dot(x: Float, y: Float) = this.x * x + this.y * y
+fun Vector2fm.dot(x: Float, y: Float) = this.x * x + this.y * y
 
-inline fun Vector2fm.dot(other: Vector2fc) = dot(other.x, other.y)
+fun Vector2fm.dot(other: Vector2fc) = dot(other.x, other.y)
 
 /**
  * Returns determinant
  */
-inline fun Vector2fm.det(x: Float, y: Float) = this.x * y - this.y * x
+fun Vector2fm.det(x: Float, y: Float) = this.x * y - this.y * x
 
-inline fun Vector2fm.det(other: Vector2fc) = det(other.x, other.y)
+fun Vector2fm.det(other: Vector2fc) = det(other.x, other.y)
 
 
 fun Vector2ic.add(x: Int, y: Int, dest: Vector2im): Vector2im {
