@@ -37,6 +37,7 @@ kotlin {
                 api "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
                 api "pw.binom.io:core:$binom_io_version"
                 api project(":math")
+                api project(":engine")
             }
         }
         openGLMain {
@@ -110,7 +111,7 @@ kotlin {
         }
     }
 }
-//
+
 //publishing {
 //    repositories {
 //        maven {
